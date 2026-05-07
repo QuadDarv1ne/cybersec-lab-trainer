@@ -6,7 +6,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { useEffect } from 'react';
 import {
   Shield,
   Database,
@@ -27,6 +28,22 @@ import {
   Zap,
 } from 'lucide-react';
 import type { PageType } from '@/lib/store';
+
+function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: string }) {
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, (v) => Math.round(v));
+
+  useEffect(() => {
+    const controls = animate(count, value, { duration: 1, ease: 'easeOut' });
+    return controls.stop;
+  }, [value, count]);
+
+  return (
+    <motion.span>
+      {useTransform(rounded, (v) => `${v}${suffix}`)}
+    </motion.span>
+  );
+}
 
 const iconMap: Record<string, React.ReactNode> = {
   Shield: <Shield size={28} />,
@@ -186,10 +203,10 @@ export default function Dashboard() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Модули пройдены', value: `${completedCount}/${totalModules}`, color: 'text-emerald-600' },
-          { label: 'Квизов завершено', value: `${Object.keys(quizScores).length}/5`, color: 'text-amber-600' },
-          { label: 'Средний балл', value: `${avgQuizScore}%`, color: 'text-sky-600' },
-          { label: 'Достижения', value: `${unlockedAchievements.length}/${achievements.length}`, color: 'text-violet-600' },
+          { label: 'Модули пройдены', value: completedCount, total: totalModules, color: 'text-emerald-600' },
+          { label: 'Квизов завершено', value: Object.keys(quizScores).length, total: 5, color: 'text-amber-600' },
+          { label: 'Средний балл', value: avgQuizScore, suffix: '%', color: 'text-sky-600' },
+          { label: 'Достижения', value: unlockedAchievements.length, total: achievements.length, color: 'text-violet-600' },
         ].map((stat, i) => (
           <motion.div
             key={stat.label}
@@ -199,7 +216,11 @@ export default function Dashboard() {
           >
             <Card className="border-none shadow-sm bg-white">
               <CardContent className="p-4 text-center">
-                <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                <p className={`text-2xl font-bold ${stat.color}`}>
+                  <AnimatedCounter value={stat.value} />
+                  {stat.total !== undefined ? <span>/{stat.total}</span> : null}
+                  {stat.suffix && !stat.total ? stat.suffix : ''}
+                </p>
                 <p className="text-xs text-slate-500 mt-1">{stat.label}</p>
               </CardContent>
             </Card>
