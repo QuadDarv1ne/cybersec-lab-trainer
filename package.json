@@ -1,7 +1,10 @@
 {
-  "name": "nextjs_tailwind_shadcn_ts",
-  "version": "0.2.0",
+  "name": "cybersec-lab-trainer",
+  "version": "1.0.0",
   "private": true,
+  "author": "Dupley Maxim Igorevich",
+  "description": "🛡️ Интерактивный тренажёр по информационной безопасности — учебный проект для направления 09.03.04 Программная инженерия",
+  "license": "MIT",
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
     "build": "next build",
