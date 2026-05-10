@@ -265,7 +265,7 @@ export default function Dashboard() {
                 {achievementIcons[nextAchievement.id]}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-amber-600">Следующее достижение</p>
+                <p className="text-xs text-amber-600">{t('nextAchievement')}</p>
                 <p className="text-sm font-semibold text-amber-900">{nextAchievement.title}</p>
                 <p className="text-[11px] text-amber-700">{nextAchievement.condition}</p>
               </div>
@@ -277,7 +277,7 @@ export default function Dashboard() {
 
       {/* Module Cards */}
       <div>
-        <h2 className="text-xl font-bold mb-4">Модули обучения</h2>
+        <h2 className="text-xl font-bold mb-4">{t('modulesTitle')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {modules.map((mod, i) => {
             const isCompleted = completedModules.includes(mod.id);

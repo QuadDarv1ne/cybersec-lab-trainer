@@ -86,7 +86,9 @@
       "completed": "Excellent! You've completed all modules. Try quizzes for reinforcement and unlock all achievements.",
       "notStarted": "Start with any module that interests you.",
       "inProgress": "Keep learning! {remaining} modules remaining."
-    }
+    },
+    "modulesTitle": "Learning Modules",
+    "nextAchievement": "Next Achievement"
   },
     "owasp": {
     "title": "OWASP Top 10 (2021)",
