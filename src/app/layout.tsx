@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
+import { SessionProvider } from "@/components/SessionProvider";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "CyberSec Lab — Тренажёр по информационной безопасности",
-  description:
+  description: 
     "Интерактивная платформа для изучения уязвимостей веб-приложений: OWASP Top 10, SQL-инъекции, XSS, CSRF и безопасное кодирование. Направление 09.03.04 Программная инженерия.",
   keywords: [
     "информационная безопасность",
@@ -20,11 +23,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
+
   return (
     <html lang="ru" suppressHydrationWarning>
       <body className="antialiased font-sans">
@@ -34,7 +39,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <SessionProvider session={session}>
+            {children}
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>
