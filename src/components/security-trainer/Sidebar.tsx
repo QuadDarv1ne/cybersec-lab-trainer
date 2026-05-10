@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const iconMap: Record<string, React.ReactNode> = {
   LayoutDashboard: <LayoutDashboard size={20} />,
@@ -68,14 +69,17 @@ export default function Sidebar() {
             <p className="text-[11px] text-slate-400">09.03.04</p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-slate-400 hover:text-white md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        >
-          <X size={20} />
-        </Button>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-slate-400 hover:text-white md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X size={20} />
+          </Button>
+        </div>
       </div>
 
       <Separator className="bg-slate-700" />
