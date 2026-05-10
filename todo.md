@@ -1,7 +1,7 @@
 # TODO List — CyberSec Lab Trainer
 **Актуально на:** воскресенье, 10 мая 2026 г.
 **Ветка:** `dev` → `main` (синхронизация обязательна)
-**Статус:** Модуляризация данных завершена, синхронизировано с main (commit 86dff80)
+**Статус:** Работа в dev-ветке
 ---
 
 ## 🔥 High Priority (Критично для production)
@@ -10,20 +10,12 @@
 - [x] ✅ **Prisma схема** — `prisma/schema.prisma` существует (PostgreSQL + модели для User, Account, Session, Progress, QuizResult)
 - [x] ✅ **Prisma клиент** — `src/lib/db.ts` настроен (логирование включено для development)
 - [ ] **Настроить подключение к БД** — `DATABASE_URL` в `.env` + проверить подключение в production
-- [x] ✅ **NextAuth.js реализован** — `src/lib/auth.ts` + `src/app/api/auth/[...nextauth]/route.ts` с GitHub/Google провайдерами
-- [x] ✅ **Модуляризация данных** — `security-data.ts` разбит на 7 модулей (commit 86dff80)
-- [ ] **Мигрировать прогресс из localStorage в БД** — синхронизировать `useAppStore` (`src/lib/store.ts`) с Prisma
+- [x] ✅ **NextAuth.js реализован** — `src/lib/auth.ts` + `SessionProvider` с GitHub/Google провайдерами
+- [x] ✅ **Модуляризация данных** — `security-data.ts` разбит на 7 модулей (`src/lib/data/`)
+- [x] ✅ **Синхронизация прогресса с БД** — `useAppStore` (`src/lib/store.ts`) имеет методы `syncWithDatabase` и `loadFromDatabase`
 
 ### 2. Безопасность приложения
-- [ ] **Добавить CSP заголовки** — в `next.config.ts` есть базовые заголовки, нужно расширить:
-  ```typescript
-  headers: [
-    {
-      key: 'Content-Security-Policy',
-      value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
-    }
-  ]
-  ```
+- [x] ✅ **CSP заголовки** — настроены в `next.config.ts` (Content-Security-Policy, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy)
 - [ ] **Настроить rate limiting** — для API routes (`src/app/api/route.ts`)
 - [ ] **Валидация входных данных** — использовать Zod для всех форм (уже подключён)
 - [ ] **Проверить зависимости** — `bun audit` + обновить уязвимые пакеты
@@ -41,7 +33,7 @@
 ### 4. Локализация (i18n)
 - [x] ✅ **next-intl подключён** — `next-env.ts` настроен (`locales: ['en', 'ru']`, `defaultLocale: 'ru'`)
 - [x] ✅ **middleware.ts** — настроен для i18n
-- [ ] **Создать структуру перевода** — вынести строки в JSON файлы (`locales/en.json`, `locales/ru.json`)
+- [x] ✅ **Структура переводов** — `locales/ru.json` и `locales/en.json` созданы с полной структурой
 - [ ] **Обновить компоненты** — использовать `useTranslations` вместо хардкода
 
 ### 5. Контент
@@ -102,16 +94,18 @@
 - ✅ `bun run lint` — ошибок нет
 - ✅ Все 12 компонентов security-trainer работают
 - ✅ Zustand store с persist (localStorage) настроен (`src/lib/store.ts`)
-- ✅ next-intl настроен (`next-env.ts`, `middleware.ts`)
-- ✅ NextAuth.js реализован (`src/lib/auth.ts` + API route)
+- ✅ next-intl подключён (`next-env.ts`, `middleware.ts`)
+- ✅ Локальные JSON файлы переводов созданы (`locales/ru.json`, `locales/en.json`)
+- ✅ NextAuth.js реализован (`src/lib/auth.ts` + `SessionProvider`)
 - ✅ CSP заголовки настроены в `next.config.ts`
 - ✅ Модуляризация `security-data.ts` — разбит на 7 модулей
+- ✅ Синхронизация прогресса с БД реализована в `store.ts`
 
 ---
 
 ## ⚠️ Текущие проблемы
 1. **Prisma не используется в production** — схема есть, клиент настроен, но нет подключения к БД в production
-2. **i18n не работает** — next-intl подключён, но не используется в компонентах
+2. **i18n не интегрирован в компоненты** — next-intl подключён, но компоненты ещё используют хардкод
 3. **Rate limiting не настроен** — для API routes
 4. **Нужно проверить адаптивность** — мобильные устройства
 
@@ -119,7 +113,7 @@
 
 ## 🚀 Следующие шаги (приоритет)
 1. **Подключить БД в production** — настроить `DATABASE_URL` + миграции
-2. **Настроить i18n** — вынести строки в JSON, использовать `useTranslations`
+2. **Интегрировать i18n в компоненты** — использовать `useTranslations` в основных компонентах
 3. **Добавить rate limiting** — для API routes
 4. **Проверить адаптивность** — тестировать на мобильных
 5. **Унифицировать обработку ошибок** — создать `lib/errors.ts`
