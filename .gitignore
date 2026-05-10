@@ -49,3 +49,6 @@ prisma/*.db-journal
 *.pem
 *.log
 .cache/
+
+# Husky
+.husky/_/
