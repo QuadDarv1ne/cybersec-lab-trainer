@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { quizQuestions, quizCategories } from '@/lib/security-data';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -39,6 +40,8 @@ type QuizState = 'select' | 'playing' | 'result';
 
 export default function QuizSystem() {
   const { quizScores, setQuizScore, setCurrentPage } = useAppStore();
+  const t = useTranslations('quiz');
+  const tCommon = useTranslations('common');
   const [quizState, setQuizState] = useState<QuizState>('select');
   const [activeCategory, setActiveCategory] = useState('');
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -152,8 +155,8 @@ export default function QuizSystem() {
           <HelpCircle size={20} className="text-amber-600" />
         </div>
         <div>
-          <h1 className="text-xl font-bold">Проверка знаний</h1>
-          <p className="text-xs text-slate-500">Тестирование по информационной безопасности</p>
+          <h1 className="text-xl font-bold">{t('title')}</h1>
+          <p className="text-xs text-slate-500">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -162,8 +165,8 @@ export default function QuizSystem() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
           <Card className="border-none shadow-sm">
             <CardContent className="p-5">
-              <h2 className="font-semibold mb-1">Выберите категорию квиза</h2>
-              <p className="text-xs text-slate-500">Каждый квиз содержит 5 вопросов с таймером 30 секунд на каждый.</p>
+              <h2 className="font-semibold mb-1">{t('selectCategory')}</h2>
+              <p className="text-xs text-slate-500">{t('selectCategoryDesc')}</p>
             </CardContent>
           </Card>
 
@@ -184,7 +187,7 @@ export default function QuizSystem() {
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-sm">{cat.name}</h3>
-                        <p className="text-xs text-slate-500">{cat.count} вопросов</p>
+                        <p className="text-xs text-slate-500">{t('questionsCount', { count: cat.count })}</p>
                       </div>
                       <div className="text-right">
                         {score !== undefined ? (
@@ -215,10 +218,10 @@ export default function QuizSystem() {
               <div className="flex items-center justify-between mb-2">
                 <Badge variant="secondary" className="text-xs">{activeCategory}</Badge>
                 <div className="flex items-center gap-3 text-xs text-slate-500">
-                  <span>Вопрос {currentQuestion + 1}/{categoryQuestions.length}</span>
+                  <span>{t('questionProgress', { current: currentQuestion + 1, total: categoryQuestions.length })}</span>
                   <div className={`flex items-center gap-1 ${timeLeft <= 10 ? 'text-red-500' : 'text-slate-500'}`}>
                     <Clock size={14} />
-                    <span className="font-mono font-bold">{timeLeft}с</span>
+                    <span className="font-mono font-bold">{timeLeft}{t('seconds')}</span>
                   </div>
                 </div>
               </div>
@@ -285,7 +288,7 @@ export default function QuizSystem() {
                   onClick={handleAnswer}
                   disabled={!selectedAnswer}
                 >
-                  Ответить
+                  {t('submitAnswer')}
                 </Button>
               )}
 
@@ -299,7 +302,7 @@ export default function QuizSystem() {
                     answers[currentQuestion] ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'
                   }`}>
                     <p className={`text-xs font-semibold ${answers[currentQuestion] ? 'text-emerald-700' : 'text-red-700'}`}>
-                      {answers[currentQuestion] ? '✅ Правильно!' : timeLeft <= 0 ? '⏰ Время вышло!' : '❌ Неправильно!'}
+                      {answers[currentQuestion] ? `${t('correct')}!` : timeLeft <= 0 ? `${t('timeUp')}!` : `${t('incorrect')}!`}
                     </p>
                     <p className="text-xs text-slate-600 mt-1 leading-relaxed">{question.explanation}</p>
                   </div>
@@ -308,7 +311,7 @@ export default function QuizSystem() {
                     className="w-full bg-emerald-600 hover:bg-emerald-700"
                     onClick={nextQuestion}
                   >
-                    {currentQuestion < categoryQuestions.length - 1 ? 'Следующий вопрос →' : 'Результаты'}
+                    {currentQuestion < categoryQuestions.length - 1 ? `${t('nextQuestion')} →` : t('results')}
                   </Button>
                 </motion.div>
               )}
@@ -332,21 +335,21 @@ export default function QuizSystem() {
                 )}
               </div>
               <h2 className="text-2xl font-bold mb-1">
-                {finalScore >= 80 ? 'Отлично!' : finalScore >= 60 ? 'Хороший результат!' : 'Нужно подтянуть!'}
+                {finalScore >= 80 ? t('excellent') : finalScore >= 60 ? t('goodResult') : t('needsImprovement')}
               </h2>
               <p className="text-slate-300 text-sm mb-4">{activeCategory}</p>
 
               <div className="text-5xl font-bold font-mono mb-2">{finalScore}%</div>
               <p className="text-slate-400 text-sm mb-6">
-                {correctCount} из {categoryQuestions.length} правильных ответов
+                {t('correctAnswers', { correct: correctCount, total: categoryQuestions.length })}
               </p>
 
               <div className="flex gap-2 justify-center">
                 <Button variant="outline" className="text-white border-white/20 hover:bg-white/10" onClick={resetQuiz}>
-                  <RotateCcw size={14} className="mr-2" /> К категориям
+                  <RotateCcw size={14} className="mr-2" /> {t('backToCategories')}
                 </Button>
                 <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => startQuiz(activeCategory)}>
-                  <RotateCcw size={14} className="mr-2" /> Пройти заново
+                  <RotateCcw size={14} className="mr-2" /> {t('retry')}
                 </Button>
               </div>
             </CardContent>
@@ -355,7 +358,7 @@ export default function QuizSystem() {
           {/* Answer breakdown */}
           <Card className="border-slate-200">
             <CardContent className="p-5">
-              <h3 className="text-sm font-semibold mb-3">Разбор ответов</h3>
+              <h3 className="text-sm font-semibold mb-3">{t('answerBreakdown')}</h3>
               <div className="space-y-3">
                 {categoryQuestions.map((q, i) => (
                   <div key={q.id} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50">
@@ -368,7 +371,7 @@ export default function QuizSystem() {
                       <p className="text-xs font-medium leading-relaxed">{q.question}</p>
                       {!answers[i] && (
                         <p className="text-[11px] text-emerald-600 mt-1">
-                          Правильный ответ: {q.options[q.correctIndex]}
+                          {t('correctAnswer')}: {q.options[q.correctIndex]}
                         </p>
                       )}
                     </div>
