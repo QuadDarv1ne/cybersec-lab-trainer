@@ -1,28 +1,32 @@
 # TODO List — CyberSec Lab Trainer
 **Актуально на:** воскресенье, 10 мая 2026 г.
 **Ветка:** `dev` → `main` (синхронизация обязательна)
-
+**Статус:** Анализ кода выполнен, приоритеты уточнены
 ---
 
 ## 🔥 High Priority (Критично для production)
 
 ### 1. База данных и аутентификация
 - [x] ✅ **Prisma схема** — `prisma/schema.prisma` существует (PostgreSQL + модели для User, Account, Session, Progress, QuizResult)
-- [ ] **Настроить подключение к БД** — `DATABASE_URL` в `.env` + проверить `src/lib/db.ts`
-- [ ] **Реализовать NextAuth.js** — подключён в `package.json`, но не используется. Нужно:
-  - Создать `app/api/auth/[...nextauth]/route.ts`
+- [x] ✅ **Prisma клиент** — `src/lib/db.ts` настроен (логирование включено для development)
+- [ ] **Настроить подключение к БД** — `DATABASE_URL` в `.env` + проверить подключение в production
+- [ ] **Реализовать NextAuth.js** — подключён в `package.json` (`next-auth@4.24.11`), но не используется. Нужно:
+  - Создать `src/app/api/auth/[...nextauth]/route.ts`
   - Настроить провайдеры (GitHub/OAuth или email)
   - Интегрировать с Prisma для хранения пользователей
-- [ ] **Мигрировать прогресс из localStorage в БД** — синхронизировать `useAppStore` с Prisma
+- [ ] **Мигрировать прогресс из localStorage в БД** — синхронизировать `useAppStore` (`src/lib/store.ts`) с Prisma
 
 ### 2. Безопасность приложения
 - [ ] **Добавить CSP заголовки** — в `next.config.ts` есть базовые заголовки, нужно расширить:
   ```typescript
   headers: [
-    { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;" }
+    {
+      key: 'Content-Security-Policy',
+      value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+    }
   ]
   ```
-- [ ] **Настроить rate limiting** — для API routes (`app/api/route.ts`)
+- [ ] **Настроить rate limiting** — для API routes (`src/app/api/route.ts`)
 - [ ] **Валидация входных данных** — использовать Zod для всех форм (уже подключён)
 - [ ] **Проверить зависимости** — `bun audit` + обновить уязвимые пакеты
 
@@ -37,10 +41,10 @@
 - [ ] **PWA поддержка** — добавить `manifest.json` + service worker
 
 ### 4. Локализация (i18n)
-- [ ] **Настроить next-intl** — подключён в `package.json` и `middleware.ts`, но не используется:
-  - Создать структуру `app/[locale]/`
-  - Вынести строки в JSON файлы (`messages/en.json`, `messages/ru.json`)
-  - Обновить `next-env.ts` (сейчас пустой)
+- [x] ✅ **next-intl подключён** — `next-env.ts` настроен (`locales: ['en', 'ru']`, `defaultLocale: 'ru'`)
+- [x] ✅ **middleware.ts** — настроен для i18n
+- [ ] **Создать структуру перевода** — вынести строки в JSON файлы (`locales/en.json`, `locales/ru.json`)
+- [ ] **Обновить компоненты** — использовать `useTranslations` вместо хардкода
 
 ### 5. Контент
 - [ ] **Расширить квизы** — добавить вопросы до 50+ (сейчас 25)
@@ -53,7 +57,7 @@
 ## 🛠️ Технические долги
 
 ### Код
-- [ ] **Рефакторинг `security-data.ts`** — 1346 строк → разбить на модули:
+- [ ] **Рефакторинг `security-data.ts`** — 1609 строк → разбить на модули:
   - `owasp-data.ts`
   - `sql-data.ts`
   - `xss-data.ts`
@@ -95,31 +99,26 @@
 
 ---
 
-## 📝 Документация (только по запросу)
-- [ ] JSDoc комментарии для функций и компонентов
-- [ ] CONTRIBUTING.md для контрибьюторов
-- [ ] Архитектурная схема проекта
-
----
-
 ## ✅ Выполнено (проверено 10.05.2026)
 - ✅ Prisma схема существует (`prisma/schema.prisma`)
+- ✅ Prisma клиент настроен (`src/lib/db.ts`)
 - ✅ Next-themes подключён в `layout.tsx`
 - ✅ `ThemeToggle` компонент реализован
 - ✅ `reactStrictMode: true` в `next.config.ts`
 - ✅ `bun run build` — сборка проходит успешно
 - ✅ `bun run lint` — ошибок нет
 - ✅ Все 12 компонентов security-trainer работают
-- ✅ Zustand store с persist (localStorage) настроен
+- ✅ Zustand store с persist (localStorage) настроен (`src/lib/store.ts`)
+- ✅ next-intl настроен (`next-env.ts`, `middleware.ts`)
 
 ---
 
 ## ⚠️ Текущие проблемы
-1. **Prisma не используется** — схема есть, но нет подключения к БД в production
-2. **NextAuth.js не настроен** — зависимость есть, но нет реализации
-3. **i18n не работает** — next-intl подключён, но не настроен
+1. **Prisma не используется в production** — схема есть, клиент настроен, но нет подключения к БД в production
+2. **NextAuth.js не настроен** — зависимость есть (`next-auth@4.24.11`), но нет реализации
+3. **i18n не работает** — next-intl подключён, но не используется в компонентах
 4. **CSP заголовки неполные** — нужны более строгие настройки
-5. **`eslint.config.mjs`** — много отключённых правил (но это временно)
+5. **`security-data.ts` слишком большой** — 1609 строк, нужно разбить на модули
 
 ---
 
@@ -137,3 +136,4 @@
 - **Качество > количество** — фокус на важных улучшениях
 - **Работа в `dev`** → тестирование → синхронизация с `main`
 - **Все изменения коммитить и пушить** — не забывать про `git push`
+- **Проверять зависимости** — `bun audit` перед коммитом
