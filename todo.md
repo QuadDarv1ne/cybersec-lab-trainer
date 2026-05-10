@@ -8,7 +8,7 @@
 
 ### 1. База данных и аутентификация
 - [x] ✅ **Prisma схема** — `prisma/schema.prisma` существует (PostgreSQL + модели для User, Account, Session, Progress, QuizResult)
-- [x] ✅ **Prisma клиент** — `src/lib/db.ts` настроен (логирование включено для development)
+- [x] ✅ **Prisma клиент** — `src/lib/db.ts` настроен (логирование: dev=[query,error,warn], prod=[error])
 - [ ] **Настроить подключение к БД** — `DATABASE_URL` в `.env` + проверить подключение в production
 - [x] ✅ **NextAuth.js реализован** — `src/lib/auth.ts` + `SessionProvider` с GitHub/Google провайдерами
 - [x] ✅ **Модуляризация данных** — `security-data.ts` разбит на 7 модулей (`src/lib/data/`)
@@ -16,7 +16,7 @@
 
 ### 2. Безопасность приложения
 - [x] ✅ **CSP заголовки** — настроены в `next.config.ts` (Content-Security-Policy, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy)
-- [ ] **Настроить rate limiting** — для API routes (`src/app/api/route.ts`)
+- [x] ✅ **Rate limiting** — реализован в `src/app/api/route.ts` (100 запросов/минута, в памяти)
 - [ ] **Валидация входных данных** — использовать Zod для всех форм (уже подключён)
 - [ ] **Проверить зависимости** — `bun audit` + обновить уязвимые пакеты
 
@@ -26,7 +26,7 @@
 
 ### 3. UX/UI
 - [x] ✅ **Тёмная тема** — `next-themes` подключён в `layout.tsx`, `ThemeToggle` компонент есть
-- [ ] **Проверить адаптивность** — тестировать на мобильных устройствах (особенно `Sidebar`, `OWASPTop10`, `QuizSystem`)
+- [x] ✅ **Адаптивность проверена** — Sidebar, OWASPTop10, QuizSystem работают на мобильных
 - [ ] **Анимации переходов** — добавить Framer Motion для смены страниц
 - [ ] **PWA поддержка** — добавить `manifest.json` + service worker
 
@@ -86,7 +86,7 @@
 
 ## ✅ Выполнено (проверено 10.05.2026)
 - ✅ Prisma схема существует (`prisma/schema.prisma`)
-- ✅ Prisma клиент настроен (`src/lib/db.ts`)
+- ✅ Prisma клиент настроен (`src/lib/db.ts`) — логирование: dev=[query,error,warn], prod=[error]
 - ✅ Next-themes подключён в `layout.tsx`
 - ✅ `ThemeToggle` компонент реализован
 - ✅ `reactStrictMode: true` в `next.config.ts`
@@ -100,23 +100,21 @@
 - ✅ CSP заголовки настроены в `next.config.ts`
 - ✅ Модуляризация `security-data.ts` — разбит на 7 модулей
 - ✅ Синхронизация прогресса с БД реализована в `store.ts`
+- ✅ Rate limiting реализован (`src/app/api/route.ts`) — 100 запросов/минута
+- ✅ Адаптивность проверена — Sidebar, OWASPTop10, QuizSystem работают на мобильных
 
 ---
 
 ## ⚠️ Текущие проблемы
 1. **Prisma не используется в production** — схема есть, клиент настроен, но нет подключения к БД в production
 2. **i18n не интегрирован в компоненты** — next-intl подключён, но компоненты ещё используют хардкод
-3. **Rate limiting не настроен** — для API routes
-4. **Нужно проверить адаптивность** — мобильные устройства
 
 ---
 
 ## 🚀 Следующие шаги (приоритет)
 1. **Подключить БД в production** — настроить `DATABASE_URL` + миграции
 2. **Интегрировать i18n в компоненты** — использовать `useTranslations` в основных компонентах
-3. **Добавить rate limiting** — для API routes
-4. **Проверить адаптивность** — тестировать на мобильных
-5. **Унифицировать обработку ошибок** — создать `lib/errors.ts`
+3. **Унифицировать обработку ошибок** — создать `lib/errors.ts`
 
 ---
 
