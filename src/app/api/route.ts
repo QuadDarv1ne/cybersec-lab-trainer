@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { quizAnswerSchema, quizAnswersSchema, progressUpdateSchema, glossarySearchSchema } from "@/lib/validations/api";
 
 // Rate limiting configuration
 const RATE_LIMIT = {
@@ -81,18 +82,48 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    
-    const response = NextResponse.json({ 
+
+    // Валидация в зависимости от типа запроса
+    const { type, payload } = body;
+
+    let validatedData: unknown;
+
+    switch (type) {
+      case 'quiz-answer':
+        validatedData = quizAnswerSchema.parse(payload);
+        break;
+      case 'quiz-answers':
+        validatedData = quizAnswersSchema.parse(payload);
+        break;
+      case 'progress':
+        validatedData = progressUpdateSchema.parse(payload);
+        break;
+      case 'glossary-search':
+        validatedData = glossarySearchSchema.parse(payload);
+        break;
+      default:
+        validatedData = payload;
+    }
+
+    const response = NextResponse.json({
       message: "Request received",
-      received: body 
+      received: validatedData,
+      type,
     });
-    
+
     response.headers.set("X-RateLimit-Limit", String(RATE_LIMIT.maxRequests));
     response.headers.set("X-RateLimit-Remaining", String(RATE_LIMIT.maxRequests - 1));
     response.headers.set("X-RateLimit-Reset", String(Math.ceil(Date.now() / 1000 + RATE_LIMIT.windowMs / 1000)));
 
     return response;
   } catch (error) {
+    if (error instanceof Error && 'issues' in error) {
+      // Zod validation error
+      return NextResponse.json(
+        { error: "Validation failed", details: (error as { issues?: unknown }).issues },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
       { error: "Invalid JSON body" },
       { status: 400 }

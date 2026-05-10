@@ -2,6 +2,7 @@
 
 import { useAppStore, type PageType } from '@/lib/store';
 import { modules, achievements } from '@/lib/security-data';
+import { useTranslations } from 'next-intl';
 import {
   LayoutDashboard,
   Shield,
@@ -35,11 +36,11 @@ const iconMap: Record<string, React.ReactNode> = {
   Trophy: <Trophy size={20} />,
 };
 
-const navItems: { id: PageType; label: string; iconKey: string }[] = [
-  { id: 'dashboard', label: 'Главная', iconKey: 'LayoutDashboard' },
-  ...modules.map((m) => ({ id: m.id as PageType, label: m.title, iconKey: m.icon })),
-  { id: 'quiz', label: 'Квизы', iconKey: 'HelpCircle' },
-  { id: 'achievements', label: 'Достижения', iconKey: 'Trophy' },
+const navItems: { id: PageType; labelKey: string; iconKey: string }[] = [
+  { id: 'dashboard', labelKey: 'nav.dashboard', iconKey: 'LayoutDashboard' },
+  ...modules.map((m) => ({ id: m.id as PageType, labelKey: m.id, iconKey: m.icon })),
+  { id: 'quiz', labelKey: 'nav.quiz', iconKey: 'HelpCircle' },
+  { id: 'achievements', labelKey: 'nav.achievements', iconKey: 'Trophy' },
 ];
 
 export default function Sidebar() {
@@ -50,6 +51,7 @@ export default function Sidebar() {
     setCurrentPage,
     completedModules,
   } = useAppStore();
+  const t = useTranslations();
 
   // Count trackable items (excluding dashboard and achievements)
   const trackableItems = navItems.filter((item) => item.id !== 'dashboard' && item.id !== 'achievements');
@@ -90,6 +92,9 @@ export default function Sidebar() {
           const isActive = currentPage === item.id;
           const isCompleted =
             item.id === 'dashboard' || completedModules.includes(item.id);
+          const label = item.labelKey.startsWith('nav.') 
+            ? t(item.labelKey) 
+            : item.labelKey;
 
           return (
             <button
@@ -115,7 +120,7 @@ export default function Sidebar() {
               }>
                 {iconMap[item.iconKey]}
               </span>
-              <span className="flex-1">{item.label}</span>
+              <span className="flex-1">{label}</span>
               {isCompleted && (
                 <CheckCircle2 size={16} className="text-emerald-500" />
               )}
@@ -127,12 +132,12 @@ export default function Sidebar() {
       {/* Progress */}
       <div className="p-4 border-t border-slate-700">
         <div className="flex items-center justify-between text-xs mb-2">
-          <span className="text-slate-400">Общий прогресс</span>
+          <span className="text-slate-400">{t('sidebar.progress')}</span>
           <span className="text-emerald-400 font-semibold">{progressPct}%</span>
         </div>
         <Progress value={progressPct} className="h-2 bg-slate-700 [&>div]:bg-emerald-500" />
         <p className="text-[11px] text-slate-500 mt-2">
-          Пройдено {completedCount} из {trackableItems.length} модулей
+          {t('sidebar.completedModules', { completed: completedCount, total: trackableItems.length })}
         </p>
       </div>
     </div>

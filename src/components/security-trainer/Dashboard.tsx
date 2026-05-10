@@ -2,6 +2,7 @@
 
 import { useAppStore } from '@/lib/store';
 import { modules, achievements } from '@/lib/security-data';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -70,6 +71,8 @@ const achievementIcons: Record<string, React.ReactNode> = {
 
 export default function Dashboard() {
   const { setCurrentPage, completedModules, quizScores, toggleSidebar, studiedOwaspItems } = useAppStore();
+  const t = useTranslations('dashboard');
+  const tCommon = useTranslations('common');
 
   const totalModules = modules.length;
   const completedCount = completedModules.filter((id) =>
@@ -108,24 +111,24 @@ export default function Dashboard() {
   // Recommendations
   const getRecommendation = () => {
     if (completedModules.length === 0) {
-      return { text: 'Начните с OWASP Top 10 — это фундамент веб-безопасности.', page: 'owasp' as PageType };
+      return { text: t('recommendations.owaspStart'), page: 'owasp' as PageType };
     }
     if (!completedModules.includes('sql-injection')) {
-      return { text: 'Попробуйте SQL-инъекции — самая распространённая уязвимость.', page: 'sql-injection' as PageType };
+      return { text: t('recommendations.sqlTry'), page: 'sql-injection' as PageType };
     }
     if (!completedModules.includes('xss')) {
-      return { text: 'Изучите XSS-атаки — они встречаются на каждом третьем сайте.', page: 'xss' as PageType };
+      return { text: t('recommendations.xssLearn'), page: 'xss' as PageType };
     }
     if (!completedModules.includes('quiz')) {
-      return { text: 'Проверьте свои знания в квизах!', page: 'quiz' as PageType };
+      return { text: t('recommendations.quizCheck'), page: 'quiz' as PageType };
     }
     if (!completedModules.includes('tools')) {
-      return { text: 'Попробуйте инструменты: шифры, кодирование и генератор паролей.', page: 'tools' as PageType };
+      return { text: t('recommendations.toolsTry'), page: 'tools' as PageType };
     }
     if (totalProgress < 100) {
-      return { text: 'Завершите оставшиеся модули для полного прохождения!', page: modules.find((m) => !completedModules.includes(m.id))?.id as PageType || 'dashboard' as PageType };
+      return { text: t('recommendations.completeRemaining'), page: modules.find((m) => !completedModules.includes(m.id))?.id as PageType || 'dashboard' as PageType };
     }
-    return { text: 'Великолепно! Вы прошли все модули. Посмотрите достижения!', page: 'achievements' as PageType };
+    return { text: t('recommendations.wellDone'), page: 'achievements' as PageType };
   };
 
   const recommendation = getRecommendation();
@@ -170,31 +173,29 @@ export default function Dashboard() {
             09.03.04 Программная инженерия
           </Badge>
           <h1 className="text-2xl md:text-3xl font-bold mb-3">
-            Тренажёр по информационной безопасности
+            {t('hero.title')}
           </h1>
           <p className="text-slate-300 max-w-2xl leading-relaxed">
-            Интерактивная платформа для изучения уязвимостей веб-приложений, методов атак и защитных
-            механизмов. Практикуйтесь в безопасной среде: находите уязвимости, экспериментируйте с
-            атаками и учитесь писать защищённый код.
+            {t('hero.description')}
           </p>
           <div className="flex flex-wrap gap-4 mt-6">
             <div className="flex items-center gap-2 text-sm">
               <BookOpen size={16} className="text-emerald-400" />
-              <span className="text-slate-300">{totalModules} модулей</span>
+              <span className="text-slate-300">{t('hero.modules', { count: totalModules })}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Flame size={16} className="text-emerald-400" />
-              <span className="text-slate-300">{totalProgress}% прогресса</span>
+              <span className="text-slate-300">{t('hero.progress', { percent: totalProgress })}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Trophy size={16} className="text-emerald-400" />
               <span className="text-slate-300">
-                {avgQuizScore > 0 ? `Средний балл квизов: ${avgQuizScore}%` : 'Пройдите квиз для оценки'}
+                {avgQuizScore > 0 ? t('hero.quizScore', { score: avgQuizScore }) : t('hero.takeQuiz')}
               </span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Star size={16} className="text-amber-400" />
-              <span className="text-slate-300">{unlockedAchievements.length} достижений</span>
+              <span className="text-slate-300">{t('hero.achievements', { count: unlockedAchievements.length })}</span>
             </div>
           </div>
         </div>
@@ -203,10 +204,10 @@ export default function Dashboard() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Модули пройдены', value: completedCount, total: totalModules, color: 'text-emerald-600' },
-          { label: 'Квизов завершено', value: Object.keys(quizScores).length, total: 5, color: 'text-amber-600' },
-          { label: 'Средний балл', value: avgQuizScore, suffix: '%', color: 'text-sky-600' },
-          { label: 'Достижения', value: unlockedAchievements.length, total: achievements.length, color: 'text-violet-600' },
+          { label: t('stats.modulesCompleted'), value: completedCount, total: totalModules, color: 'text-emerald-600' },
+          { label: t('stats.quizzesCompleted'), value: Object.keys(quizScores).length, total: 5, color: 'text-amber-600' },
+          { label: t('stats.averageScore'), value: avgQuizScore, suffix: '%', color: 'text-sky-600' },
+          { label: t('stats.achievements'), value: unlockedAchievements.length, total: achievements.length, color: 'text-violet-600' },
         ].map((stat, i) => (
           <motion.div
             key={stat.label}
@@ -242,7 +243,7 @@ export default function Dashboard() {
                 <ArrowRight size={20} />
               </div>
               <div>
-                <p className="text-xs text-emerald-600 font-medium">Рекомендация</p>
+                <p className="text-xs text-emerald-600 font-medium">{t('recommendationBanner.title')}</p>
                 <p className="text-sm font-semibold text-slate-800">{recommendation.text}</p>
               </div>
             </div>
@@ -303,7 +304,7 @@ export default function Dashboard() {
                         </span>
                       </div>
                       <div className="flex-1 p-4">
-                        <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center justify-between gap-2">
                           <div>
                             <h3 className="font-semibold text-sm group-hover:text-emerald-700 transition-colors">
                               {mod.title}
@@ -321,9 +322,9 @@ export default function Dashboard() {
                           <Badge variant="secondary" className={`text-[10px] ${mod.difficultyColor}`}>
                             {mod.difficulty}
                           </Badge>
-                          <span className="text-[11px] text-slate-400">{mod.lessons} уроков</span>
+                          <span className="text-[11px] text-slate-400">{t('modulesLessons', { count: mod.lessons })}</span>
                           {isCompleted && (
-                            <Badge className="bg-emerald-100 text-emerald-700 border-0 text-[10px]">Пройден</Badge>
+                            <Badge className="bg-emerald-100 text-emerald-700 border-0 text-[10px]">{tCommon('completed')}</Badge>
                           )}
                         </div>
                       </div>
@@ -357,14 +358,14 @@ export default function Dashboard() {
                   <div className="flex-1 p-4">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h3 className="font-semibold text-sm group-hover:text-amber-700 transition-colors">Проверка знаний</h3>
-                        <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">Проверьте свои знания по 5 категориям безопасности.</p>
+                        <h3 className="font-semibold text-sm group-hover:text-amber-700 transition-colors">{t('quizCard.title')}</h3>
+                        <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">{t('quizCard.description')}</p>
                       </div>
                       <ChevronRight size={16} className="text-slate-300 group-hover:text-amber-500 transition-colors mt-1 shrink-0" />
                     </div>
                     <div className="flex items-center gap-2 mt-3">
-                      <Badge className="bg-amber-100 text-amber-700 border-0 text-[10px]">5 категорий</Badge>
-                      <span className="text-[11px] text-slate-400">25 вопросов</span>
+                      <Badge className="bg-amber-100 text-amber-700 border-0 text-[10px]">{t('quizCard.categories', { count: 5 })}</Badge>
+                      <span className="text-[11px] text-slate-400">{t('quizCard.questions', { count: 25 })}</span>
                     </div>
                   </div>
                 </div>
@@ -389,16 +390,16 @@ export default function Dashboard() {
                   <div className="flex-1 p-4">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h3 className="font-semibold text-sm group-hover:text-violet-700 transition-colors">Достижения и глоссарий</h3>
-                        <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">Отслеживайте прогресс и изучайте термины ИБ.</p>
+                        <h3 className="font-semibold text-sm group-hover:text-violet-700 transition-colors">{t('achievementsCard.title')}</h3>
+                        <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">{t('achievementsCard.description')}</p>
                       </div>
                       <ChevronRight size={16} className="text-slate-300 group-hover:text-violet-500 transition-colors mt-1 shrink-0" />
                     </div>
                     <div className="flex items-center gap-2 mt-3">
                       <Badge className="bg-violet-100 text-violet-700 border-0 text-[10px]">
-                        {unlockedAchievements.length}/{achievements.length} разблокировано
+                        {t('achievementsCard.unlocked', { unlocked: unlockedAchievements.length, total: achievements.length })}
                       </Badge>
-                      <span className="text-[11px] text-slate-400">34 термина</span>
+                      <span className="text-[11px] text-slate-400">{t('achievementsCard.terms', { count: 34 })}</span>
                     </div>
                   </div>
                 </div>
@@ -411,14 +412,14 @@ export default function Dashboard() {
       {/* Overall progress */}
       <Card className="border-none shadow-sm bg-white">
         <CardContent className="p-6">
-          <h3 className="font-semibold text-sm mb-3">Общий прогресс обучения</h3>
+          <h3 className="font-semibold text-sm mb-3">{t('overallProgress.title')}</h3>
           <Progress value={totalProgress} className="h-3 mb-2" />
           <p className="text-xs text-slate-500">
             {totalProgress === 100
-              ? 'Отлично! Вы прошли все модули. Попробуйте квизы для закрепления и откройте все достижения.'
+              ? t('overallProgress.completed')
               : totalProgress === 0
-                ? 'Начните с любого модуля, который вас интересует.'
-                : `Продолжайте обучение! Ещё ${totalModules - completedCount} модулей осталось.`}
+                ? t('overallProgress.notStarted')
+                : t('overallProgress.inProgress', { remaining: totalModules - completedCount })}
           </p>
         </CardContent>
       </Card>
