@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAppStore } from '@/lib/store';
-import { owaspItems } from '@/lib/security-data';
+import { owaspTopics } from '@/lib/security-data';
 import CodeBlock from './CodeBlock';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +18,7 @@ export default function OWASPTop10() {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const studiedCount = studiedOwaspItems.length;
-  const totalCount = owaspItems.length;
+  const totalCount = owaspTopics.length;
   const allStudied = studiedCount === totalCount;
 
   const handleToggleStudied = (id: string) => {
@@ -88,7 +88,7 @@ export default function OWASPTop10() {
             Матрица рисков
           </h3>
           <div className="flex flex-wrap gap-2">
-            {owaspItems.map((item) => (
+            {owaspTopics.map((item) => (
               <div
                 key={item.id}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium text-white ${item.severityColor} cursor-pointer hover:opacity-80 transition-opacity`}
@@ -108,7 +108,7 @@ export default function OWASPTop10() {
 
       {/* Items */}
       <Accordion type="multiple" className="space-y-3">
-        {owaspItems.map((item, index) => {
+        {owaspTopics.map((item, index) => {
           const isStudied = studiedOwaspItems.includes(item.id);
           return (
             <motion.div

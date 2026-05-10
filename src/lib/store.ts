@@ -67,8 +67,11 @@ const syncWithDatabase = async (state: AppState) => {
     // Синхронизируем результаты квизов
     for (const [category, score] of Object.entries(state.quizScores)) {
       await db.quizResult.upsert({
-        where: { userId_quizId: { userId: state.userId, quizId: category } },
+        where: { 
+          id: `${state.userId}_${category}`
+        },
         create: {
+          id: `${state.userId}_${category}`,
           userId: state.userId,
           quizId: category,
           score,
