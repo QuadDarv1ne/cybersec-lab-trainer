@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { owaspTopics } from '@/lib/security-data';
+import { useTranslations } from 'next-intl';
 import CodeBlock from './CodeBlock';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,8 @@ import { ShieldCheck, ChevronLeft, CheckCircle2, AlertTriangle, Shield } from 'l
 
 export default function OWASPTop10() {
   const { studiedOwaspItems, addStudiedOwasp, completeModule, setCurrentPage } = useAppStore();
+  const t = useTranslations('owasp');
+  const tCommon = useTranslations('common');
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const studiedCount = studiedOwaspItems.length;
@@ -46,9 +49,9 @@ export default function OWASPTop10() {
           <Shield size={20} className="text-emerald-600" />
         </div>
         <div>
-          <h1 className="text-xl font-bold">OWASP Top 10 (2021)</h1>
+          <h1 className="text-xl font-bold">{t('title')}</h1>
           <p className="text-xs text-slate-500">
-            10 критических угроз безопасности веб-приложений
+            {t('subtitle')}
           </p>
         </div>
       </div>
@@ -64,11 +67,11 @@ export default function OWASPTop10() {
                 <AlertTriangle size={18} className="text-amber-500" />
               )}
               <span className="text-sm font-medium">
-                Изучено: {studiedCount} из {totalCount}
+                {t('studiedCount', { studied: studiedCount, total: totalCount })}
               </span>
             </div>
             <Badge variant={allStudied ? 'default' : 'secondary'} className={allStudied ? 'bg-emerald-600' : ''}>
-              {allStudied ? 'Модуль завершён!' : `${Math.round((studiedCount / totalCount) * 100)}%`}
+              {allStudied ? t('moduleComplete') : `${Math.round((studiedCount / totalCount) * 100)}%`}
             </Badge>
           </div>
           <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -85,7 +88,7 @@ export default function OWASPTop10() {
         <CardContent className="p-5">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <ShieldCheck size={16} className="text-red-500" />
-            Матрица рисков
+            {t('riskMatrix')}
           </h3>
           <div className="flex flex-wrap gap-2">
             {owaspTopics.map((item) => (
@@ -99,9 +102,9 @@ export default function OWASPTop10() {
             ))}
           </div>
           <div className="flex gap-4 mt-3 text-[11px] text-slate-500">
-            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-red-500" /> Критический</span>
-            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-orange-500" /> Высокий</span>
-            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-yellow-500" /> Средний</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-red-500" /> {t('severity.critical')}</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-orange-500" /> {t('severity.high')}</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-yellow-500" /> {t('severity.medium')}</span>
           </div>
         </CardContent>
       </Card>
@@ -143,7 +146,7 @@ export default function OWASPTop10() {
                       {/* Real-world example */}
                       <div className="bg-amber-50 rounded-lg p-4">
                         <h4 className="text-xs font-semibold text-amber-800 mb-1">
-                          🌍 Реальный пример
+                          🌍 {t('realWorldExample')}
                         </h4>
                         <p className="text-xs text-amber-700 leading-relaxed">{item.realExample}</p>
                       </div>
@@ -151,7 +154,7 @@ export default function OWASPTop10() {
                       {/* Vulnerable code */}
                       <div>
                         <h4 className="text-xs font-semibold text-red-600 mb-2 flex items-center gap-1">
-                          ❌ Уязвимый код
+                          ❌ {t('vulnerableCode')}
                         </h4>
                         <CodeBlock code={item.vulnerableCode} language="javascript" title="vulnerable.js" />
                       </div>
@@ -159,7 +162,7 @@ export default function OWASPTop10() {
                       {/* Secure code */}
                       <div>
                         <h4 className="text-xs font-semibold text-emerald-600 mb-2 flex items-center gap-1">
-                          ✅ Безопасный код
+                          ✅ {t('secureCode')}
                         </h4>
                         <CodeBlock code={item.secureCode} language="javascript" title="secure.js" />
                       </div>
@@ -167,7 +170,7 @@ export default function OWASPTop10() {
                       {/* Mitigations */}
                       <div>
                         <h4 className="text-xs font-semibold text-slate-700 mb-2">
-                          🛡️ Способы защиты
+                          🛡️ {t('mitigations')}
                         </h4>
                         <ul className="space-y-1.5">
                           {item.mitigations.map((m, i) => (
@@ -183,10 +186,10 @@ export default function OWASPTop10() {
 
                       {/* Mark as studied */}
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-slate-500">Отметить как изученное</span>
+                        <span className="text-xs text-slate-500">{t('markAsStudied')}</span>
                         <div className="flex items-center gap-2">
                           {isStudied && (
-                            <span className="text-xs text-emerald-600 font-medium">Изучено!</span>
+                            <span className="text-xs text-emerald-600 font-medium">{t('studied')}</span>
                           )}
                           <Button
                             size="sm"
@@ -195,7 +198,7 @@ export default function OWASPTop10() {
                             onClick={() => handleToggleStudied(item.id)}
                             disabled={isStudied}
                           >
-                            {isStudied ? 'Пройдено' : 'Отметить'}
+                            {isStudied ? t('passed') : t('mark')}
                           </Button>
                         </div>
                       </div>
