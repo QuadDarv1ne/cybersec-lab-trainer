@@ -592,13 +592,200 @@ export const quizQuestions: QuizQuestion[] = [
     explanation:
       'SSRF позволяет злоумышленнику заставить серверное приложение делать HTTP-запросы к произвольным URL, включая внутренние ресурсы, облачные метаданные (169.254.169.254), сканирование портов внутренней сети. Это новая категория в OWASP Top 10 2021.',
   },
+  {
+    id: 'owasp-6',
+    category: 'OWASP Top 10',
+    question: 'Какая уязвимость относится к A01:2021 (Broken Access Control)?',
+    options: [
+      'SQL-инъекция',
+      'Пользователь может получить доступ к админ-панели без прав',
+      'XSS-атака',
+      'DDoS-атака',
+    ],
+    correctIndex: 1,
+    explanation:
+      'Broken Access Control — это когда пользователи могут действовать за пределами своих разрешений. Примеры: доступ к чужим аккаунтам, изменение других пользователей, доступ к админ-функциям без прав.',
+  },
+  {
+    id: 'owasp-7',
+    category: 'OWASP Top 10',
+    question: 'Что такое Cryptographic Failures (A02:2021)?',
+    options: [
+      'Ошибки в криптографических алгоритмах',
+      'Незашифрованные пароли в базе данных',
+      'Утечка ключей шифрования',
+      'Все вышеперечисленное',
+    ],
+    correctIndex: 3,
+    explanation:
+      'Cryptographic Failures включают: хранение паролей в открытом виде, отсутствие шифрования чувствительных данных, использование слабых алгоритмов (MD5, SHA1), неправильное управление ключами шифрования.',
+  },
+  {
+    id: 'owasp-8',
+    category: 'OWASP Top 10',
+    question: 'Какая уязвимость была перемещена с A7 на A01 в OWASP Top 10 2021?',
+    options: [
+      'XSS',
+      'Broken Authentication',
+      'Injection',
+      'CSRF',
+    ],
+    correctIndex: 1,
+    explanation:
+      'Broken Authentication (A7:2017) была переименована и перемещена на A01:2021 как «Identification and Authentication Failures». Это подчеркивает критическую важность безопасной аутентификации.',
+  },
+  // Additional SQL questions
+  {
+    id: 'sql-9',
+    category: 'SQL-инъекции',
+    question: 'Что делает SQL-команда DROP TABLE?',
+    options: [
+      'Удаляет запись из таблицы',
+      'Удаляет всю таблицу вместе со структурой',
+      'Очищает таблицу от данных',
+      'Создаёт новую таблицу',
+    ],
+    correctIndex: 1,
+    explanation:
+      'DROP TABLE полностью удаляет таблицу из базы данных вместе со структурой, индексами и данными. Это одна из самых опасных команд, которую злоумышленник может выполнить через SQL-инъекцию.',
+  },
+  {
+    id: 'sql-10',
+    category: 'SQL-инъекции',
+    question: 'Как работает SQL-инъекция через UNION SELECT?',
+    options: [
+      'Объединяет результаты запросов для извлечения данных',
+      'Удаляет таблицы',
+      'Шифрует данные',
+      'Создаёт новые таблицы',
+    ],
+    correctIndex: 0,
+    explanation:
+      'UNION SELECT позволяет злоумышленнику объединить результаты своего запроса с оригинальным запросом приложения. Это позволяет извлекать данные из любых таблиц, к которым есть доступ у пользователя БД.',
+  },
+  // Additional XSS questions
+  {
+    id: 'xss-9',
+    category: 'XSS-атаки',
+    question: 'Что делает функция escape() в JavaScript?',
+    options: [
+      'Защищает от XSS',
+      'Кодирует спецсимволы для передачи в URL',
+      'Останавливает выполнение скрипта',
+      'Ничего не делает',
+    ],
+    correctIndex: 1,
+    explanation:
+      'escape() кодирует спецсимволы для передачи в URL. Однако для защиты от XSS лучше использовать encodeURIComponent() или библиотеки типа DOMPurify, так как escape() устарел и не кодирует все необходимые символы.',
+  },
+  {
+    id: 'xss-10',
+    category: 'XSS-атаки',
+    question: 'Какой заголовок HTTP предотвращает выполнение inline-скриптов?',
+    options: [
+      'X-XSS-Protection',
+      'Content-Security-Policy с \'unsafe-inline\'',
+      'Content-Security-Policy без \'unsafe-inline\'',
+      'X-Content-Type-Options',
+    ],
+    correctIndex: 2,
+    explanation:
+      'CSP без \'unsafe-inline\' запрещает выполнение inline-скриптов (<script>...</script> и обработчики событий). Это блокирует большинство XSS-атак. Правильная политика: script-src \'self\' или с nonce/hash.',
+  },
+  // Additional Auth questions
+  {
+    id: 'auth-9',
+    category: 'Аутентификация',
+    question: 'Что такое MFA (Multi-Factor Authentication)?',
+    options: [
+      'Множественная проверка пароля',
+      'Использование двух и более факторов аутентификации',
+      'Множественные учётные записи',
+      'Аутентификация через несколько сервисов',
+    ],
+    correctIndex: 1,
+    explanation:
+      'MFA требует два или более факторов из разных категорий: что-то, что вы знаете (пароль), что-то, что у вас есть (телефон, токен), что-то, что вы есть (биометрия). Это значительно повышает безопасность.',
+  },
+  {
+    id: 'auth-10',
+    category: 'Аутентификация',
+    question: 'Что такое rate limiting для защиты от brute-force?',
+    options: [
+      'Ограничение скорости запросов для предотвращения перебора',
+      'Ускорение запросов',
+      'Шифрование трафика',
+      'Блокировка всех запросов',
+    ],
+    correctIndex: 0,
+    explanation:
+      'Rate limiting ограничивает количество попыток аутентификации с одного IP за определённое время. Например, 5 попыток в минуту. После превышения лимита запросы блокируются. Это эффективная защита от brute-force атак.',
+  },
+  // Additional General questions
+  {
+    id: 'general-9',
+    category: 'Общая безопасность',
+    question: 'Что такое Security by Design?',
+    options: [
+      'Безопасность как дополнительная функция',
+      'Встраивание безопасности на этапе проектирования системы',
+      'Использование готовых решений безопасности',
+      'Только тестирование на проникновение',
+    ],
+    correctIndex: 1,
+    explanation:
+      'Security by Design означает, что безопасность закладывается в архитектуру и дизайн системы с самого начала, а не добавляется как дополнение. Это включает threat modeling, secure coding practices, автоматизированное тестирование безопасности.',
+  },
+  {
+    id: 'general-10',
+    category: 'Общая безопасность',
+    question: 'Что такое vulnerability scanning?',
+    options: [
+      'Поиск уязвимостей автоматизированными инструментами',
+      'Ручной аудит кода',
+      'Тестирование на проникновение',
+      'Мониторинг логов',
+    ],
+    correctIndex: 0,
+    explanation:
+      'Vulnerability scanning — это автоматизированный поиск известных уязвимостей в системах, сетях и приложениях. Инструменты типа Nessus, OpenVAS сканируют порты, версии ПО, конфигурации и сравнивают с базами известных уязвимостей (CVE).',
+  },
+  // Additional CSRF questions
+  {
+    id: 'csrf-8',
+    category: 'CSRF',
+    question: 'Что такое Synchronizer Token Pattern?',
+    options: [
+      'Использование одного токена для всех форм',
+      'Сервер генерирует уникальный токен для каждой формы/сессии',
+      'Клиент генерирует токен',
+      'Токен хранится в URL',
+    ],
+    correctIndex: 1,
+    explanation:
+      'Synchronizer Token Pattern — сервер генерирует уникальный случайный токен для каждой формы или сессии. Токен включается в форму как скрытое поле и проверяется при отправке. Злоумышленник не может получить токен из-за Same-Origin Policy.',
+  },
+  {
+    id: 'csrf-9',
+    category: 'CSRF',
+    question: 'Почему GET-запросы уязвимы к CSRF?',
+    options: [
+      'GET-запросы не используют куки',
+      'GET-запросы могут быть выполнены через <img>, <a>, <script> теги',
+      'GET-запросы не шифруются',
+      'GET-запросы медленнее',
+    ],
+    correctIndex: 1,
+    explanation:
+      'GET-запросы могут быть инициированы через обычные HTML-элемы: <img src="...">, <a href="...">, <script src="...">. Это означает, что злоумышленник может заставить браузер выполнить GET-запрос без ведома пользователя.',
+  },
 ];
 
 export const quizCategories = [
-  { id: 'sql', name: 'SQL-инъекции', icon: 'Database', count: 8 },
-  { id: 'xss', name: 'XSS-атаки', icon: 'FileText', count: 8 },
-  { id: 'csrf', name: 'CSRF', icon: 'Link', count: 7 },
-  { id: 'auth', name: 'Аутентификация', icon: 'Lock', count: 8 },
-  { id: 'general', name: 'Общая безопасность', icon: 'Shield', count: 8 },
-  { id: 'owasp', name: 'OWASP Top 10', icon: 'ShieldAlert', count: 5 },
+  { id: 'sql', name: 'SQL-инъекции', icon: 'Database', count: 10 },
+  { id: 'xss', name: 'XSS-атаки', icon: 'FileText', count: 10 },
+  { id: 'csrf', name: 'CSRF', icon: 'Link', count: 9 },
+  { id: 'auth', name: 'Аутентификация', icon: 'Lock', count: 10 },
+  { id: 'general', name: 'Общая безопасность', icon: 'Shield', count: 10 },
+  { id: 'owasp', name: 'OWASP Top 10', icon: 'ShieldAlert', count: 8 },
 ];
