@@ -2,16 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
-import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
 export default function AuthErrorPage() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
-
-  useEffect(() => {
-    console.error("Authentication error:", error);
-  }, [error]);
 
   const getErrorMessage = () => {
     switch (error) {

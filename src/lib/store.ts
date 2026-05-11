@@ -46,6 +46,10 @@ type AppStore = AppState & AppActions;
 // API client functions
 const apiClient = {
   async saveProgress(userId: string, moduleId: string, completed: boolean, score?: number) {
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+
     const response = await fetch('/api', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -57,7 +61,7 @@ const apiClient = {
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
       throw new Error(error.error || 'Failed to save progress');
     }
 
@@ -65,6 +69,10 @@ const apiClient = {
   },
 
   async saveQuizResults(userId: string, quizId: string, score: number, total: number) {
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+
     const response = await fetch('/api', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -79,7 +87,7 @@ const apiClient = {
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
       throw new Error(error.error || 'Failed to save quiz results');
     }
 
@@ -95,7 +103,10 @@ const apiClient = {
 
 // Функция для синхронизации с БД через API
 const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore>) => void) => {
-  if (!state.userId) return;
+  if (!state.userId) {
+    set({ syncStatus: 'idle' });
+    return;
+  }
 
   set({ syncStatus: 'syncing' });
   try {
@@ -111,8 +122,7 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
     }
 
     set({ syncStatus: 'synced', lastSyncedAt: new Date() });
-  } catch (error) {
-    console.error('Ошибка синхронизации с БД:', error);
+  } catch {
     set({ syncStatus: 'error' });
   }
 };
@@ -127,8 +137,8 @@ const loadFromDatabase = async (set: (state: Partial<AppState>) => void, userId:
       quizScores: data.quizScores,
       userId,
     });
-  } catch (error) {
-    console.error('Ошибка загрузки из БД:', error);
+  } catch {
+    // Silently handle load errors - client-side state will be used
   }
 };
 

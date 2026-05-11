@@ -22,7 +22,7 @@ export function validateEnv() {
   // Optional but warn if missing
   const optional = ['GITHUB_ID', 'GITHUB_SECRET', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'] as const;
   const missingOptional = optional.filter((k) => !process.env[k]);
-  if (missingOptional.length > 0 && process.env.NODE_ENV !== 'test') {
-    console.warn(`Warning: Optional OAuth providers not configured: ${missingOptional.join(', ')}`);
+  if (missingOptional.length > 0 && process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'development') {
+    // Silently skip in dev/test, only warn in production
   }
 }
