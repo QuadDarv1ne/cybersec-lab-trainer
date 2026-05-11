@@ -22,6 +22,8 @@ interface AppState {
   sqlCompletedLevels: string[];
   xssCompletedLevels: string[];
   userId: string | null;
+  syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
+  lastSyncedAt: Date | null;
 }
 
 interface AppActions {
@@ -92,9 +94,10 @@ const apiClient = {
 };
 
 // Функция для синхронизации с БД через API
-const syncWithDatabase = async (state: AppState) => {
+const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore>) => void) => {
   if (!state.userId) return;
 
+  set({ syncStatus: 'syncing' });
   try {
     await apiClient.saveProgress(
       state.userId,
@@ -106,8 +109,11 @@ const syncWithDatabase = async (state: AppState) => {
     for (const [category, score] of Object.entries(state.quizScores)) {
       await apiClient.saveQuizResults(state.userId, category, score, 100);
     }
+
+    set({ syncStatus: 'synced', lastSyncedAt: new Date() });
   } catch (error) {
     console.error('Ошибка синхронизации с БД:', error);
+    set({ syncStatus: 'error' });
   }
 };
 
@@ -136,6 +142,8 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   sqlCompletedLevels: [],
   xssCompletedLevels: [],
   userId: null,
+  syncStatus: 'idle',
+  lastSyncedAt: null,
 
   setCurrentPage: (page: PageType) => set({ currentPage: page, sidebarOpen: false }),
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
@@ -147,14 +155,14 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         ? state.completedModules 
         : [...state.completedModules, moduleId],
     }));
-    await syncWithDatabase(get());
+    await syncWithDatabase(get(), set);
   },
 
   setQuizScore: async (category: string, score: number) => {
     set((state) => ({
       quizScores: { ...state.quizScores, [category]: score },
     }));
-    await syncWithDatabase(get());
+    await syncWithDatabase(get(), set);
   },
 
   resetProgress: async () => {
@@ -165,7 +173,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       sqlCompletedLevels: [],
       xssCompletedLevels: [],
     });
-    await syncWithDatabase(get());
+    await syncWithDatabase(get(), set);
   },
 
   addStudiedOwasp: async (id: string) => {
@@ -174,7 +182,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         ? state.studiedOwaspItems
         : [...state.studiedOwaspItems, id],
     }));
-    await syncWithDatabase(get());
+    await syncWithDatabase(get(), set);
   },
 
   addSqlLevel: async (level: string) => {
@@ -183,7 +191,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         ? state.sqlCompletedLevels
         : [...state.sqlCompletedLevels, level],
     }));
-    await syncWithDatabase(get());
+    await syncWithDatabase(get(), set);
   },
 
   addXssLevel: async (level: string) => {
@@ -192,13 +200,13 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         ? state.xssCompletedLevels
         : [...state.xssCompletedLevels, level],
     }));
-    await syncWithDatabase(get());
+    await syncWithDatabase(get(), set);
   },
 
   setUserId: (userId: string | null) => set({ userId }),
 
   syncWithDatabase: async () => {
-    await syncWithDatabase(get());
+    await syncWithDatabase(get(), set);
   },
 
   loadFromDatabase: async (userId: string) => {
@@ -218,6 +226,7 @@ const useAppStore = create<AppStore>()(
       studiedOwaspItems: state.studiedOwaspItems,
       sqlCompletedLevels: state.sqlCompletedLevels,
       xssCompletedLevels: state.xssCompletedLevels,
+      // syncStatus and lastSyncedAt are runtime-only, not persisted
     }),
   })
 );

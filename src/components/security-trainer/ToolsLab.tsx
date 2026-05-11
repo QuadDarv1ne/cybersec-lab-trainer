@@ -168,10 +168,14 @@ function simpleHash(text: string): { md5Like: string; shaLike: string; djb2: str
 // ============================================================
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
-  const handleCopy = () => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard API may fail in non-HTTPS contexts or without permissions
+    }
   };
   return (
     <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={handleCopy}>

@@ -20,7 +20,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { useSession } from '@/hooks/use-session';
+import { signIn, signOut } from 'next-auth/react';
+import { LogIn, LogOut } from 'lucide-react';
+import SyncIndicator from './SyncIndicator';
 
 const iconMap: Record<string, React.ReactNode> = {
   LayoutDashboard: <LayoutDashboard size={20} />,
@@ -44,6 +49,8 @@ export default function Sidebar() {
     setCurrentPage,
     completedModules,
   } = useAppStore();
+
+  const { session, isAuthenticated, isLoading } = useSession();
 
   const navItems: { id: PageType; label: string; iconKey: string }[] = [
     { id: 'dashboard', label: t('dashboard'), iconKey: 'LayoutDashboard' },
@@ -131,6 +138,49 @@ export default function Sidebar() {
         })}
       </nav>
 
+      {/* Auth section */}
+      <div className="px-3 py-2">
+        {!isLoading && (
+          <>
+            {isAuthenticated && session?.user ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 px-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={session.user.image || ''} alt={session.user.name || 'User'} />
+                    <AvatarFallback className="text-xs bg-emerald-600 text-white">
+                      {session.user.name?.charAt(0).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{session.user.name}</p>
+                    <p className="text-xs text-slate-400 truncate">{session.user.email}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-slate-400 hover:text-white hover:bg-slate-800"
+                  onClick={() => signOut()}
+                >
+                  <LogOut size={14} className="mr-2" />
+                  Выйти
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-emerald-400 hover:text-emerald-300 hover:bg-emerald-600/10"
+                onClick={() => signIn()}
+              >
+                <LogIn size={14} className="mr-2" />
+                Войти
+              </Button>
+            )}
+          </>
+        )}
+      </div>
+
       {/* Progress */}
       <div className="p-4 border-t border-slate-700">
         <div className="flex items-center justify-between text-xs mb-2">
@@ -141,6 +191,9 @@ export default function Sidebar() {
         <p className="text-[11px] text-slate-500 mt-2">
           {t('modulesCompleted', { completed: completedCount, total: trackableItems.length })}
         </p>
+        <div className="mt-2">
+          <SyncIndicator />
+        </div>
       </div>
     </div>
   );

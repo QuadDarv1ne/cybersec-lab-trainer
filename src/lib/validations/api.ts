@@ -25,7 +25,13 @@ export const glossarySearchSchema = z.object({
 export const userDataSchema = z.object({
   userId: z.string().min(1, 'userId обязателен'),
   action: z.enum(['complete', 'progress', 'quiz']),
-  data: z.record(z.string(), z.any()),
+  data: z.record(z.string(), z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.array(z.string()),
+    z.record(z.string(), z.unknown()),
+  ])),
 });
 
 // Типы для схем

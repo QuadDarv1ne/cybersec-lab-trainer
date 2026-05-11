@@ -8,9 +8,11 @@ const locales: Record<string, typeof ru> = {
 
 function getLocale(): string {
   if (typeof window !== 'undefined') {
-    return 'ru'; // default locale for now
+    const browserLang = navigator.language.toLowerCase();
+    if (browserLang.startsWith('en')) return 'en';
+    if (browserLang.startsWith('ru')) return 'ru';
   }
-  return 'ru';
+  return 'ru'; // default fallback
 }
 
 function getNestedValue(obj: Record<string, unknown>, path: string): string {

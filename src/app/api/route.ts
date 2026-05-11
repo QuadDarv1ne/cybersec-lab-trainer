@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { quizAnswerSchema, quizAnswersSchema, progressUpdateSchema, glossarySearchSchema } from "@/lib/validations/api";
+import { db } from "@/lib/db";
+import { glossaryTerms } from "@/lib/data/glossary-data";
 
 // Rate limiting configuration
 const RATE_LIMIT = {
@@ -55,77 +57,181 @@ function getClientIP(request: Request): string {
   return "unknown";
 }
 
-export async function GET(request: Request) {
+/**
+ * Apply rate limiting to a request and add headers to response
+ */
+function applyRateLimit(request: Request): NextResponse | null {
   const ip = getClientIP(request);
   const rateLimitResponse = rateLimit(ip);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+  return null;
+}
 
+function addRateLimitHeaders(response: NextResponse): void {
+  response.headers.set("X-RateLimit-Limit", String(RATE_LIMIT.maxRequests));
+  response.headers.set("X-RateLimit-Remaining", String(RATE_LIMIT.maxRequests - 1));
+  response.headers.set("X-RateLimit-Reset", String(Math.ceil(Date.now() / 1000 + RATE_LIMIT.windowMs / 1000)));
+}
+
+export async function GET(request: Request) {
+  const rateLimitResponse = applyRateLimit(request);
   if (rateLimitResponse) {
     return rateLimitResponse;
   }
 
-  // Add rate limit headers to response
   const response = NextResponse.json({ message: "Hello, world!" });
-  response.headers.set("X-RateLimit-Limit", String(RATE_LIMIT.maxRequests));
-  response.headers.set("X-RateLimit-Remaining", String(RATE_LIMIT.maxRequests - 1));
-  response.headers.set("X-RateLimit-Reset", String(Math.ceil(Date.now() / 1000 + RATE_LIMIT.windowMs / 1000)));
-
+  addRateLimitHeaders(response);
   return response;
 }
 
 export async function POST(request: Request) {
-  const ip = getClientIP(request);
-  const rateLimitResponse = rateLimit(ip);
-
+  const rateLimitResponse = applyRateLimit(request);
   if (rateLimitResponse) {
     return rateLimitResponse;
   }
 
   try {
     const body = await request.json();
-
-    // Валидация в зависимости от типа запроса
     const { type, payload } = body;
 
-    let validatedData: unknown;
+    let result: Record<string, unknown>;
 
     switch (type) {
-      case 'quiz-answer':
-        validatedData = quizAnswerSchema.parse(payload);
+      case 'progress': {
+        const data = progressUpdateSchema.parse(payload);
+        const userId = typeof body.userId === 'string' ? body.userId : undefined;
+
+        if (!userId) {
+          return NextResponse.json(
+            { error: "userId is required for progress updates" },
+            { status: 400 }
+          );
+        }
+
+        const progress = await db.progress.upsert({
+          where: {
+            userId_moduleId: { userId, moduleId: data.moduleId },
+          },
+          create: {
+            userId,
+            moduleId: data.moduleId,
+            completed: data.completed,
+            score: data.score ?? 0,
+            lastAccessed: new Date(),
+          },
+          update: {
+            completed: data.completed,
+            score: data.score ?? 0,
+            lastAccessed: new Date(),
+          },
+        });
+
+        result = { progress };
         break;
-      case 'quiz-answers':
-        validatedData = quizAnswersSchema.parse(payload);
+      }
+
+      case 'quiz-answer': {
+        const data = quizAnswerSchema.parse(payload);
+        const userId = typeof body.userId === 'string' ? body.userId : undefined;
+
+        if (!userId) {
+          return NextResponse.json(
+            { error: "userId is required for quiz answers" },
+            { status: 400 }
+          );
+        }
+
+        // Store individual quiz answer (could be used for analytics)
+        const quizResult = {
+          userId,
+          questionId: data.questionId,
+          answerIndex: data.answerIndex,
+          timestamp: new Date().toISOString(),
+        };
+
+        result = { quizResult, message: "Quiz answer recorded" };
         break;
-      case 'progress':
-        validatedData = progressUpdateSchema.parse(payload);
+      }
+
+      case 'quiz-answers': {
+        const data = quizAnswersSchema.parse(payload);
+        const quizId = typeof body.quizId === 'string' ? body.quizId : undefined;
+        const userId = typeof body.userId === 'string' ? body.userId : undefined;
+        const score = typeof body.score === 'number' ? body.score : undefined;
+        const total = typeof body.total === 'number' ? body.total : undefined;
+
+        if (!userId || !quizId || score === undefined || total === undefined) {
+          return NextResponse.json(
+            { error: "userId, quizId, score, and total are required for quiz answers" },
+            { status: 400 }
+          );
+        }
+
+        const quizResult = await db.quizResult.create({
+          data: {
+            userId,
+            quizId,
+            score,
+            total,
+            percentage: total > 0 ? (score / total) * 100 : 0,
+          },
+        });
+
+        result = { quizResult, answers: data.length, message: "Quiz answers saved" };
         break;
-      case 'glossary-search':
-        validatedData = glossarySearchSchema.parse(payload);
+      }
+
+      case 'glossary-search': {
+        const data = glossarySearchSchema.parse(payload);
+        const query = data.query.toLowerCase();
+
+        let results = glossaryTerms.filter((term) =>
+          term.term.toLowerCase().includes(query) ||
+          term.definition.toLowerCase().includes(query)
+        );
+
+        if (data.category) {
+          results = results.filter((term) =>
+            term.category.toLowerCase().includes(data.category!.toLowerCase())
+          );
+        }
+
+        result = { results, count: results.length };
         break;
+      }
+
       default:
-        validatedData = payload;
+        return NextResponse.json(
+          { error: `Unknown request type: ${type}. Expected: progress, quiz-answer, quiz-answers, glossary-search` },
+          { status: 400 }
+        );
     }
 
     const response = NextResponse.json({
-      message: "Request received",
-      received: validatedData,
+      message: "Success",
       type,
+      ...result,
     });
 
-    response.headers.set("X-RateLimit-Limit", String(RATE_LIMIT.maxRequests));
-    response.headers.set("X-RateLimit-Remaining", String(RATE_LIMIT.maxRequests - 1));
-    response.headers.set("X-RateLimit-Reset", String(Math.ceil(Date.now() / 1000 + RATE_LIMIT.windowMs / 1000)));
-
+    addRateLimitHeaders(response);
     return response;
   } catch (error) {
+    if (error instanceof Error && 'errors' in error) {
+      return NextResponse.json(
+        { error: "Validation failed", details: (error as { errors?: unknown }).errors },
+        { status: 400 }
+      );
+    }
     if (error instanceof Error && 'issues' in error) {
-      // Zod validation error
       return NextResponse.json(
         { error: "Validation failed", details: (error as { issues?: unknown }).issues },
         { status: 400 }
       );
     }
     return NextResponse.json(
-      { error: "Invalid JSON body" },
+      { error: "Invalid request" },
       { status: 400 }
     );
   }

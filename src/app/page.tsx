@@ -1,6 +1,7 @@
 'use client';
 
 import { useAppStore } from '@/lib/store';
+import { useHashRouting } from '@/hooks/use-hash-routing';
 import Sidebar from '@/components/security-trainer/Sidebar';
 import Dashboard from '@/components/security-trainer/Dashboard';
 import OWASPTop10 from '@/components/security-trainer/OWASPTop10';
@@ -30,6 +31,7 @@ const pages: Record<string, React.ReactNode> = {
 
 export default function Home() {
   const { currentPage } = useAppStore();
+  useHashRouting();
 
   return (
     <div className="min-h-screen flex bg-slate-50">

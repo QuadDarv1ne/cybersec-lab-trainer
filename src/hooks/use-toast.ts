@@ -9,6 +9,8 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
+// Toasts are dismissed via onOpenChange callback, not this timeout.
+// The large value is a shadcn/ui convention to prevent accidental auto-dismiss.
 const TOAST_REMOVE_DELAY = 1000000
 
 type ToasterToast = ToastProps & {

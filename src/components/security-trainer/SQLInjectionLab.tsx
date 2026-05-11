@@ -29,7 +29,6 @@ export default function SQLInjectionLab() {
     const input = userInput.trim();
     if (!input) return;
     setShowResult(true);
-    setIsSuccess(true);
     if (!isCompleted) {
       addSqlLevel(challenge.id);
       if (sqlCompletedLevels.length + 1 === sqlChallenges.length) {
@@ -61,7 +60,6 @@ export default function SQLInjectionLab() {
     setShowResult(false);
     setShowHint(false);
     setShowExplanation(false);
-    setIsSuccess(false);
   };
 
   const getModifiedQuery = () => {

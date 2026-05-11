@@ -1,6 +1,6 @@
-# PM2 ecosystem file для production
-# npm install -g pm2
-# pm2 start deploy/pm2.config.js
+// PM2 ecosystem file for production
+// npm install -g pm2
+// pm2 start deploy/pm2.config.js
 
 module.exports = {
   apps: [
