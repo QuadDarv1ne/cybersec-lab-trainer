@@ -309,7 +309,7 @@ export default function Dashboard() {
                 transition={{ delay: i * 0.06 }}
               >
                 <Card
-                  className="group cursor-pointer border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all duration-300 overflow-hidden"
+                  className="group cursor-pointer border-slate-200 hover:border-emerald-400 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
                   onClick={() => handleStartModule(mod.id)}
                 >
                   <CardContent className="p-0">
