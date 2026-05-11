@@ -1,0 +1,31 @@
+# systemd service file для Linux-сервера
+# Разместить в /etc/systemd/system/cybersec-lab-trainer.service
+
+[Unit]
+Description=CyberSec Lab Trainer - Next.js Application
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=nextjs
+Group=nextjs
+WorkingDirectory=/opt/cybersec-lab-trainer
+ExecStart=/usr/local/bin/bun server.js
+Restart=on-failure
+RestartSec=5
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOSTNAME=0.0.0.0
+
+# Environment file (создать /opt/cybersec-lab-trainer/.env)
+EnvironmentFile=/opt/cybersec-lab-trainer/.env
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/cybersec-lab-trainer/.next
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,20 @@
+# Vercel
+# Автоматический деплой при пуше в main
+# Next.js поддерживается нативно — ничего额外的 настраивать не нужно
+
+rootDirectory: "."
+
+buildCommand: "bun build"
+
+devCommand: "bun dev"
+
+installCommand: "bun install"
+
+framework: "nextjs"
+
+# Environment variables (настроить в панели Vercel):
+# DATABASE_URL — строка подключения к PostgreSQL
+# NEXTAUTH_URL — URL приложения
+# NEXTAUTH_SECRET — секретный ключ NextAuth
+# GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET — OAuth Google
+# GITHUB_ID / GITHUB_SECRET — OAuth GitHub

@@ -1,0 +1,64 @@
+name: Deploy to Yandex Cloud
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Setup YC CLI
+        uses: cloud-posse/setup-yc@master
+        with:
+          yc-token: ${{ secrets.YC_TOKEN }}
+          cloud-id: ${{ secrets.YC_CLOUD_ID }}
+          folder-id: ${{ secrets.YC_FOLDER_ID }}
+
+      - name: Deploy to Serverless Containers
+        run: |
+          yc serverless container revision deploy \
+            --container-name cybersec-lab-trainer \
+            --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main \
+            --cpu 1 \
+            --memory 512MB \
+            --concurrency 10 \
+            --execution-timeout 60s \
+            --service-account-name cybersec-sa \
+            --env NODE_ENV=production \
+            --env DATABASE_URL=${{ secrets.DATABASE_URL }} \
+            --env NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }} \
+            --env NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }} \
+            --env GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
+            --env GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
+            --env GITHUB_ID=${{ secrets.GITHUB_ID }} \
+            --env GITHUB_SECRET=${{ secrets.GITHUB_SECRET }}

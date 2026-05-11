@@ -1,0 +1,17 @@
+# Railway
+# https://railway.app/docs
+# Деплой через Dockerfile или автоматически из репозитория
+
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "deploy/Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "bun server.js",
+    "healthcheckPath": "/",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}

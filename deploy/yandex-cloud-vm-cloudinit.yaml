@@ -1,0 +1,102 @@
+# Yandex Compute Cloud (VM)
+# cloud-init для автоматической настройки ВМ
+# https://cloud.yandex.ru/docs/compute/operations/vm-create/create-cloud-init-vm
+
+#cloud-config
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - nginx
+  - certbot
+  - python3-certbot-nginx
+
+users:
+  - name: nextjs
+    groups: [www-data]
+    shell: /bin/bash
+    sudo: false
+
+write_files:
+  # Nginx config
+  - path: /etc/nginx/sites-available/cybersec-lab-trainer
+    content: |
+      upstream cybersec_backend {
+          server 127.0.0.1:3000;
+      }
+
+      server {
+          listen 80;
+          server_name _;
+
+          location / {
+              proxy_pass http://cybersec_backend;
+              proxy_http_version 1.1;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+          }
+      }
+    owner: root:root
+    permissions: "0644"
+
+  # systemd service
+  - path: /etc/systemd/system/cybersec-lab-trainer.service
+    content: |
+      [Unit]
+      Description=CyberSec Lab Trainer
+      After=network.target
+
+      [Service]
+      Type=simple
+      User=nextjs
+      WorkingDirectory=/opt/cybersec-lab-trainer
+      ExecStart=/usr/local/bin/bun server.js
+      Restart=on-failure
+      Environment=NODE_ENV=production
+      EnvironmentFile=/opt/cybersec-lab-trainer/.env
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root:root
+    permissions: "0644"
+
+  # Environment file (заменить значения на реальные!)
+  - path: /opt/cybersec-lab-trainer/.env
+    content: |
+      DATABASE_URL=postgresql://user:password@yc-mdb-host:6432/cybersec_trainer
+      NEXTAUTH_URL=https://your-domain.ru
+      NEXTAUTH_SECRET=change-me
+      GOOGLE_CLIENT_ID=
+      GOOGLE_CLIENT_SECRET=
+      GITHUB_ID=
+      GITHUB_SECRET=
+    owner: nextjs:www-data
+    permissions: "0640"
+
+runcmd:
+  # Install Bun
+  - curl -fsSL https://bun.sh/install | bash
+  - ln -s /home/nextjs/.bun/bin/bun /usr/local/bin/bun
+
+  # Setup app directory
+  - mkdir -p /opt/cybersec-lab-trainer
+  - cd /opt/cybersec-lab-trainer
+  - git clone https://github.com/QuadDarv1ne/cybersec-lab-trainer.git .
+  - bun install --frozen-lockfile
+  - bun build
+
+  # Enable Nginx
+  - ln -sf /etc/nginx/sites-available/cybersec-lab-trainer /etc/nginx/sites-enabled/
+  - rm -f /etc/nginx/sites-enabled/default
+  - nginx -t && systemctl restart nginx
+
+  # Enable and start app
+  - systemctl daemon-reload
+  - systemctl enable cybersec-lab-trainer
+  - systemctl start cybersec-lab-trainer
+
+  # SSL (раскомментировать и заменить домен)
+  # - certbot --nginx -d your-domain.ru --non-interactive --agree-tos -m your@email.ru

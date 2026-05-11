@@ -1,0 +1,33 @@
+# Yandex Cloud Serverless Containers
+# https://cloud.yandex.ru/docs/serverless-containers/quickstart/container
+
+# Деплой через yc CLI:
+# yc serverless container revision deploy \
+#   --container-name cybersec-lab-trainer \
+#   --image ghcr.io/quadDarv1ne/cybersec-lab-trainer:main \
+#   --cpu 1 \
+#   --memory 512MB \
+#   --execution-timeout 60s \
+#   --service-account-name cybersec-sa \
+#   --env DATABASE_URL=${DATABASE_URL} \
+#   --env NEXTAUTH_URL=${NEXTAUTH_URL} \
+#   --env NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+
+memory: 512MB
+cpu: "1"
+cores: 1
+concurrency: 10
+execution_timeout: 60s
+
+env:
+  NODE_ENV: production
+  PORT: "3000"
+
+# Переменные окружения (задаются при деплое или в панели управления):
+# DATABASE_URL
+# NEXTAUTH_URL
+# NEXTAUTH_SECRET
+# GOOGLE_CLIENT_ID
+# GOOGLE_CLIENT_SECRET
+# GITHUB_ID
+# GITHUB_SECRET
