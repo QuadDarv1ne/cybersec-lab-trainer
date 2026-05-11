@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import {
   ChevronLeft,
   Lock,
@@ -27,6 +28,7 @@ import {
 
 export default function AuthSecurityLab() {
   const { completeModule, setCurrentPage, completedModules } = useAppStore();
+  const t = useTranslations('auth');
   const isCompleted = completedModules.includes('auth');
 
   const [password, setPassword] = useState('');
@@ -119,24 +121,24 @@ export default function AuthSecurityLab() {
           <Lock size={20} className="text-emerald-600" />
         </div>
         <div>
-          <h1 className="text-xl font-bold">Безопасность аутентификации</h1>
-          <p className="text-xs text-slate-500">Пароли, хеширование и управление сессиями</p>
+          <h1 className="text-xl font-bold">{t('title')}</h1>
+          <p className="text-xs text-slate-500">{t('subtitle')}</p>
         </div>
       </div>
 
       <Tabs defaultValue="password" className="space-y-4">
         <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
           <TabsTrigger value="password" className="text-xs">
-            <KeyRound size={14} className="mr-1" /> Пароли
+            <KeyRound size={14} className="mr-1" /> {t('passwordStrength')}
           </TabsTrigger>
           <TabsTrigger value="bruteforce" className="text-xs">
-            <Zap size={14} className="mr-1" /> Брутфорс
+            <Zap size={14} className="mr-1" /> {t('bruteForce')}
           </TabsTrigger>
           <TabsTrigger value="hashing" className="text-xs">
-            <Hash size={14} className="mr-1" /> Хеширование
+            <Hash size={14} className="mr-1" /> {t('hashing')}
           </TabsTrigger>
           <TabsTrigger value="sessions" className="text-xs">
-            <Clock size={14} className="mr-1" /> Сессии
+            <Clock size={14} className="mr-1" /> {t('jwtExplainer')}
           </TabsTrigger>
         </TabsList>
 
@@ -146,14 +148,14 @@ export default function AuthSecurityLab() {
             <CardContent className="p-5">
               <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
                 <KeyRound size={16} className="text-emerald-600" />
-                Проверка надёжности пароля
+                {t('passwordStrength')}
               </h3>
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Введите пароль для проверки..."
+                  placeholder={t('passwordInput')}
                   className="pr-10 font-mono"
                 />
                 <button
@@ -189,7 +191,7 @@ export default function AuthSecurityLab() {
                   <Separator />
 
                   <div className="space-y-2">
-                    <h4 className="text-xs font-semibold text-slate-600">Критерии проверки:</h4>
+                    <h4 className="text-xs font-semibold text-slate-600">{t('passwordAnalysis')}:</h4>
                     {passwordAnalysis.checks.map((check, i) => (
                       <div key={i} className="flex items-center gap-2 text-xs">
                         {check.passed ? (
@@ -215,17 +217,17 @@ export default function AuthSecurityLab() {
             <CardContent className="p-5 space-y-4">
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <Zap size={16} className="text-red-500" />
-                Визуализация полного перебора (Brute Force)
+                {t('bruteForce')}
               </h3>
               <p className="text-xs text-slate-500">
-                Узнайте, сколько времени нужно для подбора пароля с учётом длины и сложности.
+                {t('estimatedTime')}
               </p>
 
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-xs mb-2">
-                    <span>Длина пароля</span>
-                    <span className="font-mono font-bold">{crackLength} символов</span>
+                    <span>{t('passwordLength')}</span>
+                    <span className="font-mono font-bold">{crackLength} {crackLength === 1 ? 'символ' : crackLength < 5 ? 'символа' : 'символов'}</span>
                   </div>
                   <input
                     type="range"
@@ -243,7 +245,7 @@ export default function AuthSecurityLab() {
 
                 <div>
                   <div className="flex justify-between text-xs mb-2">
-                    <span>Сложность (набор символов)</span>
+                    <span>{t('complexity')}</span>
                     <span className="font-mono font-bold">
                       {crackComplexity === 1
                         ? '26 (a-z)'
@@ -308,16 +310,16 @@ export default function AuthSecurityLab() {
             <CardContent className="p-5 space-y-4">
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <Hash size={16} className="text-violet-600" />
-                Демонстрация хеширования паролей
+                {t('hashing')}
               </h3>
               <p className="text-xs text-slate-500">
-                Введите пароль, чтобы увидеть, как работает bcrypt-хеширование с солью.
+                {t('hashInput')}
               </p>
 
               <Input
                 value={hashInput}
                 onChange={(e) => setHashInput(e.target.value)}
-                placeholder="Введите пароль для хеширования..."
+                placeholder={t('hashInput')}
                 type="text"
                 className="font-mono"
               />
@@ -329,17 +331,17 @@ export default function AuthSecurityLab() {
                   className="space-y-3"
                 >
                   <div className="bg-slate-50 rounded-lg p-3">
-                    <p className="text-[10px] text-slate-500 mb-1">Оригинальный пароль:</p>
+                    <p className="text-[10px] text-slate-500 mb-1">{t('hashInput')}:</p>
                     <code className="text-xs font-mono">{hashInput}</code>
                   </div>
 
                   <div className="bg-violet-50 rounded-lg p-3 border border-violet-200">
-                    <p className="text-[10px] text-violet-500 mb-1">Сгенерированный хеш (bcrypt-подобный):</p>
+                    <p className="text-[10px] text-violet-500 mb-1">{t('hashResult')}:</p>
                     <code className="text-xs font-mono text-violet-700 break-all">{simulatedHash}</code>
                   </div>
 
                   <div className="bg-slate-50 rounded-lg p-3">
-                    <p className="text-[10px] text-slate-500 mb-1">Структура хеша:</p>
+                    <p className="text-[10px] text-slate-500 mb-1">{t('hashAlgorithm')}:</p>
                     <div className="space-y-1">
                       <p className="text-[11px]">
                         <code className="bg-red-100 text-red-700 px-1 rounded">$2b$12$</code>
@@ -401,7 +403,7 @@ async function verify(password, hash) {
             <CardContent className="p-5 space-y-4">
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <Clock size={16} className="text-sky-600" />
-                Безопасность сессий
+                {t('jwtExplainer')}
               </h3>
 
               <div className="space-y-4">
@@ -478,13 +480,14 @@ function authenticate(req, res, next) {
           className="w-full bg-emerald-600 hover:bg-emerald-700"
           onClick={handleComplete}
         >
-          Отметить модуль как изученный
+          {t('markComplete')}
         </Button>
       ) : (
         <div className="text-center text-sm text-emerald-600 font-medium flex items-center justify-center gap-2">
-          <CheckCircle2 size={16} /> Модуль завершён!
+          <CheckCircle2 size={16} /> {t('moduleComplete')}
         </div>
       )}
     </div>
   );
+$
 }

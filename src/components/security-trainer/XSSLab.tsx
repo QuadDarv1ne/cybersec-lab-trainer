@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import {
   ChevronLeft,
   CheckCircle2,
@@ -21,6 +22,7 @@ import {
 
 export default function XSSLab() {
   const { xssCompletedLevels, addXssLevel, completeModule, setCurrentPage } = useAppStore();
+  const t = useTranslations('xss');
   const [activeTab, setActiveTab] = useState(xssTypes[0].id);
   const [sanitized, setSanitized] = useState(false);
   const [showAttack, setShowAttack] = useState(false);
@@ -42,33 +44,33 @@ export default function XSSLab() {
     const attackCode = currentXss.attackDemo;
     if (sanitized) {
       const escaped = attackCode
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
+        .replace(/&/g, '&')
+        .replace(/</g, '<')
+        .replace(/>/g, '>')
+        .replace(/"/g, '"')
         .replace(/'/g, '&#039;');
       return (
         <div className="bg-white rounded-lg p-4 border border-emerald-200">
-          <p className="text-xs text-slate-500 mb-2">Безопасный вывод (текстовый режим):</p>
+          <p className="text-xs text-slate-500 mb-2">{t('sanitizedPreview')}</p>
           <code className="text-xs bg-slate-100 px-2 py-1 rounded block font-mono break-all">
             {escaped}
           </code>
           <p className="text-xs text-emerald-600 mt-2">
-            ✅ Код не выполнен — HTML-теги закодированы как текст
+            {t('codeExecuted')}
           </p>
         </div>
       );
     }
     return (
       <div className="bg-white rounded-lg p-4 border border-red-200">
-        <p className="text-xs text-slate-500 mb-2">Небезопасный вывод (innerHTML):</p>
+        <p className="text-xs text-slate-500 mb-2">{t('unsafePreview')}</p>
         <div className="bg-red-50 rounded-lg p-3 border border-red-200">
           <p className="text-sm font-mono text-red-700 break-all">
             {attackCode}
           </p>
         </div>
         <p className="text-xs text-red-600 mt-2 font-medium">
-          ⚠️ В реальном приложении этот скрипт БЫ ВЫПОЛНЕН в браузере жертвы!
+          {t('warning')}
         </p>
       </div>
     );
@@ -85,8 +87,8 @@ export default function XSSLab() {
           <FileText size={20} className="text-emerald-600" />
         </div>
         <div>
-          <h1 className="text-xl font-bold">Лаборатория XSS-атак</h1>
-          <p className="text-xs text-slate-500">Три типа Cross-Site Scripting уязвимостей</p>
+          <h1 className="text-xl font-bold">{t('title')}</h1>
+          <p className="text-xs text-slate-500">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -95,9 +97,9 @@ export default function XSSLab() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium">
-              Изучено: {xssCompletedLevels.length}/{xssTypes.length}
+              {t('progress', { completed: xssCompletedLevels.length, total: xssTypes.length })}
             </span>
-            {allCompleted && <Badge className="bg-emerald-600 text-white">Модуль завершён!</Badge>}
+            {allCompleted && <Badge className="bg-emerald-600 text-white">{t('moduleComplete')}</Badge>}
           </div>
           <div className="flex gap-2">
             {xssTypes.map((x) => (
@@ -124,15 +126,15 @@ export default function XSSLab() {
             <div>
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <ShieldAlert size={16} className="text-amber-500" />
-                Переключатель санитизации
+                {t('sanitizationToggle')}
               </h3>
               <p className="text-xs text-slate-500 mt-1">
-                Включите, чтобы увидеть разницу между безопасным и опасным выводом
+                {t('toggleExplanation')}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Label htmlFor="sanitize-toggle" className="text-xs">
-                {sanitized ? 'Защищённый' : 'Уязвимый'}
+                {sanitized ? t('safeMode') : t('unsafeMode')}
               </Label>
               <Switch
                 id="sanitize-toggle"
@@ -153,7 +155,7 @@ export default function XSSLab() {
               value={x.id}
               className="text-xs data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
             >
-              {x.id === 'reflected' ? 'Отражённый' : x.id === 'stored' ? 'Хранимый' : 'DOM-based'}
+              {t(`types.${x.id}` as const)}
               {xssCompletedLevels.includes(x.id) && (
                 <CheckCircle2 size={12} className="ml-1" />
               )}
@@ -250,12 +252,12 @@ export default function XSSLab() {
                   className="w-full bg-emerald-600 hover:bg-emerald-700"
                   onClick={() => handleMarkComplete(xss.id)}
                 >
-                  Отметить как изученное
+                  {t('markComplete')}
                 </Button>
               )}
               {isCompleted && (
                 <div className="text-center text-sm text-emerald-600 font-medium flex items-center justify-center gap-2">
-                  <CheckCircle2 size={16} /> Изучено!
+                  <CheckCircle2 size={16} /> {t('markComplete')}
                 </div>
               )}
             </motion.div>

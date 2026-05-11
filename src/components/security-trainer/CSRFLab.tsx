@@ -7,12 +7,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { ChevronLeft, ArrowRight, ArrowLeft, CheckCircle2, AlertTriangle, Lock, Globe, Server, ShieldCheck } from 'lucide-react';
 
 const attackSteps = [
   {
     id: 1,
-    title: 'Вход в банковское приложение',
     description: 'Пользователь заходит на bank.com и успешно проходит аутентификацию. Сервер устанавливает сессионную куку в браузер.',
     detail: 'Set-Cookie: session_id=abc123; Domain=bank.com; Path=/',
     icon: <Globe size={20} className="text-emerald-600" />,
@@ -20,7 +20,6 @@ const attackSteps = [
   },
   {
     id: 2,
-    title: 'Посещение вредоносного сайта',
     description: 'Пользователь переходит на evil.com, который содержит скрытую HTML-форму, автоматически отправляющую запрос к bank.com.',
     detail: 'На evil.com загружается страница с невидимой формой, JavaScript автоматически отправляет POST-запрос.',
     icon: <AlertTriangle size={20} className="text-amber-600" />,
@@ -28,7 +27,6 @@ const attackSteps = [
   },
   {
     id: 3,
-    title: 'Автоматическая отправка запроса',
     description: 'Скрытая форма на evil.com автоматически отправляет POST-запрос к bank.com/transfer с параметрами перевода.',
     detail: 'POST /transfer HTTP/1.1\nHost: bank.com\nCookie: session_id=abc123\n\namount=10000&to=attacker_account',
     icon: <Server size={20} className="text-orange-600" />,
@@ -36,7 +34,6 @@ const attackSteps = [
   },
   {
     id: 4,
-    title: 'Банк обрабатывает запрос',
     description: 'Банк получает запрос с корректной сессионной кукой и выполняет перевод. Сервер не может отличить этот запрос от легитимного действия пользователя.',
     detail: 'Сервер проверяет session_id → cookie валиден → выполняет перевод. Деньги переведены злоумышленнику!',
     icon: <AlertTriangle size={20} className="text-red-600" />,
@@ -46,7 +43,6 @@ const attackSteps = [
 
 const defenseMechanisms = [
   {
-    title: 'CSRF-токены (Anti-CSRF Tokens)',
     description: 'Сервер генерирует уникальный случайный токен для каждой формы и сохраняет его в сессии. При отправке формы токен проверяется на сервере. Злоумышленник не может получить токен из-за Same-Origin Policy.',
     code: `// Генерация CSRF-токена
 app.use(csrf({ cookie: true }));
@@ -59,7 +55,6 @@ app.use(csrf({ cookie: true }));
 </form>`,
   },
   {
-    title: 'SameSite Cookie Attribute',
     description: 'Атрибут SameSite контролирует, когда куки отправляются с кросс-сайтовыми запросами. SameSite=Strict полностью блокирует, SameSite=Lax разрешает только навигационные GET-запросы.',
     code: `// Настройка куки с SameSite
 Set-Cookie: session_id=abc123;
@@ -77,7 +72,6 @@ app.use(session({
 }));`,
   },
   {
-    title: 'Проверка Referer / Origin',
     description: 'Сервер проверяет заголовок Referer или Origin входящего запроса. Если запрос приходит не с собственного домена — он отклоняется.',
     code: `// Проверка Origin заголовка
 app.post('/transfer', (req, res) => {
@@ -94,6 +88,7 @@ app.post('/transfer', (req, res) => {
 
 export default function CSRFLab() {
   const { completedModules, completeModule, setCurrentPage } = useAppStore();
+  const t = useTranslations('csrf');
   const [currentStep, setCurrentStep] = useState(0);
   const [showDefense, setShowDefense] = useState(false);
   const [activeDefense, setActiveDefense] = useState(0);
@@ -117,8 +112,8 @@ export default function CSRFLab() {
           <Lock size={20} className="text-emerald-600" />
         </div>
         <div>
-          <h1 className="text-xl font-bold">CSRF-атаки</h1>
-          <p className="text-xs text-slate-500">Cross-Site Request Forgery — подделка межсайтовых запросов</p>
+          <h1 className="text-xl font-bold">{t('title')}</h1>
+          <p className="text-xs text-slate-500">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -139,9 +134,9 @@ export default function CSRFLab() {
       {/* Attack simulation */}
       <Card className="border-slate-200">
         <CardContent className="p-5">
-          <h3 className="text-sm font-semibold mb-1">🎭 Симуляция атаки — пошаговая демонстрация</h3>
+          <h3 className="text-sm font-semibold mb-1">🎭 {t('simulation')}</h3>
           <p className="text-xs text-slate-500 mb-4">
-            Нажимайте «Далее», чтобы увидеть каждый этап CSRF-атаки
+            {t('attackSteps')}
           </p>
 
           {/* Steps */}
@@ -167,7 +162,7 @@ export default function CSRFLab() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       {step.icon}
-                      <h4 className="text-sm font-semibold">{step.title}</h4>
+                      <h4 className="text-sm font-semibold">{t(`step${i + 1}` as const)}</h4>
                     </div>
                     <AnimatePresence>
                       {i <= currentStep && (
@@ -200,7 +195,7 @@ export default function CSRFLab() {
               onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
               disabled={currentStep === 0}
             >
-              <ArrowLeft size={14} className="mr-1" /> Назад
+              <ArrowLeft size={14} className="mr-1" /> {t('back')}
             </Button>
             <div className="flex gap-1">
               {attackSteps.map((_, i) => (
@@ -219,7 +214,7 @@ export default function CSRFLab() {
                 className="bg-emerald-600 hover:bg-emerald-700"
                 onClick={() => setCurrentStep(currentStep + 1)}
               >
-                Далее <ArrowRight size={14} className="ml-1" />
+                {t('next')} <ArrowRight size={14} className="ml-1" />
               </Button>
             ) : (
               <Button
@@ -227,7 +222,7 @@ export default function CSRFLab() {
                 className="bg-emerald-600 hover:bg-emerald-700"
                 onClick={() => setShowDefense(true)}
               >
-                К защите <ShieldCheck size={14} className="ml-1" />
+                {t('protection')} <ShieldCheck size={14} className="ml-1" />
               </Button>
             )}
           </div>
@@ -245,10 +240,10 @@ export default function CSRFLab() {
             <CardContent className="p-5">
               <h3 className="text-sm font-semibold text-emerald-800 mb-1 flex items-center gap-2">
                 <ShieldCheck size={16} />
-                Механизмы защиты от CSRF
+                {t('protection')}
               </h3>
               <p className="text-xs text-emerald-700">
-                Нажимайте на каждый механизм, чтобы увидеть пример кода
+                {t('protectionExplanation')}
               </p>
             </CardContent>
           </Card>
@@ -262,7 +257,7 @@ export default function CSRFLab() {
               >
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold">{def.title}</h4>
+                    <h4 className="text-sm font-semibold">{t(`defense${['Tokens', 'SameSite', 'Origin'][i]}` as const)}</h4>
                     <Badge variant="outline" className="text-[10px]">
                       {activeDefense === i ? 'Скрыть' : 'Показать код'}
                     </Badge>
@@ -293,15 +288,16 @@ export default function CSRFLab() {
               className="w-full bg-emerald-600 hover:bg-emerald-700"
               onClick={handleComplete}
             >
-              Отметить модуль как изученный
+              {t('markComplete')}
             </Button>
           ) : (
             <div className="text-center text-sm text-emerald-600 font-medium flex items-center justify-center gap-2">
-              <CheckCircle2 size={16} /> Модуль завершён!
+              <CheckCircle2 size={16} /> {t('moduleComplete')}
             </div>
           )}
         </motion.div>
       )}
     </div>
   );
+$
 }
