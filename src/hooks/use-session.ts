@@ -1,7 +1,6 @@
 "use client";
 
 import { useSession as useNextAuthSession } from "next-auth/react";
-import type { Session } from "next-auth";
 
 export function useSession() {
   const { data: session, status, ...rest } = useNextAuthSession();

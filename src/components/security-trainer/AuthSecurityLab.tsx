@@ -19,7 +19,6 @@ import {
   EyeOff,
   Zap,
   Clock,
-  ShieldCheck,
   Hash,
   KeyRound,
   AlertTriangle,

@@ -5,10 +5,9 @@ import { useAppStore } from '@/lib/store';
 import { owaspTopics } from '@/lib/security-data';
 import { useTranslations } from '@/lib/intlStub';
 import CodeBlock from './CodeBlock';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { motion } from 'framer-motion';
@@ -17,8 +16,7 @@ import { ShieldCheck, ChevronLeft, CheckCircle2, AlertTriangle, Shield } from 'l
 export default function OWASPTop10() {
   const { studiedOwaspItems, addStudiedOwasp, completeModule, setCurrentPage } = useAppStore();
   const t = useTranslations('owasp');
-  const tCommon = useTranslations('common');
-  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [_expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const studiedCount = studiedOwaspItems.length;
   const totalCount = owaspTopics.length;

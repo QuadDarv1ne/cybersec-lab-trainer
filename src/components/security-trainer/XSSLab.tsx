@@ -15,7 +15,6 @@ import { useTranslations } from '@/lib/intlStub';
 import {
   ChevronLeft,
   CheckCircle2,
-  AlertTriangle,
   FileText,
   ShieldAlert,
 } from 'lucide-react';

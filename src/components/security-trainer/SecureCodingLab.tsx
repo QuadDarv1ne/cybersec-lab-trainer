@@ -30,7 +30,6 @@ export default function SecureCodingLab() {
   const challenge = secureCodingChallenges[activeChallenge];
   const isAnswered = answeredChallenges.has(activeChallenge);
   const isCompleted = completedModules.includes('secure-coding');
-  const allAnswered = answeredChallenges.size === secureCodingChallenges.length;
 
   const handleSelectOption = (index: number) => {
     if (isAnswered) return;

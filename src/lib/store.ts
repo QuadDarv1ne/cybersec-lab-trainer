@@ -1,17 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { db } from './db';
 
-export type PageType = 
-  | 'dashboard' 
-  | 'owasp' 
-  | 'sql-injection' 
-  | 'xss' 
-  | 'csrf' 
-  | 'auth' 
-  | 'secure-coding' 
-  | 'tools' 
-  | 'quiz' 
+export type PageType =
+  | 'dashboard'
+  | 'owasp'
+  | 'sql-injection'
+  | 'xss'
+  | 'csrf'
+  | 'auth'
+  | 'secure-coding'
+  | 'tools'
+  | 'quiz'
   | 'achievements';
 
 interface AppState {
@@ -42,48 +41,70 @@ interface AppActions {
 
 type AppStore = AppState & AppActions;
 
-// Функция для синхронизации с БД
+// API client functions
+const apiClient = {
+  async saveProgress(userId: string, moduleId: string, completed: boolean, score?: number) {
+    const response = await fetch('/api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'progress',
+        userId,
+        payload: { moduleId, completed, score },
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to save progress');
+    }
+
+    return response.json();
+  },
+
+  async saveQuizResults(userId: string, quizId: string, score: number, total: number) {
+    const response = await fetch('/api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'quiz-answers',
+        userId,
+        quizId,
+        score,
+        total,
+        payload: [],
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to save quiz results');
+    }
+
+    return response.json();
+  },
+
+  async loadProgress(_userId: string) {
+    // For now, progress is stored client-side via persist middleware
+    // This can be extended to fetch from API when needed
+    return { completedModules: [], quizScores: {} };
+  },
+};
+
+// Функция для синхронизации с БД через API
 const syncWithDatabase = async (state: AppState) => {
   if (!state.userId) return;
 
   try {
-    // Синхронизируем прогресс модулей
-    await db.progress.upsert({
-      where: { userId_moduleId: { userId: state.userId, moduleId: 'all' } },
-      create: {
-        userId: state.userId,
-        moduleId: 'all',
-        completed: state.completedModules.length > 0,
-        score: Object.values(state.quizScores).reduce((a, b) => a + b, 0),
-        lastAccessed: new Date(),
-      },
-      update: {
-        completed: state.completedModules.length > 0,
-        score: Object.values(state.quizScores).reduce((a, b) => a + b, 0),
-        lastAccessed: new Date(),
-      },
-    });
+    await apiClient.saveProgress(
+      state.userId,
+      'all',
+      state.completedModules.length > 0,
+      Object.values(state.quizScores).reduce((a, b) => a + b, 0)
+    );
 
-    // Синхронизируем результаты квизов
     for (const [category, score] of Object.entries(state.quizScores)) {
-      await db.quizResult.upsert({
-        where: { 
-          id: `${state.userId}_${category}`
-        },
-        create: {
-          id: `${state.userId}_${category}`,
-          userId: state.userId,
-          quizId: category,
-          score,
-          total: 100,
-          percentage: score,
-        },
-        update: {
-          score,
-          total: 100,
-          percentage: score,
-        },
-      });
+      await apiClient.saveQuizResults(state.userId, category, score, 100);
     }
   } catch (error) {
     console.error('Ошибка синхронизации с БД:', error);
@@ -93,23 +114,11 @@ const syncWithDatabase = async (state: AppState) => {
 // Функция для загрузки из БД
 const loadFromDatabase = async (set: (state: Partial<AppState>) => void, userId: string) => {
   try {
-    const progress = await db.progress.findMany({
-      where: { userId },
-    });
-
-    const quizResults = await db.quizResult.findMany({
-      where: { userId },
-    });
-
-    const completedModules = progress.map((p) => p.moduleId);
-    const quizScores: Record<string, number> = {};
-    quizResults.forEach((r) => {
-      quizScores[r.quizId] = r.score;
-    });
+    const data = await apiClient.loadProgress(userId);
 
     set({
-      completedModules,
-      quizScores,
+      completedModules: data.completedModules,
+      quizScores: data.quizScores,
       userId,
     });
   } catch (error) {

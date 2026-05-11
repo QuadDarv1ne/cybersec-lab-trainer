@@ -70,7 +70,7 @@ const achievementIcons: Record<string, React.ReactNode> = {
 };
 
 export default function Dashboard() {
-  const { setCurrentPage, completedModules, quizScores, toggleSidebar, studiedOwaspItems } = useAppStore();
+  const { setCurrentPage, completedModules, quizScores, toggleSidebar } = useAppStore();
   const t = useTranslations('dashboard');
   const tCommon = useTranslations('common');
 
@@ -132,18 +132,6 @@ export default function Dashboard() {
   };
 
   const recommendation = getRecommendation();
-
-  // Recent activity - show modules in order of completion concept
-  const recentActivity = [
-    ...completedModules.map((id) => {
-      const mod = modules.find((m) => m.id === id);
-      return mod ? { type: 'module' as const, name: mod.title, icon: mod.icon } : null;
-    }).filter(Boolean),
-    ...Object.keys(quizScores).map((cat) => {
-      const score = quizScores[cat];
-      return { type: 'quiz' as const, name: `Квиз: ${cat}`, score };
-    }),
-  ].slice(-5);
 
   const handleStartModule = (moduleId: string) => {
     setCurrentPage(moduleId as PageType);

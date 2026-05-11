@@ -20,7 +20,6 @@ export default function SQLInjectionLab() {
   const [showResult, setShowResult] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
 
   const challenge = sqlChallenges[activeChallenge];
   const isCompleted = sqlCompletedLevels.includes(challenge.id);

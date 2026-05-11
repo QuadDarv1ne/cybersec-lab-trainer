@@ -10,8 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   ChevronLeft,
   HelpCircle,
@@ -43,7 +42,6 @@ type QuizState = 'select' | 'playing' | 'result';
 export default function QuizSystem() {
   const { quizScores, setQuizScore, setCurrentPage } = useAppStore();
   const t = useTranslations('quiz');
-  const tCommon = useTranslations('common');
   const [quizState, setQuizState] = useState<QuizState>('select');
   const [activeCategory, setActiveCategory] = useState('');
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -88,14 +86,6 @@ export default function QuizSystem() {
     }
   };
 
-  const handleTimeUp = () => {
-    setTimerActive(false);
-    setShowAnswer(true);
-    const newAnswers = [...answers];
-    newAnswers[currentQuestion] = false;
-    setAnswers(newAnswers);
-  };
-
   const handleAnswer = () => {
     if (!selectedAnswer) return;
     setTimerActive(false);
@@ -130,7 +120,7 @@ export default function QuizSystem() {
       });
     }, 1000);
     return () => clearTimeout(timer);
-  }, [timerActive, timeLeft]);
+  }, [timerActive, timeLeft, currentQuestion]);
 
   const resetQuiz = () => {
     setQuizState('select');

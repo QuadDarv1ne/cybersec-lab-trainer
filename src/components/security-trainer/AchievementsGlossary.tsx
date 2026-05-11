@@ -89,7 +89,7 @@ const achievementIcons: Record<string, React.ReactNode> = {
 
 export default function AchievementsAndGlossary() {
   const t = useTranslations('achievements');
-  const { setCurrentPage, completedModules, quizScores, studiedOwaspItems, sqlCompletedLevels, xssCompletedLevels } = useAppStore();
+  const { setCurrentPage, completedModules, quizScores } = useAppStore();
   const [activeTab, setActiveTab] = useState<'achievements' | 'glossary'>('achievements');
   const [searchTerm, setSearchTerm] = useState('');
 
