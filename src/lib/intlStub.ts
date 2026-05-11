@@ -1,5 +1,5 @@
-import ru from './locales/ru/main.json';
-import en from './locales/en/main.json';
+import ru from '../i18n/locales/ru/main.json';
+import en from '../i18n/locales/en/main.json';
 
 const locales: Record<string, typeof ru> = {
   ru,

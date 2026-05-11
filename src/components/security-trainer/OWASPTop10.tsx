@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { owaspTopics } from '@/lib/security-data';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/intlStub';
 import CodeBlock from './CodeBlock';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
