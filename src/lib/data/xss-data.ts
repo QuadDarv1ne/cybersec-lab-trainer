@@ -239,7 +239,7 @@ const clean = DOMPurify.sanitize(userHTML, {
 <a href="javascript:alert('XSS')">Нажми меня</a>
 
 <!-- Атака 3: через image -->
-<img src="data:image/svg+xml,<svg onload='alert(\"XSS\")'/>">`,
+<img src="data:image/svg+xml,<svg onload='alert("XSS")'/>">`,
     secureCode: `<!-- БЕЗОПАСНЫЙ КОД — валидация URL -->
 function validateUrl(url) {
   const allowedProtocols = ['https:', 'http:', 'mailto:'];

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SessionProvider } from "@/components/SessionProvider";
 import ThemeProvider from "@/components/ThemeProvider";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { validateEnv } from "@/lib/env";
@@ -45,7 +46,9 @@ export default async function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              {children}
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
             </ThemeProvider>
           </div>
         </SessionProvider>
