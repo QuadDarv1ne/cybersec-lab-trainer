@@ -1,7 +1,7 @@
 'use client';
 
 import { useAppStore, type PageType } from '@/lib/store';
-import { modules, achievements } from '@/lib/security-data';
+import { useTranslations } from '@/lib/intlStub';
 import {
   LayoutDashboard,
   Shield,
@@ -35,14 +35,8 @@ const iconMap: Record<string, React.ReactNode> = {
   Trophy: <Trophy size={20} />,
 };
 
-const navItems: { id: PageType; label: string; iconKey: string }[] = [
-  { id: 'dashboard', label: 'Панель управления', iconKey: 'LayoutDashboard' },
-  ...modules.map((m) => ({ id: m.id as PageType, label: m.title, iconKey: m.icon })),
-  { id: 'quiz', label: 'Квиз', iconKey: 'HelpCircle' },
-  { id: 'achievements', label: 'Достижения', iconKey: 'Trophy' },
-];
-
 export default function Sidebar() {
+  const t = useTranslations('sidebar');
   const {
     currentPage,
     sidebarOpen,
@@ -50,6 +44,19 @@ export default function Sidebar() {
     setCurrentPage,
     completedModules,
   } = useAppStore();
+
+  const navItems: { id: PageType; label: string; iconKey: string }[] = [
+    { id: 'dashboard', label: t('dashboard'), iconKey: 'LayoutDashboard' },
+    { id: 'owasp', label: t('owasp'), iconKey: 'Shield' },
+    { id: 'sql-injection', label: t('sqlInjection'), iconKey: 'Database' },
+    { id: 'xss', label: t('xss'), iconKey: 'FileText' },
+    { id: 'csrf', label: t('csrf'), iconKey: 'Link' },
+    { id: 'auth', label: t('auth'), iconKey: 'Lock' },
+    { id: 'secure-coding', label: t('secureCoding'), iconKey: 'Code' },
+    { id: 'tools', label: t('tools'), iconKey: 'KeyRound' },
+    { id: 'quiz', label: t('quiz'), iconKey: 'HelpCircle' },
+    { id: 'achievements', label: t('achievements'), iconKey: 'Trophy' },
+  ];
 
   // Count trackable items (excluding dashboard and achievements)
   const trackableItems = navItems.filter((item) => item.id !== 'dashboard' && item.id !== 'achievements');
@@ -66,7 +73,7 @@ export default function Sidebar() {
           </div>
           <div>
             <h2 className="font-bold text-sm leading-tight">CyberSec Lab</h2>
-            <p className="text-[11px] text-slate-400">09.03.04</p>
+            <p className="text-[11px] text-slate-400">{t('majorCode')}</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -127,12 +134,12 @@ export default function Sidebar() {
       {/* Progress */}
       <div className="p-4 border-t border-slate-700">
         <div className="flex items-center justify-between text-xs mb-2">
-          <span className="text-slate-400">Общий прогресс</span>
+          <span className="text-slate-400">{t('overallProgress')}</span>
           <span className="text-emerald-400 font-semibold">{progressPct}%</span>
         </div>
         <Progress value={progressPct} className="h-2 bg-slate-700 [&>div]:bg-emerald-500" />
         <p className="text-[11px] text-slate-500 mt-2">
-          Пройдено {completedCount} из {trackableItems.length} модулей
+          {t('modulesCompleted', { completed: completedCount, total: trackableItems.length })}
         </p>
       </div>
     </div>

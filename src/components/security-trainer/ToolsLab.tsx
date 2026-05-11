@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from '@/lib/intlStub';
 import {
   ChevronLeft,
   KeyRound,
@@ -180,6 +181,7 @@ function CopyButton({ text }: { text: string }) {
 }
 
 export default function ToolsLab() {
+  const t = useTranslations('tools');
   const { completeModule, setCurrentPage, completedModules } = useAppStore();
   const isCompleted = completedModules.includes('tools');
 
@@ -258,24 +260,24 @@ export default function ToolsLab() {
           <KeyRound size={20} className="text-violet-600" />
         </div>
         <div>
-          <h1 className="text-xl font-bold">Инструменты безопасности</h1>
-          <p className="text-xs text-slate-500">Шифры, кодирование, хеширование и генератор паролей</p>
+          <h1 className="text-xl font-bold">{t('title')}</h1>
+          <p className="text-xs text-slate-500">{t('description')}</p>
         </div>
       </div>
 
       <Tabs defaultValue="ciphers" className="space-y-4">
         <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
           <TabsTrigger value="ciphers" className="text-xs">
-            <Lock size={14} className="mr-1" /> Шифры
+            <Lock size={14} className="mr-1" /> {t('ciphers')}
           </TabsTrigger>
           <TabsTrigger value="encoding" className="text-xs">
-            <Shuffle size={14} className="mr-1" /> Кодирование
+            <Shuffle size={14} className="mr-1" /> {t('encoding')}
           </TabsTrigger>
           <TabsTrigger value="hashing" className="text-xs">
-            <KeyRound size={14} className="mr-1" /> Хеши
+            <KeyRound size={14} className="mr-1" /> {t('hashes')}
           </TabsTrigger>
           <TabsTrigger value="passwords" className="text-xs">
-            <Unlock size={14} className="mr-1" /> Пароли
+            <Unlock size={14} className="mr-1" /> {t('passwords')}
           </TabsTrigger>
         </TabsList>
 
@@ -729,11 +731,11 @@ function vigenereEncrypt(text, key) {
       {/* Complete */}
       {!isCompleted ? (
         <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => completeModule('tools')}>
-          Отметить модуль как изученный
+          {t('markComplete') || 'Отметить модуль как изученный'}
         </Button>
       ) : (
         <div className="text-center text-sm text-emerald-600 font-medium flex items-center justify-center gap-2">
-          <CheckCircle2 size={16} /> Модуль завершён!
+          <CheckCircle2 size={16} /> {t('moduleComplete') || 'Модуль завершён!'}
         </div>
       )}
     </div>

@@ -44,10 +44,10 @@ export default function XSSLab() {
     const attackCode = currentXss.attackDemo;
     if (sanitized) {
       const escaped = attackCode
-        .replace(/&/g, '&')
-        .replace(/</g, '<')
-        .replace(/>/g, '>')
-        .replace(/"/g, '"')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
       return (
         <div className="bg-white rounded-lg p-4 border border-emerald-200">

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion } from 'framer-motion';
+import { useTranslations } from '@/lib/intlStub';
 import {
   ChevronLeft,
   Trophy,
@@ -87,6 +88,7 @@ const achievementIcons: Record<string, React.ReactNode> = {
 };
 
 export default function AchievementsAndGlossary() {
+  const t = useTranslations('achievements');
   const { setCurrentPage, completedModules, quizScores, studiedOwaspItems, sqlCompletedLevels, xssCompletedLevels } = useAppStore();
   const [activeTab, setActiveTab] = useState<'achievements' | 'glossary'>('achievements');
   const [searchTerm, setSearchTerm] = useState('');
@@ -127,18 +129,18 @@ export default function AchievementsAndGlossary() {
           <Trophy size={20} className="text-amber-600" />
         </div>
         <div>
-          <h1 className="text-xl font-bold">Достижения и глоссарий</h1>
-          <p className="text-xs text-slate-500">Отслеживайте прогресс и изучайте термины</p>
+          <h1 className="text-xl font-bold">{t('title')}</h1>
+          <p className="text-xs text-slate-500">{t('description')}</p>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'achievements' | 'glossary')}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="achievements" className="text-xs">
-            <Trophy size={14} className="mr-1" /> Достижения ({unlockedCount}/{achievementDefs.length})
+            <Trophy size={14} className="mr-1" /> {t('achievementsTab')} ({unlockedCount}/{achievementDefs.length})
           </TabsTrigger>
           <TabsTrigger value="glossary" className="text-xs">
-            <BookOpen size={14} className="mr-1" /> Глоссарий ({glossaryTerms.length})
+            <BookOpen size={14} className="mr-1" /> {t('glossaryTab')} ({glossaryTerms.length})
           </TabsTrigger>
         </TabsList>
 
@@ -222,7 +224,7 @@ export default function AchievementsAndGlossary() {
             <Input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Поиск по терминам..."
+              placeholder={t('searchPlaceholder')}
               className="pl-10"
             />
           </div>
@@ -241,7 +243,7 @@ export default function AchievementsAndGlossary() {
             ))}
             {searchTerm && (
               <Badge variant="outline" className="text-[10px] cursor-pointer" onClick={() => setSearchTerm('')}>
-                Очистить
+                {t('clear')}
               </Badge>
             )}
           </div>
@@ -269,7 +271,7 @@ export default function AchievementsAndGlossary() {
             ))}
             {filteredTerms.length === 0 && (
               <div className="text-center py-8 text-sm text-slate-400">
-                Ничего не найдено по запросу &quot;{searchTerm}&quot;
+                {t('noResults')} &quot;{searchTerm}&quot;
               </div>
             )}
           </div>

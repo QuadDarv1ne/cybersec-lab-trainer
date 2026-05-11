@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from '@/lib/intlStub';
 import {
   ChevronLeft,
   Code,
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 
 export default function SecureCodingLab() {
+  const t = useTranslations('secureCoding');
   const { completeModule, setCurrentPage, completedModules } = useAppStore();
   const [activeChallenge, setActiveChallenge] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -76,8 +78,8 @@ export default function SecureCodingLab() {
           <Code size={20} className="text-emerald-600" />
         </div>
         <div>
-          <h1 className="text-xl font-bold">Безопасное кодирование</h1>
-          <p className="text-xs text-slate-500">Найдите уязвимость и выберите правильное решение</p>
+          <h1 className="text-xl font-bold">{t('title')}</h1>
+          <p className="text-xs text-slate-500">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -86,13 +88,13 @@ export default function SecureCodingLab() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium">
-              Задание {activeChallenge + 1} из {secureCodingChallenges.length}
+              {t('taskNumber', { number: activeChallenge + 1, total: secureCodingChallenges.length })}
             </span>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-[10px]">
-                ✅ {correctCount} правильных
+                ✅ {correctCount} {t('correct')}
               </Badge>
-              {isCompleted && <Badge className="bg-emerald-600 text-white">Модуль завершён!</Badge>}
+              {isCompleted && <Badge className="bg-emerald-600 text-white">{t('moduleComplete')}</Badge>}
             </div>
           </div>
           <div className="flex gap-2">
@@ -130,7 +132,7 @@ export default function SecureCodingLab() {
               <Badge variant="secondary" className="text-[10px]">
                 {challenge.category}
               </Badge>
-              <span className="text-xs text-slate-400">Код-ревью</span>
+              <span className="text-xs text-slate-400">Code review</span>
             </div>
             <h2 className="font-semibold mb-3">{challenge.title}</h2>
 
@@ -138,7 +140,7 @@ export default function SecureCodingLab() {
             <CodeBlock code={challenge.code} language="javascript" title="vulnerable.js" />
 
             <div className="mt-4">
-              <h3 className="text-sm font-semibold mb-3">Что нужно исправить?</h3>
+              <h3 className="text-sm font-semibold mb-3">What needs to be fixed?</h3>
               <div className="space-y-2">
                 {challenge.options.map((option, i) => {
                   let optionStyle = 'border-slate-200 hover:border-slate-400 hover:bg-slate-50';
@@ -193,7 +195,7 @@ export default function SecureCodingLab() {
                 onClick={handleCheckAnswer}
                 disabled={selectedOption === null}
               >
-                Проверить ответ
+                {t('checkAnswer')}
               </Button>
             )}
 
@@ -220,8 +222,8 @@ export default function SecureCodingLab() {
                       }`}
                     >
                       {challenge.options[selectedOption!]?.correct
-                        ? '✅ Правильно!'
-                        : '❌ Неправильно'}
+                        ? '✅ Correct!'
+                        : '❌ Incorrect'}
                     </h4>
                     <p className="text-xs text-slate-600 leading-relaxed">{challenge.explanation}</p>
                   </div>
@@ -233,7 +235,7 @@ export default function SecureCodingLab() {
                       onClick={prevChallenge}
                       disabled={activeChallenge === 0}
                     >
-                      <ArrowLeft size={14} className="mr-1" /> Назад
+                      <ArrowLeft size={14} className="mr-1" /> {t('back')}
                     </Button>
                     {activeChallenge < secureCodingChallenges.length - 1 ? (
                       <Button
@@ -241,11 +243,11 @@ export default function SecureCodingLab() {
                         className="bg-emerald-600 hover:bg-emerald-700"
                         onClick={nextChallenge}
                       >
-                        Следующее <ArrowRight size={14} className="ml-1" />
+                        {t('next')} <ArrowRight size={14} className="ml-1" />
                       </Button>
                     ) : (
                       <Badge className="bg-emerald-600 text-white py-1.5">
-                        Все задания завершены!
+                        {t('allComplete')}
                       </Badge>
                     )}
                   </div>

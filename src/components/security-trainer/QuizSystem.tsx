@@ -20,6 +20,7 @@ import {
   Link,
   Lock,
   Shield,
+  ShieldAlert,
   Clock,
   CheckCircle2,
   XCircle,
@@ -34,6 +35,7 @@ const iconMap: Record<string, React.ReactNode> = {
   Link: <Link size={20} />,
   Lock: <Lock size={20} />,
   Shield: <Shield size={20} />,
+  ShieldAlert: <ShieldAlert size={20} />,
 };
 
 type QuizState = 'select' | 'playing' | 'result';
