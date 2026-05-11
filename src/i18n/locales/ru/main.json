@@ -1,0 +1,121 @@
+{
+  "dashboard": {
+    "hero": {
+      "title": "Лаборатория кибербезопасности",
+      "description": "Интерактивная платформа для изучения уязвимостей веб-приложений: OWASP Top 10, SQL-инъекции, XSS, CSRF и безопасное кодирование.",
+      "modules": "7 модулей",
+      "progress": "Прогресс: {percent}%",
+      "quizScore": "Средний балл: {score}%",
+      "takeQuiz": "Пройдите квиз",
+      "achievements": "{count} достижений"
+    },
+    "stats": {
+      "modulesCompleted": "Модули",
+      "quizzesCompleted": "Квизы",
+      "averageScore": "Средний балл",
+      "achievements": "Достижения"
+    },
+    "recommendationBanner": {
+      "title": "Рекомендация"
+    },
+    "recommendations": {
+      "owaspStart": "Начните с изучения OWASP Top 10",
+      "sqlTry": "Попробуйте SQL-инъекции",
+      "xssLearn": "Изучите XSS-атаки",
+      "quizCheck": "Проверьте знания в квизе",
+      "toolsTry": "Попробуйте инструменты",
+      "completeRemaining": "Завершите оставшиеся модули",
+      "wellDone": "Отличная работа! Все модули пройдены."
+    },
+    "nextAchievement": "Следующее достижение",
+    "modulesTitle": "Модули обучения",
+    "modulesLessons": "{count} уроков",
+    "quizCard": {
+      "title": "Квиз по безопасности",
+      "description": "Проверьте свои знания по всем темам информационной безопасности",
+      "categories": "{count} категорий",
+      "questions": "{count} вопросов"
+    },
+    "achievementsCard": {
+      "title": "Достижения",
+      "description": "Получайте достижения за прогресс в обучении",
+      "unlocked": "{unlocked}/{total}",
+      "terms": "{count} условий"
+    },
+    "overallProgress": {
+      "title": "Общий прогресс",
+      "completed": "Все модули пройдены!",
+      "notStarted": "Начните изучение первого модуля",
+      "inProgress": "Осталось модулей: {remaining}"
+    }
+  },
+  "common": {
+    "completed": "Завершено",
+    "start": "Начать",
+    "continue": "Продолжить",
+    "reset": "Сбросить",
+    "back": "Назад",
+    "next": "Далее",
+    "previous": "Предыдущий",
+    "submit": "Отправить",
+    "cancel": "Отмена",
+    "success": "Успешно!",
+    "error": "Ошибка",
+    "warning": "Предупреждение",
+    "info": "Информация",
+    "level": "Уровень {level}",
+    "progress": "Прогресс"
+  },
+  "owasp": {
+    "title": "OWASP Top 10",
+    "description": "10 самых критических угроз безопасности веб-приложений",
+    "item": {
+      "brokenAccessControl": "Нарушение контроля доступа",
+      "cryptographicFailures": "Криптографические сбои",
+      "injection": "Инъекции",
+      "insecureDesign": "Небезопасный дизайн",
+      "securityMisconfiguration": "Неправильная конфигурация безопасности",
+      "vulnerableComponents": "Уязвимые компоненты",
+      "authenticationFailures": "Сбои аутентификации",
+      "dataIntegrity": "Сбои целостности данных",
+      "loggingFailures": "Сбои логирования",
+      "ssrf": "SSRF"
+    }
+  },
+  "sqlInjection": {
+    "title": "SQL-инъекции",
+    "description": "Практическая лаборатория по SQL-инъекциям",
+    "levels": {
+      "bypassAuth": "Обход аутентификации",
+      "unionAttack": "UNION-атака",
+      "blindSql": "Слепая SQL-инъекция",
+      "timeBased": "Временная SQL-инъекция"
+    }
+  },
+  "xss": {
+    "title": "XSS-атаки",
+    "description": "Изучите три типа XSS-уязвимостей",
+    "levels": {
+      "reflected": "Отражённый XSS",
+      "stored": "Хранимый XSS",
+      "domBased": "DOM-based XSS"
+    }
+  },
+  "csrf": {
+    "title": "CSRF-атаки",
+    "description": "Визуальная симуляция CSRF-атаки"
+  },
+  "auth": {
+    "title": "Аутентификация",
+    "description": "Тренажёры аутентификации и безопасности паролей"
+  },
+  "quiz": {
+    "title": "Квиз по безопасности",
+    "description": "Проверьте свои знания",
+    "start": "Начать квиз",
+    "correct": "Правильно!",
+    "incorrect": "Неправильно",
+    "score": "Ваш счёт: {score}%",
+    "category": "Категория: {category}"
+  }
+}
