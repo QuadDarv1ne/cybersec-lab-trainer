@@ -28,26 +28,26 @@ vi.mock('next-themes', () => ({
 // Mock framer-motion
 vi.mock('framer-motion', async () => {
   const actual = await vi.importActual('framer-motion');
+  const createMockComponent = (tag: string) => {
+    return ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => {
+      const Element = tag;
+      return <Element {...props}>{children}</Element>;
+    };
+  };
   return {
     ...actual,
     motion: {
-      div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-      button: ({ children, ...props }: any) => (
-        <button {...props}>{children}</button>
-      ),
-      h1: ({ children, ...props }: any) => <h1 {...props}>{children}</h1>,
-      h2: ({ children, ...props }: any) => <h2 {...props}>{children}</h2>,
-      p: ({ children, ...props }: any) => <p {...props}>{children}</p>,
-      span: ({ children, ...props }: any) => <span {...props}>{children}</span>,
-      ul: ({ children, ...props }: any) => <ul {...props}>{children}</ul>,
-      li: ({ children, ...props }: any) => <li {...props}>{children}</li>,
-      section: ({ children, ...props }: any) => (
-        <section {...props}>{children}</section>
-      ),
-      header: ({ children, ...props }: any) => (
-        <header {...props}>{children}</header>
-      ),
-      main: ({ children, ...props }: any) => <main {...props}>{children}</main>,
+      div: createMockComponent('div'),
+      button: createMockComponent('button'),
+      h1: createMockComponent('h1'),
+      h2: createMockComponent('h2'),
+      p: createMockComponent('p'),
+      span: createMockComponent('span'),
+      ul: createMockComponent('ul'),
+      li: createMockComponent('li'),
+      section: createMockComponent('section'),
+      header: createMockComponent('header'),
+      main: createMockComponent('main'),
     },
     AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
   };

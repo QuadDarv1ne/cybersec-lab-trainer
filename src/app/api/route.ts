@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { quizAnswerSchema, quizAnswersSchema, progressUpdateSchema, glossarySearchSchema } from "@/lib/validations/api";
 import { db } from "@/lib/db";
 import { glossaryTerms } from "@/lib/data/glossary-data";
@@ -76,6 +78,11 @@ function addRateLimitHeaders(response: NextResponse): void {
 }
 
 export async function GET(request: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  }
+
   const rateLimitResponse = applyRateLimit(request);
   if (rateLimitResponse) {
     return rateLimitResponse;
@@ -96,19 +103,44 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { type, payload } = body;
 
+    // glossary-search is public (no auth needed)
+    if (type === 'glossary-search') {
+      const data = glossarySearchSchema.parse(payload);
+      const query = data.query.toLowerCase();
+
+      let results = glossaryTerms.filter((term) =>
+        term.term.toLowerCase().includes(query) ||
+        term.definition.toLowerCase().includes(query)
+      );
+
+      if (data.category) {
+        results = results.filter((term) =>
+          term.category.toLowerCase().includes(data.category!.toLowerCase())
+        );
+      }
+
+      const response = NextResponse.json({
+        message: "Success",
+        type,
+        results,
+        count: results.length,
+      });
+      addRateLimitHeaders(response);
+      return response;
+    }
+
+    // All other endpoints require authentication
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+    const userId = session.user.id;
+
     let result: Record<string, unknown>;
 
     switch (type) {
       case 'progress': {
         const data = progressUpdateSchema.parse(payload);
-        const userId = typeof body.userId === 'string' ? body.userId : undefined;
-
-        if (!userId) {
-          return NextResponse.json(
-            { error: "userId is required for progress updates" },
-            { status: 400 }
-          );
-        }
 
         const progress = await db.progress.upsert({
           where: {
@@ -134,14 +166,6 @@ export async function POST(request: Request) {
 
       case 'quiz-answer': {
         const data = quizAnswerSchema.parse(payload);
-        const userId = typeof body.userId === 'string' ? body.userId : undefined;
-
-        if (!userId) {
-          return NextResponse.json(
-            { error: "userId is required for quiz answers" },
-            { status: 400 }
-          );
-        }
 
         // Store individual quiz answer (could be used for analytics)
         const quizResult = {
@@ -158,13 +182,12 @@ export async function POST(request: Request) {
       case 'quiz-answers': {
         const data = quizAnswersSchema.parse(payload);
         const quizId = typeof body.quizId === 'string' ? body.quizId : undefined;
-        const userId = typeof body.userId === 'string' ? body.userId : undefined;
         const score = typeof body.score === 'number' ? body.score : undefined;
         const total = typeof body.total === 'number' ? body.total : undefined;
 
-        if (!userId || !quizId || score === undefined || total === undefined) {
+        if (!quizId || score === undefined || total === undefined) {
           return NextResponse.json(
-            { error: "userId, quizId, score, and total are required for quiz answers" },
+            { error: "quizId, score, and total are required for quiz answers" },
             { status: 400 }
           );
         }
@@ -180,25 +203,6 @@ export async function POST(request: Request) {
         });
 
         result = { quizResult, answers: data.length, message: "Quiz answers saved" };
-        break;
-      }
-
-      case 'glossary-search': {
-        const data = glossarySearchSchema.parse(payload);
-        const query = data.query.toLowerCase();
-
-        let results = glossaryTerms.filter((term) =>
-          term.term.toLowerCase().includes(query) ||
-          term.definition.toLowerCase().includes(query)
-        );
-
-        if (data.category) {
-          results = results.filter((term) =>
-            term.category.toLowerCase().includes(data.category!.toLowerCase())
-          );
-        }
-
-        result = { results, count: results.length };
         break;
       }
 
@@ -220,13 +224,13 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof Error && 'errors' in error) {
       return NextResponse.json(
-        { error: "Validation failed", details: (error as { errors?: unknown }).errors },
+        { error: "Validation failed" },
         { status: 400 }
       );
     }
     if (error instanceof Error && 'issues' in error) {
       return NextResponse.json(
-        { error: "Validation failed", details: (error as { issues?: unknown }).issues },
+        { error: "Validation failed" },
         { status: 400 }
       );
     }

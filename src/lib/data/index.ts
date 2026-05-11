@@ -9,9 +9,6 @@ export type { SQLChallenge } from './sql-data';
 export { xssTypes } from './xss-data';
 export type { XSSType } from './xss-data';
 
-export { csrfSteps } from './csrf-data';
-export type { CSRFStep } from './csrf-data';
-
 export { quizQuestions, quizCategories } from './quiz-data';
 export type { QuizQuestion } from './quiz-data';
 
