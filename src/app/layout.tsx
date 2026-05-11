@@ -3,7 +3,11 @@ import { SessionProvider } from "@/components/SessionProvider";
 import ThemeProvider from "@/components/ThemeProvider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { validateEnv } from "@/lib/env";
 import "./globals.css";
+
+// Validate environment variables at startup
+validateEnv();
 
 export const metadata: Metadata = {
   title: "CyberSec Lab — Тренажёр по информационной безопасности",
