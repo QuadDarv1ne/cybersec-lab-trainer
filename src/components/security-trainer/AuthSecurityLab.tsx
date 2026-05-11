@@ -489,5 +489,4 @@ function authenticate(req, res, next) {
       )}
     </div>
   );
-$
 }

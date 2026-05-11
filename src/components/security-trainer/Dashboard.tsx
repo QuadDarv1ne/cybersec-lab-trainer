@@ -179,24 +179,44 @@ export default function Dashboard() {
             {t('hero.description')}
           </p>
           <div className="flex flex-wrap gap-4 mt-6">
-            <div className="flex items-center gap-2 text-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 }}
+              className="flex items-center gap-2 text-sm"
+            >
               <BookOpen size={16} className="text-emerald-400" />
               <span className="text-slate-300">{t('hero.modules', { count: totalModules })}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.15 }}
+              className="flex items-center gap-2 text-sm"
+            >
               <Flame size={16} className="text-emerald-400" />
               <span className="text-slate-300">{t('hero.progress', { percent: totalProgress })}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="flex items-center gap-2 text-sm"
+            >
               <Trophy size={16} className="text-emerald-400" />
               <span className="text-slate-300">
                 {avgQuizScore > 0 ? t('hero.quizScore', { score: avgQuizScore }) : t('hero.takeQuiz')}
               </span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.25 }}
+              className="flex items-center gap-2 text-sm"
+            >
               <Star size={16} className="text-amber-400" />
               <span className="text-slate-300">{t('hero.achievements', { count: unlockedAchievements.length })}</span>
-            </div>
+            </motion.div>
           </div>
         </div>
       </motion.div>
