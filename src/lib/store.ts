@@ -128,17 +128,24 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
 };
 
 // Функция для загрузки из БД
-const loadFromDatabase = async (set: (state: Partial<AppState>) => void, userId: string) => {
+const loadFromDatabase = async (set: (state: Partial<AppState>) => void, _get: () => AppState, userId: string) => {
   try {
     const data = await apiClient.loadProgress(userId);
 
-    set({
-      completedModules: data.completedModules,
-      quizScores: data.quizScores,
-      userId,
-    });
+    // Only overwrite local state if the API actually returned data
+    // Otherwise keep the client-side persisted state (localStorage)
+    if (data.completedModules.length > 0 || Object.keys(data.quizScores).length > 0) {
+      set({
+        completedModules: data.completedModules,
+        quizScores: data.quizScores,
+        userId,
+      });
+    } else {
+      // API has no data — just set userId to keep using local state
+      set({ userId });
+    }
   } catch {
-    // Silently handle load errors - client-side state will be used
+    // Silently handle load errors — client-side state will be used
   }
 };
 
@@ -220,7 +227,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   },
 
   loadFromDatabase: async (userId: string) => {
-    await loadFromDatabase(set, userId);
+    await loadFromDatabase(set, get(), userId);
   },
 });
 

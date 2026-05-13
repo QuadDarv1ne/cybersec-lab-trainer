@@ -58,13 +58,14 @@ export default function QuizSystem() {
   });
 
   const startQuiz = (categoryName: string) => {
+    const questions = quizQuestions.filter((q) => q.category === categoryName);
     setActiveCategory(categoryName);
     setCurrentQuestion(0);
     setCorrectCount(0);
     setSelectedAnswer('');
     setShowAnswer(false);
     setTimeLeft(30);
-    setAnswers(new Array(categoryQuestions.length).fill(null));
+    setAnswers(new Array(questions.length).fill(null));
     setTimerActive(true);
     setQuizState('playing');
   };
@@ -103,24 +104,24 @@ export default function QuizSystem() {
     if (!timerActive || timeLeft <= 0) return;
     const timer = setTimeout(() => {
       setTimeLeft((t) => {
-        if (t <= 1) {
-          // Will become 0 — schedule time-up handling outside effect
-          setTimeout(() => {
-            setTimerActive(false);
-            setShowAnswer(true);
-            setAnswers((prev) => {
-              const newAnswers = [...prev];
-              newAnswers[currentQuestion] = false;
-              return newAnswers;
-            });
-          }, 0);
-          return 0;
-        }
+        if (t <= 1) return 0;
         return t - 1;
       });
     }, 1000);
     return () => clearTimeout(timer);
-  }, [timerActive, timeLeft, currentQuestion]);
+  }, [timerActive, timeLeft]);
+
+  // Handle time-up when timer reaches 0
+  useEffect(() => {
+    if (timeLeft !== 0 || !timerActive) return;
+    setTimerActive(false);
+    setShowAnswer(true);
+    setAnswers((prev) => {
+      const newAnswers = [...prev];
+      newAnswers[currentQuestion] = false;
+      return newAnswers;
+    });
+  }, [timeLeft, timerActive, currentQuestion]);
 
   const resetQuiz = () => {
     setQuizState('select');
