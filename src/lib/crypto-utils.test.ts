@@ -43,6 +43,13 @@ describe('Caesar Cipher', () => {
   it('handles shift 26 (full wrap)', () => {
     expect(caesarEncrypt('ABC', 26)).toBe('ABC');
   });
+
+  it('handles shift > 26 correctly', () => {
+    const text = 'HELLO';
+    const shift = 30; // equivalent to shift 4
+    expect(caesarDecrypt(caesarEncrypt(text, shift), shift)).toBe(text);
+    expect(caesarEncrypt(text, shift)).toBe(caesarEncrypt(text, 4));
+  });
 });
 
 describe('Vigenere Cipher', () => {

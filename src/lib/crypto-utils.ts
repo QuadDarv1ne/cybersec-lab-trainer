@@ -14,7 +14,7 @@ export function caesarEncrypt(text: string, shift: number): string {
 }
 
 export function caesarDecrypt(text: string, shift: number): string {
-  return caesarEncrypt(text, 26 - shift);
+  return caesarEncrypt(text, (26 - (shift % 26)) % 26);
 }
 
 // ============================================================
