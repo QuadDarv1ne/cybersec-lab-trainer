@@ -14,6 +14,11 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().min(1).optional(),
   GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
 
+  // Required for production, optional for dev (crypto exercises)
+  JWT_SECRET: process.env.NODE_ENV === 'production'
+    ? z.string().min(1, 'JWT_SECRET is required in production')
+    : z.string().optional(),
+
   // Optional
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });
@@ -52,6 +57,7 @@ export function validateEnv(): Env {
     GITHUB_SECRET: process.env.GITHUB_SECRET,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    JWT_SECRET: process.env.JWT_SECRET,
     NODE_ENV: process.env.NODE_ENV,
   };
 
