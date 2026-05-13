@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import CodeBlock from './CodeBlock';
 import { Card, CardContent } from '@/components/ui/card';
@@ -94,6 +94,17 @@ export default function CSRFLab() {
   const [activeDefense, setActiveDefense] = useState(0);
 
   const isCompleted = completedModules.includes('csrf');
+
+  // Auto-complete when user has viewed all attack steps and defense
+  useEffect(() => {
+    if (
+      !isCompleted &&
+      showDefense &&
+      currentStep === attackSteps.length - 1
+    ) {
+      completeModule('csrf');
+    }
+  }, [showDefense, currentStep, isCompleted]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleComplete = () => {
     if (!isCompleted) {

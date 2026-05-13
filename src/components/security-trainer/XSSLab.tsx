@@ -27,7 +27,6 @@ export default function XSSLab() {
   const [showAttack, setShowAttack] = useState(false);
 
   const currentXss = xssTypes.find((x) => x.id === activeTab) || xssTypes[0];
-  const isCompleted = xssCompletedLevels.includes(currentXss.id);
   const allCompleted = xssCompletedLevels.length === xssTypes.length;
 
   const handleMarkComplete = (id: string) => {
@@ -246,7 +245,7 @@ export default function XSSLab() {
               </Card>
 
               {/* Mark complete */}
-              {!isCompleted && (
+              {!xssCompletedLevels.includes(xss.id) && (
                 <Button
                   className="w-full bg-emerald-600 hover:bg-emerald-700"
                   onClick={() => handleMarkComplete(xss.id)}
@@ -254,7 +253,7 @@ export default function XSSLab() {
                   {t('markComplete')}
                 </Button>
               )}
-              {isCompleted && (
+              {xssCompletedLevels.includes(xss.id) && (
                 <div className="text-center text-sm text-emerald-600 font-medium flex items-center justify-center gap-2">
                   <CheckCircle2 size={16} /> {t('markComplete')}
                 </div>

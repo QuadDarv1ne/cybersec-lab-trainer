@@ -124,7 +124,7 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
 };
 
 // Функция для загрузки из БД
-const loadFromDatabase = async (set: (state: Partial<AppState>) => void, _get: () => AppState, userId: string) => {
+const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppStore) => Partial<AppStore>)) => void, _get: () => AppStore, userId: string) => {
   try {
     const data = await apiClient.loadProgress(userId);
 
@@ -223,7 +223,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   },
 
   loadFromDatabase: async (userId: string) => {
-    await loadFromDatabase(set, get(), userId);
+    await loadFromDatabase(set, get, userId);
   },
 });
 

@@ -33,17 +33,14 @@ import type { PageType } from '@/lib/store';
 function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: string }) {
   const count = useMotionValue(0);
   const rounded = useTransform(count, (v) => Math.round(v));
+  const text = useTransform(rounded, (v) => `${v}${suffix}`);
 
   useEffect(() => {
     const controls = animate(count, value, { duration: 1, ease: 'easeOut' });
     return controls.stop;
   }, [value, count]);
 
-  return (
-    <motion.span>
-      {useTransform(rounded, (v) => `${v}${suffix}`)}
-    </motion.span>
-  );
+  return <motion.span>{text}</motion.span>;
 }
 
 const iconMap: Record<string, React.ReactNode> = {
