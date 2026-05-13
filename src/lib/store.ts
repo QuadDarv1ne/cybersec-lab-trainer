@@ -141,8 +141,8 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
       // API has no data — just set userId to keep using local state
       set({ userId });
     }
-  } catch {
-    // Silently handle load errors — client-side state will be used
+  } catch (error) {
+    console.error('Failed to load progress from database:', error);
   }
 };
 

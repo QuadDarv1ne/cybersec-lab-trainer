@@ -106,7 +106,7 @@ export default function SecurityHeadersLab() {
                   header.severity === 'Средний' ? 'bg-yellow-500' : 'bg-green-500'
                 }`} />
                 <div className="min-w-0">
-                  <p className="text-xs font-mono font-medium truncate">{header.name}</p>
+                  <p className="text-xs font-mono font-medium truncate">{header.title}</p>
                   <p className="text-[10px] text-slate-500 truncate">{header.description.slice(0, 80)}...</p>
                 </div>
               </div>
@@ -131,7 +131,7 @@ export default function SecurityHeadersLab() {
                     <Badge variant="outline" className="text-[10px] font-mono">
                       {header.severity}
                     </Badge>
-                    <h3 className="text-sm font-medium mt-1 truncate font-mono">{header.name}</h3>
+                    <h3 className="text-sm font-medium mt-1 truncate font-mono">{header.title}</h3>
                   </div>
                 </div>
               </AccordionTrigger>
