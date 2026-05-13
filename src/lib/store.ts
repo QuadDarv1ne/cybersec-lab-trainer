@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { quizCategories } from './data/quiz-data';
 
 export type PageType =
   | 'dashboard'
@@ -115,7 +116,8 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
     );
 
     for (const [category, score] of Object.entries(state.quizScores)) {
-      await apiClient.saveQuizResults(state.userId, category, score, 100);
+      const total = quizCategories.find((c) => c.id === category)?.count ?? 100;
+      await apiClient.saveQuizResults(state.userId, category, score, total);
     }
 
     set({ syncStatus: 'synced', lastSyncedAt: new Date() });

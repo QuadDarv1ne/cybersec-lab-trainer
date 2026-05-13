@@ -35,9 +35,7 @@ declare global {
   var __envLocalChecked: boolean;
 }
 
-if (!globalThis.__oauthWarningShown) {
-  globalThis.__oauthWarningShown = false;
-}
+globalThis.__oauthWarningShown = globalThis.__oauthWarningShown ?? false;
 
 if (!globalThis.__envLocalChecked && !hasEnvLocal && !nextEnvLocal && process.env.NODE_ENV !== 'production') {
   globalThis.__envLocalChecked = true;

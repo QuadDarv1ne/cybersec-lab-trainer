@@ -42,10 +42,10 @@ export const xssTypes: XSSType[] = [
 
   // Или с серверной санитизацией (Node.js)
   const escapeHTML = (str) => str
-    .replace(/&/g, '&')
-    .replace(/</g, '<')
-    .replace(/>/g, '>')
-    .replace(/"/g, '"')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 </script>`,
     attackDemo: '<script>alert("XSS-атака выполнена!")</script>',
@@ -162,11 +162,11 @@ const safeInput = decodeURIComponent(userInput);
 <input onfocus="{{userInput}}" autofocus>`,
     secureCode: `<!-- БЕЗОПАСНЫЙ КОД — санитизация атрибутов -->
 const escapeAttr = (str) => str
-  .replace(/&/g, '&')
-  .replace(/"/g, '"')
+  .replace(/&/g, '&amp;')
+  .replace(/"/g, '&quot;')
   .replace(/'/g, '&#039;')
-  .replace(/</g, '<')
-  .replace(/>/g, '>');
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;');
 
 <img src="{{escapeAttr(userInput)}}" alt="Картинка">
 

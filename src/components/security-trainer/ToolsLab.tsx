@@ -221,7 +221,7 @@ export default function ToolsLab() {
               <div className="flex items-center gap-2">
                 <Lock size={16} className="text-violet-600" />
                 <h3 className="text-sm font-semibold">Шифр Виженера</h3>
-                <Badge variant="secondary" className="text-[10px]">Полialфавитный</Badge>
+                <Badge variant="secondary" className="text-[10px]">Полиалфавитный</Badge>
               </div>
               <p className="text-xs text-slate-500">Использует ключевое слово для переменного сдвига каждой буквы. Долгое время считался невзламываемым.</p>
 
