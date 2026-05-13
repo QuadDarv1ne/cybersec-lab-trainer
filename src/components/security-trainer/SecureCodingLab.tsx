@@ -200,7 +200,7 @@ export default function SecureCodingLab() {
 
             {/* Explanation */}
             <AnimatePresence>
-              {showResult && (
+              {showResult && selectedOption !== null && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -208,19 +208,19 @@ export default function SecureCodingLab() {
                 >
                   <div
                     className={`rounded-lg p-4 ${
-                      challenge.options[selectedOption!]?.correct
+                      challenge.options[selectedOption].correct
                         ? 'bg-emerald-50 border border-emerald-200'
                         : 'bg-red-50 border border-red-200'
                     }`}
                   >
                     <h4
                       className={`text-xs font-semibold mb-1 ${
-                        challenge.options[selectedOption!]?.correct
+                        challenge.options[selectedOption].correct
                           ? 'text-emerald-700'
                           : 'text-red-700'
                       }`}
                     >
-                      {challenge.options[selectedOption!]?.correct
+                      {challenge.options[selectedOption].correct
                         ? '✅ Correct!'
                         : '❌ Incorrect'}
                     </h4>

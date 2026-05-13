@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { owaspTopics } from '@/lib/security-data';
 import { useTranslations } from '@/lib/intlStub';
@@ -16,7 +15,6 @@ import { ShieldCheck, ChevronLeft, CheckCircle2, AlertTriangle, Shield } from 'l
 export default function OWASPTop10() {
   const { studiedOwaspItems, addStudiedOwasp, completeModule, setCurrentPage } = useAppStore();
   const t = useTranslations('owasp');
-  const [_expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const studiedCount = studiedOwaspItems.length;
   const totalCount = owaspTopics.length;
@@ -28,12 +26,6 @@ export default function OWASPTop10() {
     if (studiedOwaspItems.length + 1 === totalCount) {
       completeModule('owasp');
     }
-  };
-
-  const toggleExpand = (id: string) => {
-    setExpandedItems((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
   };
 
   return (
@@ -92,8 +84,7 @@ export default function OWASPTop10() {
             {owaspTopics.map((item) => (
               <div
                 key={item.id}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium text-white ${item.severityColor} cursor-pointer hover:opacity-80 transition-opacity`}
-                onClick={() => toggleExpand(item.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium text-white ${item.severityColor}`}
               >
                 {item.code}
               </div>

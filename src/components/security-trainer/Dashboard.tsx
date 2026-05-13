@@ -2,6 +2,7 @@
 
 import { useAppStore } from '@/lib/store';
 import { modules, achievements } from '@/lib/security-data';
+import { getAchievementStatus } from '@/lib/achievement-utils';
 import { useTranslations } from '@/lib/intlStub';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -85,25 +86,8 @@ export default function Dashboard() {
         )
       : 0;
 
-  // Achievements
-  const getAchievementStatus = (id: string) => {
-    switch (id) {
-      case 'first-steps': return completedModules.length >= 1;
-      case 'sql-master': return completedModules.includes('sql-injection');
-      case 'xss-hunter': return completedModules.includes('xss');
-      case 'security-guard': return completedModules.includes('owasp');
-      case 'auth-expert': return completedModules.includes('auth');
-      case 'code-reviewer': return completedModules.includes('secure-coding');
-      case 'quiz-master': return Object.keys(quizScores).length >= 3;
-      case 'quiz-perfect': return Object.values(quizScores).some((s) => s === 100);
-      case 'crypto-ninja': return completedModules.includes('tools');
-      case 'full-completion': return completedModules.length >= 7;
-      default: return false;
-    }
-  };
-
-  const unlockedAchievements = achievements.filter((a) => getAchievementStatus(a.id));
-  const nextAchievement = achievements.find((a) => !getAchievementStatus(a.id));
+  const unlockedAchievements = achievements.filter((a) => getAchievementStatus(a.id, completedModules, quizScores));
+  const nextAchievement = achievements.find((a) => !getAchievementStatus(a.id, completedModules, quizScores));
 
   // Recommendations
   const getRecommendation = () => {

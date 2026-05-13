@@ -34,6 +34,7 @@ import {
   Unlock,
   Copy,
   CheckCircle2,
+  XCircle,
   RefreshCw,
   Eye,
   EyeOff,
@@ -45,18 +46,21 @@ import {
 // ============================================================
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
+  const [failed, setFailed] = useState(false);
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
+      setFailed(false);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      // Clipboard API may fail in non-HTTPS contexts or without permissions
+      setFailed(true);
+      setTimeout(() => setFailed(false), 2000);
     }
   };
   return (
     <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={handleCopy}>
-      {copied ? <CheckCircle2 size={14} className="text-emerald-500" /> : <Copy size={14} />}
+      {failed ? <XCircle size={14} className="text-red-500" /> : copied ? <CheckCircle2 size={14} className="text-emerald-500" /> : <Copy size={14} />}
     </Button>
   );
 }
