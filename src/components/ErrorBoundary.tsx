@@ -13,6 +13,7 @@ interface State {
   hasError: boolean;
   error: Error | null;
   errorInfo: ErrorInfo | null;
+  showDetails: boolean;
 }
 
 /**
@@ -26,17 +27,18 @@ export class ErrorBoundary extends Component<Props, State> {
     hasError: false,
     error: null,
     errorInfo: null,
+    showDetails: false,
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error, errorInfo: null };
+    return { hasError: true, error, errorInfo: null, showDetails: false };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Отправка ошибки в лог (в production можно отправить в Sentry)
-    process.stderr.write(`[ErrorBoundary] Uncaught error: ${error.toString()}\n`);
-    process.stderr.write(`[ErrorBoundary] Component stack: ${errorInfo.componentStack}\n`);
-    
+    console.error(`[ErrorBoundary] Uncaught error: ${error.toString()}`);
+    console.error(`[ErrorBoundary] Component stack: ${errorInfo.componentStack}`);
+
     this.setState({ errorInfo });
   }
 
@@ -45,9 +47,7 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   private handleErrorDetails = () => {
-    this.setState((prev) => ({
-      error: prev.error ? null : prev.error,
-    }));
+    this.setState((prev) => ({ showDetails: !prev.showDetails }));
   };
 
   public render() {
@@ -69,19 +69,27 @@ export class ErrorBoundary extends Component<Props, State> {
             </p>
 
             {this.state.error && (
-              <details className="bg-gray-100 dark:bg-gray-700 rounded p-3 text-sm">
-                <summary className="cursor-pointer font-medium text-gray-700 dark:text-gray-200">
-                  Показать детали ошибки
-                </summary>
-                <pre className="mt-2 overflow-x-auto text-xs text-gray-800 dark:text-gray-100">
-                  {this.state.error.toString()}
-                </pre>
-                {this.state.errorInfo && (
-                  <pre className="mt-2 overflow-x-auto text-xs text-gray-600 dark:text-gray-300">
-                    {this.state.errorInfo.componentStack}
-                  </pre>
+              <div className="bg-gray-100 dark:bg-gray-700 rounded p-3 text-sm">
+                <button
+                  type="button"
+                  onClick={this.handleErrorDetails}
+                  className="cursor-pointer font-medium text-gray-700 dark:text-gray-200 text-left w-full"
+                >
+                  {this.state.showDetails ? "Скрыть детали" : "Показать детали ошибки"}
+                </button>
+                {this.state.showDetails && (
+                  <>
+                    <pre className="mt-2 overflow-x-auto text-xs text-gray-800 dark:text-gray-100">
+                      {this.state.error.toString()}
+                    </pre>
+                    {this.state.errorInfo && (
+                      <pre className="mt-2 overflow-x-auto text-xs text-gray-600 dark:text-gray-300">
+                        {this.state.errorInfo.componentStack}
+                      </pre>
+                    )}
+                  </>
                 )}
-              </details>
+              </div>
             )}
 
             <div className="flex gap-2">
