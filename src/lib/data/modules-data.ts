@@ -101,6 +101,99 @@ await user.save();`,
     explanation:
       'Показ stack trace в продакшене раскрывает структуру приложения, пути к файлам, версии библиотек и другие данные, полезные для злоумышленника. В продакшене нужно показывать общее сообщение и логировать детали ошибки на сервере.',
   },
+  {
+    id: 'sc-6',
+    title: 'Path Traversal (обход пути)',
+    category: 'Контроль доступа',
+    code: `app.get('/api/files', (req, res) => {
+  const filename = req.query.name;
+  const filePath = path.join(__dirname, 'uploads', filename);
+  res.sendFile(filePath);
+});`,
+    options: [
+      { text: 'Запретить загрузку файлов', correct: false },
+      { text: 'Валидировать имя файла и использовать path.resolve с проверкой корневой директории', correct: true },
+      { text: 'Скрывать ошибки файловой системы', correct: false },
+      { text: 'Использовать только расширения .jpg и .png', correct: false },
+    ],
+    explanation:
+      'Злоумышленник может передать name=../../etc/passwd и прочитать системные файлы. Необходимо валидировать имя файла, запретить символы ../ и проверять, что итоговый путь находится внутри разрешённой директории.',
+  },
+  {
+    id: 'sc-7',
+    title: 'Небезопасная десериализация',
+    category: 'Десериализация',
+    code: `app.post('/api/profile', (req, res) => {
+  const profile = JSON.parse(req.body.data);
+  // Динамическое создание объекта из пользовательских данных
+  const User = eval(profile.type);
+  const user = new User(profile);
+  res.json(user);
+});`,
+    options: [
+      { text: 'Использовать schema validation (Zod/Joi) и запретить eval()', correct: true },
+      { text: 'Добавить try-catch вокруг eval()', correct: false },
+      { text: 'Ограничить размер тела запроса', correct: false },
+      { text: 'Использовать XML вместо JSON', correct: false },
+    ],
+    explanation:
+      'eval() выполняет произвольный JavaScript-код. Злоумышленник может передать profile.type с вредоносным кодом и получить RCE (Remote Code Execution). Используйте безопасную валидацию схем и никогда не используйте eval() с пользовательским вводом.',
+  },
+  {
+    id: 'sc-8',
+    title: 'Race Condition (состояние гонки)',
+    category: 'Конкурентность',
+    code: `app.post('/api/withdraw', async (req, res) => {
+  const user = await db.getUser(req.body.userId);
+  if (user.balance >= req.body.amount) {
+    await db.updateBalance(req.body.userId, user.balance - req.body.amount);
+    res.json({ success: true });
+  }
+});`,
+    options: [
+      { text: 'Использовать транзакции базы данных с блокировкой строк', correct: true },
+      { text: 'Добавить задержку между запросами', correct: false },
+      { text: 'Проверять баланс на клиенте', correct: false },
+      { text: 'Ограничить частоту запросов', correct: false },
+    ],
+    explanation:
+      'При одновременных запросах оба запроса могут прочитать одинаковый баланс до обновления, что приведёт к двойному списанию. Транзакции с блокировкой строк (SELECT FOR UPDATE) гарантируют атомарность операции.',
+  },
+  {
+    id: 'sc-9',
+    title: 'Open Redirect (открытое перенаправление)',
+    category: 'Перенаправление',
+    code: `app.get('/api/redirect', (req, res) => {
+  const url = req.query.url;
+  res.redirect(url);
+});`,
+    options: [
+      { text: 'Разрешить только внутренние URL или использовать белый список доменов', correct: true },
+      { text: 'Запретить все перенаправления', correct: false },
+      { text: 'Добавить заголовки безопасности', correct: false },
+      { text: 'Использовать POST вместо GET', correct: false },
+    ],
+    explanation:
+      'Злоумышленник может создать ссылку https://yoursite.com/api/redirect?url=https://evil.com для фишинга. Пользователь видит доверенный домен, но попадает на вредоносный сайт. Используйте белый список разрешённых доменов для перенаправлений.',
+  },
+  {
+    id: 'sc-10',
+    title: 'Небезопасная загрузка файлов',
+    category: 'Загрузка файлов',
+    code: `app.post('/api/upload', (req, res) => {
+  const file = req.files.document;
+  file.mv(path.join(__dirname, 'uploads', file.name));
+  res.json({ message: 'Файл загружен' });
+});`,
+    options: [
+      { text: 'Проверять MIME-тип, расширение и размер файла, генерировать уникальное имя', correct: true },
+      { text: 'Разрешить загрузку только изображений', correct: false },
+      { text: 'Ограничить размер файла до 1MB', correct: false },
+      { text: 'Хранить файлы в базе данных', correct: false },
+    ],
+    explanation:
+      'Без проверки злоумышленник может загрузить .php или .js файл и выполнить его на сервере. Необходимо проверять MIME-тип, расширение, размер, генерировать уникальные имена файлов и хранить их вне директории с исполняемым кодом.',
+  },
 ];
 
 export interface Module {
@@ -168,12 +261,12 @@ export const modules: Module[] = [
   {
     id: 'secure-coding',
     title: 'Безопасное кодирование',
-    description: 'Задачи по ревью кода: найдите уязвимость в фрагменте кода и выберите правильное решение.',
+    description: 'Задачи по ревью кода: найдите уязвимость в фрагменте кода и выберите правильное решение. 10 практических задач.',
     icon: 'Code',
     difficulty: 'Продвинутый',
     difficultyColor: 'bg-red-100 text-red-800',
-    lessons: 5,
-    totalSteps: 5,
+    lessons: 10,
+    totalSteps: 10,
   },
   {
     id: 'tools',
@@ -184,5 +277,15 @@ export const modules: Module[] = [
     difficultyColor: 'bg-green-100 text-green-800',
     lessons: 4,
     totalSteps: 4,
+  },
+  {
+    id: 'security-headers',
+    title: 'Заголовки безопасности',
+    description: 'Изучите HTTP-заголовки для защиты веб-приложений: CSP, HSTS, X-Frame-Options и другие.',
+    icon: 'ShieldAlert',
+    difficulty: 'Средний',
+    difficultyColor: 'bg-yellow-100 text-yellow-800',
+    lessons: 8,
+    totalSteps: 8,
   },
 ];

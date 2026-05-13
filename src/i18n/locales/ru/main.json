@@ -3,7 +3,7 @@
     "hero": {
       "title": "Лаборатория кибербезопасности",
       "description": "Интерактивная платформа для изучения уязвимостей веб-приложений: OWASP Top 10, SQL-инъекции, XSS, CSRF и безопасное кодирование.",
-      "modules": "7 модулей",
+      "modules": "8 модулей",
       "progress": "Прогресс: {percent}%",
       "quizScore": "Средний балл: {score}%",
       "takeQuiz": "Пройдите квиз",
@@ -75,6 +75,7 @@
     "auth": "Аутентификация",
     "secureCoding": "Безопасное кодирование",
     "tools": "Инструменты",
+    "securityHeaders": "Заголовки безопасности",
     "quiz": "Квиз",
     "achievements": "Достижения",
     "overallProgress": "Общий прогресс",
@@ -310,5 +311,23 @@
     "score": "Ваш счёт: {score}%",
     "category": "Категория: {category}",
     "new": "Новый"
+  },
+  "securityHeaders": {
+    "title": "Заголовки безопасности",
+    "description": "Изучите HTTP-заголовки для защиты веб-приложений",
+    "subtitle": "Настройте заголовки безопасности для защиты от атак",
+    "headersOverview": "Обзор заголовков безопасности",
+    "attackScenario": "Сценарий атаки",
+    "vulnerableConfig": "Небезопасная конфигурация",
+    "secureConfig": "Безопасная конфигурация",
+    "mitigations": "Меры защиты",
+    "challenges": "Практические задания",
+    "taskNumber": "Задание {number} из {total}",
+    "correct": "правильных",
+    "moduleComplete": "Модуль завершён!",
+    "allComplete": "Все задания завершены!",
+    "checkAnswer": "Проверить ответ",
+    "back": "Назад",
+    "next": "Следующее"
   }
 }

@@ -3,7 +3,7 @@
     "hero": {
       "title": "Cybersecurity Laboratory",
       "description": "Interactive platform for learning web application vulnerabilities: OWASP Top 10, SQL injections, XSS, CSRF and secure coding.",
-      "modules": "7 modules",
+      "modules": "8 modules",
       "progress": "Progress: {percent}%",
       "quizScore": "Average score: {score}%",
       "takeQuiz": "Take a quiz",
@@ -75,6 +75,7 @@
     "auth": "Authentication",
     "secureCoding": "Secure Coding",
     "tools": "Tools",
+    "securityHeaders": "Security Headers",
     "quiz": "Quiz",
     "achievements": "Achievements",
     "overallProgress": "Overall Progress",
@@ -310,5 +311,23 @@
     "score": "Your score: {score}%",
     "category": "Category: {category}",
     "new": "New"
+  },
+  "securityHeaders": {
+    "title": "Security Headers",
+    "description": "Learn HTTP headers for web application protection",
+    "subtitle": "Configure security headers to protect against attacks",
+    "headersOverview": "Security Headers Overview",
+    "attackScenario": "Attack Scenario",
+    "vulnerableConfig": "Vulnerable Configuration",
+    "secureConfig": "Secure Configuration",
+    "mitigations": "Mitigations",
+    "challenges": "Practical Challenges",
+    "taskNumber": "Task {number} of {total}",
+    "correct": "correct",
+    "moduleComplete": "Module complete!",
+    "allComplete": "All tasks complete!",
+    "checkAnswer": "Check answer",
+    "back": "Back",
+    "next": "Next"
   }
 }

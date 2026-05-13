@@ -15,6 +15,7 @@ import {
   Trophy,
   X,
   CheckCircle2,
+  ShieldAlert,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
@@ -38,6 +39,7 @@ const iconMap: Record<string, React.ReactNode> = {
   HelpCircle: <HelpCircle size={20} />,
   KeyRound: <KeyRound size={20} />,
   Trophy: <Trophy size={20} />,
+  ShieldAlert: <ShieldAlert size={20} />,
 };
 
 export default function Sidebar() {
@@ -61,6 +63,7 @@ export default function Sidebar() {
     { id: 'auth', label: t('auth'), iconKey: 'Lock' },
     { id: 'secure-coding', label: t('secureCoding'), iconKey: 'Code' },
     { id: 'tools', label: t('tools'), iconKey: 'KeyRound' },
+    { id: 'security-headers', label: t('securityHeaders'), iconKey: 'ShieldAlert' },
     { id: 'quiz', label: t('quiz'), iconKey: 'HelpCircle' },
     { id: 'achievements', label: t('achievements'), iconKey: 'Trophy' },
   ];

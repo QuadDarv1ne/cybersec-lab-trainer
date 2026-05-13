@@ -10,6 +10,7 @@ export type PageType =
   | 'auth'
   | 'secure-coding'
   | 'tools'
+  | 'security-headers'
   | 'quiz'
   | 'achievements';
 
