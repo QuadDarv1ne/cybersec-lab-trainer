@@ -192,7 +192,7 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4" aria-live="polite" aria-label="Learning statistics">
         {[
           { label: t('stats.modulesCompleted'), value: completedCount, total: totalModules, color: 'text-emerald-600' },
           { label: t('stats.quizzesCompleted'), value: Object.keys(quizScores).length, total: 5, color: 'text-amber-600' },
@@ -400,7 +400,7 @@ export default function Dashboard() {
       </div>
 
       {/* Overall progress */}
-      <Card className="border-none shadow-sm bg-white">
+      <Card className="border-none shadow-sm bg-white" aria-live="polite" aria-label="Overall progress">
         <CardContent className="p-6">
           <h3 className="font-semibold text-sm mb-3">{t('overallProgress.title')}</h3>
           <Progress value={totalProgress} className="h-3 mb-2" />

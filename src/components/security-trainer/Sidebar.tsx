@@ -166,9 +166,10 @@ export default function Sidebar() {
                   size="sm"
                   className="w-full text-slate-400 hover:text-white hover:bg-slate-800"
                   onClick={() => signOut()}
+                  aria-label={t('signOut')}
                 >
                   <LogOut size={14} className="mr-2" />
-                  Выйти
+                  {t('signOut')}
                 </Button>
               </div>
             ) : (
@@ -177,9 +178,10 @@ export default function Sidebar() {
                 size="sm"
                 className="w-full text-emerald-400 hover:text-emerald-300 hover:bg-emerald-600/10"
                 onClick={() => signIn()}
+                aria-label={t('signIn')}
               >
                 <LogIn size={14} className="mr-2" />
-                Войти
+                {t('signIn')}
               </Button>
             )}
           </>
@@ -187,7 +189,7 @@ export default function Sidebar() {
       </div>
 
       {/* Progress */}
-      <div className="p-4 border-t border-slate-700">
+      <div className="p-4 border-t border-slate-700" aria-live="polite" aria-label="Overall progress">
         <div className="flex items-center justify-between text-xs mb-2">
           <span className="text-slate-400">{t('overallProgress')}</span>
           <span className="text-emerald-400 font-semibold">{progressPct}%</span>

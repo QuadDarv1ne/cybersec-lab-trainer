@@ -80,7 +80,9 @@
     "achievements": "Достижения",
     "overallProgress": "Общий прогресс",
     "modulesCompleted": "Пройдено {completed} из {total} модулей",
-    "majorCode": "09.03.04"
+    "majorCode": "09.03.04",
+    "signIn": "Войти",
+    "signOut": "Выйти"
   },
   "owasp": {
     "title": "OWASP Top 10",
