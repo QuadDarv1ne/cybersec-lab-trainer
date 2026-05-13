@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { quizAnswerSchema, quizResultSchema, progressUpdateSchema, glossarySearchSchema } from "@/lib/validations/api";
 import { db } from "@/lib/db";
 import { glossaryTerms } from "@/lib/data/glossary-data";
+import { z } from "zod";
 
 // Rate limiting configuration
 const RATE_LIMIT = {
@@ -14,33 +15,44 @@ const RATE_LIMIT = {
 // Store for tracking requests (in-memory, use Redis for production)
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
 
+// Periodic cleanup of expired entries
+const CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of requestCounts.entries()) {
+    if (now > value.resetTime) {
+      requestCounts.delete(key);
+    }
+  }
+}, CLEANUP_INTERVAL_MS);
+
 /**
  * Rate limiting middleware
  * @param ip - Client IP address
- * @returns Response if rate limit exceeded, null otherwise
+ * @returns Rate limit error response with count, or null with the current count
  */
-function rateLimit(ip: string): NextResponse | null {
+function rateLimit(ip: string): { response: NextResponse | null; count: number } {
   const now = Date.now();
   const record = requestCounts.get(ip);
 
   if (!record || now > record.resetTime) {
-    // Reset the counter if window has passed
     requestCounts.set(ip, { count: 1, resetTime: now + RATE_LIMIT.windowMs });
-    return null;
+    return { response: null, count: 1 };
   }
 
   if (record.count >= RATE_LIMIT.maxRequests) {
-    // Rate limit exceeded
-    return NextResponse.json(
-      { error: "Too many requests", retryAfter: Math.ceil((record.resetTime - now) / 1000) },
-      { status: 429, headers: { 'Retry-After': String(Math.ceil((record.resetTime - now) / 1000)) } }
-    );
+    return {
+      response: NextResponse.json(
+        { error: "Too many requests", retryAfter: Math.ceil((record.resetTime - now) / 1000) },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil((record.resetTime - now) / 1000)) } }
+      ),
+      count: record.count,
+    };
   }
 
-  // Increment counter
   record.count += 1;
   requestCounts.set(ip, record);
-  return null;
+  return { response: null, count: record.count };
 }
 
 /**
@@ -49,7 +61,7 @@ function rateLimit(ip: string): NextResponse | null {
 function getClientIP(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
   const realIP = request.headers.get("x-real-ip");
-  
+
   if (forwarded) {
     return forwarded.split(",")[0].trim();
   }
@@ -59,21 +71,14 @@ function getClientIP(request: Request): string {
   return "unknown";
 }
 
-/**
- * Apply rate limiting to a request and add headers to response
- */
-function applyRateLimit(request: Request): NextResponse | null {
+function applyRateLimit(request: Request): { response: NextResponse | null; count: number } {
   const ip = getClientIP(request);
-  const rateLimitResponse = rateLimit(ip);
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
-  return null;
+  return rateLimit(ip);
 }
 
-function addRateLimitHeaders(response: NextResponse): void {
+function addRateLimitHeaders(response: NextResponse, currentCount: number): void {
   response.headers.set("X-RateLimit-Limit", String(RATE_LIMIT.maxRequests));
-  response.headers.set("X-RateLimit-Remaining", String(RATE_LIMIT.maxRequests - 1));
+  response.headers.set("X-RateLimit-Remaining", String(Math.max(0, RATE_LIMIT.maxRequests - currentCount)));
   response.headers.set("X-RateLimit-Reset", String(Math.ceil(Date.now() / 1000 + RATE_LIMIT.windowMs / 1000)));
 }
 
@@ -83,21 +88,60 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   }
 
-  const rateLimitResponse = applyRateLimit(request);
-  if (rateLimitResponse) {
-    return rateLimitResponse;
+  const rateLimitResult = applyRateLimit(request);
+  if (rateLimitResult.response) {
+    return rateLimitResult.response;
+  }
+  const requestCount = rateLimitResult.count;
+
+  const userId = session.user.id;
+
+  try {
+    const url = new URL(request.url);
+    const action = url.searchParams.get('action');
+
+    if (action === 'load-progress') {
+      const [progressRecords, quizResults] = await Promise.all([
+        db.progress.findMany({
+          where: { userId },
+          orderBy: { lastAccessed: 'desc' },
+        }),
+        db.quizResult.findMany({
+          where: { userId },
+          orderBy: { createdAt: 'desc' },
+        }),
+      ]);
+
+      const completedModules = progressRecords
+        .filter((p) => p.completed)
+        .map((p) => p.moduleId);
+
+      const quizScores: Record<string, number> = {};
+      for (const result of quizResults) {
+        if (!quizScores[result.quizId] || result.percentage > quizScores[result.quizId]) {
+          quizScores[result.quizId] = result.percentage;
+        }
+      }
+
+      const response = NextResponse.json({ completedModules, quizScores });
+      addRateLimitHeaders(response, requestCount);
+      return response;
+    }
+  } catch {
+    return NextResponse.json({ error: "Failed to load progress" }, { status: 500 });
   }
 
   const response = NextResponse.json({ message: "Hello, world!" });
-  addRateLimitHeaders(response);
+  addRateLimitHeaders(response, requestCount);
   return response;
 }
 
 export async function POST(request: Request) {
-  const rateLimitResponse = applyRateLimit(request);
-  if (rateLimitResponse) {
-    return rateLimitResponse;
+  const rateLimitResult = applyRateLimit(request);
+  if (rateLimitResult.response) {
+    return rateLimitResult.response;
   }
+  const requestCount = rateLimitResult.count;
 
   try {
     const body = await request.json();
@@ -125,7 +169,7 @@ export async function POST(request: Request) {
         results,
         count: results.length,
       });
-      addRateLimitHeaders(response);
+      addRateLimitHeaders(response, requestCount);
       return response;
     }
 
@@ -209,18 +253,12 @@ export async function POST(request: Request) {
       ...result,
     });
 
-    addRateLimitHeaders(response);
+    addRateLimitHeaders(response, requestCount);
     return response;
   } catch (error) {
-    if (error instanceof Error && 'errors' in error) {
+    if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Validation failed" },
-        { status: 400 }
-      );
-    }
-    if (error instanceof Error && 'issues' in error) {
-      return NextResponse.json(
-        { error: "Validation failed" },
+        { error: "Validation failed", details: error.issues },
         { status: 400 }
       );
     }

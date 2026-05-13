@@ -45,6 +45,25 @@ interface AppActions {
 
 type AppStore = AppState & AppActions;
 
+// Prevent concurrent sync calls; always uses latest state
+let isSyncing = false;
+let syncRequested = false;
+
+const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>) => void) => {
+  if (isSyncing) {
+    syncRequested = true;
+    return;
+  }
+  isSyncing = true;
+  syncRequested = false;
+  await syncWithDatabase(get(), set);
+  isSyncing = false;
+  if (syncRequested) {
+    syncRequested = false;
+    await ensureSync(get, set);
+  }
+};
+
 // API client functions
 const apiClient = {
   async saveProgress(userId: string, moduleId: string, completed: boolean, score?: number) {
@@ -92,10 +111,22 @@ const apiClient = {
     return response.json();
   },
 
-  async loadProgress(_userId: string) {
-    // For now, progress is stored client-side via persist middleware
-    // This can be extended to fetch from API when needed
-    return { completedModules: [], quizScores: {} };
+  async loadProgress(userId: string) {
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+
+    const response = await fetch(`/api?action=load-progress`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || 'Failed to load progress');
+    }
+
+    return response.json();
   },
 };
 
@@ -171,14 +202,14 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         ? state.completedModules 
         : [...state.completedModules, moduleId],
     }));
-    await syncWithDatabase(get(), set);
+    await ensureSync(get, set);
   },
 
   setQuizScore: async (category: string, score: number) => {
     set((state) => ({
       quizScores: { ...state.quizScores, [category]: score },
     }));
-    await syncWithDatabase(get(), set);
+    await ensureSync(get, set);
   },
 
   resetProgress: async () => {
@@ -189,7 +220,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       sqlCompletedLevels: [],
       xssCompletedLevels: [],
     });
-    await syncWithDatabase(get(), set);
+    await ensureSync(get, set);
   },
 
   addStudiedOwasp: async (id: string) => {
@@ -198,7 +229,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         ? state.studiedOwaspItems
         : [...state.studiedOwaspItems, id],
     }));
-    await syncWithDatabase(get(), set);
+    await ensureSync(get, set);
   },
 
   addSqlLevel: async (level: string) => {
@@ -207,7 +238,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         ? state.sqlCompletedLevels
         : [...state.sqlCompletedLevels, level],
     }));
-    await syncWithDatabase(get(), set);
+    await ensureSync(get, set);
   },
 
   addXssLevel: async (level: string) => {
@@ -216,7 +247,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         ? state.xssCompletedLevels
         : [...state.xssCompletedLevels, level],
     }));
-    await syncWithDatabase(get(), set);
+    await ensureSync(get, set);
   },
 
   setUserId: (userId: string | null) => set({ userId }),

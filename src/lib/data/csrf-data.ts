@@ -110,7 +110,7 @@ export const csrfChallenges: CSRFChallenge[] = [
 <!-- Если сервер не проверяет CSRF-токен корректно, аккаунт будет удалён -->`,
     explanation:
       'Некоторые реализации CSRF-защиты проверяют только наличие заголовка, но не валидируют его значение. Если токен хранится в cookie и сервер пытается прочитать его через JavaScript, возможна атака через CORS.',
-    mitigation: 'Всегда используйте Double Submit Cookie паттерн или Syncer Token Pattern с серверной проверкой.',
+    mitigation: 'Всегда используйте Double Submit Cookie паттерн или Synchronizer Token Pattern с серверной проверкой.',
   },
   {
     id: 'csrf-5',
@@ -166,7 +166,7 @@ export const csrfChallenges: CSRFChallenge[] = [
 // CSRF Mitigation Strategies
 export const csrfMitigations = [
   {
-    technique: 'CSRF Token (Syncer Token)',
+    technique: 'CSRF Token (Synchronizer Token)',
     description: 'Генерируйте уникальный криптографически стойкий токен для каждой сессии. Вставляйте его в каждую форму и проверяйте на сервере.',
     implementation: `// Server-side (Node.js/Express)
 const csrfToken = crypto.randomBytes(32).toString('hex');
