@@ -101,9 +101,9 @@ export default function SecurityHeadersLab() {
                 className="flex items-center gap-2 bg-white rounded-lg p-2.5 border border-slate-200"
               >
                 <span className={`w-2 h-2 rounded-full shrink-0 ${
-                  header.severity === 'critical' ? 'bg-red-500' :
-                  header.severity === 'high' ? 'bg-orange-500' :
-                  header.severity === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                  header.severity === 'Критический' ? 'bg-red-500' :
+                  header.severity === 'Высокий' ? 'bg-orange-500' :
+                  header.severity === 'Средний' ? 'bg-yellow-500' : 'bg-green-500'
                 }`} />
                 <div className="min-w-0">
                   <p className="text-xs font-mono font-medium truncate">{header.name}</p>
@@ -123,9 +123,9 @@ export default function SecurityHeadersLab() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-slate-50 transition-colors">
                 <div className="flex items-center gap-3 text-left flex-1 mr-2">
                   <span className={`w-2.5 h-2.5 rounded-full ${
-                    header.severity === 'critical' ? 'bg-red-500' :
-                    header.severity === 'high' ? 'bg-orange-500' :
-                    header.severity === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                    header.severity === 'Критический' ? 'bg-red-500' :
+                    header.severity === 'Высокий' ? 'bg-orange-500' :
+                    header.severity === 'Средний' ? 'bg-yellow-500' : 'bg-green-500'
                   } shrink-0`} />
                   <div className="flex-1 min-w-0">
                     <Badge variant="outline" className="text-[10px] font-mono">

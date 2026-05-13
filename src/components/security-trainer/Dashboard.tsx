@@ -107,7 +107,8 @@ export default function Dashboard() {
       return { text: t('recommendations.toolsTry'), page: 'tools' as PageType };
     }
     if (totalProgress < 100) {
-      return { text: t('recommendations.completeRemaining'), page: modules.find((m) => !completedModules.includes(m.id))?.id as PageType || 'dashboard' as PageType };
+      const remainingModule = modules.find((m) => !completedModules.includes(m.id));
+      return { text: t('recommendations.completeRemaining'), page: (remainingModule?.id ?? 'dashboard') as PageType };
     }
     return { text: t('recommendations.wellDone'), page: 'achievements' as PageType };
   };

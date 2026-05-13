@@ -22,4 +22,4 @@ export { achievements, glossaryTerms } from './glossary-data';
 export type { Achievement, GlossaryTerm } from './glossary-data';
 
 export { securityHeaders, headerChallenges } from './security-headers-data';
-export type { SecurityHeader, HeaderChallenge } from './security-headers-data';
+export type { SecurityHeaderTopic, HeaderChallenge } from './security-headers-data';

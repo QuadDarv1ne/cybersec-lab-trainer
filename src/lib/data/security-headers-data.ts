@@ -12,6 +12,113 @@ export interface SecurityHeaderTopic {
   mitigations: string[];
 }
 
+export interface HeaderChallenge {
+  id: string;
+  scenario: string;
+  question: string;
+  options: { text: string; correct: boolean }[];
+  explanation: string;
+}
+
+export const headerChallenges: HeaderChallenge[] = [
+  {
+    id: 'hc-1',
+    scenario: 'Вы обнаружили XSS-уязвимость на сайте. Какой заголовок блокирует загрузку внешних скриптов?',
+    question: 'Какой заголовок предотвращает загрузку скриптов с неавторизованных доменов?',
+    options: [
+      { text: 'Content-Security-Policy с директивой script-src', correct: true },
+      { text: 'X-Content-Type-Options: nosniff', correct: false },
+      { text: 'Strict-Transport-Security', correct: false },
+      { text: 'Referrer-Policy: no-referrer', correct: false },
+    ],
+    explanation: 'CSP с директивой script-src указывает браузеру, с каких доменов разрешено загружать JavaScript. Это основной механизм защиты от XSS.',
+  },
+  {
+    id: 'hc-2',
+    scenario: 'Пользователь подключается к банку через публичный Wi-Fi. Какой заголовок гарантирует HTTPS-соединение?',
+    question: 'Какой заголовок заставляет браузер всегда использовать HTTPS, даже при вводе http://?',
+    options: [
+      { text: 'X-Frame-Options: DENY', correct: false },
+      { text: 'Strict-Transport-Security с max-age и preload', correct: true },
+      { text: 'Cache-Control: no-store', correct: false },
+      { text: 'Permissions-Policy: geolocation=()', correct: false },
+    ],
+    explanation: 'HSTS (Strict-Transport-Security) указывает браузеру использовать только HTTPS. Флаг preload добавляет домен в список встроенных HSTS-доменов браузера.',
+  },
+  {
+    id: 'hc-3',
+    scenario: 'Злоумышленник создал фишинговую страницу с невидимым iframe вашего банка. Какой заголовок блокирует это?',
+    question: 'Какие заголовки защищают от clickjacking-атак через iframe?',
+    options: [
+      { text: 'X-Content-Type-Options: nosniff', correct: false },
+      { text: 'Referrer-Policy: same-origin', correct: false },
+      { text: 'X-Frame-Options: DENY или CSP frame-ancestors', correct: true },
+      { text: 'Cache-Control: no-cache', correct: false },
+    ],
+    explanation: 'X-Frame-Options: DENY запрещает встраивание страницы в любые iframe. CSP frame-ancestors — более современный аналог с гибкой настройкой доменов.',
+  },
+  {
+    id: 'hc-4',
+    scenario: 'Злоумышленник загрузил файл .txt с JavaScript-кодом. Браузер выполнил его как скрипт. Какой заголовок предотвратил бы это?',
+    question: 'Какой заголовок запрещает браузеру угадывать MIME-тип файла?',
+    options: [
+      { text: 'X-Frame-Options: SAMEORIGIN', correct: false },
+      { text: 'X-Content-Type-Options: nosniff', correct: true },
+      { text: 'Content-Security-Policy: default-src', correct: false },
+      { text: 'Strict-Transport-Security', correct: false },
+    ],
+    explanation: 'X-Content-Type-Options: nosniff запрещает браузеру MIME-sniffing — попытку определить тип файла по содержимому. Без него .txt файл с JS может быть выполнен.',
+  },
+  {
+    id: 'hc-5',
+    scenario: 'Пользователь переходит с banking.com/dashboard?token=secret123 на внешний сайт. Токен утекает через Referer. Как исправить?',
+    question: 'Какой заголовок контролирует передачу информации о реферере при переходах?',
+    options: [
+      { text: 'Permissions-Policy', correct: false },
+      { text: 'Cross-Origin-Opener-Policy', correct: false },
+      { text: 'Referrer-Policy: strict-origin-when-cross-origin', correct: true },
+      { text: 'Content-Security-Policy', correct: false },
+    ],
+    explanation: 'Referrer-Policy контролирует, сколько информации передаётся в заголовке Referer. strict-origin-when-cross-origin передаёт только origin для cross-origin переходов.',
+  },
+  {
+    id: 'hc-6',
+    scenario: 'XSS-скрипт на странице получил доступ к камере и микрофону пользователя. Какой заголовок блокирует API?',
+    question: 'Какой заголовок позволяет запретить доступ к камере, микрофону и геолокации?',
+    options: [
+      { text: 'X-Content-Type-Options: nosniff', correct: false },
+      { text: 'Permissions-Policy: camera=(), microphone=(), geolocation=()', correct: true },
+      { text: 'Cross-Origin-Embedder-Policy: require-corp', correct: false },
+      { text: 'Cache-Control: no-store', correct: false },
+    ],
+    explanation: 'Permissions-Policy позволяет контролировать, какие браузерные API доступны странице. Пустое значение () запрещает API для всех.',
+  },
+  {
+    id: 'hc-7',
+    scenario: 'Пользователь вышел из онлайн-банка на общем компьютере. Следующий пользователь нажал «Назад» и увидел баланс. Как защитить данные?',
+    question: 'Какие заголовки и флаги предотвращают кэширование чувствительных данных?',
+    options: [
+      { text: 'Cache-Control: no-store + HttpOnly, Secure, SameSite для cookie', correct: true },
+      { text: 'Cache-Control: public, max-age=3600', correct: false },
+      { text: 'ETag и Last-Modified', correct: false },
+      { text: 'Vary: Accept-Encoding', correct: false },
+    ],
+    explanation: 'Cache-Control: no-store запрещает сохранение данных в кэше. HttpOnly защищает cookie от XSS, Secure — от передачи по HTTP, SameSite — от CSRF.',
+  },
+  {
+    id: 'hc-8',
+    scenario: 'Атакующий использует Spectre-атаку для чтения данных из памяти браузера. Какие заголовки обеспечивают полную изоляцию?',
+    question: 'Какие три заголовка обеспечивают защиту от Spectre и XS-Leaks?',
+    options: [
+      { text: 'X-Frame-Options, X-Content-Type-Options, Referrer-Policy', correct: false },
+      { text: 'COOP: same-origin, COEP: require-corp, CORP: same-origin', correct: true },
+      { text: 'HSTS, CSP, Permissions-Policy', correct: false },
+      { text: 'Cache-Control, Pragma, Expires', correct: false },
+    ],
+    explanation: 'COOP изолирует browsing context, COEP требует явного разрешения для ресурсов, CORP запрещает кросс-origin загрузку. Все три вместе обеспечивают защиту от Spectre.',
+  },
+];
+
 export const securityHeaders: SecurityHeaderTopic[] = [
   {
     id: 'csp',

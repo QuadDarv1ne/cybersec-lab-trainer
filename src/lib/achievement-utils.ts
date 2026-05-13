@@ -19,7 +19,8 @@ export function getAchievementStatus(
     case 'quiz-master': return Object.keys(quizScores).length >= 3;
     case 'quiz-perfect': return Object.values(quizScores).some((s) => s === 100);
     case 'crypto-ninja': return completedModules.includes('tools');
-    case 'full-completion': return completedModules.length >= 7;
+    case 'headers-master': return completedModules.includes('security-headers');
+    case 'full-completion': return completedModules.length >= 8;
     default: return false;
   }
 }
