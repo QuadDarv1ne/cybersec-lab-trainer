@@ -97,7 +97,7 @@ export default function SecureCodingLab() {
             </div>
           </div>
           <div className="flex gap-2">
-            {secureCodingChallenges.map((_, i) => (
+            {secureCodingChallenges.map((challenge, i) => (
               <button
                 key={i}
                 onClick={() => {
@@ -105,6 +105,7 @@ export default function SecureCodingLab() {
                   setSelectedOption(null);
                   setShowResult(false);
                 }}
+                aria-label={`Перейти к заданию ${i + 1}: ${challenge.title}`}
                 className={`flex-1 h-2 rounded-full transition-all ${
                   answeredChallenges.has(i)
                     ? 'bg-emerald-500'

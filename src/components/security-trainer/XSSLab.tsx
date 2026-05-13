@@ -104,6 +104,7 @@ export default function XSSLab() {
               <button
                 key={x.id}
                 onClick={() => setActiveTab(x.id)}
+                aria-label={`Перейти к типу XSS: ${t(`types.${x.id}` as const)}`}
                 className={`flex-1 h-2 rounded-full transition-all ${
                   xssCompletedLevels.includes(x.id)
                     ? 'bg-emerald-500'

@@ -29,11 +29,24 @@ export default function SQLInjectionLab() {
     const input = userInput.trim();
     if (!input) return;
     setShowResult(true);
-    if (!isCompleted) {
-      addSqlLevel(challenge.id);
-      if (sqlCompletedLevels.length + 1 === sqlChallenges.length) {
-        completeModule('sql-injection');
+
+    // Validate that the input contains meaningful SQL injection patterns
+    const hasSqlInjectionPattern = (val: string): boolean => {
+      const lower = val.toLowerCase();
+      const patterns = ["'", '"', '--', ';', 'union', 'select', 'drop', 'or ', 'and ', 'order by', 'load_file', 'into outfile'];
+      return patterns.some(p => lower.includes(p));
+    };
+
+    if (hasSqlInjectionPattern(input)) {
+      if (!isCompleted) {
+        addSqlLevel(challenge.id);
+        if (sqlCompletedLevels.length + 1 === sqlChallenges.length) {
+          completeModule('sql-injection');
+        }
       }
+    } else {
+      setShowResult(false);
+      return;
     }
   };
 
@@ -101,6 +114,7 @@ export default function SQLInjectionLab() {
               <button
                 key={c.id}
                 onClick={() => { setActiveChallenge(i); resetState(); }}
+                aria-label={`Перейти к заданию ${i + 1}: ${c.title}`}
                 className={`flex-1 h-2 rounded-full transition-all ${
                   sqlCompletedLevels.includes(c.id)
                     ? 'bg-emerald-500'

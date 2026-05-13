@@ -200,7 +200,7 @@ export default function SecurityHeadersLab() {
             </div>
           </div>
           <div className="flex gap-2">
-            {headerChallenges.map((_, i) => (
+            {headerChallenges.map((challenge, i) => (
               <button
                 key={i}
                 onClick={() => {
@@ -208,6 +208,7 @@ export default function SecurityHeadersLab() {
                   setSelectedOption(null);
                   setShowResult(false);
                 }}
+                aria-label={`Перейти к заданию ${i + 1}: ${challenge.question.substring(0, 50)}`}
                 className={`flex-1 h-2 rounded-full transition-all ${
                   answeredChallenges.has(i)
                     ? 'bg-emerald-500'

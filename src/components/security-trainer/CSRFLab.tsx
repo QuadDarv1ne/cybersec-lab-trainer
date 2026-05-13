@@ -209,10 +209,11 @@ export default function CSRFLab() {
               <ArrowLeft size={14} className="mr-1" /> {t('back')}
             </Button>
             <div className="flex gap-1">
-              {attackSteps.map((_, i) => (
+              {attackSteps.map((step, i) => (
                 <button
                   key={i}
                   onClick={() => setCurrentStep(i)}
+                  aria-label={`Шаг ${i + 1}: ${step.description.substring(0, 50)}`}
                   className={`w-2.5 h-2.5 rounded-full transition-all ${
                     i <= currentStep ? 'bg-emerald-500' : 'bg-slate-300'
                   }`}
