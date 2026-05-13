@@ -99,7 +99,7 @@ export default function Sidebar() {
       <Separator className="bg-slate-700" />
 
       {/* Nav items */}
-      <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1">
+      <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1" aria-label="Main navigation">
         {navItems.map((item) => {
           const isActive = currentPage === item.id;
           const isCompleted =
@@ -109,6 +109,8 @@ export default function Sidebar() {
             <button
               key={item.id}
               onClick={() => setCurrentPage(item.id)}
+              aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
               className={`
                 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
                 transition-all duration-200 text-left group

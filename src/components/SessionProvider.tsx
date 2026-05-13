@@ -20,7 +20,8 @@ export function SessionProvider({ children, session }: SessionProviderProps) {
     } else {
       setUserId(null);
     }
-  }, [session, setUserId, loadFromDatabase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to session changes
+  }, [session, setUserId]);
 
   return (
     <NextAuthSessionProvider session={session}>

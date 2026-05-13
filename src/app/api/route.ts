@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { quizAnswerSchema, quizAnswersSchema, progressUpdateSchema, glossarySearchSchema } from "@/lib/validations/api";
+import { quizAnswerSchema, quizResultSchema, progressUpdateSchema, glossarySearchSchema } from "@/lib/validations/api";
 import { db } from "@/lib/db";
 import { glossaryTerms } from "@/lib/data/glossary-data";
 
@@ -180,29 +180,19 @@ export async function POST(request: Request) {
       }
 
       case 'quiz-answers': {
-        const data = quizAnswersSchema.parse(payload);
-        const quizId = typeof body.quizId === 'string' ? body.quizId : undefined;
-        const score = typeof body.score === 'number' ? body.score : undefined;
-        const total = typeof body.total === 'number' ? body.total : undefined;
-
-        if (!quizId || score === undefined || total === undefined) {
-          return NextResponse.json(
-            { error: "quizId, score, and total are required for quiz answers" },
-            { status: 400 }
-          );
-        }
+        const data = quizResultSchema.parse(payload);
 
         const quizResult = await db.quizResult.create({
           data: {
             userId,
-            quizId,
-            score,
-            total,
-            percentage: total > 0 ? (score / total) * 100 : 0,
+            quizId: data.quizId,
+            score: data.score,
+            total: data.total,
+            percentage: data.total > 0 ? (data.score / data.total) * 100 : 0,
           },
         });
 
-        result = { quizResult, answers: data.length, message: "Quiz answers saved" };
+        result = { quizResult, answers: data.answers?.length ?? 0, message: "Quiz answers saved" };
         break;
       }
 

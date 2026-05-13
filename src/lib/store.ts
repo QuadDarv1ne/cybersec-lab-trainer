@@ -78,11 +78,7 @@ const apiClient = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'quiz-answers',
-        userId,
-        quizId,
-        score,
-        total,
-        payload: [],
+        payload: { quizId, score, total },
       }),
     });
 

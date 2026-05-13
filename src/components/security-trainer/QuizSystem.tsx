@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAppStore } from '@/lib/store';
 import { quizQuestions, quizCategories } from '@/lib/security-data';
 import { useTranslations } from '@/lib/intlStub';
@@ -51,6 +51,40 @@ export default function QuizSystem() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [answers, setAnswers] = useState<(boolean | null)[]>([]);
   const [timerActive, setTimerActive] = useState(false);
+  const timeUpRef = useRef(false);
+
+  // Stable callback for time-up
+  const handleTimeUp = useCallback(() => {
+    setTimerActive(false);
+    setShowAnswer(true);
+    setAnswers((prev) => {
+      const newAnswers = [...prev];
+      newAnswers[currentQuestion] = false;
+      return newAnswers;
+    });
+  }, [currentQuestion]);
+
+  // Timer using setInterval to avoid overlapping timeouts
+  useEffect(() => {
+    if (!timerActive) return;
+    timeUpRef.current = false;
+
+    const interval = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          clearInterval(interval);
+          if (!timeUpRef.current) {
+            timeUpRef.current = true;
+            handleTimeUp();
+          }
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timerActive, handleTimeUp]);
 
   const categoryQuestions = quizQuestions.filter((q) => {
     const catId = quizCategories.find((c) => c.name === activeCategory)?.id;
@@ -98,30 +132,6 @@ export default function QuizSystem() {
     newAnswers[currentQuestion] = isCorrect;
     setAnswers(newAnswers);
   };
-
-  // Timer
-  useEffect(() => {
-    if (!timerActive || timeLeft <= 0) return;
-    const timer = setTimeout(() => {
-      setTimeLeft((t) => {
-        if (t <= 1) return 0;
-        return t - 1;
-      });
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [timerActive, timeLeft]);
-
-  // Handle time-up when timer reaches 0
-  useEffect(() => {
-    if (timeLeft !== 0 || !timerActive) return;
-    setTimerActive(false);
-    setShowAnswer(true);
-    setAnswers((prev) => {
-      const newAnswers = [...prev];
-      newAnswers[currentQuestion] = false;
-      return newAnswers;
-    });
-  }, [timeLeft, timerActive, currentQuestion]);
 
   const resetQuiz = () => {
     setQuizState('select');
