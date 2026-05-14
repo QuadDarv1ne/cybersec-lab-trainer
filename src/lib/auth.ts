@@ -1,5 +1,4 @@
 import type { NextAuthOptions } from "next-auth";
-import type { Provider } from "next-auth/providers";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -8,7 +7,7 @@ import { validateEnv } from "./env";
 
 validateEnv();
 
-const providers: Provider[] = [];
+const providers = [];
 
 if (process.env.GITHUB_ID && process.env.GITHUB_SECRET) {
   providers.push(
