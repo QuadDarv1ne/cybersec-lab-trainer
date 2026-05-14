@@ -24,6 +24,7 @@ import {
   Code,
   Database,
   GraduationCap,
+  ShieldCheck,
 } from 'lucide-react';
 
 const categoryColors: Record<string, string> = {
@@ -49,6 +50,7 @@ const achievementIcons: Record<string, React.ReactNode> = {
   'quiz-perfect': <Star size={24} />,
   'crypto-ninja': <LockIcon size={24} />,
   'full-completion': <GraduationCap size={24} />,
+  'headers-master': <ShieldCheck size={24} />,
 };
 
 export default function AchievementsAndGlossary() {

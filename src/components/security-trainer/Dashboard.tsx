@@ -29,6 +29,7 @@ import {
   Target,
   ArrowRight,
   Zap,
+  ShieldCheck,
 } from 'lucide-react';
 import type { PageType } from '@/lib/store';
 
@@ -66,6 +67,7 @@ const achievementIcons: Record<string, React.ReactNode> = {
   'quiz-perfect': <Star size={18} />,
   'crypto-ninja': <Lock size={18} />,
   'full-completion': <Zap size={18} />,
+  'headers-master': <ShieldCheck size={18} />,
 };
 
 export default function Dashboard() {
