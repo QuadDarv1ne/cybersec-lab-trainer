@@ -3,37 +3,41 @@
 import { useAppStore } from '@/lib/store';
 import { useHashRouting } from '@/hooks/use-hash-routing';
 import Sidebar from '@/components/security-trainer/Sidebar';
-import Dashboard from '@/components/security-trainer/Dashboard';
-import OWASPTop10 from '@/components/security-trainer/OWASPTop10';
-import SQLInjectionLab from '@/components/security-trainer/SQLInjectionLab';
-import XSSLab from '@/components/security-trainer/XSSLab';
-import CSRFLab from '@/components/security-trainer/CSRFLab';
-import AuthSecurityLab from '@/components/security-trainer/AuthSecurityLab';
-import SecureCodingLab from '@/components/security-trainer/SecureCodingLab';
-import ToolsLab from '@/components/security-trainer/ToolsLab';
-import QuizSystem from '@/components/security-trainer/QuizSystem';
-import AchievementsGlossary from '@/components/security-trainer/AchievementsGlossary';
-import SecurityHeadersLab from '@/components/security-trainer/SecurityHeadersLab';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster } from 'sonner';
+import dynamic from 'next/dynamic';
 
-const pages: Record<string, React.ReactNode> = {
-  dashboard: <Dashboard />,
-  owasp: <OWASPTop10 />,
-  'sql-injection': <SQLInjectionLab />,
-  xss: <XSSLab />,
-  csrf: <CSRFLab />,
-  auth: <AuthSecurityLab />,
-  'secure-coding': <SecureCodingLab />,
-  tools: <ToolsLab />,
-  'security-headers': <SecurityHeadersLab />,
-  quiz: <QuizSystem />,
-  achievements: <AchievementsGlossary />,
+const Dashboard = dynamic(() => import('@/components/security-trainer/Dashboard'), { ssr: false });
+const OWASPTop10 = dynamic(() => import('@/components/security-trainer/OWASPTop10'), { ssr: false });
+const SQLInjectionLab = dynamic(() => import('@/components/security-trainer/SQLInjectionLab'), { ssr: false });
+const XSSLab = dynamic(() => import('@/components/security-trainer/XSSLab'), { ssr: false });
+const CSRFLab = dynamic(() => import('@/components/security-trainer/CSRFLab'), { ssr: false });
+const AuthSecurityLab = dynamic(() => import('@/components/security-trainer/AuthSecurityLab'), { ssr: false });
+const SecureCodingLab = dynamic(() => import('@/components/security-trainer/SecureCodingLab'), { ssr: false });
+const ToolsLab = dynamic(() => import('@/components/security-trainer/ToolsLab'), { ssr: false });
+const QuizSystem = dynamic(() => import('@/components/security-trainer/QuizSystem'), { ssr: false });
+const AchievementsGlossary = dynamic(() => import('@/components/security-trainer/AchievementsGlossary'), { ssr: false });
+const SecurityHeadersLab = dynamic(() => import('@/components/security-trainer/SecurityHeadersLab'), { ssr: false });
+
+const pages: Record<string, React.ComponentType> = {
+  dashboard: Dashboard,
+  'sql-injection': SQLInjectionLab,
+  xss: XSSLab,
+  csrf: CSRFLab,
+  auth: AuthSecurityLab,
+  'secure-coding': SecureCodingLab,
+  tools: ToolsLab,
+  'security-headers': SecurityHeadersLab,
+  quiz: QuizSystem,
+  achievements: AchievementsGlossary,
+  owasp: OWASPTop10,
 };
 
 export default function Home() {
   const { currentPage } = useAppStore();
   useHashRouting();
+
+  const Page = pages[currentPage] || Dashboard;
 
   return (
     <div className="min-h-screen flex bg-slate-50">
@@ -48,7 +52,7 @@ export default function Home() {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2 }}
             >
-              {pages[currentPage] || <Dashboard />}
+              <Page />
             </motion.div>
           </AnimatePresence>
         </div>
