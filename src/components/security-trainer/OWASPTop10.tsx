@@ -26,7 +26,7 @@ export default function OWASPTop10() {
     if (allStudied && studiedCount > 0) {
       completeModule('owasp');
     }
-  }, [allStudied, studiedCount]);
+  }, [allStudied, studiedCount, completeModule]);
 
   const handleToggleStudied = (id: string) => {
     if (studiedOwaspItems.includes(id)) return;

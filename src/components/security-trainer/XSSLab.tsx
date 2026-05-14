@@ -130,7 +130,6 @@ export default function XSSLab() {
   const [activeTab, setActiveTab] = useState(xssTypes[0].id);
   const [showAttack, setShowAttack] = useState(false);
 
-  const currentXss = xssTypes.find((x) => x.id === activeTab) || xssTypes[0];
   const allCompleted = xssCompletedLevels.length === xssTypes.length;
 
   // Complete module when all XSS levels completed
@@ -138,7 +137,7 @@ export default function XSSLab() {
     if (allCompleted && xssCompletedLevels.length > 0) {
       completeModule('xss');
     }
-  }, [allCompleted, xssCompletedLevels.length]);
+  }, [allCompleted, xssCompletedLevels.length, completeModule]);
 
   const handleMarkComplete = (id: string) => {
     if (xssCompletedLevels.includes(id)) return;

@@ -30,7 +30,7 @@ export default function SQLInjectionLab() {
     if (allCompleted && sqlCompletedLevels.length > 0) {
       completeModule('sql-injection');
     }
-  }, [allCompleted, sqlCompletedLevels.length]);
+  }, [allCompleted, sqlCompletedLevels.length, completeModule]);
 
   const checkAnswer = () => {
     const input = userInput.trim();

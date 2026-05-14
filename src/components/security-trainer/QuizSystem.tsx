@@ -93,7 +93,7 @@ export default function QuizSystem() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timerActive]);
+  }, [timerActive, handleTimeUp]);
 
   const categoryQuestions = useMemo(
     () => quizQuestions.filter((q) => q.category === activeCategory),

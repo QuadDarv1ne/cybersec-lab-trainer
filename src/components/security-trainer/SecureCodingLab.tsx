@@ -36,7 +36,7 @@ export default function SecureCodingLab() {
     if (answeredChallenges.size === secureCodingChallenges.length && correctCount === secureCodingChallenges.length) {
       completeModule('secure-coding');
     }
-  }, [answeredChallenges.size, correctCount]);
+  }, [answeredChallenges.size, correctCount, completeModule]);
 
   const handleSelectOption = (index: number) => {
     if (isAnswered) return;

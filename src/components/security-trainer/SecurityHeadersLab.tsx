@@ -41,7 +41,7 @@ export default function SecurityHeadersLab() {
     if (answeredChallenges.size === headerChallenges.length && correctCount === headerChallenges.length) {
       completeModule('security-headers');
     }
-  }, [answeredChallenges.size, correctCount]);
+  }, [answeredChallenges.size, correctCount, completeModule]);
 
   const handleSelectOption = (index: number) => {
     if (isAnswered) return;
