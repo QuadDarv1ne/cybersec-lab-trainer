@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import { quizQuestions, quizCategories } from '@/lib/security-data';
 import { useTranslations } from '@/lib/intlStub';
@@ -95,10 +95,10 @@ export default function QuizSystem() {
     return () => clearInterval(interval);
   }, [timerActive]);
 
-  const categoryQuestions = quizQuestions.filter((q) => {
-    const catId = quizCategories.find((c) => c.name === activeCategory)?.id;
-    return catId && q.category === activeCategory;
-  });
+  const categoryQuestions = useMemo(
+    () => quizQuestions.filter((q) => q.category === activeCategory),
+    [activeCategory],
+  );
 
   const startQuiz = (categoryName: string) => {
     const questions = quizQuestions.filter((q) => q.category === categoryName);
@@ -114,19 +114,22 @@ export default function QuizSystem() {
   };
 
   const nextQuestion = () => {
-    if (currentQuestion < categoryQuestions.length - 1) {
+    const totalQuestions = categoryQuestions.length;
+    if (currentQuestion < totalQuestions - 1) {
       setCurrentQuestion((q) => q + 1);
       setSelectedAnswer('');
       setShowAnswer(false);
       setTimeLeft(30);
       setTimerActive(true);
     } else {
-      const finalCount = correctCount;
-      const catId = quizCategories.find((c) => c.name === activeCategory)?.id || '';
-      const score = Math.round((finalCount / categoryQuestions.length) * 100);
-      setQuizScore(catId, score);
-      setTimerActive(false);
-      setQuizState('result');
+      setCorrectCount((finalCount) => {
+        const catId = quizCategories.find((c) => c.name === activeCategory)?.id || '';
+        const score = Math.round((finalCount / totalQuestions) * 100);
+        setQuizScore(catId, score);
+        setTimerActive(false);
+        setQuizState('result');
+        return finalCount;
+      });
     }
   };
 
@@ -137,9 +140,11 @@ export default function QuizSystem() {
     const question = categoryQuestions[currentQuestion];
     const isCorrect = parseInt(selectedAnswer) === question.correctIndex;
     if (isCorrect) setCorrectCount((c) => c + 1);
-    const newAnswers = [...answers];
-    newAnswers[currentQuestion] = isCorrect;
-    setAnswers(newAnswers);
+    setAnswers((prev) => {
+      const newAnswers = [...prev];
+      newAnswers[currentQuestion] = isCorrect;
+      return newAnswers;
+    });
   };
 
   const resetQuiz = () => {
