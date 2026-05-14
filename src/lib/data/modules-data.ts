@@ -231,12 +231,12 @@ export const modules: Module[] = [
   {
     id: 'xss',
     title: 'XSS-атаки',
-    description: 'Изучите три типа XSS-уязвимостей: отражённый, хранимый и DOM-based. Интерактивные демонстрации атак.',
+    description: 'Изучите семь типов XSS-уязвимостей: отражённый, хранимый, DOM-based, event-handler, SVG, data: URI и template injection. Интерактивные демонстрации.',
     icon: 'FileText',
     difficulty: 'Средний',
     difficultyColor: 'bg-yellow-100 text-yellow-800',
-    lessons: 3,
-    totalSteps: 3,
+    lessons: 7,
+    totalSteps: 7,
   },
   {
     id: 'csrf',

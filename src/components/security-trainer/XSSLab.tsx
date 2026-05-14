@@ -8,22 +8,126 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from '@/lib/intlStub';
 import {
   ChevronLeft,
   CheckCircle2,
   FileText,
-  ShieldAlert,
 } from 'lucide-react';
+
+// Per-type defense rendering
+const renderDefense = (xssId: string, attackDemo: string) => {
+  switch (xssId) {
+    case 'reflected':
+    case 'stored': {
+      const escaped = attackDemo
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+      return (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-emerald-700">HTML-экранирование (output encoding)</p>
+          <div className="bg-white rounded-lg p-3 border border-emerald-200">
+            <p className="text-[11px] text-slate-500 mb-1">Результат после экранирования:</p>
+            <code className="text-xs font-mono text-emerald-700 break-all">{escaped}</code>
+            <p className="text-[11px] text-emerald-600 mt-2">Скрипт не выполнится — символы закодированы</p>
+          </div>
+        </div>
+      );
+    }
+    case 'dom': {
+      return (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-emerald-700">textContent вместо innerHTML</p>
+          <div className="bg-white rounded-lg p-3 border border-emerald-200">
+            <p className="text-[11px] text-slate-500 mb-1">Безопасный код:</p>
+            <code className="text-xs font-mono text-emerald-700">element.textContent = userInput;</code>
+            <p className="text-[11px] text-emerald-600 mt-2">Браузер вставляет текст как данные, а не HTML</p>
+          </div>
+        </div>
+      );
+    }
+    case 'svg': {
+      const escaped = attackDemo
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      return (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-emerald-700">DOMPurify санитизация</p>
+          <div className="bg-white rounded-lg p-3 border border-emerald-200">
+            <p className="text-[11px] text-slate-500 mb-1">DOMPurify.sanitize() удаляет опасные теги:</p>
+            <code className="text-xs font-mono text-emerald-700 break-all">{escaped}</code>
+            <p className="text-[11px] text-emerald-600 mt-2">&lt;svg&gt; и события onload удалены</p>
+          </div>
+        </div>
+      );
+    }
+    case 'event-handler': {
+      const attrEscaped = attackDemo
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      return (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-emerald-700">Экранирование атрибутов + CSP</p>
+          <div className="bg-white rounded-lg p-3 border border-emerald-200">
+            <p className="text-[11px] text-slate-500 mb-1">Атрибут после экранирования:</p>
+            <code className="text-xs font-mono text-emerald-700 break-all">{attrEscaped}</code>
+            <p className="text-[11px] text-emerald-600 mt-2">CSP запретит inline-события даже если экранирование пропущено</p>
+          </div>
+        </div>
+      );
+    }
+    case 'data-uri': {
+      return (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-emerald-700">Валидация протокола URL</p>
+          <div className="bg-white rounded-lg p-3 border border-emerald-200">
+            <p className="text-[11px] text-slate-500 mb-1">Проверка:</p>
+            <code className="text-xs font-mono text-emerald-700">
+              {`const allowed = ['https:', 'http:', 'mailto:'];\nconst parsed = new URL(url);\nallowed.includes(parsed.protocol) // false для javascript:`}
+            </code>
+            <p className="text-[11px] text-red-600 mt-2 font-medium">Ссылка заблокирована: протокол javascript: запрещён</p>
+          </div>
+        </div>
+      );
+    }
+    case 'template-injection': {
+      return (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-emerald-700">Безопасный шаблонизатор (auto-escape)</p>
+          <div className="bg-white rounded-lg p-3 border border-emerald-200">
+            <p className="text-[11px] text-slate-500 mb-1">Вместо &lt;%= %&gt; используйте &lt;%- %&gt; (escape по умолчанию):</p>
+            <code className="text-xs font-mono text-emerald-700">{`<h1>Привет, <%- name %></h1>`}</code>
+            <p className="text-[11px] text-emerald-600 mt-2">&lt;%- %&gt; автоматически экранирует HTML-символы</p>
+          </div>
+        </div>
+      );
+    }
+    default: {
+      const escaped = attackDemo
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      return (
+        <div className="bg-white rounded-lg p-3 border border-emerald-200">
+          <code className="text-xs font-mono text-emerald-700 break-all">{escaped}</code>
+        </div>
+      );
+    }
+  }
+};
 
 export default function XSSLab() {
   const { xssCompletedLevels, addXssLevel, completeModule, setCurrentPage } = useAppStore();
   const t = useTranslations('xss');
   const [activeTab, setActiveTab] = useState(xssTypes[0].id);
-  const [sanitized, setSanitized] = useState(false);
   const [showAttack, setShowAttack] = useState(false);
 
   const currentXss = xssTypes.find((x) => x.id === activeTab) || xssTypes[0];
@@ -36,42 +140,6 @@ export default function XSSLab() {
         completeModule('xss');
       }
     }
-  };
-
-  const renderSimulatedPreview = () => {
-    const attackCode = currentXss.attackDemo;
-    if (sanitized) {
-      const escaped = attackCode
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-      return (
-        <div className="bg-white rounded-lg p-4 border border-emerald-200">
-          <p className="text-xs text-slate-500 mb-2">{t('sanitizedPreview')}</p>
-          <code className="text-xs bg-slate-100 px-2 py-1 rounded block font-mono break-all">
-            {escaped}
-          </code>
-          <p className="text-xs text-emerald-600 mt-2">
-            {t('codeExecuted')}
-          </p>
-        </div>
-      );
-    }
-    return (
-      <div className="bg-white rounded-lg p-4 border border-red-200">
-        <p className="text-xs text-slate-500 mb-2">{t('unsafePreview')}</p>
-        <div className="bg-red-50 rounded-lg p-3 border border-red-200">
-          <p className="text-sm font-mono text-red-700 break-all">
-            {attackCode}
-          </p>
-        </div>
-        <p className="text-xs text-red-600 mt-2 font-medium">
-          {t('warning')}
-        </p>
-      </div>
-    );
   };
 
   return (
@@ -114,33 +182,6 @@ export default function XSSLab() {
                 }`}
               />
             ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Sanitization toggle */}
-      <Card className="border-slate-200">
-        <CardContent className="p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold flex items-center gap-2">
-                <ShieldAlert size={16} className="text-amber-500" />
-                {t('sanitizationToggle')}
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                {t('toggleExplanation')}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Label htmlFor="sanitize-toggle" className="text-xs">
-                {sanitized ? t('safeMode') : t('unsafeMode')}
-              </Label>
-              <Switch
-                id="sanitize-toggle"
-                checked={sanitized}
-                onCheckedChange={setSanitized}
-              />
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -225,14 +266,19 @@ export default function XSSLab() {
                       >
                         <div className="space-y-3">
                           <p className="text-xs text-slate-500">Payload атаки:</p>
-                          <div className="bg-slate-50 rounded-lg p-3">
+                          <div className="bg-slate-50 rounded-lg p-3 border border-red-200">
                             <code className="text-xs font-mono text-red-600 break-all">
                               {xss.attackDemo}
                             </code>
                           </div>
 
-                          <p className="text-xs text-slate-500">Результат вывода:</p>
-                          {renderSimulatedPreview()}
+                          <p className="text-xs text-slate-500">Результат вывода (без защиты):</p>
+                          <div className="bg-white rounded-lg p-3 border border-red-200">
+                            <p className="text-[11px] text-red-600 font-medium">⚠ Код выполнится — пользовательская вставка не обработана</p>
+                          </div>
+
+                          <p className="text-xs text-slate-500">Применённая защита:</p>
+                          {renderDefense(xss.id, xss.attackDemo)}
 
                           <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
                             <h4 className="text-xs font-semibold text-blue-700 mb-1">💡 Защита</h4>
