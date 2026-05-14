@@ -83,5 +83,5 @@ export function validateEnv(): Env {
   return result.data;
 }
 
-// Export validated env object for type-safe access
-export const env = validateEnv();
+// Validate at module load time for early error detection
+validateEnv();

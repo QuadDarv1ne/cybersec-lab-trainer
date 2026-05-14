@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { sqlChallenges } from '@/lib/security-data';
 import { useTranslations } from '@/lib/intlStub';
@@ -24,6 +24,13 @@ export default function SQLInjectionLab() {
   const challenge = sqlChallenges[activeChallenge];
   const isCompleted = sqlCompletedLevels.includes(challenge.id);
   const allCompleted = sqlCompletedLevels.length === sqlChallenges.length;
+
+  // Complete module when all SQL levels completed
+  useEffect(() => {
+    if (allCompleted && sqlCompletedLevels.length > 0) {
+      completeModule('sql-injection');
+    }
+  }, [allCompleted, sqlCompletedLevels.length]);
 
   const checkAnswer = () => {
     const input = userInput.trim();
