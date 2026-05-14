@@ -1,110 +1,48 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAppStore } from '@/lib/store';
+import { csrfChallenges, csrfMitigations } from '@/lib/data/csrf-data';
 import CodeBlock from './CodeBlock';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from '@/lib/intlStub';
-import { ChevronLeft, ArrowRight, ArrowLeft, CheckCircle2, AlertTriangle, Lock, Globe, Server, ShieldCheck } from 'lucide-react';
+import { ChevronLeft, CheckCircle2, ChevronRight, Shield, Lightbulb, AlertTriangle, Lock } from 'lucide-react';
 
-const attackSteps = [
-  {
-    id: 1,
-    description: 'Пользователь заходит на bank.com и успешно проходит аутентификацию. Сервер устанавливает сессионную куку в браузер.',
-    detail: 'Set-Cookie: session_id=abc123; Domain=bank.com; Path=/',
-    icon: <Globe size={20} className="text-emerald-600" />,
-    color: 'border-emerald-300 bg-emerald-50',
-  },
-  {
-    id: 2,
-    description: 'Пользователь переходит на evil.com, который содержит скрытую HTML-форму, автоматически отправляющую запрос к bank.com.',
-    detail: 'На evil.com загружается страница с невидимой формой, JavaScript автоматически отправляет POST-запрос.',
-    icon: <AlertTriangle size={20} className="text-amber-600" />,
-    color: 'border-amber-300 bg-amber-50',
-  },
-  {
-    id: 3,
-    description: 'Скрытая форма на evil.com автоматически отправляет POST-запрос к bank.com/transfer с параметрами перевода.',
-    detail: 'POST /transfer HTTP/1.1\nHost: bank.com\nCookie: session_id=abc123\n\namount=10000&to=attacker_account',
-    icon: <Server size={20} className="text-orange-600" />,
-    color: 'border-orange-300 bg-orange-50',
-  },
-  {
-    id: 4,
-    description: 'Банк получает запрос с корректной сессионной кукой и выполняет перевод. Сервер не может отличить этот запрос от легитимного действия пользователя.',
-    detail: 'Сервер проверяет session_id → cookie валиден → выполняет перевод. Деньги переведены злоумышленнику!',
-    icon: <AlertTriangle size={20} className="text-red-600" />,
-    color: 'border-red-300 bg-red-50',
-  },
-];
-
-const defenseMechanisms = [
-  {
-    description: 'Сервер генерирует уникальный случайный токен для каждой формы и сохраняет его в сессии. При отправке формы токен проверяется на сервере. Злоумышленник не может получить токен из-за Same-Origin Policy.',
-    code: `// Генерация CSRF-токена
-app.use(csrf({ cookie: true }));
-
-// В форме
-<form action="/transfer" method="POST">
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-  <input name="amount" type="number">
-  <button type="submit">Перевести</button>
-</form>`,
-  },
-  {
-    description: 'Атрибут SameSite контролирует, когда куки отправляются с кросс-сайтовыми запросами. SameSite=Strict полностью блокирует, SameSite=Lax разрешает только навигационные GET-запросы.',
-    code: `// Настройка куки с SameSite
-Set-Cookie: session_id=abc123;
-  SameSite=Strict;
-  Secure;
-  HttpOnly
-
-// Express.js
-app.use(session({
-  cookie: {
-    sameSite: 'strict',
-    secure: true,
-    httpOnly: true
-  }
-}));`,
-  },
-  {
-    description: 'Сервер проверяет заголовок Referer или Origin входящего запроса. Если запрос приходит не с собственного домена — он отклоняется.',
-    code: `// Проверка Origin заголовка
-app.post('/transfer', (req, res) => {
-  const origin = req.headers.origin;
-  if (origin !== 'https://bank.com') {
-    return res.status(403).json({
-      error: 'CSRF: неверный Origin'
-    });
-  }
-  // Обработка перевода...
-});`,
-  },
-];
+const levelColors: Record<string, string> = {
+  'Новичок': 'bg-emerald-100 text-emerald-700',
+  'Средний': 'bg-amber-100 text-amber-700',
+  'Продвинутый': 'bg-orange-100 text-orange-700',
+  'Эксперт': 'bg-red-100 text-red-700',
+};
 
 export default function CSRFLab() {
   const { completedModules, completeModule, setCurrentPage } = useAppStore();
   const t = useTranslations('csrf');
-  const [currentStep, setCurrentStep] = useState(0);
+  const [activeChallenge, setActiveChallenge] = useState(0);
   const [showDefense, setShowDefense] = useState(false);
-  const [activeDefense, setActiveDefense] = useState(0);
+  const [activeMitigation, setActiveMitigation] = useState<number | null>(null);
 
   const isCompleted = completedModules.includes('csrf');
+  const challenge = csrfChallenges[activeChallenge];
 
-  // Auto-complete when user has viewed all attack steps and defense
-  useEffect(() => {
-    if (
-      !isCompleted &&
-      showDefense &&
-      currentStep === attackSteps.length - 1
-    ) {
-      completeModule('csrf');
+  const handleNext = () => {
+    if (activeChallenge < csrfChallenges.length - 1) {
+      setActiveChallenge(activeChallenge + 1);
+    } else {
+      setShowDefense(true);
     }
-  }, [showDefense, currentStep, isCompleted]); // eslint-disable-line react-hooks/exhaustive-deps
+  };
+
+  const handlePrev = () => {
+    if (showDefense) {
+      setShowDefense(false);
+    } else {
+      setActiveChallenge(Math.max(0, activeChallenge - 1));
+    }
+  };
 
   const handleComplete = () => {
     if (!isCompleted) {
@@ -131,115 +69,95 @@ export default function CSRFLab() {
       {/* What is CSRF */}
       <Card className="border-slate-200">
         <CardContent className="p-5">
-          <h2 className="font-semibold mb-2">Что такое CSRF?</h2>
+          <h2 className="font-semibold mb-2">{t('whatIsCsrf')}</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
-            CSRF — это атака, при которой злоумышленник заставляет браузер аутентифицированного пользователя
-            выполнить нежелательное действие на сайте, на котором пользователь уже авторизован. Атака
-            эксплуатирует то, что браузер автоматически прикрепляет куки аутентификации к каждому запросу
-            к домену, для которого они установлены. Злоумышленник создаёт вредоносную страницу с
-            скрытой HTML-формой, которая автоматически отправляет запрос к целевому сайту.
+            {t('whatIsCsrfDescription')}
           </p>
         </CardContent>
       </Card>
 
-      {/* Attack simulation */}
-      <Card className="border-slate-200">
-        <CardContent className="p-5">
-          <h3 className="text-sm font-semibold mb-1">🎭 {t('simulation')}</h3>
-          <p className="text-xs text-slate-500 mb-4">
-            {t('attackSteps')}
-          </p>
+      {/* Challenge selector */}
+      <div className="flex flex-wrap gap-2">
+        {csrfChallenges.map((c, i) => (
+          <button
+            key={c.id}
+            onClick={() => { setActiveChallenge(i); setShowDefense(false); }}
+            aria-label={`Челлендж ${c.title}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              i === activeChallenge && !showDefense
+                ? 'bg-emerald-600 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            {i + 1}. {c.title}
+          </button>
+        ))}
+      </div>
 
-          {/* Steps */}
-          <div className="space-y-3">
-            {attackSteps.map((step, i) => (
-              <motion.div
-                key={step.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.1, duration: 0.3 }}
-                className={`rounded-lg border-2 p-4 transition-all duration-300 ${
-                  i <= currentStep ? step.color : 'border-slate-100 bg-slate-50 opacity-50'
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 ${
-                      i <= currentStep ? 'bg-slate-800' : 'bg-slate-300'
-                    }`}
-                  >
-                    {i + 1}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      {step.icon}
-                      <h4 className="text-sm font-semibold">{t(`step${i + 1}` as const)}</h4>
+      {/* Current challenge */}
+      {!showDefense && (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={challenge.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Card className="border-slate-200">
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Badge className={levelColors[challenge.level] || 'bg-slate-100 text-slate-700'}>
+                    {challenge.level}
+                  </Badge>
+                  <h3 className="font-semibold">{challenge.title}</h3>
+                </div>
+
+                <p className="text-sm text-slate-600">{challenge.description}</p>
+
+                {/* Vulnerable scenario */}
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-amber-800">{t('vulnerableScenario')}</h4>
+                      <p className="text-xs text-amber-700 mt-1">{challenge.vulnerableScenario}</p>
                     </div>
-                    <AnimatePresence>
-                      {i <= currentStep && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                        >
-                          <p className="text-xs text-slate-600 leading-relaxed mb-2">
-                            {step.description}
-                          </p>
-                          <div className="bg-white/70 rounded p-2">
-                            <code className="text-[11px] font-mono text-slate-700 whitespace-pre-wrap">
-                              {step.detail}
-                            </code>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </div>
 
-          {/* Navigation */}
-          <div className="flex justify-between mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-              disabled={currentStep === 0}
-            >
-              <ArrowLeft size={14} className="mr-1" /> {t('back')}
-            </Button>
-            <div className="flex gap-1">
-              {attackSteps.map((step, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentStep(i)}
-                  aria-label={`Шаг ${i + 1}: ${step.description.substring(0, 50)}`}
-                  className={`w-2.5 h-2.5 rounded-full transition-all ${
-                    i <= currentStep ? 'bg-emerald-500' : 'bg-slate-300'
-                  }`}
-                />
-              ))}
-            </div>
-            {currentStep < attackSteps.length - 1 ? (
-              <Button
-                size="sm"
-                className="bg-emerald-600 hover:bg-emerald-700"
-                onClick={() => setCurrentStep(currentStep + 1)}
-              >
-                {t('next')} <ArrowRight size={14} className="ml-1" />
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                className="bg-emerald-600 hover:bg-emerald-700"
-                onClick={() => setShowDefense(true)}
-              >
-                {t('protection')} <ShieldCheck size={14} className="ml-1" />
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                {/* Attack code */}
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">{t('attackCode')}</h4>
+                  <CodeBlock code={challenge.attackCode} language="html" title="attack.html" />
+                </div>
+
+                {/* Explanation */}
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <Lightbulb size={16} className="text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-emerald-800">{t('explanation')}</h4>
+                      <p className="text-xs text-emerald-700 mt-1">{challenge.explanation}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mitigation */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <Shield size={16} className="text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-blue-800">{t('mitigation')}</h4>
+                      <p className="text-xs text-blue-700 mt-1">{challenge.mitigation}</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </AnimatePresence>
+      )}
 
       {/* Defense mechanisms */}
       {showDefense && (
@@ -250,41 +168,39 @@ export default function CSRFLab() {
         >
           <Card className="border-emerald-200 bg-emerald-50">
             <CardContent className="p-5">
-              <h3 className="text-sm font-semibold text-emerald-800 mb-1 flex items-center gap-2">
-                <ShieldCheck size={16} />
+              <h3 className="text-sm font-semibold text-emerald-800 flex items-center gap-2">
+                <Shield size={16} />
                 {t('protection')}
               </h3>
-              <p className="text-xs text-emerald-700">
-                {t('protectionExplanation')}
-              </p>
+              <p className="text-xs text-emerald-700 mt-1">{t('protectionExplanation')}</p>
             </CardContent>
           </Card>
 
           <div className="space-y-3">
-            {defenseMechanisms.map((def, i) => (
+            {csrfMitigations.map((m, i) => (
               <Card
                 key={i}
                 className="border-slate-200 cursor-pointer hover:border-emerald-300 transition-colors"
-                onClick={() => setActiveDefense(activeDefense === i ? -1 : i)}
+                onClick={() => setActiveMitigation(activeMitigation === i ? null : i)}
               >
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold">{t(`defense${['Tokens', 'SameSite', 'Origin'][i]}` as const)}</h4>
+                    <h4 className="text-sm font-semibold">{m.technique}</h4>
                     <Badge variant="outline" className="text-[10px]">
-                      {activeDefense === i ? 'Скрыть' : 'Показать код'}
+                      {activeMitigation === i ? t('hide') : t('showCode')}
                     </Badge>
                   </div>
-                  <p className="text-xs text-slate-600 mt-2 leading-relaxed">{def.description}</p>
+                  <p className="text-xs text-slate-600 mt-2 leading-relaxed">{m.description}</p>
 
                   <AnimatePresence>
-                    {activeDefense === i && (
+                    {activeMitigation === i && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
                       >
                         <div className="mt-3">
-                          <CodeBlock code={def.code} language="javascript" title="defense.js" />
+                          <CodeBlock code={m.implementation} language="javascript" title="defense.js" />
                         </div>
                       </motion.div>
                     )}
@@ -293,22 +209,60 @@ export default function CSRFLab() {
               </Card>
             ))}
           </div>
+        </motion.div>
+      )}
 
-          {/* Complete */}
-          {!isCompleted ? (
+      {/* Navigation */}
+      <div className="flex items-center justify-between">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handlePrev}
+          disabled={(!showDefense && activeChallenge === 0)}
+        >
+          <ChevronLeft size={14} className="mr-1" /> {t('back')}
+        </Button>
+
+        <div className="flex gap-1">
+          {csrfChallenges.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => { setActiveChallenge(i); setShowDefense(false); }}
+              aria-label={`Перейти к челленджу ${i + 1}`}
+              className={`w-2.5 h-2.5 rounded-full transition-all ${
+                i === activeChallenge && !showDefense ? 'bg-emerald-500' : 'bg-slate-300'
+              }`}
+            />
+          ))}
+          {showDefense && (
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-600" aria-label="Защита" />
+          )}
+        </div>
+
+        {!showDefense ? (
+          <Button
+            size="sm"
+            className="bg-emerald-600 hover:bg-emerald-700"
+            onClick={handleNext}
+          >
+            {activeChallenge < csrfChallenges.length - 1 ? t('next') : t('protection')} <ChevronRight size={14} className="ml-1" />
+          </Button>
+        ) : (
+          isCompleted ? (
+            <div className="text-sm text-emerald-600 font-medium flex items-center gap-2">
+              <CheckCircle2 size={16} /> {t('moduleComplete')}
+            </div>
+          ) : (
             <Button
-              className="w-full bg-emerald-600 hover:bg-emerald-700"
+              size="sm"
+              className="bg-emerald-600 hover:bg-emerald-700"
               onClick={handleComplete}
             >
               {t('markComplete')}
             </Button>
-          ) : (
-            <div className="text-center text-sm text-emerald-600 font-medium flex items-center justify-center gap-2">
-              <CheckCircle2 size={16} /> {t('moduleComplete')}
-            </div>
-          )}
-        </motion.div>
-      )}
+          )
+        )}
+      </div>
     </div>
   );
 }
