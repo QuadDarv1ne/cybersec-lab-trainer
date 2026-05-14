@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import CodeBlock from './CodeBlock';
 import { Card, CardContent } from '@/components/ui/card';
@@ -91,19 +91,30 @@ export default function AuthSecurityLab() {
   };
   const crackTime = getCrackTime();
 
-  // Simulated hash
-  const getSimulatedHash = () => {
-    if (!hashInput) return '';
-    let hash = 0;
-    const salt = 'a1b2c3d4e5f6';
-    for (let i = 0; i < hashInput.length; i++) {
-      const char = hashInput.charCodeAt(i);
-      hash = ((hash << 5) - hash + char + salt.charCodeAt(i % salt.length)) | 0;
+  // Simulated hash using Web Crypto API (SHA-256)
+  const [simulatedHash, setSimulatedHash] = useState('');
+
+  useEffect(() => {
+    if (!hashInput) {
+      setSimulatedHash('');
+      return;
     }
-    const hexHash = Math.abs(hash).toString(16).padStart(8, '0');
-    return `$2b$12$${salt}$${hexHash.repeat(8)}`;
-  };
-  const simulatedHash = getSimulatedHash();
+    let cancelled = false;
+    const computeHash = async () => {
+      const salt = 'a1b2c3d4e5f6';
+      const encoder = new TextEncoder();
+      const data = encoder.encode(salt + hashInput);
+      const buffer = await crypto.subtle.digest('SHA-256', data);
+      const hashHex = Array.from(new Uint8Array(buffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+      if (!cancelled) {
+        setSimulatedHash(hashHex);
+      }
+    };
+    computeHash();
+    return () => { cancelled = true; };
+  }, [hashInput]);
 
   const handleComplete = () => {
     if (!isCompleted) completeModule('auth');

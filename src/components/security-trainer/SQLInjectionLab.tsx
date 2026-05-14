@@ -30,19 +30,29 @@ export default function SQLInjectionLab() {
     if (!input) return;
     setShowResult(true);
 
-    // Validate that the input contains meaningful SQL injection patterns
-    const hasSqlInjectionPattern = (val: string): boolean => {
-      const lower = val.toLowerCase();
-      const patterns = ["'", '"', '--', ';', 'union', 'select', 'drop', 'or ', 'and ', 'order by', 'load_file', 'into outfile'];
-      return patterns.some(p => lower.includes(p));
+    // Per-challenge validation: input must contain keywords specific to this challenge
+    const requiredKeywords: Record<string, string[]> = {
+      'beginner-1': ["'", 'or'],
+      'beginner-2': ["'", '--'],
+      'beginner-3': ["'", 'and'],
+      'intermediate-1': ['order by'],
+      'intermediate-2': ['union', 'select'],
+      'advanced-1': ['union', 'select'],
+      'advanced-2': ['union', 'information_schema'],
+      'expert-1': ['drop table'],
+      'expert-2': ['load_file'],
+      'expert-3': ['into outfile'],
     };
 
-    if (hasSqlInjectionPattern(input)) {
+    const validateForChallenge = (val: string, challengeId: string): boolean => {
+      const lower = val.toLowerCase();
+      const keywords = requiredKeywords[challengeId] ?? ["'", '"', '--', ';', 'union', 'select'];
+      return keywords.every(kw => lower.includes(kw));
+    };
+
+    if (validateForChallenge(input, challenge.id)) {
       if (!isCompleted) {
         addSqlLevel(challenge.id);
-        if (sqlCompletedLevels.length + 1 === sqlChallenges.length) {
-          completeModule('sql-injection');
-        }
       }
     } else {
       setShowResult(false);
