@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { securityHeaders, headerChallenges } from '@/lib/data/security-headers-data';
 import CodeBlock from './CodeBlock';
@@ -36,6 +36,13 @@ export default function SecurityHeadersLab() {
   const challenge = headerChallenges[activeChallenge];
   const isAnswered = answeredChallenges.has(activeChallenge);
 
+  // Complete module only when all challenges answered AND all correct
+  useEffect(() => {
+    if (answeredChallenges.size === headerChallenges.length && correctCount === headerChallenges.length) {
+      completeModule('security-headers');
+    }
+  }, [answeredChallenges.size, correctCount]);
+
   const handleSelectOption = (index: number) => {
     if (isAnswered) return;
     setSelectedOption(index);
@@ -49,10 +56,6 @@ export default function SecurityHeadersLab() {
     newAnswered.add(activeChallenge);
     setAnsweredChallenges(newAnswered);
     if (isCorrect) setCorrectCount((c) => c + 1);
-
-    if (newAnswered.size === headerChallenges.length) {
-      completeModule('security-headers');
-    }
   };
 
   const nextChallenge = () => {

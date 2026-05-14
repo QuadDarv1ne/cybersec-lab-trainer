@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { xssTypes } from '@/lib/security-data';
 import CodeBlock from './CodeBlock';
@@ -133,13 +133,16 @@ export default function XSSLab() {
   const currentXss = xssTypes.find((x) => x.id === activeTab) || xssTypes[0];
   const allCompleted = xssCompletedLevels.length === xssTypes.length;
 
-  const handleMarkComplete = (id: string) => {
-    if (!xssCompletedLevels.includes(id)) {
-      addXssLevel(id);
-      if (xssCompletedLevels.length + 1 === xssTypes.length) {
-        completeModule('xss');
-      }
+  // Complete module when all XSS levels completed
+  useEffect(() => {
+    if (allCompleted && xssCompletedLevels.length > 0) {
+      completeModule('xss');
     }
+  }, [allCompleted, xssCompletedLevels.length]);
+
+  const handleMarkComplete = (id: string) => {
+    if (xssCompletedLevels.includes(id)) return;
+    addXssLevel(id);
   };
 
   return (

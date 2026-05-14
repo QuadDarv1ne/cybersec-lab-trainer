@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { owaspTopics } from '@/lib/security-data';
 import { useTranslations } from '@/lib/intlStub';
@@ -20,12 +21,16 @@ export default function OWASPTop10() {
   const totalCount = owaspTopics.length;
   const allStudied = studiedCount === totalCount;
 
+  // Complete module when all topics studied
+  useEffect(() => {
+    if (allStudied && studiedCount > 0) {
+      completeModule('owasp');
+    }
+  }, [allStudied, studiedCount]);
+
   const handleToggleStudied = (id: string) => {
     if (studiedOwaspItems.includes(id)) return;
     addStudiedOwasp(id);
-    if (studiedOwaspItems.length + 1 === totalCount) {
-      completeModule('owasp');
-    }
   };
 
   return (
