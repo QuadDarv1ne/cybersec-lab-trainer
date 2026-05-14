@@ -52,17 +52,26 @@ export default function QuizSystem() {
   const [answers, setAnswers] = useState<(boolean | null)[]>([]);
   const [timerActive, setTimerActive] = useState(false);
   const timeUpRef = useRef(false);
+  const currentQuestionRef = useRef(0);
 
-  // Stable callback for time-up
+  // Keep ref in sync with current question index
+  useEffect(() => {
+    currentQuestionRef.current = currentQuestion;
+  }, [currentQuestion]);
+
+  // Stable callback for time-up — uses ref to avoid stale closure
   const handleTimeUp = useCallback(() => {
     setTimerActive(false);
     setShowAnswer(true);
+    // Only mark as wrong if no answer was recorded yet
     setAnswers((prev) => {
+      const idx = currentQuestionRef.current;
+      if (prev[idx] !== null && prev[idx] !== undefined) return prev;
       const newAnswers = [...prev];
-      newAnswers[currentQuestion] = false;
+      newAnswers[idx] = false;
       return newAnswers;
     });
-  }, [currentQuestion]);
+  }, []);
 
   // Timer using setInterval to avoid overlapping timeouts
   useEffect(() => {
@@ -84,7 +93,7 @@ export default function QuizSystem() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timerActive, handleTimeUp]);
+  }, [timerActive]);
 
   const categoryQuestions = quizQuestions.filter((q) => {
     const catId = quizCategories.find((c) => c.name === activeCategory)?.id;
@@ -145,7 +154,9 @@ export default function QuizSystem() {
   };
 
   const question = categoryQuestions[currentQuestion];
-  const finalScore = Math.round((correctCount / categoryQuestions.length) * 100);
+  const finalScore = categoryQuestions.length > 0
+    ? Math.round((correctCount / categoryQuestions.length) * 100)
+    : 0;
 
   return (
     <div className="space-y-6">

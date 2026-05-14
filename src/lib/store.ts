@@ -139,13 +139,18 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
 
   set({ syncStatus: 'syncing' });
   try {
-    await apiClient.saveProgress(
-      state.userId,
-      'all',
-      state.completedModules.length > 0,
-      Object.values(state.quizScores).reduce((a, b) => a + b, 0)
-    );
+    // Save each completed module individually
+    for (const moduleId of state.completedModules) {
+      await apiClient.saveProgress(state.userId, moduleId, true, 100);
+    }
 
+    // Save aggregate 'all' record for backward compatibility with load-progress
+    if (state.completedModules.length > 0) {
+      const maxQuizScore = Math.max(0, ...Object.values(state.quizScores));
+      await apiClient.saveProgress(state.userId, 'all', true, maxQuizScore);
+    }
+
+    // Save quiz results (each category upserted by quizId unique constraint)
     for (const [category, score] of Object.entries(state.quizScores)) {
       const total = quizCategories.find((c) => c.id === category)?.count ?? 100;
       await apiClient.saveQuizResults(state.userId, category, score, total);
