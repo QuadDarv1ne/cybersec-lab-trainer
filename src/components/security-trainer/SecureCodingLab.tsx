@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { secureCodingChallenges } from '@/lib/security-data';
 import CodeBlock from './CodeBlock';
@@ -31,6 +31,13 @@ export default function SecureCodingLab() {
   const isAnswered = answeredChallenges.has(activeChallenge);
   const isCompleted = completedModules.includes('secure-coding');
 
+  // Complete module only when all challenges answered AND all correct
+  useEffect(() => {
+    if (answeredChallenges.size === secureCodingChallenges.length && correctCount === secureCodingChallenges.length) {
+      completeModule('secure-coding');
+    }
+  }, [answeredChallenges.size, correctCount]);
+
   const handleSelectOption = (index: number) => {
     if (isAnswered) return;
     setSelectedOption(index);
@@ -44,10 +51,6 @@ export default function SecureCodingLab() {
     newAnswered.add(activeChallenge);
     setAnsweredChallenges(newAnswered);
     if (isCorrect) setCorrectCount((c) => c + 1);
-
-    if (newAnswered.size === secureCodingChallenges.length) {
-      completeModule('secure-coding');
-    }
   };
 
   const nextChallenge = () => {
