@@ -66,7 +66,7 @@ export const achievements: Achievement[] = [
     id: 'full-completion',
     title: 'Полное прохождение',
     description: 'Завершите все обучающие модули платформы.',
-    condition: 'Пройдите все 8 модулей',
+    condition: 'Пройдите все модули',
   },
   {
     id: 'headers-master',

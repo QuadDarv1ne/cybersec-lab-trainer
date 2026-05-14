@@ -2,6 +2,7 @@
 
 import { useAppStore } from '@/lib/store';
 import { modules, achievements } from '@/lib/security-data';
+import { quizCategories } from '@/lib/data/quiz-data';
 import { getAchievementStatus } from '@/lib/achievement-utils';
 import { useTranslations } from '@/lib/intlStub';
 import { Card, CardContent } from '@/components/ui/card';
@@ -354,8 +355,8 @@ export default function Dashboard() {
                       <ChevronRight size={16} className="text-slate-300 group-hover:text-amber-500 transition-colors mt-1 shrink-0" />
                     </div>
                     <div className="flex items-center gap-2 mt-3">
-                      <Badge className="bg-amber-100 text-amber-700 border-0 text-[10px]">{t('quizCard.categories', { count: 5 })}</Badge>
-                      <span className="text-[11px] text-slate-400">{t('quizCard.questions', { count: 25 })}</span>
+                      <Badge className="bg-amber-100 text-amber-700 border-0 text-[10px]">{t('quizCard.categories', { count: quizCategories.length })}</Badge>
+                      <span className="text-[11px] text-slate-400">{t('quizCard.questions', { count: quizCategories.reduce((sum, c) => sum + c.count, 0) })}</span>
                     </div>
                   </div>
                 </div>
