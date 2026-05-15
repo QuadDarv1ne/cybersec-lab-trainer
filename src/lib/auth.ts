@@ -3,9 +3,6 @@ import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { db } from "./db";
-import { validateEnv } from "./env";
-
-validateEnv();
 
 const providers: NextAuthOptions["providers"] = [];
 
