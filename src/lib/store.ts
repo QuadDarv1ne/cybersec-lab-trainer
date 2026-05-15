@@ -48,6 +48,8 @@ type AppStore = AppState & AppActions;
 // Prevent concurrent sync calls; always uses latest state
 let isSyncing = false;
 let syncRequested = false;
+let syncRetryCount = 0;
+const MAX_SYNC_RETRIES = 3;
 
 const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>) => void) => {
   if (isSyncing) {
@@ -55,12 +57,17 @@ const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>)
     return;
   }
   isSyncing = true;
-  syncRequested = false;
-  await syncWithDatabase(get(), set);
-  isSyncing = false;
-  if (syncRequested) {
+  syncRetryCount = 0;
+
+  try {
+    // Loop to handle pending sync requests without recursion
+    do {
+      syncRequested = false;
+      await syncWithDatabase(get(), set);
+    } while (syncRequested && ++syncRetryCount < MAX_SYNC_RETRIES);
+  } finally {
+    isSyncing = false;
     syncRequested = false;
-    await ensureSync(get, set);
   }
 };
 
@@ -181,6 +188,7 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
     }
   } catch (error) {
     console.error('Failed to load progress from database:', error);
+    set({ syncStatus: 'error' });
   }
 };
 
