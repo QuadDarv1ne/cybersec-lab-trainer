@@ -15,16 +15,40 @@ const RATE_LIMIT = {
 // Store for tracking requests (in-memory, use Redis for production)
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
 
-// Periodic cleanup of expired entries
+// Periodic cleanup of expired entries — runs once per module lifetime
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, value] of requestCounts.entries()) {
-    if (now > value.resetTime) {
-      requestCounts.delete(key);
+let cleanupInterval: ReturnType<typeof setInterval> | null = null;
+
+function startCleanupInterval(): void {
+  if (cleanupInterval !== null) return; // already running
+  cleanupInterval = setInterval(() => {
+    const now = Date.now();
+    for (const [key, value] of requestCounts.entries()) {
+      if (now > value.resetTime) {
+        requestCounts.delete(key);
+      }
     }
+  }, CLEANUP_INTERVAL_MS);
+}
+
+// Start cleanup on first module load
+startCleanupInterval();
+
+// Clean up interval on process shutdown (prevents leak in dev hot-reload / serverless cold start)
+function stopCleanupInterval(): void {
+  if (cleanupInterval !== null) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = null;
   }
-}, CLEANUP_INTERVAL_MS);
+}
+
+if (typeof process !== 'undefined') {
+  process.on('SIGTERM', stopCleanupInterval);
+  process.on('SIGINT', stopCleanupInterval);
+  // In Next.js dev mode the module is re-evaluated on each rebuild;
+  // SIGTERM/SIGINT won't fire between hot-reloads, but the guard in
+  // startCleanupInterval prevents duplicate intervals regardless.
+}
 
 /**
  * Rate limiting middleware

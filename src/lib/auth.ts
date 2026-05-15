@@ -7,7 +7,7 @@ import { validateEnv } from "./env";
 
 validateEnv();
 
-const providers = [];
+const providers: NextAuthOptions["providers"] = [];
 
 if (process.env.GITHUB_ID && process.env.GITHUB_SECRET) {
   providers.push(
