@@ -35,9 +35,9 @@ interface AppActions {
   completeModule: (moduleId: string) => Promise<void>;
   setQuizScore: (category: string, score: number) => Promise<void>;
   resetProgress: () => Promise<void>;
-  addStudiedOwasp: (id: string) => Promise<void>;
-  addSqlLevel: (level: string) => Promise<void>;
-  addXssLevel: (level: string) => Promise<void>;
+  addStudiedOwasp: (id: string) => void;
+  addSqlLevel: (level: string) => void;
+  addXssLevel: (level: string) => void;
   setUserId: (userId: string | null) => void;
   syncWithDatabase: () => Promise<void>;
   loadFromDatabase: (userId: string) => Promise<void>;
@@ -228,31 +228,28 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     await ensureSync(get, set);
   },
 
-  addStudiedOwasp: async (id: string) => {
+  addStudiedOwasp: (id: string) => {
     set((state) => ({
       studiedOwaspItems: state.studiedOwaspItems.includes(id)
         ? state.studiedOwaspItems
         : [...state.studiedOwaspItems, id],
     }));
-    await ensureSync(get, set);
   },
 
-  addSqlLevel: async (level: string) => {
+  addSqlLevel: (level: string) => {
     set((state) => ({
       sqlCompletedLevels: state.sqlCompletedLevels.includes(level)
         ? state.sqlCompletedLevels
         : [...state.sqlCompletedLevels, level],
     }));
-    await ensureSync(get, set);
   },
 
-  addXssLevel: async (level: string) => {
+  addXssLevel: (level: string) => {
     set((state) => ({
       xssCompletedLevels: state.xssCompletedLevels.includes(level)
         ? state.xssCompletedLevels
         : [...state.xssCompletedLevels, level],
     }));
-    await ensureSync(get, set);
   },
 
   setUserId: (userId: string | null) => set({ userId }),
