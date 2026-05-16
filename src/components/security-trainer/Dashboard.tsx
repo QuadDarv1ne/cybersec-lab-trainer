@@ -71,7 +71,7 @@ const achievementIcons: Record<string, React.ReactNode> = {
 };
 
 export default function Dashboard() {
-  const { setCurrentPage, completedModules, quizScores, toggleSidebar } = useAppStore();
+  const { setCurrentPage, completedModules, quizScores, toggleSidebar, owaspChallengeScores, authChallengeScores } = useAppStore();
   const t = useTranslations('dashboard');
   const tCommon = useTranslations('common');
 
@@ -89,8 +89,9 @@ export default function Dashboard() {
         )
       : 0;
 
-  const unlockedAchievements = achievements.filter((a) => getAchievementStatus(a.id, completedModules, quizScores));
-  const nextAchievement = achievements.find((a) => !getAchievementStatus(a.id, completedModules, quizScores));
+  const challengeStats = { owaspCorrect: owaspChallengeScores.correct, authCorrect: authChallengeScores.correct };
+  const unlockedAchievements = achievements.filter((a) => getAchievementStatus(a.id, completedModules, quizScores, challengeStats));
+  const nextAchievement = achievements.find((a) => !getAchievementStatus(a.id, completedModules, quizScores, challengeStats));
 
   // Recommendations
   const getRecommendation = () => {

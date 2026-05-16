@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 
 export default function AuthSecurityLab() {
-  const { completeModule, setCurrentPage, completedModules } = useAppStore();
+  const { completeModule, setCurrentPage, completedModules, setAuthChallengeScore, authChallengeScores } = useAppStore();
   const t = useTranslations('auth');
   const isCompleted = completedModules.includes('auth');
 
@@ -39,8 +39,8 @@ export default function AuthSecurityLab() {
   const [activeChallenge, setActiveChallenge] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set());
+  const [correctCount, setCorrectCount] = useState(authChallengeScores.correct);
+  const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set(authChallengeScores.answered));
 
   const currentChallenge = authChallenges[activeChallenge];
   const isChallengeAnswered = answeredChallenges.has(activeChallenge);
@@ -56,7 +56,10 @@ export default function AuthSecurityLab() {
     const newAnswered = new Set(answeredChallenges);
     newAnswered.add(activeChallenge);
     setAnsweredChallenges(newAnswered);
-    if (currentChallenge.options[selectedOption].correct) setCorrectCount((c) => c + 1);
+    const isCorrect = currentChallenge.options[selectedOption].correct;
+    const newCorrect = isCorrect ? correctCount + 1 : correctCount;
+    setCorrectCount(newCorrect);
+    setAuthChallengeScore(newCorrect, [...newAnswered]);
   };
 
   const nextChallenge = () => {

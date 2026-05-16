@@ -55,11 +55,12 @@ const achievementIcons: Record<string, React.ReactNode> = {
 
 export default function AchievementsAndGlossary() {
   const t = useTranslations('achievements');
-  const { setCurrentPage, completedModules, quizScores } = useAppStore();
+  const { setCurrentPage, completedModules, quizScores, owaspChallengeScores, authChallengeScores } = useAppStore();
   const [activeTab, setActiveTab] = useState<'achievements' | 'glossary'>('achievements');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const unlockedCount = achievementDefs.filter((a) => getAchievementStatus(a.id, completedModules, quizScores)).length;
+  const challengeStats = { owaspCorrect: owaspChallengeScores.correct, authCorrect: authChallengeScores.correct };
+  const unlockedCount = achievementDefs.filter((a) => getAchievementStatus(a.id, completedModules, quizScores, challengeStats)).length;
 
   const filteredTerms = glossaryTerms.filter(
     (t) =>
@@ -123,7 +124,7 @@ export default function AchievementsAndGlossary() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {achievementDefs.map((ach, i) => {
-              const unlocked = getAchievementStatus(ach.id, completedModules, quizScores);
+              const unlocked = getAchievementStatus(ach.id, completedModules, quizScores, challengeStats);
               return (
                 <motion.div
                   key={ach.id}

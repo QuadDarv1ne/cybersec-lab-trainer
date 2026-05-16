@@ -16,7 +16,7 @@ import { ShieldCheck, ChevronLeft, CheckCircle2, AlertTriangle, Shield, Target, 
 import { useState } from 'react';
 
 export default function OWASPTop10() {
-  const { studiedOwaspItems, addStudiedOwasp, completeModule, setCurrentPage, completedModules } = useAppStore();
+  const { studiedOwaspItems, addStudiedOwasp, completeModule, setCurrentPage, completedModules, setOwaspChallengeScore, owaspChallengeScores } = useAppStore();
   const t = useTranslations('owasp');
   const isCompleted = completedModules.includes('owasp');
 
@@ -24,8 +24,8 @@ export default function OWASPTop10() {
   const [activeChallenge, setActiveChallenge] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set());
+  const [correctCount, setCorrectCount] = useState(owaspChallengeScores.correct);
+  const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set(owaspChallengeScores.answered));
 
   const studiedCount = studiedOwaspItems.length;
   const totalCount = owaspTopics.length;
@@ -45,7 +45,10 @@ export default function OWASPTop10() {
     const newAnswered = new Set(answeredChallenges);
     newAnswered.add(activeChallenge);
     setAnsweredChallenges(newAnswered);
-    if (currentChallenge.options[selectedOption].correct) setCorrectCount((c) => c + 1);
+    const isCorrect = currentChallenge.options[selectedOption].correct;
+    const newCorrect = isCorrect ? correctCount + 1 : correctCount;
+    setCorrectCount(newCorrect);
+    setOwaspChallengeScore(newCorrect, [...newAnswered]);
   };
 
   const nextChallenge = () => {
