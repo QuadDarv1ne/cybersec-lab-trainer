@@ -23,15 +23,15 @@ import {
 
 export default function SecurityHeadersLab() {
   const t = useTranslations('securityHeaders');
-  const { completeModule, setCurrentPage, completedModules } = useAppStore();
+  const { completeModule, setCurrentPage, completedModules, setHeadersChallengeScore, headersChallengeScores } = useAppStore();
   const isCompleted = completedModules.includes('security-headers');
 
   // Challenge state
   const [activeChallenge, setActiveChallenge] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set());
+  const [correctCount, setCorrectCount] = useState(headersChallengeScores.correct);
+  const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set(headersChallengeScores.answered));
 
   const challenge = headerChallenges[activeChallenge];
   const isAnswered = answeredChallenges.has(activeChallenge);

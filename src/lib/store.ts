@@ -25,6 +25,7 @@ interface AppState {
   xssCompletedLevels: string[];
   owaspChallengeScores: { correct: number; total: number; answered: number[] };
   authChallengeScores: { correct: number; total: number; answered: number[] };
+  headersChallengeScores: { correct: number; total: number; answered: number[] };
   userId: string | null;
   syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
   lastSyncedAt: Date | null;
@@ -42,6 +43,7 @@ interface AppActions {
   addXssLevel: (level: string) => void;
   setOwaspChallengeScore: (correct: number, answered: number[]) => void;
   setAuthChallengeScore: (correct: number, answered: number[]) => void;
+  setHeadersChallengeScore: (correct: number, answered: number[]) => void;
   setUserId: (userId: string | null) => void;
   syncWithDatabase: () => Promise<void>;
   loadFromDatabase: (userId: string) => Promise<void>;
@@ -199,6 +201,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   xssCompletedLevels: [],
   owaspChallengeScores: { correct: 0, total: 0, answered: [] },
   authChallengeScores: { correct: 0, total: 0, answered: [] },
+  headersChallengeScores: { correct: 0, total: 0, answered: [] },
   userId: null,
   syncStatus: 'idle',
   lastSyncedAt: null,
@@ -232,6 +235,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       xssCompletedLevels: [],
       owaspChallengeScores: { correct: 0, total: 0, answered: [] },
       authChallengeScores: { correct: 0, total: 0, answered: [] },
+      headersChallengeScores: { correct: 0, total: 0, answered: [] },
     });
     await ensureSync(get, set);
   },
@@ -268,6 +272,10 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     set({ authChallengeScores: { correct, total: answered.length, answered } });
   },
 
+  setHeadersChallengeScore: (correct: number, answered: number[]) => {
+    set({ headersChallengeScores: { correct, total: answered.length, answered } });
+  },
+
   setUserId: (userId: string | null) => set({ userId }),
 
   syncWithDatabase: async () => {
@@ -293,6 +301,7 @@ const useAppStore = create<AppStore>()(
       xssCompletedLevels: state.xssCompletedLevels,
       owaspChallengeScores: state.owaspChallengeScores,
       authChallengeScores: state.authChallengeScores,
+      headersChallengeScores: state.headersChallengeScores,
       // syncStatus and lastSyncedAt are runtime-only, not persisted
     }),
   })
