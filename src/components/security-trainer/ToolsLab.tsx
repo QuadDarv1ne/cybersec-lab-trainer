@@ -106,16 +106,38 @@ export default function ToolsLab() {
   const [showPw, setShowPw] = useState(false);
 
   const generatePassword = () => {
-    let chars = '';
-    if (pwUppercase) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    if (pwLowercase) chars += 'abcdefghijklmnopqrstuvwxyz';
-    if (pwNumbers) chars += '0123456789';
-    if (pwSymbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
-    if (!chars) chars = 'abcdefghijklmnopqrstuvwxyz';
-    const arr = new Uint32Array(pwLength);
-    crypto.getRandomValues(arr);
-    const pw = Array.from(arr, (v) => chars[v % chars.length]).join('');
-    setGeneratedPassword(pw);
+    const classes: string[] = [];
+    if (pwUppercase) classes.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+    if (pwLowercase) classes.push('abcdefghijklmnopqrstuvwxyz');
+    if (pwNumbers) classes.push('0123456789');
+    if (pwSymbols) classes.push('!@#$%^&*()_+-=[]{}|;:,.<>?');
+    if (classes.length === 0) classes.push('abcdefghijklmnopqrstuvwxyz');
+
+    const allChars = classes.join('');
+    const password: string[] = [];
+
+    // Guarantee at least one character from each enabled class
+    const randBytes = new Uint32Array(pwLength);
+    crypto.getRandomValues(randBytes);
+
+    for (let i = 0; i < classes.length && i < pwLength; i++) {
+      password.push(classes[i][randBytes[i] % classes[i].length]);
+    }
+
+    // Fill remaining positions randomly from all chars
+    for (let i = classes.length; i < pwLength; i++) {
+      password.push(allChars[randBytes[i] % allChars.length]);
+    }
+
+    // Fisher-Yates shuffle using crypto-random values
+    const shuffleBytes = new Uint32Array(password.length);
+    crypto.getRandomValues(shuffleBytes);
+    for (let i = password.length - 1; i > 0; i--) {
+      const j = shuffleBytes[i] % (i + 1);
+      [password[i], password[j]] = [password[j], password[i]];
+    }
+
+    setGeneratedPassword(password.join(''));
   };
 
   const caesarResult = caesarMode === 'encrypt'

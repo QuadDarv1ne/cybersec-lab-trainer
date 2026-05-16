@@ -97,12 +97,21 @@ export function xorDecrypt(hex: string, key: string): string {
 // Base64
 // ============================================================
 export function base64Encode(text: string): string {
-  try { return btoa(unescape(encodeURIComponent(text))); }
+  try {
+    const bytes = new TextEncoder().encode(text);
+    const binary = Array.from(bytes, (b) => String.fromCharCode(b)).join('');
+    return btoa(binary);
+  }
   catch { return 'Ошибка кодирования'; }
 }
 
 export function base64Decode(text: string): string {
-  try { return decodeURIComponent(escape(atob(text))); }
+  try {
+    const binary = atob(text);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
   catch { return 'Ошибка декодирования'; }
 }
 

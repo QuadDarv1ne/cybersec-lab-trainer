@@ -45,33 +45,34 @@ interface AppActions {
 
 type AppStore = AppState & AppActions;
 
-// Prevent concurrent sync calls; always uses latest state
+// Prevent concurrent sync calls; always reads latest state via get()
 let isSyncing = false;
 let syncRequested = false;
-let syncRetryCount = 0;
-const MAX_SYNC_RETRIES = 3;
+let pendingSyncResolve: (() => void)[] = [];
 
 const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>) => void) => {
+  // If already syncing, queue this caller to wait for the current sync to finish
   if (isSyncing) {
     syncRequested = true;
-    return;
+    return new Promise<void>((resolve) => {
+      pendingSyncResolve.push(resolve);
+    });
   }
   isSyncing = true;
-  syncRetryCount = 0;
+  syncRequested = true; // trigger at least one sync
 
   try {
-    // Loop to handle pending sync requests without recursion
-    do {
+    // Loop to handle pending sync requests — always reads latest state
+    while (syncRequested) {
       syncRequested = false;
       await syncWithDatabase(get(), set);
-      // If another sync was requested during the last sync, retry
-      if (syncRequested) {
-        syncRetryCount += 1;
-      }
-    } while (syncRequested && syncRetryCount < MAX_SYNC_RETRIES);
+    }
   } finally {
     isSyncing = false;
-    syncRequested = false;
+    // Resolve all queued callers
+    const resolves = pendingSyncResolve;
+    pendingSyncResolve = [];
+    for (const resolve of resolves) resolve();
   }
 };
 
