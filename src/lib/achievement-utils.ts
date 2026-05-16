@@ -1,4 +1,5 @@
 import { achievements } from '@/lib/security-data';
+import { modules } from '@/lib/data/modules-data';
 
 /**
  * Checks whether a given achievement is unlocked based on progress state.
@@ -20,7 +21,7 @@ export function getAchievementStatus(
     case 'quiz-perfect': return Object.values(quizScores).some((s) => s === 100);
     case 'crypto-ninja': return completedModules.includes('tools');
     case 'headers-master': return completedModules.includes('security-headers');
-    case 'full-completion': return completedModules.length >= 8;
+    case 'full-completion': return completedModules.length >= modules.length;
     default: return false;
   }
 }

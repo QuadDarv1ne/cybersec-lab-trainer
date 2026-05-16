@@ -13,6 +13,9 @@ import { useTranslations } from '@/lib/intlStub';
 import {
   ChevronLeft,
   CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Lightbulb,
   FileText,
 } from 'lucide-react';
 
@@ -232,7 +235,7 @@ export default function XSSLab() {
               {/* Vulnerable code */}
               <Card className="border-slate-200">
                 <CardContent className="p-5">
-                  <h3 className="text-xs font-semibold text-red-600 mb-2">❌ Уязвимый код</h3>
+                  <h3 className="text-xs font-semibold text-red-600 mb-2 flex items-center gap-1"><XCircle size={14} /> Уязвимый код</h3>
                   <CodeBlock code={xss.vulnerableCode} language="html" title="vulnerable.html" />
                 </CardContent>
               </Card>
@@ -240,7 +243,7 @@ export default function XSSLab() {
               {/* Secure code */}
               <Card className="border-slate-200">
                 <CardContent className="p-5">
-                  <h3 className="text-xs font-semibold text-emerald-600 mb-2">✅ Безопасный код</h3>
+                  <h3 className="text-xs font-semibold text-emerald-600 mb-2 flex items-center gap-1"><CheckCircle2 size={14} /> Безопасный код</h3>
                   <CodeBlock code={xss.secureCode} language="html" title="secure.html" />
                 </CardContent>
               </Card>
@@ -249,7 +252,7 @@ export default function XSSLab() {
               <Card className="border-slate-200">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold">🎮 Интерактивная демонстрация</h3>
+                    <h3 className="text-sm font-semibold flex items-center gap-1"><AlertTriangle size={16} className="text-amber-500" /> Интерактивная демонстрация</h3>
                     <Button
                       variant="outline"
                       size="sm"
@@ -276,14 +279,14 @@ export default function XSSLab() {
 
                           <p className="text-xs text-slate-500">Результат вывода (без защиты):</p>
                           <div className="bg-white rounded-lg p-3 border border-red-200">
-                            <p className="text-[11px] text-red-600 font-medium">⚠ Код выполнится — пользовательская вставка не обработана</p>
+                            <p className="text-[11px] text-red-600 font-medium flex items-center gap-1"><AlertTriangle size={12} /> Код выполнится — пользовательская вставка не обработана</p>
                           </div>
 
                           <p className="text-xs text-slate-500">Применённая защита:</p>
                           {renderDefense(xss.id, xss.attackDemo)}
 
                           <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                            <h4 className="text-xs font-semibold text-blue-700 mb-1">💡 Защита</h4>
+                            <h4 className="text-xs font-semibold text-blue-700 mb-1 flex items-center gap-1"><Lightbulb size={14} /> Защита</h4>
                             <p className="text-xs text-blue-600">{xss.mitigation}</p>
                           </div>
                         </div>

@@ -44,6 +44,13 @@ export default function SecureCodingLab() {
     setSelectedOption(index);
   };
 
+  // Reset navigation state when switching challenges; preserve answer state
+  const navigateToChallenge = (index: number) => {
+    setActiveChallenge(index);
+    setSelectedOption(null);
+    setShowResult(answeredChallenges.has(index));
+  };
+
   const handleCheckAnswer = () => {
     if (selectedOption === null || isAnswered) return;
     const isCorrect = challenge.options[selectedOption].correct;
@@ -56,17 +63,13 @@ export default function SecureCodingLab() {
 
   const nextChallenge = () => {
     if (activeChallenge < secureCodingChallenges.length - 1) {
-      setActiveChallenge(activeChallenge + 1);
-      setSelectedOption(null);
-      setShowResult(false);
+      navigateToChallenge(activeChallenge + 1);
     }
   };
 
   const prevChallenge = () => {
     if (activeChallenge > 0) {
-      setActiveChallenge(activeChallenge - 1);
-      setSelectedOption(null);
-      setShowResult(false);
+      navigateToChallenge(activeChallenge - 1);
     }
   };
 
@@ -95,7 +98,7 @@ export default function SecureCodingLab() {
             </span>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-[10px]">
-                ✅ {correctCount} {t('correct')}
+                <CheckCircle2 size={12} className="inline mr-1" /> {correctCount} {t('correct')}
               </Badge>
               {isCompleted && <Badge className="bg-emerald-600 text-white">{t('moduleComplete')}</Badge>}
             </div>
@@ -104,11 +107,7 @@ export default function SecureCodingLab() {
             {secureCodingChallenges.map((challenge, i) => (
               <button
                 key={i}
-                onClick={() => {
-                  setActiveChallenge(i);
-                  setSelectedOption(null);
-                  setShowResult(false);
-                }}
+                onClick={() => navigateToChallenge(i)}
                 aria-label={`Перейти к заданию ${i + 1}: ${challenge.title}`}
                 className={`flex-1 h-2 rounded-full transition-all ${
                   answeredChallenges.has(i)
@@ -219,15 +218,15 @@ export default function SecureCodingLab() {
                     }`}
                   >
                     <h4
-                      className={`text-xs font-semibold mb-1 ${
+                      className={`text-xs font-semibold mb-1 flex items-center gap-1 ${
                         challenge.options[selectedOption].correct
                           ? 'text-emerald-700'
                           : 'text-red-700'
                       }`}
                     >
                       {challenge.options[selectedOption].correct
-                        ? '✅ Correct!'
-                        : '❌ Incorrect'}
+                        ? <><CheckCircle2 size={14} /> Correct!</>
+                        : <><XCircle size={14} /> Incorrect</>}
                     </h4>
                     <p className="text-xs text-slate-600 leading-relaxed">{challenge.explanation}</p>
                   </div>

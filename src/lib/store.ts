@@ -64,7 +64,11 @@ const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>)
     do {
       syncRequested = false;
       await syncWithDatabase(get(), set);
-    } while (syncRequested && ++syncRetryCount < MAX_SYNC_RETRIES);
+      // If another sync was requested during the last sync, retry
+      if (syncRequested) {
+        syncRetryCount += 1;
+      }
+    } while (syncRequested && syncRetryCount < MAX_SYNC_RETRIES);
   } finally {
     isSyncing = false;
     syncRequested = false;
