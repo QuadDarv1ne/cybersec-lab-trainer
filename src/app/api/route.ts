@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { quizAnswerSchema, quizResultSchema, progressUpdateSchema, glossarySearchSchema } from "@/lib/validations/api";
 import { db } from "@/lib/db";
 import { glossaryTerms } from "@/lib/data/glossary-data";
-import { z } from "zod";
 
 // Rate limiting configuration
 const RATE_LIMIT = {
@@ -288,9 +287,9 @@ export async function POST(request: Request) {
     addRateLimitHeaders(response, requestCount);
     return response;
   } catch (error) {
-    if (error instanceof z.ZodError) {
+    if (error instanceof Error && 'issues' in error) {
       return NextResponse.json(
-        { error: "Validation failed", details: error.issues },
+        { error: "Validation failed", details: (error as { issues: unknown[] }).issues },
         { status: 400 }
       );
     }
