@@ -1,4 +1,8 @@
+import { validateEnv } from './env';
 import { PrismaClient } from '@prisma/client'
+
+// Validate environment variables at module load time (fail fast)
+validateEnv();
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
