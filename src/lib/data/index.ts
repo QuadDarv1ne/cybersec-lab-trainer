@@ -1,7 +1,7 @@
 // Security Data Index - re-exports from modular data files
 
-export { owaspTopics } from './owasp-data';
-export type { OWASPTopic } from './owasp-data';
+export { owaspTopics, owaspChallenges } from './owasp-data';
+export type { OWASPTopic, OWASPChallenge } from './owasp-data';
 
 export { sqlChallenges } from './sql-data';
 export type { SQLChallenge } from './sql-data';
@@ -23,3 +23,6 @@ export type { Achievement, GlossaryTerm } from './glossary-data';
 
 export { securityHeaders, headerChallenges } from './security-headers-data';
 export type { SecurityHeaderTopic, HeaderChallenge } from './security-headers-data';
+
+export { authChallenges } from './auth-challenges-data';
+export type { AuthChallenge } from './auth-challenges-data';

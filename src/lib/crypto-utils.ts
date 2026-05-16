@@ -1,5 +1,9 @@
 // ============================================================
 // Caesar Cipher
+// Educational note: The Caesar cipher is one of the simplest substitution ciphers.
+// Each letter is shifted by a fixed number of positions in the alphabet.
+// Security: NOT secure — only 25 possible keys, trivially brute-forced.
+// Historical: Used by Julius Caesar for military communications (~58 BC).
 // ============================================================
 export function caesarEncrypt(text: string, shift: number): string {
   const normalizedShift = ((shift % 26) + 26) % 26;
@@ -20,6 +24,10 @@ export function caesarDecrypt(text: string, shift: number): string {
 
 // ============================================================
 // Vigenere Cipher
+// Educational note: The Vigenere cipher uses a keyword to shift each letter differently.
+// Each letter of the keyword determines the shift for the corresponding plaintext letter.
+// Security: NOT secure — can be broken using frequency analysis (Kasiski examination).
+// Historical: Considered "unbreakable" for 300 years (1586-1863).
 // ============================================================
 export function vigenereEncrypt(text: string, key: string): string {
   const k = key.toLowerCase().replace(/[^a-z]/g, '');
@@ -69,6 +77,10 @@ export function vigenereDecrypt(text: string, key: string): string {
 
 // ============================================================
 // XOR Cipher
+// Educational note: XOR (exclusive OR) is a bitwise operation used in many encryption algorithms.
+// When applied with a repeating key, it creates a simple stream cipher.
+// Security: NOT secure with repeating key — vulnerable to known-plaintext attacks.
+// However, XOR with a truly random one-time key (same length as message) is perfectly secure.
 // ============================================================
 export function xorEncrypt(text: string, key: string): string {
   if (!key) return text;
@@ -95,7 +107,11 @@ export function xorDecrypt(hex: string, key: string): string {
 }
 
 // ============================================================
-// Base64
+// Base64 Encoding
+// Educational note: Base64 encodes binary data as ASCII text using 64 characters (A-Z, a-z, 0-9, +, /).
+// Each 3 bytes of input become 4 characters of output (33% size increase).
+// Security: NOT encryption — Base64 is easily reversible. It's encoding, not protection.
+// Common uses: Data URLs, email attachments, embedding images in HTML/CSS.
 // ============================================================
 export function base64Encode(text: string): string {
   try {
@@ -117,7 +133,11 @@ export function base64Decode(text: string): string {
 }
 
 // ============================================================
-// URL Encoding
+// URL Encoding (Percent Encoding)
+// Educational note: URL encoding replaces special characters with % followed by their hex ASCII code.
+// Required for safe transmission of data in URLs (spaces, &, ?, =, etc. have special meaning).
+// Security: NOT encryption — fully reversible encoding for data transmission.
+// Example: "Hello World!" → "Hello%20World!"
 // ============================================================
 export function urlEncode(text: string): string {
   return encodeURIComponent(text);
@@ -129,19 +149,34 @@ export function urlDecode(text: string): string {
 }
 
 // ============================================================
-// Hash visualization (simple djb2)
+// Hash Functions
+// Educational note: A hash function converts data of any size to a fixed-size output.
+// Properties: deterministic, fast, irreversible, collision-resistant.
+//
+// djb2: Simple educational hash — NOT cryptographically secure.
+// SHA-256: Real cryptographic hash (via Web Crypto API) — 256-bit output.
+// MD5: Deprecated cryptographic hash — broken, vulnerable to collisions.
 // ============================================================
 export function simpleHash(text: string): { md5Like: string; shaLike: string; djb2: string } {
   let h1 = 5381;
-  let h2 = 0x6a09e667;
   for (let i = 0; i < text.length; i++) {
     const c = text.charCodeAt(i);
     h1 = ((h1 << 5) + h1 + c) & 0xffffffff;
-    h2 = ((h2 ^ (c << 13)) + (c << 7) + (c >> 2)) & 0xffffffff;
   }
+  // djb2 produces a 32-bit value — we pad it to simulate longer outputs
+  const djb2 = Math.abs(h1).toString(16).padStart(8, '0');
   return {
-    md5Like: Math.abs(h1).toString(16).padStart(8, '0').repeat(4),
-    shaLike: Math.abs(h2).toString(16).padStart(8, '0').repeat(8),
-    djb2: Math.abs(h1).toString(16).padStart(8, '0'),
+    md5Like: djb2.repeat(4),   // 32 chars (simulated MD5 length)
+    shaLike: djb2.repeat(8),   // 64 chars (simulated SHA-256 length)
+    djb2,
   };
+}
+
+/** Compute real SHA-256 hash using Web Crypto API */
+export async function sha256(text: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const buffer = await crypto.subtle.digest('SHA-256', encoder.encode(text));
+  return Array.from(new Uint8Array(buffer))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
 }

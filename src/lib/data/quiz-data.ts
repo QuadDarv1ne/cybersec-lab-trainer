@@ -779,13 +779,359 @@ export const quizQuestions: QuizQuestion[] = [
     explanation:
       'GET-запросы могут быть инициированы через обычные HTML-элемы: <img src="...">, <a href="...">, <script src="...">. Это означает, что злоумышленник может заставить браузер выполнить GET-запрос без ведома пользователя.',
   },
+  // Additional CSRF questions
+  {
+    id: 'csrf-10',
+    category: 'CSRF',
+    question: 'Как SameSite=Lax отличается от SameSite=Strict?',
+    options: [
+      'Lax блокирует все кросс-сайтовые запросы',
+      'Lax разрешает куки при навигации по ссылке (GET), но блокирует POST из форм',
+      'Lax и Strict одинаковы',
+      'Strict разрешает все кросс-сайтовые запросы',
+    ],
+    correctIndex: 1,
+    explanation:
+      'SameSite=Lax разрешает отправку куки при топ-уровневой навигации (клик по ссылке), что улучшает UX. SameSite=Strict блокирует куки при всех кросс-сайтовых запросах. Lax — хороший баланс безопасности и удобства.',
+  },
+  // Additional OWASP questions
+  {
+    id: 'owasp-9',
+    category: 'OWASP Top 10',
+    question: 'Что такое Insecure Design (A04:2021)?',
+    options: [
+      'Баг в коде реализации',
+      'Недостаток в архитектуре/проектировании, который нельзя исправить модификацией кода',
+      'Плохой UI/UX дизайн',
+      'Отсутствие документации',
+    ],
+    correctIndex: 1,
+    explanation:
+      'Insecure Design — это проблемы на уровне архитектуры, а не реализации. Например, отсутствие rate limiting при сбросе пароля — это не баг кода, а недостаточный дизайн бизнес-процесса. Исправление требует изменения дизайна, а не просто фикса кода.',
+  },
+  {
+    id: 'owasp-10',
+    category: 'OWASP Top 10',
+    question: 'Какой OWASP Top 10 (2021) заменил Security Misconfiguration из 2017?',
+    options: [
+      'Он остался на том же месте (A5)',
+      'Он был объединён с Injection',
+      'Он был удалён из списка',
+      'Он стал A01',
+    ],
+    correctIndex: 0,
+    explanation:
+      'Security Misconfiguration остался на A05:2021, но расширил свою область. В 2021 году он включает не только конфигурацию серверов, но и cloud storage, CORS misconfiguration, и отсутствие security headers.',
+  },
+  // Security Headers questions
+  {
+    id: 'headers-1',
+    category: 'Заголовки безопасности',
+    question: 'Что делает заголовок HSTS (HTTP Strict Transport Security)?',
+    options: [
+      'Шифрует HTTP-трафик',
+      'Заставляет браузер использовать только HTTPS для данного домена',
+      'Блокирует XSS-атаки',
+      'Запрещает iframe',
+    ],
+    correctIndex: 1,
+    explanation:
+      'HSTS предписывает браузеру всегда использовать HTTPS для данного домена, даже если пользователь вводит http://. Это защищает от SSL-stripping атак, когда злоумышленник перехватывает и понижает HTTPS до HTTP.',
+  },
+  {
+    id: 'headers-2',
+    category: 'Заголовки безопасности',
+    question: 'Какой заголовок защищает от MIME-sniffing атак?',
+    options: [
+      'X-Frame-Options',
+      'X-Content-Type-Options: nosniff',
+      'Content-Security-Policy',
+      'Strict-Transport-Security',
+    ],
+    correctIndex: 1,
+    explanation:
+      'X-Content-Type-Options: nosniff запрещает браузеру угадывать MIME-тип файла. Без него браузер может интерпретировать загруженный .txt файл как JavaScript, что создаёт XSS-риск.',
+  },
+  {
+    id: 'headers-3',
+    category: 'Заголовки безопасности',
+    question: 'Что такое CSP (Content Security Policy)?',
+    options: [
+      'Политика блокировки IP-адресов',
+      'Механизм указания разрешённых источников для загрузки ресурсов',
+      'Политика управления паролями',
+      'Система контроля версий',
+    ],
+    correctIndex: 1,
+    explanation:
+      'CSP позволяет указать, откуда можно загружать скрипты, стили, изображения и другие ресурсы. Например, script-src \'self\' разрешает загрузку скриптов только с текущего домена, блокируя внешние вредоносные скрипты.',
+  },
+  {
+    id: 'headers-4',
+    category: 'Заголовки безопасности',
+    question: 'Какой заголовок защищает от кликджекинга?',
+    options: [
+      'X-XSS-Protection',
+      'X-Frame-Options: DENY',
+      'Cache-Control: no-store',
+      'Referrer-Policy: no-referrer',
+    ],
+    correctIndex: 1,
+    explanation:
+      'X-Frame-Options: DENY запрещает встраивание страницы в iframe. Это предотвращает кликджекинг, когда злоумышленник накладывает невидимый iframe с целевым сайтом поверх своих элементов.',
+  },
+  {
+    id: 'headers-5',
+    category: 'Заголовки безопасности',
+    question: 'Что делает Referrer-Policy: strict-origin-when-cross-origin?',
+    options: [
+      'Никогда не отправляет Referer',
+      'Отправляет полный URL для same-origin, только origin для cross-origin',
+      'Отправляет полный URL всегда',
+      'Блокирует все cross-origin запросы',
+    ],
+    correctIndex: 1,
+    explanation:
+      'Эта политика отправляет полный URL (включая path) для запросов на тот же домен, но только origin (домен без path) для кросс-сайтовых запросов. Это балансирует между функциональностью и конфиденциальностью.',
+  },
+  {
+    id: 'headers-6',
+    category: 'Заголовки безопасности',
+    question: 'Что такое Permissions-Policy?',
+    options: [
+      'Политика управления правами пользователей',
+      'Заголовок для контроля доступа к браузерным API (камера, микрофон, геолокация)',
+      'Политика CORS',
+      'Политика управления cookie',
+    ],
+    correctIndex: 1,
+    explanation:
+      'Permissions-Policy (ранее Feature-Policy) позволяет указать, какие браузерные API могут использоваться на странице. Например, Permissions-Policy: camera=(), microphone=() запрещает доступ к камере и микрофону.',
+  },
+  {
+    id: 'headers-7',
+    category: 'Заголовки безопасности',
+    question: 'Зачем нужен Cache-Control: no-store для чувствительных страниц?',
+    options: [
+      'Для ускорения загрузки',
+      'Чтобы браузер не сохранял страницу в кеше, где её могут прочитать другие',
+      'Для сжатия данных',
+      'Для блокировки XSS',
+    ],
+    correctIndex: 1,
+    explanation:
+      'Cache-Control: no-store запрещает браузеру и прокси-серверам сохранять страницу в кеше. Без этого чувствительные данные (банковские счета, медицинские записи) могут быть прочитаны с общего компьютера.',
+  },
+  {
+    id: 'headers-8',
+    category: 'Заголовки безопасности',
+    question: 'Что такое COOP (Cross-Origin-Opener-Policy)?',
+    options: [
+      'Политика управления кросс-доменными cookie',
+      'Изолирует окно браузера от кросс-доменных окон',
+      'Политика CORS',
+      'Политика управления iframe',
+    ],
+    correctIndex: 1,
+    explanation:
+      'COOP (Cross-Origin-Opener-Policy) предотвращает доступ других окон к текущему окну через window.open(). Это защищает от атак типа Spectre и других side-channel атак через cross-origin окна.',
+  },
+  // Secure Coding questions
+  {
+    id: 'coding-1',
+    category: 'Безопасное кодирование',
+    question: 'Что такое "deny by default" в контроле доступа?',
+    options: [
+      'Разрешить всё, кроме явно запрещённого',
+      'Запретить всё, кроме явно разрешённого',
+      'Разрешить доступ только администраторам',
+      'Отключить все эндпоинты',
+    ],
+    correctIndex: 1,
+    explanation:
+      'Deny by default (запрет по умолчанию) означает, что доступ запрещён, пока не будет явно разрешён. Это более безопасный подход, чем "allow by default", так как новые функции/эндпоинты автоматически защищены.',
+  },
+  {
+    id: 'coding-2',
+    category: 'Безопасное кодирование',
+    question: 'Какой подход к валидации входных данных правильный?',
+    options: [
+      'Валидировать только на клиенте',
+      'Валидировать только на сервере',
+      'Валидировать и на клиенте (UX), и на сервере (безопасность)',
+      'Не валидировать — это замедляет приложение',
+    ],
+    correctIndex: 2,
+    explanation:
+      'Клиентская валидация улучшает UX (быстрая обратная связь), но не обеспечивает безопасность — злоумышленник может обойти её. Серверная валидация обязательна для безопасности. Правильный подход: обе.',
+  },
+  {
+    id: 'coding-3',
+    category: 'Безопасное кодирование',
+    question: 'Что такое принцип Defense in Depth?',
+    options: [
+      'Один мощный механизм защиты',
+      'Многоуровневая защита — несколько независимых механизмов безопасности',
+      'Защита только на уровне сети',
+      'Использование только open-source решений',
+    ],
+    correctIndex: 1,
+    explanation:
+      'Defense in Depth (глубокая защита) — стратегия использования нескольких уровней защиты. Если один уровень выходит из строя, другие продолжают защищать. Пример: WAF + параметризованные запросы + контроль прав БД для защиты от SQLi.',
+  },
+  {
+    id: 'coding-4',
+    category: 'Безопасное кодирование',
+    question: 'Почему нельзя использовать Math.random() для генерации токенов?',
+    options: [
+      'Он слишком медленный',
+      'Он не криптографически безопасен — его вывод предсказуем',
+      'Он генерирует только числа',
+      'Он не работает в Node.js',
+    ],
+    correctIndex: 1,
+    explanation:
+      'Math.random() использует deterministic algorithm (seed-based PRNG). Злоумышленник, наблюдая несколько значений, может предсказать следующие. Используйте crypto.randomBytes() или crypto.randomUUID() для криптографически безопасных случайных значений.',
+  },
+  {
+    id: 'coding-5',
+    category: 'Безопасное кодирование',
+    question: 'Что такое allowlist (белый список) валидация?',
+    options: [
+      'Запретить всё, что не разрешено явно',
+      'Разрешить всё, кроме запрещённого',
+      'Использовать регулярные выражения',
+      'Валидировать только длину строки',
+    ],
+    correctIndex: 0,
+    explanation:
+      'Allowlist валидация (белый список) определяет, что разрешено, и отвергает всё остальное. Это безопаснее blocklist (чёрного списка), так как невозможно предугадать все возможные вредоносные варианты. Пример: разрешить только a-z, 0-9 для username.',
+  },
+  // Additional SQL questions
+  {
+    id: 'sql-11',
+    category: 'SQL-инъекции',
+    question: 'Что такое second-order SQL injection?',
+    options: [
+      'Инъекция через второй параметр',
+      'Вредоносный код сохраняется в БД и выполняется при последующем запросе',
+      'Инъекция через ORDER BY',
+      'Инъекция через комментарий',
+    ],
+    correctIndex: 1,
+    explanation:
+      'Second-order SQL injection — когда вредоносный payload сохраняется в базе данных и активируется при последующем SQL-запросе. Например, пользователь регистрируется с именем "admin\'--", и при последующем запросе это имя подставляется в SQL без проверки.',
+  },
+  {
+    id: 'sql-12',
+    category: 'SQL-инъекции',
+    question: 'Какой подход защищает от SQL-инъекций в ORM?',
+    options: [
+      'Использовать raw SQL через ORM',
+      'Использовать ORM-методы (find, where) вместо raw SQL',
+      'ORM автоматически защищает от всех инъекций',
+      'Использовать строковые шаблоны',
+    ],
+    correctIndex: 1,
+    explanation:
+      'ORM-методы (Prisma.find, Sequelize.where) используют параметризованные запросы внутри. Однако ORM часто поддерживает raw SQL (prisma.$queryRaw), который так же уязвим. Важно использовать ORM-методы, а не raw SQL с конкатенацией строк.',
+  },
+  // Additional XSS questions
+  {
+    id: 'xss-11',
+    category: 'XSS-атаки',
+    question: 'Что такое DOMPurify?',
+    options: [
+      'Библиотека для шифрования DOM',
+      'Библиотека для санитизации HTML и защиты от XSS',
+      'Фреймворк для создания DOM',
+      'Инструмент для отладки XSS',
+    ],
+    correctIndex: 1,
+    explanation:
+      'DOMPurify — популярная библиотека для санитизации HTML. Она удаляет вредоносные элементы (<script>, event handlers) и оставляет безопасный HTML. Используется в Gmail, Slack и других крупных приложениях.',
+  },
+  {
+    id: 'xss-12',
+    category: 'XSS-атаки',
+    question: 'Что такое Template Literal XSS?',
+    options: [
+      'XSS через шаблонные строки JavaScript',
+      'XSS через шаблонизаторы (Handlebars, Pug) без экранирования',
+      'XSS через CSS templates',
+      'XSS через email templates',
+    ],
+    correctIndex: 1,
+    explanation:
+      'Template Literal XSS возникает, когда шаблонизаторы (Handlebars, Twig, EJS) вставляют данные без экранирования. В Handlebars {{variable}} экранирует, а {{{variable}}} — нет. В EJS <%= variable %> экранирует, а <%- variable %> — нет.',
+  },
+  // Additional Auth questions
+  {
+    id: 'auth-11',
+    category: 'Аутентификация',
+    question: 'Что такое credential stuffing?',
+    options: [
+      'Автоматическая подстановка учётных данных из утечек на множестве сайтов',
+      'Заполнение формы логина',
+      'Перебор паролей на одном сайте',
+      'Создание фейковых аккаунтов',
+    ],
+    correctIndex: 0,
+    explanation:
+      'Credential stuffing — атака, при которой злоумышленник использует email/пароль из одной утечки для попытки входа на других сайтах. Многие пользователи используют одинаковые пароли, что делает эту атаку эффективной. Защита: MFA, обнаружение аномальных входов.',
+  },
+  {
+    id: 'auth-12',
+    category: 'Аутентификация',
+    question: 'Что такое PKCE (Proof Key for Code Exchange)?',
+    options: [
+      'Дополнительный протокол OAuth 2.0 для защиты от interception attacks',
+      'Метод хеширования паролей',
+      'Протокол обмена ключами',
+      'Метод шифрования токенов',
+    ],
+    correctIndex: 0,
+    explanation:
+      'PKCE (произносится "pixy") — расширение OAuth 2.0 для защиты от authorization code interception. Клиент генерирует code_verifier и code_challenge, которые связывают запрос авторизации с обменом кода на токен. Обязательно для мобильных и SPA приложений.',
+  },
+  // Additional General questions
+  {
+    id: 'general-11',
+    category: 'Общая безопасность',
+    question: 'Что такое Threat Modeling?',
+    options: [
+      'Моделирование 3D-объектов',
+      'Систематический процесс идентификации и оценки потенциальных угроз безопасности',
+      'Создание вирусов для тестирования',
+      'Моделирование сетевой инфраструктуры',
+    ],
+    correctIndex: 1,
+    explanation:
+      'Threat Modeling — процесс анализа системы для выявления потенциальных угроз. Использует методологии типа STRIDE (Spoofing, Tampering, Repudiation, Information Disclosure, DoS, Elevation of Privilege). Проводится на этапе проектирования.',
+  },
+  {
+    id: 'general-12',
+    category: 'Общая безопасность',
+    question: 'Что такое CIA Triad?',
+    options: [
+      'Центральное разведывательное агентство',
+      'Confidentiality, Integrity, Availability — конфиденциальность, целостность, доступность',
+      'Central Identity Authority',
+      'Cryptographic Implementation Assessment',
+    ],
+    correctIndex: 1,
+    explanation:
+      'CIA Triad — фундаментальная модель информационной безопасности: Confidentiality (данные доступны только авторизованным), Integrity (данные не изменяются несанкционированно), Availability (данные доступны когда нужны). Все меры безопасности направлены на один из этих принципов.',
+  },
 ];
 
 export const quizCategories = [
-  { id: 'sql', name: 'SQL-инъекции', icon: 'Database', count: 10 },
-  { id: 'xss', name: 'XSS-атаки', icon: 'FileText', count: 10 },
-  { id: 'csrf', name: 'CSRF', icon: 'Link', count: 9 },
-  { id: 'auth', name: 'Аутентификация', icon: 'Lock', count: 10 },
-  { id: 'general', name: 'Общая безопасность', icon: 'Shield', count: 10 },
-  { id: 'owasp', name: 'OWASP Top 10', icon: 'ShieldAlert', count: 8 },
+  { id: 'sql', name: 'SQL-инъекции', icon: 'Database', count: 12 },
+  { id: 'xss', name: 'XSS-атаки', icon: 'FileText', count: 12 },
+  { id: 'csrf', name: 'CSRF', icon: 'Link', count: 10 },
+  { id: 'auth', name: 'Аутентификация', icon: 'Lock', count: 12 },
+  { id: 'general', name: 'Общая безопасность', icon: 'Shield', count: 12 },
+  { id: 'owasp', name: 'OWASP Top 10', icon: 'ShieldAlert', count: 10 },
+  { id: 'headers', name: 'Заголовки безопасности', icon: 'ShieldCheck', count: 8 },
+  { id: 'coding', name: 'Безопасное кодирование', icon: 'Code', count: 5 },
 ];

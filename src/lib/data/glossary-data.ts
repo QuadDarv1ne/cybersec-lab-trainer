@@ -74,6 +74,42 @@ export const achievements: Achievement[] = [
     description: 'Завершите модуль заголовков безопасности.',
     condition: 'Пройдите модуль Заголовки безопасности',
   },
+  {
+    id: 'owasp-challenger',
+    title: 'OWASP-претендент',
+    description: 'Пройдите все интерактивные задания OWASP Top 10.',
+    condition: 'Ответьте на все OWASP-задания',
+  },
+  {
+    id: 'auth-challenger',
+    title: 'Аутентификация-эксперт',
+    description: 'Пройдите все задания Auth Security Lab.',
+    condition: 'Ответьте на все Auth-задания',
+  },
+  {
+    id: 'quiz-streak',
+    title: 'Квиз-серия',
+    description: 'Получите 80%+ в 3 квизах подряд.',
+    condition: '3 квиза с результатом 80%+',
+  },
+  {
+    id: 'all-categories',
+    title: 'Универсал',
+    description: 'Пройдите квизы во всех доступных категориях.',
+    condition: 'Завершите квизы всех категорий',
+  },
+  {
+    id: 'first-challenge',
+    title: 'Первый вызов',
+    description: 'Решите первое интерактивное задание.',
+    condition: 'Ответьте на первый challenge',
+  },
+  {
+    id: 'perfect-challenges',
+    title: 'Безупречные задания',
+    description: 'Ответьте на все задания любого модуля без ошибок.',
+    condition: '100% в challenge любого модуля',
+  },
 ];
 
 export interface GlossaryTerm {
@@ -491,5 +527,84 @@ export const glossaryTerms: GlossaryTerm[] = [
     term: 'Data Breach (Утечка данных)',
     definition: 'Инцидент безопасности, при котором конфиденциальные данные становятся доступными неавторизованным лицам.',
     category: 'Уязвимости',
+  },
+  // New terms with examples
+  {
+    id: 'stripe-methodology',
+    term: 'STRIDE',
+    definition: 'Методология моделирования угроз: Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege. Используется при threat modeling.',
+    category: 'Защита',
+  },
+  {
+    id: 'dast',
+    term: 'DAST (Dynamic Application Security Testing)',
+    definition: 'Тестирование безопасности работающего приложения извне. Инструменты: OWASP ZAP, Burp Suite, Nikto. Ищет уязвимости в runtime.',
+    category: 'Защита',
+  },
+  {
+    id: 'sast',
+    term: 'SAST (Static Application Security Testing)',
+    definition: 'Анализ исходного кода на уязвимости без запуска приложения. Инструменты: SonarQube, ESLint security, CodeQL. Находит проблемы на этапе разработки.',
+    category: 'Защита',
+  },
+  {
+    id: 'iast',
+    term: 'IAST (Interactive Application Security Testing)',
+    definition: 'Комбинация SAST и DAST — анализ кода во время выполнения приложения через инструментирование. Более точные результаты с меньшим количеством false positives.',
+    category: 'Защита',
+  },
+  {
+    id: 'bom',
+    term: 'SBOM (Software Bill of Materials)',
+    definition: 'Полный перечень компонентов программного обеспечения: библиотеки, фреймворки, зависимости. Необходим для управления рисками цепочки поставок.',
+    category: 'Стандарты',
+  },
+  {
+    id: 'supply-chain-attack',
+    term: 'Supply Chain Attack (Атака на цепочку поставок)',
+    definition: 'Компрометация программного обеспечения через внедрение вредоносного кода в зависимости, библиотеки или обновления. Пример: атака на SolarWinds, event-stream.',
+    category: 'Атаки',
+  },
+  {
+    id: 'side-channel',
+    term: 'Side-Channel Attack (Атака по побочным каналам)',
+    definition: 'Атака, использующая физическую реализацию системы: время выполнения, потребление энергии, электромагнитное излучение. Пример: timing attack, Spectre, Meltdown.',
+    category: 'Атаки',
+  },
+  {
+    id: 'constant-time',
+    term: 'Constant-Time Comparison (Сравнение за постоянное время)',
+    definition: 'Алгоритм сравнения, выполняющийся за фиксированное время независимо от входных данных. Защищает от timing attacks. Пример: crypto.timingSafeEqual() в Node.js.',
+    category: 'Криптография',
+  },
+  {
+    id: 'key-management',
+    term: 'Key Management (Управление ключами)',
+    definition: 'Процесс генерации, хранения, ротации и уничтожения криптографических ключей. Включает HSM (Hardware Security Module) и KMS (Key Management Service).',
+    category: 'Криптография',
+  },
+  {
+    id: 'pkce',
+    term: 'PKCE (Proof Key for Code Exchange)',
+    definition: 'Расширение OAuth 2.0 для защиты от interception attacks. Клиент генерирует code_verifier и code_challenge, связывающие authorization request с token exchange.',
+    category: 'Аутентификация',
+  },
+  {
+    id: 'fido2',
+    term: 'FIDO2 / WebAuthn',
+    definition: 'Стандарты парольless-аутентификации с использованием аппаратных ключей (YubiKey) или биометрии. Защищают от фишинга, так как привязаны к домену.',
+    category: 'Аутентификация',
+  },
+  {
+    id: 'passkey',
+    term: 'Passkey',
+    definition: 'Современная альтернатива паролям на основе FIDO2. Хранится на устройстве пользователя, синхронизируется через iCloud/Google Password Manager. Не передаётся по сети.',
+    category: 'Аутентификация',
+  },
+  {
+    id: 'secret-management',
+    term: 'Secret Management (Управление секретами)',
+    definition: 'Безопасное хранение и управление чувствительными данными: API ключи, пароли БД, токены. Инструменты: HashiCorp Vault, AWS Secrets Manager, Doppler.',
+    category: 'Защита',
   },
 ];

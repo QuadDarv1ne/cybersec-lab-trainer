@@ -10,8 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from '@/lib/intlStub';
+import { authChallenges } from '@/lib/security-data';
 import {
   ChevronLeft,
   Lock,
@@ -23,12 +24,56 @@ import {
   KeyRound,
   AlertTriangle,
   CheckCircle2,
+  Target,
+  ArrowRight,
+  ArrowLeft,
+  XCircle,
 } from 'lucide-react';
 
 export default function AuthSecurityLab() {
   const { completeModule, setCurrentPage, completedModules } = useAppStore();
   const t = useTranslations('auth');
   const isCompleted = completedModules.includes('auth');
+
+  // Challenge state
+  const [activeChallenge, setActiveChallenge] = useState(0);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [showResult, setShowResult] = useState(false);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set());
+
+  const currentChallenge = authChallenges[activeChallenge];
+  const isChallengeAnswered = answeredChallenges.has(activeChallenge);
+
+  const handleSelectOption = (index: number) => {
+    if (isChallengeAnswered) return;
+    setSelectedOption(index);
+  };
+
+  const handleCheckAnswer = () => {
+    if (selectedOption === null || isChallengeAnswered) return;
+    setShowResult(true);
+    const newAnswered = new Set(answeredChallenges);
+    newAnswered.add(activeChallenge);
+    setAnsweredChallenges(newAnswered);
+    if (currentChallenge.options[selectedOption].correct) setCorrectCount((c) => c + 1);
+  };
+
+  const nextChallenge = () => {
+    if (activeChallenge < authChallenges.length - 1) {
+      setActiveChallenge(activeChallenge + 1);
+      setSelectedOption(null);
+      setShowResult(false);
+    }
+  };
+
+  const prevChallenge = () => {
+    if (activeChallenge > 0) {
+      setActiveChallenge(activeChallenge - 1);
+      setSelectedOption(null);
+      setShowResult(false);
+    }
+  };
 
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -137,7 +182,7 @@ export default function AuthSecurityLab() {
       </div>
 
       <Tabs defaultValue="password" className="space-y-4">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
+        <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
           <TabsTrigger value="password" className="text-xs">
             <KeyRound size={14} className="mr-1" /> {t('passwordStrength')}
           </TabsTrigger>
@@ -149,6 +194,9 @@ export default function AuthSecurityLab() {
           </TabsTrigger>
           <TabsTrigger value="sessions" className="text-xs">
             <Clock size={14} className="mr-1" /> {t('jwtExplainer')}
+          </TabsTrigger>
+          <TabsTrigger value="challenges" className="text-xs">
+            <Target size={14} className="mr-1" /> Задания ({authChallenges.length})
           </TabsTrigger>
         </TabsList>
 
@@ -481,6 +529,130 @@ function authenticate(req, res, next) {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Challenges Tab */}
+        <TabsContent value="challenges" className="space-y-4">
+          {/* Challenge Progress */}
+          <Card className="border-none shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium">
+                  Задание {activeChallenge + 1} из {authChallenges.length}
+                </span>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-[10px]">
+                    ✅ {correctCount} верно
+                  </Badge>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                {authChallenges.map((c, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setActiveChallenge(i); setSelectedOption(null); setShowResult(false); }}
+                    className={`flex-1 h-2 rounded-full transition-all ${
+                      answeredChallenges.has(i) ? 'bg-emerald-500' : i === activeChallenge ? 'bg-emerald-300' : 'bg-slate-200'
+                    }`}
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Challenge Card */}
+          <motion.div key={activeChallenge} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
+            <Card className="border-slate-200">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Target size={16} className="text-emerald-600" />
+                  <h3 className="font-semibold">{currentChallenge.title}</h3>
+                  <Badge variant="outline" className="text-[10px] uppercase">{currentChallenge.category}</Badge>
+                </div>
+
+                <div className="bg-slate-50 rounded-lg p-3 mb-4">
+                  <p className="text-xs text-slate-600">{currentChallenge.scenario}</p>
+                </div>
+
+                <CodeBlock code={currentChallenge.code} language="javascript" title="challenge.js" />
+
+                <h4 className="font-medium mt-4 mb-3">{currentChallenge.question}</h4>
+
+                <div className="space-y-2">
+                  {currentChallenge.options.map((option, i) => {
+                    let optionStyle = 'border-slate-200 hover:border-slate-400 hover:bg-slate-50';
+                    if (isChallengeAnswered) {
+                      optionStyle = option.correct ? 'border-emerald-400 bg-emerald-50' :
+                        selectedOption === i && !option.correct ? 'border-red-400 bg-red-50' : 'border-slate-100 opacity-60';
+                    } else if (selectedOption === i) {
+                      optionStyle = 'border-emerald-400 bg-emerald-50/50';
+                    }
+
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => handleSelectOption(i)}
+                        disabled={isChallengeAnswered}
+                        className={`w-full text-left p-3 rounded-lg border-2 transition-all duration-200 ${optionStyle}`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${
+                            isChallengeAnswered && option.correct ? 'border-emerald-500 bg-emerald-500' :
+                            isChallengeAnswered && selectedOption === i && !option.correct ? 'border-red-500 bg-red-500' :
+                            selectedOption === i ? 'border-emerald-500 bg-emerald-100' : 'border-slate-300'
+                          }`}>
+                            {isChallengeAnswered && option.correct && <CheckCircle2 size={14} className="text-white" />}
+                            {isChallengeAnswered && selectedOption === i && !option.correct && <XCircle size={14} className="text-white" />}
+                          </div>
+                          <span className="text-sm">{option.text}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {!isChallengeAnswered && (
+                  <Button
+                    className="mt-4 w-full bg-emerald-600 hover:bg-emerald-700"
+                    onClick={handleCheckAnswer}
+                    disabled={selectedOption === null}
+                  >
+                    Проверить ответ
+                  </Button>
+                )}
+
+                <AnimatePresence>
+                  {showResult && selectedOption !== null && (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
+                      <div className={`rounded-lg p-4 ${
+                        currentChallenge.options[selectedOption].correct ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'
+                      }`}>
+                        <h4 className={`text-xs font-semibold mb-1 ${
+                          currentChallenge.options[selectedOption].correct ? 'text-emerald-700' : 'text-red-700'
+                        }`}>
+                          {currentChallenge.options[selectedOption].correct ? '✅ Верно!' : '❌ Неверно'}
+                        </h4>
+                        <p className="text-xs text-slate-600 leading-relaxed">{currentChallenge.explanation}</p>
+                      </div>
+
+                      <div className="flex justify-between mt-4">
+                        <Button variant="outline" size="sm" onClick={prevChallenge} disabled={activeChallenge === 0}>
+                          <ArrowLeft size={14} className="mr-1" /> Назад
+                        </Button>
+                        {activeChallenge < authChallenges.length - 1 ? (
+                          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={nextChallenge}>
+                            Далее <ArrowRight size={14} className="ml-1" />
+                          </Button>
+                        ) : (
+                          <Badge className="bg-emerald-600 text-white py-1.5">Все задания пройдены!</Badge>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </CardContent>
+            </Card>
+          </motion.div>
         </TabsContent>
       </Tabs>
 

@@ -13,6 +13,275 @@ export interface OWASPTopic {
   mitigations: string[];
 }
 
+export interface OWASPChallenge {
+  id: string;
+  topicId: string;
+  title: string;
+  scenario: string;
+  code: string;
+  question: string;
+  options: Array<{ text: string; correct: boolean }>;
+  explanation: string;
+}
+
+export const owaspChallenges: OWASPChallenge[] = [
+  // A01: Broken Access Control
+  {
+    id: 'owasp-c1',
+    topicId: 'a01',
+    title: 'Найдите уязвимость контроля доступа',
+    scenario: 'Вы проводите аудит API интернет-магазина. Найдите проблему в коде:',
+    code: `app.get('/api/orders/:id', (req, res) => {
+  const order = db.findOrder(req.params.id);
+  res.json(order);
+});`,
+    question: 'Какая уязвимость присутствует в этом коде?',
+    options: [
+      { text: 'SQL-инъекция в req.params.id', correct: false },
+      { text: 'Отсутствует проверка, что заказ принадлежит текущему пользователю (IDOR)', correct: true },
+      { text: 'XSS в ответе сервера', correct: false },
+      { text: 'Нет HTTPS-соединения', correct: false },
+    ],
+    explanation:
+      'Код возвращает любой заказ по ID без проверки прав доступа. Злоумышленник может перебирать ID и просматривать чужие заказы. Это классический IDOR (Insecure Direct Object Reference). Исправление: проверять order.userId === req.user.id.',
+  },
+  {
+    id: 'owasp-c2',
+    topicId: 'a01',
+    title: 'Исправьте контроль доступа',
+    scenario: 'Какой код корректно исправляет уязвимость?',
+    code: `// Исходный код (уязвимый):
+app.get('/api/users/:id/profile', (req, res) => {
+  const user = db.getUser(req.params.id);
+  res.json({ name: user.name, email: user.email });
+});`,
+    question: 'Выберите безопасную реализацию:',
+    options: [
+      { text: 'Добавить проверку if (req.user.id !== req.params.id) return 403', correct: true },
+      { text: 'Заменить GET на POST', correct: false },
+      { text: 'Добавить rate limiting на эндпоинт', correct: false },
+      { text: 'Валидировать формат ID через regex', correct: false },
+    ],
+    explanation:
+      'Контроль доступа должен проверять, что аутентифицированный пользователь имеет право просматривать данные запрашиваемого ресурса. Проверка req.user.id !== req.params.id гарантирует, что пользователь видит только свой профиль (или администратор — все).',
+  },
+  // A02: Cryptographic Failures
+  {
+    id: 'owasp-c3',
+    topicId: 'a02',
+    title: 'Определите криптографическую уязвимость',
+    scenario: 'Приложение хранит данные пользователей. Найдите проблемы:',
+    code: `const user = {
+  email: 'user@example.com',
+  password: 'p@ssw0rd123',      // ?
+  ssn: '123-45-6789',           // ?
+  api_key: 'sk-abc123...',      // ?
+};`,
+    question: 'Какие данные хранятся небезопасно?',
+    options: [
+      { text: 'Только пароль — его нужно хешировать', correct: false },
+      { text: 'Все три: пароль (нужен bcrypt), SSN и API ключ (нужно шифрование AES-256)', correct: true },
+      { text: 'Только SSN — это персональные данные', correct: false },
+      { text: 'Ничего, данные хранятся в базе с паролем', correct: false },
+    ],
+    explanation:
+      'Пароли нельзя хранить в открытом виде — нужен bcrypt/Argon2. SSN (номер социального страхования) и API ключи — чувствительные данные, которые нужно шифровать при хранении (encryption at rest) через AES-256.',
+  },
+  // A03: Injection
+  {
+    id: 'owasp-c4',
+    topicId: 'a03',
+    title: 'Найдите инъекцию в коде',
+    scenario: 'Приложение выполняет поиск пользователей:',
+    code: `app.get('/api/search', (req, res) => {
+  const { query } = req.query;
+  const filter = { name: { $regex: query } };
+  const users = db.collection('users').find(filter);
+  res.json(users);
+});`,
+    question: 'Какой тип инъекции возможен?',
+    options: [
+      { text: 'SQL-инъекция через req.query', correct: false },
+      { text: 'NoSQL-инъекция — злоумышленник может передать { $gt: "" } вместо строки', correct: true },
+      { text: 'XPath-инъекция', correct: false },
+      { text: 'LDAP-инъекция', correct: false },
+    ],
+    explanation:
+      'MongoDB/NoSQL инъекция возможна, когда приложение принимает объект вместо строки. Злоумышленник может передать ?query[$gt]=, что превратит фильтр в { $regex: { $gt: "" } }, вернув всех пользователей. Решение: валидировать тип входных данных (typeof query === "string").',
+  },
+  // A04: Insecure Design
+  {
+    id: 'owasp-c5',
+    topicId: 'a04',
+    title: 'Проблема дизайна: Coupon Brute Force',
+    scenario: 'Система купонов на скидку:',
+    code: `app.post('/api/apply-coupon', (req, res) => {
+  const { code } = req.body;
+  const coupon = db.findCoupon(code);
+  if (coupon && coupon.valid) {
+    applyDiscount(req.user, coupon.discount);
+    res.json({ success: true });
+  } else {
+    res.json({ error: 'Неверный код купона' });
+  }
+});
+// Купоны: SAVE10, SAVE20, SAVE30...`,
+    question: 'Какая проблема дизайна присутствует?',
+    options: [
+      { text: 'Нет ограничения попыток — можно перебрать все купоны', correct: true },
+      { text: 'Купоны слишком предсказуемы', correct: false },
+      { text: 'Нет HTTPS', correct: false },
+      { text: 'Нет валидации на клиенте', correct: false },
+    ],
+    explanation:
+      'Небезопасный дизайн: отсутствие rate limiting позволяет автоматически перебирать все возможные коды купонов. Предсказуемый формат (SAVE10, SAVE20...) усугубляет проблему. Исправление: rate limiting + случайные UUID-коды + мониторинг подозрительных попыток.',
+  },
+  // A05: Security Misconfiguration
+  {
+    id: 'owasp-c6',
+    topicId: 'a05',
+    title: 'Найдите ошибки конфигурации',
+    scenario: 'Express-приложение в продакшене:',
+    code: `const app = express();
+app.set('trust proxy', true);
+app.use(express.json());
+
+app.get('/health', (req, res) => {
+  res.json({
+    env: process.env.NODE_ENV,
+    db: process.env.DB_PASSWORD,
+    version: '2.4.1'
+  });
+});`,
+    question: 'Какие проблемы безопасности есть?',
+    options: [
+      { text: 'Нет helmet.js и раскрывается DB_PASSWORD в health эндпоинте', correct: true },
+      { text: 'trust proxy включён — это всегда уязвимость', correct: false },
+      { text: 'express.json() небезопасен', correct: false },
+      { text: 'Нет проблем, всё корректно настроено', correct: false },
+    ],
+    explanation:
+      'Раскрытие пароля БД в ответе — критическая ошибка. Дополнительно: нет helmet.js для заголовков безопасности, версия приложения раскрыта. В продакшене /health эндпоинт должен возвращать минимум информации и быть защищён.',
+  },
+  // A06: Vulnerable Components
+  {
+    id: 'owasp-c7',
+    topicId: 'a06',
+    title: 'Анализ зависимостей',
+    scenario: 'Файл package.json проекта:',
+    code: `"dependencies": {
+  "lodash": "4.17.11",
+  "express": "4.17.1",
+  "axios": "0.21.1",
+  "jsonwebtoken": "8.5.1"
+}`,
+    question: 'Какой подход к управлению зависимостями правильный?',
+    options: [
+      { text: 'Обновить все пакеты до последних версий и настроить Dependabot', correct: true },
+      { text: 'Использовать только мажорные версии (^)', correct: false },
+      { text: 'Удалить все зависимости и написать свой код', correct: false },
+      { text: 'Оставить как есть, если всё работает', correct: false },
+    ],
+    explanation:
+      'Все перечисленные версии имеют известные CVE: lodash (CVE-2021-23337), axios (CVE-2021-3749), jsonwebtoken (CVE-2022-23529). Необходимо регулярно обновлять зависимости, использовать lock-файлы и настроить автоматический мониторинг (Dependabot, Snyk).',
+  },
+  // A07: Auth Failures
+  {
+    id: 'owasp-c8',
+    topicId: 'a07',
+    title: 'Уязвимость аутентификации',
+    scenario: 'Функция восстановления пароля:',
+    code: `app.post('/api/forgot-password', (req, res) => {
+  const { email } = req.body;
+  const user = db.findUser(email);
+  if (user) {
+    const otp = Math.floor(Math.random() * 9999);
+    sendEmail(email, \`Код: \${otp}\`);
+    res.json({ message: 'Код отправлен' });
+  } else {
+    res.json({ message: 'Код отправлен' }); // Скрываем существование
+  }
+});`,
+    question: 'Что здесь небезопасно?',
+    options: [
+      { text: 'Math.random() предсказуем — OTP можно угадать', correct: true },
+      { text: 'Нет rate limiting, но это не критично', correct: false },
+      { text: 'Сообщение "Код отправлен" раскрывает информацию', correct: false },
+      { text: 'Всё безопасно', correct: false },
+    ],
+    explanation:
+      'Math.random() в JavaScript не криптографически безопасен — его вывод можно предсказать. Злоумышленник может сгенерировать последовательность и угадать OTP. Используйте crypto.randomInt(1000, 9999). Также нужен rate limiting (макс. 3 попытки в 15 минут).',
+  },
+  // A08: Data Integrity
+  {
+    id: 'owasp-c9',
+    topicId: 'a08',
+    title: 'Десериализация данных',
+    scenario: 'API принимает JSON и создаёт объект:',
+    code: `app.post('/api/process', (req, res) => {
+  const data = req.body;
+  // Прямое использование данных без валидации
+  const result = eval(data.calculation);
+  res.json({ result });
+});`,
+    question: 'Какая уязвимость критична?',
+    options: [
+      { text: 'XSS через JSON', correct: false },
+      { text: 'RCE через eval() — злоумышленник выполнит любой код', correct: true },
+      { text: 'SQL-инъекция через data.calculation', correct: false },
+      { text: 'CSRF через POST', correct: false },
+    ],
+    explanation:
+      'eval() выполняет произвольный JavaScript. Злоумышленник может передать calculation: "require(\'child_process\').exec(\'rm -rf /\')" и получить RCE. Никогда не используйте eval() с пользовательским вводом. Используйте mathjs.evaluate() с sandbox или парсер выражений.',
+  },
+  // A09: Logging Failures
+  {
+    id: 'owasp-c10',
+    topicId: 'a09',
+    title: 'Проблемы журналирования',
+    scenario: 'Логи приложения содержат:',
+    code: `// Логи сервера:
+[2024-01-15] Login failed for user admin
+[2024-01-15] Login failed for user admin
+[2024-01-15] Login failed for user admin
+... (500 раз)
+// Нет IP, нет User-Agent, нет timestamp
+console.log('Error:', error);`,
+    question: 'Что нужно улучшить в логировании?',
+    options: [
+      { text: 'Добавить IP, User-Agent, timestamp и алерты на множественные failures', correct: true },
+      { text: 'Удалить логи для экономии места', correct: false },
+      { text: 'Логировать пароль для отладки', correct: false },
+      { text: 'Отображать логи на главной странице', correct: false },
+    ],
+    explanation:
+      'Без IP и User-Agent невозможно определить источник атаки. Без алертов на множественные неудачные попытки невозможно обнаружить brute force в реальном времени. Также нельзя логировать пароли, токены, номера карт. Нужна централизованная система (ELK, Splunk).',
+  },
+  // A10: SSRF
+  {
+    id: 'owasp-c11',
+    topicId: 'a10',
+    title: 'SSRF-уязвимость',
+    scenario: 'Сервис загрузки изображений по URL:',
+    code: `app.post('/api/fetch-image', async (req, res) => {
+  const { url } = req.body;
+  const response = await fetch(url);
+  const buffer = await response.buffer();
+  res.set('Content-Type', 'image/png');
+  res.send(buffer);
+});`,
+    question: 'Какая атака возможна?',
+    options: [
+      { text: 'SSRF — запрос к http://169.254.169.254 для получения AWS метаданных', correct: true },
+      { text: 'XSS через URL', correct: false },
+      { text: 'SQL-инъекция через url', correct: false },
+      { text: 'CSRF через POST', correct: false },
+    ],
+    explanation:
+      'SSRF позволяет злоумышленнику заставить сервер запросить внутренние ресурсы. AWS EC2 metadata (169.254.169.254) содержит IAM credentials, которые дадут доступ к S3, RDS и другим сервисам. Исправление: валидировать URL (только HTTPS), белый список доменов, блокировка приватных IP.',
+  },
+];
+
 export const owaspTopics: OWASPTopic[] = [
   {
     id: 'a01',
