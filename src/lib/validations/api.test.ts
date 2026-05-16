@@ -1,53 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import {
-  quizAnswerSchema,
-  quizAnswersSchema,
   progressUpdateSchema,
   glossarySearchSchema,
   userDataSchema,
 } from './api';
-
-describe('quizAnswerSchema', () => {
-  it('validates correct input', () => {
-    const result = quizAnswerSchema.safeParse({ questionId: 'q1', answerIndex: 0 });
-    expect(result.success).toBe(true);
-  });
-
-  it('rejects empty questionId', () => {
-    const result = quizAnswerSchema.safeParse({ questionId: '', answerIndex: 0 });
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects negative answerIndex', () => {
-    const result = quizAnswerSchema.safeParse({ questionId: 'q1', answerIndex: -1 });
-    expect(result.success).toBe(false);
-  });
-
-  it('accepts answerIndex 0', () => {
-    const result = quizAnswerSchema.safeParse({ questionId: 'q1', answerIndex: 0 });
-    expect(result.success).toBe(true);
-  });
-});
-
-describe('quizAnswersSchema', () => {
-  it('validates array of answers', () => {
-    const result = quizAnswersSchema.safeParse([
-      { questionId: 'q1', answerIndex: 0 },
-      { questionId: 'q2', answerIndex: 2 },
-    ]);
-    expect(result.success).toBe(true);
-  });
-
-  it('accepts empty array', () => {
-    const result = quizAnswersSchema.safeParse([]);
-    expect(result.success).toBe(true);
-  });
-
-  it('rejects invalid entry in array', () => {
-    const result = quizAnswersSchema.safeParse([{ questionId: '', answerIndex: 0 }]);
-    expect(result.success).toBe(false);
-  });
-});
 
 describe('progressUpdateSchema', () => {
   it('validates correct input', () => {

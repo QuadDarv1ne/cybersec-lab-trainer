@@ -1,19 +1,10 @@
 import { z } from 'zod';
 
-// Schema для квиза
-export const quizAnswerSchema = z.object({
-  questionId: z.string().min(1, 'questionId обязателен'),
-  answerIndex: z.number().int().min(0),
-});
-
-export const quizAnswersSchema = z.array(quizAnswerSchema);
-
 // Schema для сохранения результатов квиза
 export const quizResultSchema = z.object({
   quizId: z.string().min(1, 'quizId обязателен'),
   score: z.number().int().min(0, 'score должен быть >= 0'),
   total: z.number().int().min(1, 'total должен быть >= 1'),
-  answers: z.array(quizAnswerSchema).optional(),
 });
 
 // Schema для отправки прогресса
@@ -43,8 +34,6 @@ export const userDataSchema = z.object({
 });
 
 // Типы для схем
-export type QuizAnswer = z.infer<typeof quizAnswerSchema>;
-export type QuizAnswers = z.infer<typeof quizAnswersSchema>;
 export type QuizResult = z.infer<typeof quizResultSchema>;
 export type ProgressUpdate = z.infer<typeof progressUpdateSchema>;
 export type GlossarySearch = z.infer<typeof glossarySearchSchema>;

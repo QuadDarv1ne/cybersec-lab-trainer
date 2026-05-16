@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { quizAnswerSchema, quizResultSchema, progressUpdateSchema, glossarySearchSchema } from "@/lib/validations/api";
+import { quizResultSchema, progressUpdateSchema, glossarySearchSchema } from "@/lib/validations/api";
 import { db } from "@/lib/db";
 import { glossaryTerms } from "@/lib/data/glossary-data";
 
@@ -231,21 +231,6 @@ export async function POST(request: Request) {
         break;
       }
 
-      case 'quiz-answer': {
-        const data = quizAnswerSchema.parse(payload);
-
-        // Store individual quiz answer (could be used for analytics)
-        const quizResult = {
-          userId,
-          questionId: data.questionId,
-          answerIndex: data.answerIndex,
-          timestamp: new Date().toISOString(),
-        };
-
-        result = { quizResult, message: "Quiz answer recorded" };
-        break;
-      }
-
       case 'quiz-answers': {
         const data = quizResultSchema.parse(payload);
 
@@ -273,7 +258,7 @@ export async function POST(request: Request) {
 
       default:
         return NextResponse.json(
-          { error: `Unknown request type: ${type}. Expected: progress, quiz-answer, quiz-answers, glossary-search` },
+          { error: `Unknown request type: ${type}. Expected: progress, quiz-answers, glossary-search` },
           { status: 400 }
         );
     }
