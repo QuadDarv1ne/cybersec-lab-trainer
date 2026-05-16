@@ -41,7 +41,7 @@ function stopCleanupInterval(): void {
   }
 }
 
-if (typeof process !== 'undefined') {
+if (typeof process !== 'undefined' && typeof process.on === 'function') {
   process.on('SIGTERM', stopCleanupInterval);
   process.on('SIGINT', stopCleanupInterval);
   // In Next.js dev mode the module is re-evaluated on each rebuild;
