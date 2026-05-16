@@ -23,7 +23,7 @@ import {
 
 export default function SecurityHeadersLab() {
   const t = useTranslations('securityHeaders');
-  const { completeModule, setCurrentPage, completedModules, setHeadersChallengeScore, headersChallengeScores } = useAppStore();
+  const { completeModule, setCurrentPage, completedModules, headersChallengeScores } = useAppStore();
   const isCompleted = completedModules.includes('security-headers');
 
   // Challenge state
@@ -39,10 +39,11 @@ export default function SecurityHeadersLab() {
   // Complete module when all challenges are answered with >= 70% correct
   useEffect(() => {
     if (answeredChallenges.size === headerChallenges.length &&
-        correctCount >= Math.ceil(headerChallenges.length * 0.7)) {
+        correctCount >= Math.ceil(headerChallenges.length * 0.7) &&
+        !isCompleted) {
       completeModule('security-headers');
     }
-  }, [answeredChallenges.size, correctCount, completeModule]);
+  }, [answeredChallenges.size, correctCount, isCompleted, completeModule]);
 
   const handleSelectOption = (index: number) => {
     if (isAnswered) return;

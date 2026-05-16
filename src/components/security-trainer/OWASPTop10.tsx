@@ -73,10 +73,10 @@ export default function OWASPTop10() {
 
   // Complete module when all topics studied
   useEffect(() => {
-    if (allStudied && studiedCount > 0) {
+    if (allStudied && studiedCount > 0 && !isCompleted) {
       completeModule('owasp');
     }
-  }, [allStudied, studiedCount, completeModule]);
+  }, [allStudied, studiedCount, isCompleted, completeModule]);
 
   const handleToggleStudied = (id: string) => {
     if (studiedOwaspItems.includes(id)) return;

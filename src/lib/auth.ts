@@ -1,6 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { db } from "./db";
 
@@ -24,13 +25,41 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   );
 }
 
+// Fallback: allow anonymous demo access when no OAuth providers are configured
+if (providers.length === 0) {
+  providers.push(
+    CredentialsProvider({
+      name: "Demo",
+      credentials: {},
+      async authorize() {
+        return {
+          id: "demo-user",
+          name: "Demo User",
+          email: "demo@example.com",
+          image: null,
+        };
+      },
+    }),
+  );
+}
+
+// Only use PrismaAdapter when OAuth providers are configured
+// Demo mode (CredentialsProvider) doesn't need DB-backed sessions
+const hasOAuth = providers.length > 0 && !providers.some(p => p.type === "credentials");
+
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(db),
+  ...(hasOAuth ? { adapter: PrismaAdapter(db) } : {}),
   providers,
   callbacks: {
-    async session({ session, user }) {
+    async jwt({ token, user }) {
+      if (user?.id) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = user.id;
+        session.user.id = (token.id as string) ?? token.sub ?? "";
       }
       return session;
     },

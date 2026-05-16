@@ -128,19 +128,20 @@ const renderDefense = (xssId: string, attackDemo: string) => {
 };
 
 export default function XSSLab() {
-  const { xssCompletedLevels, addXssLevel, completeModule, setCurrentPage } = useAppStore();
+  const { xssCompletedLevels, addXssLevel, completeModule, setCurrentPage, completedModules } = useAppStore();
   const t = useTranslations('xss');
   const [activeTab, setActiveTab] = useState(xssTypes[0].id);
   const [showAttack, setShowAttack] = useState(false);
 
   const allCompleted = xssCompletedLevels.length === xssTypes.length;
+  const isCompleted = completedModules.includes('xss');
 
   // Complete module when all XSS levels completed
   useEffect(() => {
-    if (allCompleted && xssCompletedLevels.length > 0) {
+    if (allCompleted && xssCompletedLevels.length > 0 && !isCompleted) {
       completeModule('xss');
     }
-  }, [allCompleted, xssCompletedLevels.length, completeModule]);
+  }, [allCompleted, xssCompletedLevels.length, isCompleted, completeModule]);
 
   const handleMarkComplete = (id: string) => {
     if (xssCompletedLevels.includes(id)) return;

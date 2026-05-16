@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, CheckCircle2, Play, Eye, EyeOff, Lightbulb, AlertTriangle, Zap } from 'lucide-react';
 
 export default function SQLInjectionLab() {
-  const { sqlCompletedLevels, addSqlLevel, completeModule, setCurrentPage } = useAppStore();
+  const { sqlCompletedLevels, addSqlLevel, completeModule, setCurrentPage, completedModules } = useAppStore();
   const t = useTranslations('sqlInjection');
   const [activeChallenge, setActiveChallenge] = useState(0);
   const [userInput, setUserInput] = useState('');
@@ -24,13 +24,14 @@ export default function SQLInjectionLab() {
   const challenge = sqlChallenges[activeChallenge];
   const isCompleted = sqlCompletedLevels.includes(challenge.id);
   const allCompleted = sqlCompletedLevels.length === sqlChallenges.length;
+  const moduleCompleted = completedModules.includes('sql-injection');
 
   // Complete module when all SQL levels completed
   useEffect(() => {
-    if (allCompleted && sqlCompletedLevels.length > 0) {
+    if (allCompleted && sqlCompletedLevels.length > 0 && !moduleCompleted) {
       completeModule('sql-injection');
     }
-  }, [allCompleted, sqlCompletedLevels.length, completeModule]);
+  }, [allCompleted, sqlCompletedLevels.length, moduleCompleted, completeModule]);
 
   const checkAnswer = () => {
     const input = userInput.trim();

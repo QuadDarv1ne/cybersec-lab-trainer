@@ -34,10 +34,11 @@ export default function SecureCodingLab() {
   // Complete module when all challenges are answered with >= 70% correct
   useEffect(() => {
     if (answeredChallenges.size === secureCodingChallenges.length &&
-        correctCount >= Math.ceil(secureCodingChallenges.length * 0.7)) {
+        correctCount >= Math.ceil(secureCodingChallenges.length * 0.7) &&
+        !isCompleted) {
       completeModule('secure-coding');
     }
-  }, [answeredChallenges.size, correctCount, completeModule]);
+  }, [answeredChallenges.size, correctCount, isCompleted, completeModule]);
 
   const handleSelectOption = (index: number) => {
     if (isAnswered) return;
