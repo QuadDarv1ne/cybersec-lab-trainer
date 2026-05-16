@@ -103,8 +103,8 @@ export default function Dashboard() {
     if (!completedModules.includes('xss')) {
       return { text: t('recommendations.xssLearn'), page: 'xss' as PageType };
     }
-    if (!completedModules.includes('quiz')) {
-      return { text: t('recommendations.quizCheck'), page: 'quiz' as PageType };
+    if (!completedModules.includes('csrf')) {
+      return { text: t('recommendations.quizCheck'), page: 'csrf' as PageType };
     }
     if (!completedModules.includes('tools')) {
       return { text: t('recommendations.toolsTry'), page: 'tools' as PageType };

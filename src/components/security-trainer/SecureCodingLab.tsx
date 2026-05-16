@@ -31,9 +31,10 @@ export default function SecureCodingLab() {
   const isAnswered = answeredChallenges.has(activeChallenge);
   const isCompleted = completedModules.includes('secure-coding');
 
-  // Complete module only when all challenges answered AND all correct
+  // Complete module when all challenges are answered with >= 70% correct
   useEffect(() => {
-    if (answeredChallenges.size === secureCodingChallenges.length && correctCount === secureCodingChallenges.length) {
+    if (answeredChallenges.size === secureCodingChallenges.length &&
+        correctCount >= Math.ceil(secureCodingChallenges.length * 0.7)) {
       completeModule('secure-coding');
     }
   }, [answeredChallenges.size, correctCount, completeModule]);

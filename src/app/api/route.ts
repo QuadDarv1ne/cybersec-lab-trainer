@@ -250,10 +250,18 @@ export async function POST(request: Request) {
       case 'quiz-answers': {
         const data = quizResultSchema.parse(payload);
 
-        const quizResult = await db.quizResult.create({
-          data: {
+        const quizResult = await db.quizResult.upsert({
+          where: {
+            userId_quizId: { userId, quizId: data.quizId },
+          },
+          create: {
             userId,
             quizId: data.quizId,
+            score: data.score,
+            total: data.total,
+            percentage: data.total > 0 ? (data.score / data.total) * 100 : 0,
+          },
+          update: {
             score: data.score,
             total: data.total,
             percentage: data.total > 0 ? (data.score / data.total) * 100 : 0,

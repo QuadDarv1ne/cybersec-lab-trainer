@@ -36,9 +36,10 @@ export default function SecurityHeadersLab() {
   const challenge = headerChallenges[activeChallenge];
   const isAnswered = answeredChallenges.has(activeChallenge);
 
-  // Complete module only when all challenges answered AND all correct
+  // Complete module when all challenges are answered with >= 70% correct
   useEffect(() => {
-    if (answeredChallenges.size === headerChallenges.length && correctCount === headerChallenges.length) {
+    if (answeredChallenges.size === headerChallenges.length &&
+        correctCount >= Math.ceil(headerChallenges.length * 0.7)) {
       completeModule('security-headers');
     }
   }, [answeredChallenges.size, correctCount, completeModule]);
