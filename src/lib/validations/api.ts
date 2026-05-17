@@ -5,6 +5,7 @@ export const quizResultSchema = z.object({
   quizId: z.string().min(1, 'quizId обязателен'),
   score: z.number().int().min(0, 'score должен быть >= 0'),
   total: z.number().int().min(1, 'total должен быть >= 1'),
+  answers: z.array(z.record(z.string(), z.unknown())).optional(),
 });
 
 // Schema для отправки прогресса

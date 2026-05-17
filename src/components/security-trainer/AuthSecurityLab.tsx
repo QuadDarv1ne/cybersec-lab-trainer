@@ -176,6 +176,15 @@ export default function AuthSecurityLab() {
     return () => { cancelled = true; };
   }, [hashInput]);
 
+  // Complete module when all challenges are answered with >= 70% correct
+  useEffect(() => {
+    if (answeredChallenges.size === authChallenges.length &&
+        correctCount >= Math.ceil(authChallenges.length * 0.7) &&
+        !isCompleted) {
+      completeModule('auth');
+    }
+  }, [answeredChallenges.size, correctCount, isCompleted, completeModule]);
+
   const handleComplete = () => {
     if (!isCompleted) completeModule('auth');
   };
