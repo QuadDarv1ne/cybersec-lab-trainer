@@ -26,9 +26,8 @@ export function getAchievementStatus(
     case 'owasp-challenger': return (challengeStats?.owaspCorrect ?? 0) >= 11;
     case 'auth-challenger': return (challengeStats?.authCorrect ?? 0) >= 8;
     case 'quiz-streak': {
-      const scores = Object.values(quizScores);
-      if (scores.length < 3) return false;
-      return scores.slice(-3).every((s) => s >= 80);
+      const highScores = Object.values(quizScores).filter((s) => s >= 80);
+      return highScores.length >= 3;
     }
     case 'all-categories': {
       const categoryCount = Object.keys(quizScores).length;

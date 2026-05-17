@@ -272,9 +272,15 @@ export async function POST(request: Request) {
     addRateLimitHeaders(response, requestCount);
     return response;
   } catch (error) {
-    if (error instanceof Error && 'issues' in error) {
+    if (error instanceof Error && error.name === "ZodError") {
+      let details: unknown;
+      try {
+        details = JSON.parse(error.message);
+      } catch {
+        details = error.message;
+      }
       return NextResponse.json(
-        { error: "Validation failed", details: (error as { issues: unknown[] }).issues },
+        { error: "Validation failed", details },
         { status: 400 }
       );
     }

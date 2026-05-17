@@ -100,6 +100,7 @@ export default function SQLInjectionLab() {
 
   const levelColors: Record<string, string> = {
     'Новичок': 'bg-green-100 text-green-700',
+    'Средний': 'bg-blue-100 text-blue-700',
     'Продвинутый': 'bg-yellow-100 text-yellow-700',
     'Эксперт': 'bg-red-100 text-red-700',
   };
