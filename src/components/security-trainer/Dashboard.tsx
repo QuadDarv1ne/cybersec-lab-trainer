@@ -199,7 +199,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4" aria-live="polite" aria-label="Learning statistics">
         {[
           { label: t('stats.modulesCompleted'), value: completedCount, total: totalModules, color: 'text-emerald-600' },
-          { label: t('stats.quizzesCompleted'), value: Object.keys(quizScores).length, total: 5, color: 'text-amber-600' },
+          { label: t('stats.quizzesCompleted'), value: Object.keys(quizScores).length, total: quizCategories.length, color: 'text-amber-600' },
           { label: t('stats.averageScore'), value: avgQuizScore, suffix: '%', color: 'text-sky-600' },
           { label: t('stats.achievements'), value: unlockedAchievements.length, total: achievements.length, color: 'text-violet-600' },
         ].map((stat, i) => (
