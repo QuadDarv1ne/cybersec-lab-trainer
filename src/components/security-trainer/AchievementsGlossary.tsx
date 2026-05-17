@@ -146,7 +146,7 @@ export default function AchievementsAndGlossary() {
                           </h3>
                           {unlocked && (
                             <Badge className="bg-amber-500 text-white border-0 text-[10px]">
-                              <Flame size={10} className="mr-0.5" /> Получено
+                              <Flame size={10} className="mr-0.5" /> {t('unlocked')}
                             </Badge>
                           )}
                         </div>

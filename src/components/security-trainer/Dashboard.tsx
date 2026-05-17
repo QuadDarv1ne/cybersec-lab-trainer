@@ -123,6 +123,13 @@ export default function Dashboard() {
     setCurrentPage(moduleId as PageType);
   };
 
+  const handleCardKeyDown = (e: React.KeyboardEvent, action: () => void) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      action();
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Top bar mobile */}
@@ -229,8 +236,12 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
-        <Card className="bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200 cursor-pointer hover:shadow-md transition-shadow"
-          onClick={() => setCurrentPage(recommendation.page)}>
+        <Card className="bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200 cursor-pointer hover:shadow-md transition-shadow focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+          onClick={() => setCurrentPage(recommendation.page)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => handleCardKeyDown(e, () => setCurrentPage(recommendation.page))}
+          aria-label="Next recommendation">
           <CardContent className="p-5 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 flex-1">
               <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shrink-0">
@@ -283,8 +294,12 @@ export default function Dashboard() {
                 transition={{ delay: i * 0.06 }}
               >
                 <Card
-                  className="group cursor-pointer border-slate-200 hover:border-emerald-400 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                  className="group cursor-pointer border-slate-200 hover:border-emerald-400 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
                   onClick={() => handleStartModule(mod.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => handleCardKeyDown(e, () => handleStartModule(mod.id))}
+                  aria-label={mod.title}
                 >
                   <CardContent className="p-0">
                     <div className="flex">
@@ -341,8 +356,12 @@ export default function Dashboard() {
             transition={{ delay: modules.length * 0.06 }}
           >
             <Card
-              className="group cursor-pointer border-amber-200 hover:border-amber-400 hover:shadow-md transition-all duration-300 overflow-hidden"
+              className="group cursor-pointer border-amber-200 hover:border-amber-400 hover:shadow-md transition-all duration-300 overflow-hidden focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
               onClick={() => setCurrentPage('quiz')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => handleCardKeyDown(e, () => setCurrentPage('quiz'))}
+              aria-label="Quiz system"
             >
               <CardContent className="p-0">
                 <div className="flex">
@@ -373,8 +392,12 @@ export default function Dashboard() {
             transition={{ delay: (modules.length + 1) * 0.06 }}
           >
             <Card
-              className="group cursor-pointer border-violet-200 hover:border-violet-400 hover:shadow-md transition-all duration-300 overflow-hidden"
+              className="group cursor-pointer border-violet-200 hover:border-violet-400 hover:shadow-md transition-all duration-300 overflow-hidden focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
               onClick={() => setCurrentPage('achievements')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => handleCardKeyDown(e, () => setCurrentPage('achievements'))}
+              aria-label="Achievements and glossary"
             >
               <CardContent className="p-0">
                 <div className="flex">

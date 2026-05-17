@@ -5,19 +5,20 @@ import { useHashRouting } from '@/hooks/use-hash-routing';
 import Sidebar from '@/components/security-trainer/Sidebar';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 import dynamic from 'next/dynamic';
 
-const Dashboard = dynamic(() => import('@/components/security-trainer/Dashboard'), { ssr: false });
-const OWASPTop10 = dynamic(() => import('@/components/security-trainer/OWASPTop10'), { ssr: false });
-const SQLInjectionLab = dynamic(() => import('@/components/security-trainer/SQLInjectionLab'), { ssr: false });
-const XSSLab = dynamic(() => import('@/components/security-trainer/XSSLab'), { ssr: false });
-const CSRFLab = dynamic(() => import('@/components/security-trainer/CSRFLab'), { ssr: false });
-const AuthSecurityLab = dynamic(() => import('@/components/security-trainer/AuthSecurityLab'), { ssr: false });
-const SecureCodingLab = dynamic(() => import('@/components/security-trainer/SecureCodingLab'), { ssr: false });
-const ToolsLab = dynamic(() => import('@/components/security-trainer/ToolsLab'), { ssr: false });
-const QuizSystem = dynamic(() => import('@/components/security-trainer/QuizSystem'), { ssr: false });
-const AchievementsGlossary = dynamic(() => import('@/components/security-trainer/AchievementsGlossary'), { ssr: false });
-const SecurityHeadersLab = dynamic(() => import('@/components/security-trainer/SecurityHeadersLab'), { ssr: false });
+const Dashboard = dynamic(() => import('@/components/security-trainer/Dashboard'), { ssr: false, loading: () => <PageSkeleton /> });
+const OWASPTop10 = dynamic(() => import('@/components/security-trainer/OWASPTop10'), { ssr: false, loading: () => <PageSkeleton /> });
+const SQLInjectionLab = dynamic(() => import('@/components/security-trainer/SQLInjectionLab'), { ssr: false, loading: () => <PageSkeleton /> });
+const XSSLab = dynamic(() => import('@/components/security-trainer/XSSLab'), { ssr: false, loading: () => <PageSkeleton /> });
+const CSRFLab = dynamic(() => import('@/components/security-trainer/CSRFLab'), { ssr: false, loading: () => <PageSkeleton /> });
+const AuthSecurityLab = dynamic(() => import('@/components/security-trainer/AuthSecurityLab'), { ssr: false, loading: () => <PageSkeleton /> });
+const SecureCodingLab = dynamic(() => import('@/components/security-trainer/SecureCodingLab'), { ssr: false, loading: () => <PageSkeleton /> });
+const ToolsLab = dynamic(() => import('@/components/security-trainer/ToolsLab'), { ssr: false, loading: () => <PageSkeleton /> });
+const QuizSystem = dynamic(() => import('@/components/security-trainer/QuizSystem'), { ssr: false, loading: () => <PageSkeleton /> });
+const AchievementsGlossary = dynamic(() => import('@/components/security-trainer/AchievementsGlossary'), { ssr: false, loading: () => <PageSkeleton /> });
+const SecurityHeadersLab = dynamic(() => import('@/components/security-trainer/SecurityHeadersLab'), { ssr: false, loading: () => <PageSkeleton /> });
 
 const pages: Record<string, React.ComponentType> = {
   dashboard: Dashboard,
@@ -32,6 +33,24 @@ const pages: Record<string, React.ComponentType> = {
   achievements: AchievementsGlossary,
   owasp: OWASPTop10,
 };
+
+function PageSkeleton() {
+  return (
+    <div className="space-y-6">
+      <Skeleton className="h-48 w-full rounded-2xl" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-24" />
+        ))}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-28" />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const { currentPage } = useAppStore();

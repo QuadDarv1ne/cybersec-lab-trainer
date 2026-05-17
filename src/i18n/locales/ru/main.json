@@ -289,7 +289,7 @@
     "searchPlaceholder": "Поиск по терминам...",
     "clear": "Очистить",
     "noResults": "Ничего не найдено...",
-    "unlocked": "Разблокировано",
+    "unlocked": "Получено",
     "locked": "Заблокировано",
     "progress": "Прогресс: {completed}/{total}"
   },

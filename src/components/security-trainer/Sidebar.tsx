@@ -105,8 +105,7 @@ export default function Sidebar() {
       <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1" aria-label="Main navigation">
         {navItems.map((item) => {
           const isActive = currentPage === item.id;
-          const isCompleted =
-            item.id === 'dashboard' || completedModules.includes(item.id);
+          const isCompleted = completedModules.includes(item.id);
 
           return (
             <button
