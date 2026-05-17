@@ -320,7 +320,7 @@ export default function SecurityHeadersLab() {
                           : 'text-red-700'
                       }`}
                     >
-                      {challenge.options[selectedOption].correct ? '✅ Correct!' : '❌ Incorrect'}
+                      {challenge.options[selectedOption].correct ? `✅ ${t('correctAnswer')}` : `❌ ${t('incorrectAnswer')}`}
                     </h4>
                     <p className="text-xs text-slate-600 leading-relaxed">{challenge.explanation}</p>
                   </div>

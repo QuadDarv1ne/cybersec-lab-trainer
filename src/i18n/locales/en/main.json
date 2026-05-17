@@ -329,6 +329,8 @@
     "allComplete": "All tasks complete!",
     "checkAnswer": "Check answer",
     "back": "Back",
-    "next": "Next"
+    "next": "Next",
+    "correctAnswer": "Correct!",
+    "incorrectAnswer": "Incorrect"
   }
 }

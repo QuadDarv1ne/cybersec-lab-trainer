@@ -273,12 +273,8 @@ export async function POST(request: Request) {
     return response;
   } catch (error) {
     if (error instanceof Error && error.name === "ZodError") {
-      let details: unknown;
-      try {
-        details = JSON.parse(error.message);
-      } catch {
-        details = error.message;
-      }
+      const zodError = error as { flatten?: () => { fieldErrors: Record<string, string[]> } };
+      const details = zodError.flatten?.()?.fieldErrors ?? error.message;
       return NextResponse.json(
         { error: "Validation failed", details },
         { status: 400 }

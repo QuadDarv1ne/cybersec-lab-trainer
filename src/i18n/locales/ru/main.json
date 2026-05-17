@@ -329,6 +329,8 @@
     "allComplete": "Все задания завершены!",
     "checkAnswer": "Проверить ответ",
     "back": "Назад",
-    "next": "Следующее"
+    "next": "Следующее",
+    "correctAnswer": "Правильно!",
+    "incorrectAnswer": "Неправильно"
   }
 }
