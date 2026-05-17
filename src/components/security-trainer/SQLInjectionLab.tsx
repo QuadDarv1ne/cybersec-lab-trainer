@@ -95,7 +95,8 @@ export default function SQLInjectionLab() {
 
   const getModifiedQuery = () => {
     if (!userInput.trim()) return challenge.initialQuery;
-    return challenge.initialQuery.replace('[ВВОД]', userInput.trim());
+    // Use a replacement function to avoid interpreting special patterns like $&, $', $`
+    return challenge.initialQuery.replace('[ВВОД]', () => userInput.trim());
   };
 
   const levelColors: Record<string, string> = {

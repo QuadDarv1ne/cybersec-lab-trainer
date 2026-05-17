@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -160,18 +161,18 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const rateLimitResult = applyRateLimit(request);
-  if (rateLimitResult.response) {
-    return rateLimitResult.response;
-  }
-  const requestCount = rateLimitResult.count;
-
   try {
     const body = await request.json();
     const { type, payload } = body;
 
-    // glossary-search is public (no auth needed)
+    // glossary-search is public (no auth needed) — apply rate limit
     if (type === 'glossary-search') {
+      const rateLimitResult = applyRateLimit(request);
+      if (rateLimitResult.response) {
+        return rateLimitResult.response;
+      }
+      const requestCount = rateLimitResult.count;
+
       const data = glossarySearchSchema.parse(payload);
       const query = data.query.toLowerCase();
 
@@ -196,12 +197,19 @@ export async function POST(request: Request) {
       return response;
     }
 
-    // All other endpoints require authentication
+    // All other endpoints require authentication — check before consuming rate limit
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
     const userId = session.user.id;
+
+    // Apply rate limit only for authenticated requests
+    const rateLimitResult = applyRateLimit(request);
+    if (rateLimitResult.response) {
+      return rateLimitResult.response;
+    }
+    const requestCount = rateLimitResult.count;
 
     let result: Record<string, unknown>;
 
@@ -272,9 +280,8 @@ export async function POST(request: Request) {
     addRateLimitHeaders(response, requestCount);
     return response;
   } catch (error) {
-    if (error instanceof Error && error.name === "ZodError") {
-      const zodError = error as { flatten?: () => { fieldErrors: Record<string, string[]> } };
-      const details = zodError.flatten?.()?.fieldErrors ?? error.message;
+    if (error instanceof z.ZodError) {
+      const details = error.flatten().fieldErrors;
       return NextResponse.json(
         { error: "Validation failed", details },
         { status: 400 }

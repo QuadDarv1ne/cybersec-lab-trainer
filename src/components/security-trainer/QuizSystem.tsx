@@ -95,14 +95,21 @@ export default function QuizSystem() {
     return () => clearInterval(interval);
   }, [timerActive, handleTimeUp]);
 
-  const categoryQuestions = useMemo(
-    () => quizQuestions.filter((q) => q.category === activeCategory),
+  const activeCategoryName = useMemo(
+    () => quizCategories.find((c) => c.id === activeCategory)?.name || activeCategory,
     [activeCategory],
   );
 
-  const startQuiz = (categoryName: string) => {
-    const questions = quizQuestions.filter((q) => q.category === categoryName);
-    setActiveCategory(categoryName);
+  const categoryQuestions = useMemo(
+    () => quizQuestions.filter((q) => q.category === activeCategoryName),
+    [activeCategoryName],
+  );
+
+  const startQuiz = (categoryId: string) => {
+    const cat = quizCategories.find((c) => c.id === categoryId);
+    if (!cat) return;
+    const questions = quizQuestions.filter((q) => q.category === cat.name);
+    setActiveCategory(cat.id);
     setCurrentQuestion(0);
     setCorrectCount(0);
     setSelectedAnswer('');
@@ -123,7 +130,7 @@ export default function QuizSystem() {
       setTimerActive(true);
     } else {
       setCorrectCount((finalCount) => {
-        const catId = quizCategories.find((c) => c.name === activeCategory)?.id || '';
+        const catId = activeCategory;
         const score = Math.round((finalCount / totalQuestions) * 100);
         setQuizScore(catId, score);
         setTimerActive(false);
@@ -197,7 +204,7 @@ export default function QuizSystem() {
                 <Card
                   key={cat.id}
                   className="cursor-pointer border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all"
-                  onClick={() => startQuiz(cat.name)}
+                  onClick={() => startQuiz(cat.id)}
                 >
                   <CardContent className="p-5">
                     <div className="flex items-center gap-3">
@@ -235,7 +242,7 @@ export default function QuizSystem() {
           <Card className="border-none shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
-                <Badge variant="secondary" className="text-xs">{activeCategory}</Badge>
+                <Badge variant="secondary" className="text-xs">{activeCategoryName}</Badge>
                 <div className="flex items-center gap-3 text-xs text-slate-500">
                   <span>{t('questionProgress', { current: currentQuestion + 1, total: categoryQuestions.length })}</span>
                   <div className={`flex items-center gap-1 ${timeLeft <= 10 ? 'text-red-500' : 'text-slate-500'}`}>
@@ -356,7 +363,7 @@ export default function QuizSystem() {
               <h2 className="text-2xl font-bold mb-1">
                 {finalScore >= 80 ? t('excellent') : finalScore >= 60 ? t('goodResult') : t('needsImprovement')}
               </h2>
-              <p className="text-slate-300 text-sm mb-4">{activeCategory}</p>
+              <p className="text-slate-300 text-sm mb-4">{activeCategoryName}</p>
 
               <div className="text-5xl font-bold font-mono mb-2">{finalScore}%</div>
               <p className="text-slate-400 text-sm mb-6">
