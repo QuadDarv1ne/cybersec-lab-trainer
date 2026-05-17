@@ -68,7 +68,7 @@ export class ErrorBoundary extends Component<Props, State> {
               Произошла непредвиденная ошибка. Попробуйте обновить страницу.
             </p>
 
-            {this.state.error && (
+            {this.state.error && process.env.NODE_ENV === 'development' && (
               <div className="bg-gray-100 dark:bg-gray-700 rounded p-3 text-sm">
                 <button
                   type="button"

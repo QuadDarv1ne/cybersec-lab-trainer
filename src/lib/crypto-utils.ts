@@ -164,7 +164,8 @@ export function simpleHash(text: string): { md5Like: string; shaLike: string; dj
     h1 = ((h1 << 5) + h1 + c) & 0xffffffff;
   }
   // djb2 produces a 32-bit value — we pad it to simulate longer outputs
-  const djb2 = Math.abs(h1).toString(16).padStart(8, '0');
+  // Use >>> 0 to convert signed 32-bit to unsigned, avoiding Math.abs(INT_MIN) edge case
+  const djb2 = (h1 >>> 0).toString(16).padStart(8, '0');
   return {
     md5Like: djb2.repeat(4),   // 32 chars (simulated MD5 length)
     shaLike: djb2.repeat(8),   // 64 chars (simulated SHA-256 length)
