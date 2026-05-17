@@ -25,8 +25,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   Target,
-  ArrowRight,
-  ArrowLeft,
   XCircle,
 } from 'lucide-react';
 
@@ -541,11 +539,11 @@ function authenticate(req, res, next) {
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium">
-                  Задание {activeChallenge + 1} из {authChallenges.length}
+                  {t('taskLabel', { current: activeChallenge + 1, total: authChallenges.length })}
                 </span>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-[10px]">
-                    ✅ {correctCount} верно
+                    {t('correctCount', { count: correctCount })}
                   </Badge>
                 </div>
               </div>
@@ -620,7 +618,7 @@ function authenticate(req, res, next) {
                     onClick={handleCheckAnswer}
                     disabled={selectedOption === null}
                   >
-                    Проверить ответ
+                    {t('checkAnswerBtn')}
                   </Button>
                 )}
 
@@ -633,21 +631,21 @@ function authenticate(req, res, next) {
                         <h4 className={`text-xs font-semibold mb-1 ${
                           currentChallenge.options[selectedOption].correct ? 'text-emerald-700' : 'text-red-700'
                         }`}>
-                          {currentChallenge.options[selectedOption].correct ? '✅ Верно!' : '❌ Неверно'}
+                          {currentChallenge.options[selectedOption].correct ? `✅ ${t('correctAnswer')}` : `❌ ${t('incorrectAnswer')}`}
                         </h4>
                         <p className="text-xs text-slate-600 leading-relaxed">{currentChallenge.explanation}</p>
                       </div>
 
                       <div className="flex justify-between mt-4">
                         <Button variant="outline" size="sm" onClick={prevChallenge} disabled={activeChallenge === 0}>
-                          <ArrowLeft size={14} className="mr-1" /> Назад
+                          {t('backBtn')}
                         </Button>
                         {activeChallenge < authChallenges.length - 1 ? (
                           <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={nextChallenge}>
-                            Далее <ArrowRight size={14} className="ml-1" />
+                            {t('nextBtn')}
                           </Button>
                         ) : (
-                          <Badge className="bg-emerald-600 text-white py-1.5">Все задания пройдены!</Badge>
+                          <Badge className="bg-emerald-600 text-white py-1.5">{t('allTasksPassed')}</Badge>
                         )}
                       </div>
                     </motion.div>

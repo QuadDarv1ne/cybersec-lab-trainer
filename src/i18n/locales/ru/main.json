@@ -223,7 +223,15 @@
     "hashResult": "Результат хеширования",
     "hashAlgorithm": "Алгоритм хеширования",
     "markComplete": "Отметить как завершённое",
-    "moduleComplete": "Модуль завершён!"
+    "moduleComplete": "Модуль завершён!",
+    "correctCount": "{count} верно",
+    "allTasksPassed": "Все задания пройдены!",
+    "backBtn": "Назад",
+    "nextBtn": "Далее",
+    "correctAnswer": "Верно!",
+    "incorrectAnswer": "Неверно",
+    "checkAnswerBtn": "Проверить ответ",
+    "taskLabel": "Задание {current} из {total}"
   },
   "secureCoding": {
     "title": "Безопасное кодирование",

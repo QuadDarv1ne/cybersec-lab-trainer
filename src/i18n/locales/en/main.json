@@ -223,7 +223,15 @@
     "hashResult": "Hash result",
     "hashAlgorithm": "Hash algorithm",
     "markComplete": "Mark as complete",
-    "moduleComplete": "Module complete!"
+    "moduleComplete": "Module complete!",
+    "correctCount": "{count} correct",
+    "allTasksPassed": "All tasks completed!",
+    "backBtn": "Back",
+    "nextBtn": "Next",
+    "correctAnswer": "Correct!",
+    "incorrectAnswer": "Incorrect",
+    "checkAnswerBtn": "Check answer",
+    "taskLabel": "Task {current} of {total}"
   },
   "secureCoding": {
     "title": "Secure Coding",
