@@ -23,7 +23,7 @@ import {
 
 export default function SecurityHeadersLab() {
   const t = useTranslations('securityHeaders');
-  const { completeModule, setCurrentPage, completedModules, headersChallengeScores } = useAppStore();
+  const { completeModule, setCurrentPage, completedModules, headersChallengeScores, setHeadersChallengeScore } = useAppStore();
   const isCompleted = completedModules.includes('security-headers');
 
   // Challenge state
@@ -57,7 +57,9 @@ export default function SecurityHeadersLab() {
     const newAnswered = new Set(answeredChallenges);
     newAnswered.add(activeChallenge);
     setAnsweredChallenges(newAnswered);
-    if (isCorrect) setCorrectCount((c) => c + 1);
+    const newCorrect = isCorrect ? correctCount + 1 : correctCount;
+    setCorrectCount(newCorrect);
+    setHeadersChallengeScore(newCorrect, [...newAnswered]);
   };
 
   const nextChallenge = () => {

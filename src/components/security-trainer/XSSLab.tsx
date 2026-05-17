@@ -131,7 +131,7 @@ export default function XSSLab() {
   const { xssCompletedLevels, addXssLevel, completeModule, setCurrentPage, completedModules } = useAppStore();
   const t = useTranslations('xss');
   const [activeTab, setActiveTab] = useState(xssTypes[0].id);
-  const [showAttack, setShowAttack] = useState(false);
+  const [showAttacks, setShowAttacks] = useState<Set<string>>(new Set());
 
   const allCompleted = xssCompletedLevels.length === xssTypes.length;
   const isCompleted = completedModules.includes('xss');
@@ -257,14 +257,19 @@ export default function XSSLab() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setShowAttack(!showAttack)}
+                      onClick={() => {
+                        const next = new Set(showAttacks);
+                        if (next.has(activeTab)) next.delete(activeTab);
+                        else next.add(activeTab);
+                        setShowAttacks(next);
+                      }}
                     >
-                      {showAttack ? 'Скрыть демо' : 'Показать атаку'}
+                      {showAttacks.has(activeTab) ? 'Скрыть демо' : 'Показать атаку'}
                     </Button>
                   </div>
 
                   <AnimatePresence>
-                    {showAttack && (
+                    {showAttacks.has(activeTab) && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
