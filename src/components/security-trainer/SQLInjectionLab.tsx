@@ -22,6 +22,15 @@ export default function SQLInjectionLab() {
   const [showExplanation, setShowExplanation] = useState(false);
 
   const challenge = sqlChallenges[activeChallenge];
+
+  if (!challenge) {
+    return (
+      <div className="flex items-center justify-center h-64 text-slate-400">
+        Нет доступных заданий
+      </div>
+    );
+  }
+
   const isCompleted = sqlCompletedLevels.includes(challenge.id);
   const allCompleted = sqlCompletedLevels.length === sqlChallenges.length;
   const moduleCompleted = completedModules.includes('sql-injection');

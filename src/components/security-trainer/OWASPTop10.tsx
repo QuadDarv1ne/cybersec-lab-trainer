@@ -27,12 +27,26 @@ export default function OWASPTop10() {
   const [correctCount, setCorrectCount] = useState(owaspChallengeScores.correct);
   const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set(owaspChallengeScores.answered));
 
+  // Re-sync local state when store values change (e.g., after navigation/rehydration)
+  useEffect(() => {
+    setCorrectCount(owaspChallengeScores.correct);
+    setAnsweredChallenges(new Set(owaspChallengeScores.answered));
+  }, [owaspChallengeScores.correct, owaspChallengeScores.answered]);
+
   const studiedCount = studiedOwaspItems.length;
   const totalCount = owaspTopics.length;
   const allStudied = studiedCount === totalCount;
 
   const currentChallenge = owaspChallenges[activeChallenge];
   const isChallengeAnswered = answeredChallenges.has(activeChallenge);
+
+  if (!currentChallenge) {
+    return (
+      <div className="flex items-center justify-center h-64 text-slate-400">
+        Нет доступных заданий
+      </div>
+    );
+  }
 
   const handleSelectOption = (index: number) => {
     if (isChallengeAnswered) return;

@@ -33,8 +33,22 @@ export default function SecurityHeadersLab() {
   const [correctCount, setCorrectCount] = useState(headersChallengeScores.correct);
   const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set(headersChallengeScores.answered));
 
+  // Re-sync local state when store values change
+  useEffect(() => {
+    setCorrectCount(headersChallengeScores.correct);
+    setAnsweredChallenges(new Set(headersChallengeScores.answered));
+  }, [headersChallengeScores.correct, headersChallengeScores.answered]);
+
   const challenge = headerChallenges[activeChallenge];
   const isAnswered = answeredChallenges.has(activeChallenge);
+
+  if (!challenge) {
+    return (
+      <div className="flex items-center justify-center h-64 text-slate-400">
+        Нет доступных заданий
+      </div>
+    );
+  }
 
   // Complete module when all challenges are answered with >= 70% correct
   useEffect(() => {

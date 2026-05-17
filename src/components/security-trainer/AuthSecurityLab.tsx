@@ -40,8 +40,22 @@ export default function AuthSecurityLab() {
   const [correctCount, setCorrectCount] = useState(authChallengeScores.correct);
   const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set(authChallengeScores.answered));
 
+  // Re-sync local state when store values change
+  useEffect(() => {
+    setCorrectCount(authChallengeScores.correct);
+    setAnsweredChallenges(new Set(authChallengeScores.answered));
+  }, [authChallengeScores.correct, authChallengeScores.answered]);
+
   const currentChallenge = authChallenges[activeChallenge];
   const isChallengeAnswered = answeredChallenges.has(activeChallenge);
+
+  if (!currentChallenge) {
+    return (
+      <div className="flex items-center justify-center h-64 text-slate-400">
+        Нет доступных заданий
+      </div>
+    );
+  }
 
   const handleSelectOption = (index: number) => {
     if (isChallengeAnswered) return;

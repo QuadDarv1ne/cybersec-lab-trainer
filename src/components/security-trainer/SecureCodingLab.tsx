@@ -28,6 +28,15 @@ export default function SecureCodingLab() {
   const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set());
 
   const challenge = secureCodingChallenges[activeChallenge];
+
+  if (!challenge) {
+    return (
+      <div className="flex items-center justify-center h-64 text-slate-400">
+        Нет доступных заданий
+      </div>
+    );
+  }
+
   const isAnswered = answeredChallenges.has(activeChallenge);
   const isCompleted = completedModules.includes('secure-coding');
 

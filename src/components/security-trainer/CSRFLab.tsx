@@ -28,6 +28,14 @@ export default function CSRFLab() {
   const isCompleted = completedModules.includes('csrf');
   const challenge = csrfChallenges[activeChallenge];
 
+  if (!challenge) {
+    return (
+      <div className="flex items-center justify-center h-64 text-slate-400">
+        Нет доступных заданий
+      </div>
+    );
+  }
+
   const handleNext = () => {
     if (activeChallenge < csrfChallenges.length - 1) {
       setActiveChallenge(activeChallenge + 1);
