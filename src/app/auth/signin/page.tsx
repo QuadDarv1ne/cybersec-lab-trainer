@@ -9,7 +9,7 @@ export default function SignInPage() {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [demoMode, setDemoMode] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [providersLoading, setProvidersLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/auth/providers")
@@ -22,20 +22,28 @@ export default function SignInPage() {
         setAvailableProviders([]);
         setDemoMode(true);
       })
-      .finally(() => setLoading(false));
+      .finally(() => setProvidersLoading(false));
   }, []);
 
-  const handleSignIn = (provider: string) => {
+  const handleSignIn = async (provider: string) => {
     setLoadingProvider(provider);
-    signIn(provider, { callbackUrl: "/" });
+    try {
+      await signIn(provider, { callbackUrl: "/" });
+    } catch {
+      setLoadingProvider(null);
+    }
   };
 
-  const handleDemo = () => {
+  const handleDemo = async () => {
     setLoadingProvider("credentials");
-    signIn("credentials", { callbackUrl: "/" });
+    try {
+      await signIn("credentials", { callbackUrl: "/" });
+    } catch {
+      setLoadingProvider(null);
+    }
   };
 
-  if (loading) {
+  if (providersLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
