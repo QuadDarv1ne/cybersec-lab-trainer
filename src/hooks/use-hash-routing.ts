@@ -44,9 +44,7 @@ export function useHashRouting() {
   useEffect(() => {
     const hash = window.location.hash.replace('#', '') as string;
     const page = hashToPage[hash] ?? 'dashboard';
-    if (page !== currentPage) {
-      setCurrentPage(page);
-    }
+    setCurrentPage(page);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Update URL hash when currentPage changes

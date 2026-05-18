@@ -169,20 +169,19 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
 
 // Функция для загрузки из БД
 const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppStore) => Partial<AppStore>)) => void, _get: () => AppStore, userId: string) => {
+  set({ syncStatus: 'syncing' });
   try {
     const data = await apiClient.loadProgress();
 
-    // Only overwrite local state if the API actually returned data
-    // Otherwise keep the client-side persisted state (localStorage)
     if (data.completedModules.length > 0 || Object.keys(data.quizScores).length > 0) {
       set({
         completedModules: data.completedModules,
         quizScores: data.quizScores,
         userId,
+        syncStatus: 'synced',
       });
     } else {
-      // API has no data — just set userId to keep using local state
-      set({ userId });
+      set({ userId, syncStatus: 'synced' });
     }
   } catch (error) {
     console.error('Failed to load progress from database:', error);
