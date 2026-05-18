@@ -23,15 +23,7 @@ export default function SQLInjectionLab() {
 
   const challenge = sqlChallenges[activeChallenge];
 
-  if (!challenge) {
-    return (
-      <div className="flex items-center justify-center h-64 text-slate-400">
-        Нет доступных заданий
-      </div>
-    );
-  }
-
-  const isCompleted = sqlCompletedLevels.includes(challenge.id);
+  const isCompleted = challenge ? sqlCompletedLevels.includes(challenge.id) : false;
   const allCompleted = sqlCompletedLevels.length === sqlChallenges.length;
   const moduleCompleted = completedModules.includes('sql-injection');
 
@@ -41,6 +33,14 @@ export default function SQLInjectionLab() {
       completeModule('sql-injection');
     }
   }, [allCompleted, sqlCompletedLevels.length, moduleCompleted, completeModule]);
+
+  if (!challenge) {
+    return (
+      <div className="flex items-center justify-center h-64 text-slate-400">
+        Нет доступных заданий
+      </div>
+    );
+  }
 
   const checkAnswer = () => {
     const input = userInput.trim();

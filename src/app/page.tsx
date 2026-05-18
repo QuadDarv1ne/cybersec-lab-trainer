@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import dynamic from 'next/dynamic';
+import { useRef, useEffect } from 'react';
 
 const Dashboard = dynamic(() => import('@/components/security-trainer/Dashboard'), { ssr: false, loading: () => <PageSkeleton /> });
 const OWASPTop10 = dynamic(() => import('@/components/security-trainer/OWASPTop10'), { ssr: false, loading: () => <PageSkeleton /> });
@@ -55,13 +56,21 @@ function PageSkeleton() {
 export default function Home() {
   const { currentPage } = useAppStore();
   useHashRouting();
+  const mainRef = useRef<HTMLElement>(null);
 
   const Page = pages[currentPage] || Dashboard;
+
+  useEffect(() => {
+    if (mainRef.current) {
+      const focusTarget = mainRef.current.querySelector<HTMLElement>('[tabindex="-1"], h1, h2');
+      focusTarget?.focus();
+    }
+  }, [currentPage]);
 
   return (
     <div className="min-h-screen flex bg-slate-50">
       <Sidebar />
-      <main className="flex-1 min-w-0">
+      <main id="main-content" ref={mainRef} className="flex-1 min-w-0" tabIndex={-1}>
         <div className="max-w-4xl mx-auto p-4 md:p-6 lg:p-8">
           <AnimatePresence mode="wait">
             <motion.div

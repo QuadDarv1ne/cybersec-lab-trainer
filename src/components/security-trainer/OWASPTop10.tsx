@@ -37,6 +37,13 @@ export default function OWASPTop10() {
   const totalCount = owaspTopics.length;
   const allStudied = studiedCount === totalCount;
 
+  // Complete module when all topics studied
+  useEffect(() => {
+    if (allStudied && studiedCount > 0 && !isCompleted) {
+      completeModule('owasp');
+    }
+  }, [allStudied, studiedCount, isCompleted, completeModule]);
+
   const currentChallenge = owaspChallenges[activeChallenge];
   const isChallengeAnswered = answeredChallenges.has(activeChallenge);
 
@@ -84,13 +91,6 @@ export default function OWASPTop10() {
   const handleComplete = () => {
     if (!isCompleted) completeModule('owasp');
   };
-
-  // Complete module when all topics studied
-  useEffect(() => {
-    if (allStudied && studiedCount > 0 && !isCompleted) {
-      completeModule('owasp');
-    }
-  }, [allStudied, studiedCount, isCompleted, completeModule]);
 
   const handleToggleStudied = (id: string) => {
     if (studiedOwaspItems.includes(id)) return;

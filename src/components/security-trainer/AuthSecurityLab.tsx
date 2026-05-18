@@ -40,11 +40,50 @@ export default function AuthSecurityLab() {
   const [correctCount, setCorrectCount] = useState(authChallengeScores.correct);
   const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set(authChallengeScores.answered));
 
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [crackLength, setCrackLength] = useState(8);
+  const [crackComplexity, setCrackComplexity] = useState(1);
+  const [hashInput, setHashInput] = useState('');
+  const [simulatedHash, setSimulatedHash] = useState('');
+
   // Re-sync local state when store values change
   useEffect(() => {
     setCorrectCount(authChallengeScores.correct);
     setAnsweredChallenges(new Set(authChallengeScores.answered));
   }, [authChallengeScores.correct, authChallengeScores.answered]);
+
+  // Simulated hash using Web Crypto API (SHA-256)
+  useEffect(() => {
+    if (!hashInput) {
+      setSimulatedHash('');
+      return;
+    }
+    let cancelled = false;
+    const computeHash = async () => {
+      const salt = 'a1b2c3d4e5f6';
+      const encoder = new TextEncoder();
+      const data = encoder.encode(salt + hashInput);
+      const buffer = await crypto.subtle.digest('SHA-256', data);
+      const hashHex = Array.from(new Uint8Array(buffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+      if (!cancelled) {
+        setSimulatedHash(hashHex);
+      }
+    };
+    computeHash();
+    return () => { cancelled = true; };
+  }, [hashInput]);
+
+  // Complete module when all challenges are answered with >= 70% correct
+  useEffect(() => {
+    if (answeredChallenges.size === authChallenges.length &&
+        correctCount >= Math.ceil(authChallenges.length * 0.7) &&
+        !isCompleted) {
+      completeModule('auth');
+    }
+  }, [answeredChallenges.size, correctCount, isCompleted, completeModule]);
 
   const currentChallenge = authChallenges[activeChallenge];
   const isChallengeAnswered = answeredChallenges.has(activeChallenge);
@@ -89,12 +128,6 @@ export default function AuthSecurityLab() {
       setShowResult(false);
     }
   };
-
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [crackLength, setCrackLength] = useState(8);
-  const [crackComplexity, setCrackComplexity] = useState(1);
-  const [hashInput, setHashInput] = useState('');
 
   // Password strength checker
   const getPasswordAnalysis = () => {
@@ -150,40 +183,6 @@ export default function AuthSecurityLab() {
     return formatTime(seconds);
   };
   const crackTime = getCrackTime();
-
-  // Simulated hash using Web Crypto API (SHA-256)
-  const [simulatedHash, setSimulatedHash] = useState('');
-
-  useEffect(() => {
-    if (!hashInput) {
-      setSimulatedHash('');
-      return;
-    }
-    let cancelled = false;
-    const computeHash = async () => {
-      const salt = 'a1b2c3d4e5f6';
-      const encoder = new TextEncoder();
-      const data = encoder.encode(salt + hashInput);
-      const buffer = await crypto.subtle.digest('SHA-256', data);
-      const hashHex = Array.from(new Uint8Array(buffer))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-      if (!cancelled) {
-        setSimulatedHash(hashHex);
-      }
-    };
-    computeHash();
-    return () => { cancelled = true; };
-  }, [hashInput]);
-
-  // Complete module when all challenges are answered with >= 70% correct
-  useEffect(() => {
-    if (answeredChallenges.size === authChallenges.length &&
-        correctCount >= Math.ceil(authChallenges.length * 0.7) &&
-        !isCompleted) {
-      completeModule('auth');
-    }
-  }, [answeredChallenges.size, correctCount, isCompleted, completeModule]);
 
   const handleComplete = () => {
     if (!isCompleted) completeModule('auth');

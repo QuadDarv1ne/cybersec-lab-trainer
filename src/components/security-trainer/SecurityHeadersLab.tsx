@@ -42,14 +42,6 @@ export default function SecurityHeadersLab() {
   const challenge = headerChallenges[activeChallenge];
   const isAnswered = answeredChallenges.has(activeChallenge);
 
-  if (!challenge) {
-    return (
-      <div className="flex items-center justify-center h-64 text-slate-400">
-        Нет доступных заданий
-      </div>
-    );
-  }
-
   // Complete module when all challenges are answered with >= 70% correct
   useEffect(() => {
     if (answeredChallenges.size === headerChallenges.length &&
@@ -58,6 +50,14 @@ export default function SecurityHeadersLab() {
       completeModule('security-headers');
     }
   }, [answeredChallenges.size, correctCount, isCompleted, completeModule]);
+
+  if (!challenge) {
+    return (
+      <div className="flex items-center justify-center h-64 text-slate-400">
+        Нет доступных заданий
+      </div>
+    );
+  }
 
   const handleSelectOption = (index: number) => {
     if (isAnswered) return;

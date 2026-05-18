@@ -5,105 +5,11 @@ import { authOptions } from "@/lib/auth";
 import { quizResultSchema, progressUpdateSchema, glossarySearchSchema } from "@/lib/validations/api";
 import { db } from "@/lib/db";
 import { glossaryTerms } from "@/lib/data/glossary-data";
+import { rateLimit, getClientIP, addRateLimitHeaders } from "@/lib/rate-limit";
 
-// Rate limiting configuration
-const RATE_LIMIT = {
-  maxRequests: 100, // Maximum requests per window
-  windowMs: 60 * 1000, // 1 minute in milliseconds
-};
-
-// Store for tracking requests (in-memory, use Redis for production)
-const requestCounts = new Map<string, { count: number; resetTime: number }>();
-
-// Periodic cleanup of expired entries — runs once per module lifetime
-const CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
-let cleanupInterval: ReturnType<typeof setInterval> | null = null;
-
-function startCleanupInterval(): void {
-  if (cleanupInterval !== null) return; // already running
-  cleanupInterval = setInterval(() => {
-    const now = Date.now();
-    for (const [key, value] of requestCounts.entries()) {
-      if (now > value.resetTime) {
-        requestCounts.delete(key);
-      }
-    }
-  }, CLEANUP_INTERVAL_MS);
-}
-
-// Start cleanup on first module load
-startCleanupInterval();
-
-// Clean up interval on process shutdown (prevents leak in dev hot-reload / serverless cold start)
-function stopCleanupInterval(): void {
-  if (cleanupInterval !== null) {
-    clearInterval(cleanupInterval);
-    cleanupInterval = null;
-  }
-}
-
-if (typeof process !== 'undefined' && typeof process.on === 'function') {
-  process.on('SIGTERM', stopCleanupInterval);
-  process.on('SIGINT', stopCleanupInterval);
-  // In Next.js dev mode the module is re-evaluated on each rebuild;
-  // SIGTERM/SIGINT won't fire between hot-reloads, but the guard in
-  // startCleanupInterval prevents duplicate intervals regardless.
-}
-
-/**
- * Rate limiting middleware
- * @param ip - Client IP address
- * @returns Rate limit error response with count, or null with the current count
- */
-function rateLimit(ip: string): { response: NextResponse | null; count: number } {
-  const now = Date.now();
-  const record = requestCounts.get(ip);
-
-  if (!record || now > record.resetTime) {
-    requestCounts.set(ip, { count: 1, resetTime: now + RATE_LIMIT.windowMs });
-    return { response: null, count: 1 };
-  }
-
-  if (record.count >= RATE_LIMIT.maxRequests) {
-    return {
-      response: NextResponse.json(
-        { error: "Too many requests", retryAfter: Math.ceil((record.resetTime - now) / 1000) },
-        { status: 429, headers: { 'Retry-After': String(Math.ceil((record.resetTime - now) / 1000)) } }
-      ),
-      count: record.count,
-    };
-  }
-
-  record.count += 1;
-  requestCounts.set(ip, record);
-  return { response: null, count: record.count };
-}
-
-/**
- * Get client IP from request
- */
-function getClientIP(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  const realIP = request.headers.get("x-real-ip");
-
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
-  if (realIP) {
-    return realIP;
-  }
-  return "unknown";
-}
-
-function applyRateLimit(request: Request): { response: NextResponse | null; count: number } {
+async function applyRateLimit(request: Request): Promise<{ response: NextResponse | null; remaining: number; reset: number }> {
   const ip = getClientIP(request);
   return rateLimit(ip);
-}
-
-function addRateLimitHeaders(response: NextResponse, currentCount: number): void {
-  response.headers.set("X-RateLimit-Limit", String(RATE_LIMIT.maxRequests));
-  response.headers.set("X-RateLimit-Remaining", String(Math.max(0, RATE_LIMIT.maxRequests - currentCount)));
-  response.headers.set("X-RateLimit-Reset", String(Math.ceil(Date.now() / 1000 + RATE_LIMIT.windowMs / 1000)));
 }
 
 export async function GET(request: Request) {
@@ -112,11 +18,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   }
 
-  const rateLimitResult = applyRateLimit(request);
+  const rateLimitResult = await applyRateLimit(request);
   if (rateLimitResult.response) {
     return rateLimitResult.response;
   }
-  const requestCount = rateLimitResult.count;
 
   const userId = session.user.id;
 
@@ -148,7 +53,7 @@ export async function GET(request: Request) {
       }
 
       const response = NextResponse.json({ completedModules, quizScores });
-      addRateLimitHeaders(response, requestCount);
+      addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
       return response;
     }
   } catch {
@@ -156,7 +61,7 @@ export async function GET(request: Request) {
   }
 
   const response = NextResponse.json({ message: "Hello, world!" });
-  addRateLimitHeaders(response, requestCount);
+  addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
   return response;
 }
 
@@ -167,11 +72,10 @@ export async function POST(request: Request) {
 
     // glossary-search is public (no auth needed) — apply rate limit
     if (type === 'glossary-search') {
-      const rateLimitResult = applyRateLimit(request);
+      const rateLimitResult = await applyRateLimit(request);
       if (rateLimitResult.response) {
         return rateLimitResult.response;
       }
-      const requestCount = rateLimitResult.count;
 
       const data = glossarySearchSchema.parse(payload);
       const query = data.query.toLowerCase();
@@ -193,7 +97,7 @@ export async function POST(request: Request) {
         results,
         count: results.length,
       });
-      addRateLimitHeaders(response, requestCount);
+      addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
       return response;
     }
 
@@ -205,11 +109,10 @@ export async function POST(request: Request) {
     const userId = session.user.id;
 
     // Apply rate limit only for authenticated requests
-    const rateLimitResult = applyRateLimit(request);
+    const rateLimitResult = await applyRateLimit(request);
     if (rateLimitResult.response) {
       return rateLimitResult.response;
     }
-    const requestCount = rateLimitResult.count;
 
     let result: Record<string, unknown>;
 
@@ -277,7 +180,7 @@ export async function POST(request: Request) {
       ...result,
     });
 
-    addRateLimitHeaders(response, requestCount);
+    addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
     return response;
   } catch (error) {
     if (error instanceof z.ZodError) {

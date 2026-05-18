@@ -29,14 +29,6 @@ export default function SecureCodingLab() {
 
   const challenge = secureCodingChallenges[activeChallenge];
 
-  if (!challenge) {
-    return (
-      <div className="flex items-center justify-center h-64 text-slate-400">
-        Нет доступных заданий
-      </div>
-    );
-  }
-
   const isAnswered = answeredChallenges.has(activeChallenge);
   const isCompleted = completedModules.includes('secure-coding');
 
@@ -48,6 +40,14 @@ export default function SecureCodingLab() {
       completeModule('secure-coding');
     }
   }, [answeredChallenges.size, correctCount, isCompleted, completeModule]);
+
+  if (!challenge) {
+    return (
+      <div className="flex items-center justify-center h-64 text-slate-400">
+        Нет доступных заданий
+      </div>
+    );
+  }
 
   const handleSelectOption = (index: number) => {
     if (isAnswered) return;

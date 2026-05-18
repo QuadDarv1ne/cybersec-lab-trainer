@@ -52,3 +52,8 @@ prisma/*.db-journal
 
 # Husky
 .husky/_/
+
+# Misc temporary directories
+m/
+.qoder/
+.qwen/
