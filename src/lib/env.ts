@@ -1,40 +1,41 @@
 import { z } from 'zod';
-import { existsSync } from 'fs';
-import { join } from 'path';
+
+const isServer = typeof window === 'undefined';
 
 const envSchema = z.object({
-  // Required
   NEXTAUTH_SECRET: z.string().min(1, 'NEXTAUTH_SECRET is required'),
   NEXTAUTH_URL: z.string().url('NEXTAUTH_URL must be a valid URL'),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
-
-  // Optional (CredentialsProvider fallback is used if none configured)
   GITHUB_ID: z.string().min(1).optional(),
   GITHUB_SECRET: z.string().min(1).optional(),
   GOOGLE_CLIENT_ID: z.string().min(1).optional(),
   GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
-
-  // Required for production, optional for dev (crypto exercises)
   JWT_SECRET: process.env.NODE_ENV === 'production'
     ? z.string().min(1, 'JWT_SECRET is required in production')
     : z.string().optional(),
-
-  // Optional
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });
 
 type Env = z.infer<typeof envSchema>;
 
-// Check for .env.local file existence (run once at module load)
-const hasEnvLocal = existsSync(join(process.cwd(), '.env.local'));
-const nextEnvLocal = existsSync(join(process.cwd(), '.next', '.env.local'));
-
-if (!hasEnvLocal && !nextEnvLocal && process.env.NODE_ENV !== 'production') {
-  process.stderr.write(
-    '\x1b[33m[Env] Warning: .env.local file not found.\x1b[0m\n' +
-    '  Copy .env.example to .env.local and configure your environment variables.\n' +
-    '  Run: copy .env.example .env.local\n\n'
-  );
+function warnMissingEnvFile(): void {
+  if (process.env.NODE_ENV === 'production') return;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { existsSync } = require('fs') as typeof import('fs');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { join } = require('path') as typeof import('path');
+    const cwd = process.cwd();
+    if (!existsSync(join(cwd, '.env.local')) && !existsSync(join(cwd, '.next', '.env.local'))) {
+      process.stderr.write(
+        '\x1b[33m[Env] Warning: .env.local file not found.\x1b[0m\n' +
+        '  Copy .env.example to .env.local and configure your environment variables.\n' +
+        '  Run: copy .env.example .env.local\n\n'
+      );
+    }
+  } catch {
+    // fs not available (browser or edge runtime) — skip warning
+  }
 }
 
 export function validateEnv(): Env {
@@ -63,5 +64,8 @@ export function validateEnv(): Env {
   return result.data;
 }
 
-// Validate at module load time for early error detection
-validateEnv();
+// Validate at module load time only on the server
+if (isServer) {
+  warnMissingEnvFile();
+  validateEnv();
+}
