@@ -173,11 +173,4 @@ export function simpleHash(text: string): { md5Like: string; shaLike: string; dj
   };
 }
 
-/** Compute real SHA-256 hash using Web Crypto API */
-export async function sha256(text: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const buffer = await crypto.subtle.digest('SHA-256', encoder.encode(text));
-  return Array.from(new Uint8Array(buffer))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-}
+
