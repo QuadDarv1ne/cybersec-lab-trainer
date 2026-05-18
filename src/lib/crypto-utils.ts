@@ -173,4 +173,3 @@ export function simpleHash(text: string): { md5Like: string; shaLike: string; dj
   };
 }
 
-
