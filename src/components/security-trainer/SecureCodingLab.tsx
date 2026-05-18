@@ -20,26 +20,31 @@ import {
 
 export default function SecureCodingLab() {
   const t = useTranslations('secureCoding');
-  const { completeModule, setCurrentPage, completedModules } = useAppStore();
+  const {
+    completeModule,
+    setCurrentPage,
+    completedModules,
+    secureCodingChallengeScores,
+    setSecureCodingChallengeScore,
+  } = useAppStore();
   const [activeChallenge, setActiveChallenge] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set());
 
   const challenge = secureCodingChallenges[activeChallenge];
 
-  const isAnswered = answeredChallenges.has(activeChallenge);
+  const answeredSet = new Set(secureCodingChallengeScores.answered);
+  const isAnswered = answeredSet.has(activeChallenge);
   const isCompleted = completedModules.includes('secure-coding');
 
   // Complete module when all challenges are answered with >= 70% correct
   useEffect(() => {
-    if (answeredChallenges.size === secureCodingChallenges.length &&
-        correctCount >= Math.ceil(secureCodingChallenges.length * 0.7) &&
+    if (secureCodingChallengeScores.answered.length === secureCodingChallenges.length &&
+        secureCodingChallengeScores.correct >= Math.ceil(secureCodingChallenges.length * 0.7) &&
         !isCompleted) {
       completeModule('secure-coding');
     }
-  }, [answeredChallenges.size, correctCount, isCompleted, completeModule]);
+  }, [secureCodingChallengeScores, isCompleted, completeModule]);
 
   if (!challenge) {
     return (
@@ -54,21 +59,27 @@ export default function SecureCodingLab() {
     setSelectedOption(index);
   };
 
-  // Reset navigation state when switching challenges; preserve answer state
   const navigateToChallenge = (index: number) => {
     setActiveChallenge(index);
-    setSelectedOption(null);
-    setShowResult(answeredChallenges.has(index));
+    const isAnswered = new Set(secureCodingChallengeScores.answered).has(index);
+    if (isAnswered) {
+      const correctIndex = secureCodingChallenges[index].options.findIndex(o => o.correct);
+      setSelectedOption(correctIndex);
+    } else {
+      setSelectedOption(null);
+    }
+    setShowResult(isAnswered);
   };
 
   const handleCheckAnswer = () => {
     if (selectedOption === null || isAnswered) return;
     const isCorrect = challenge.options[selectedOption].correct;
+    const newScores = {
+      correct: secureCodingChallengeScores.correct + (isCorrect ? 1 : 0),
+      answered: [...secureCodingChallengeScores.answered, activeChallenge],
+    };
+    setSecureCodingChallengeScore(newScores.correct, newScores.answered);
     setShowResult(true);
-    const newAnswered = new Set(answeredChallenges);
-    newAnswered.add(activeChallenge);
-    setAnsweredChallenges(newAnswered);
-    if (isCorrect) setCorrectCount((c) => c + 1);
   };
 
   const nextChallenge = () => {
@@ -108,7 +119,7 @@ export default function SecureCodingLab() {
             </span>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-[10px]">
-                <CheckCircle2 size={12} className="inline mr-1" /> {correctCount} {t('correct')}
+                <CheckCircle2 size={12} className="inline mr-1" /> {secureCodingChallengeScores.correct} {t('correct')}
               </Badge>
               {isCompleted && <Badge className="bg-emerald-600 text-white">{t('moduleComplete')}</Badge>}
             </div>
@@ -120,7 +131,7 @@ export default function SecureCodingLab() {
                 onClick={() => navigateToChallenge(i)}
                 aria-label={`Перейти к заданию ${i + 1}: ${challenge.title}`}
                 className={`flex-1 h-2 rounded-full transition-all ${
-                  answeredChallenges.has(i)
+                  secureCodingChallengeScores.answered.includes(i)
                     ? 'bg-emerald-500'
                     : i === activeChallenge
                       ? 'bg-emerald-300'

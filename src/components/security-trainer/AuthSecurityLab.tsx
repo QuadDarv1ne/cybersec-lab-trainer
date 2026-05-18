@@ -263,11 +263,6 @@ export default function AuthSecurityLab() {
                     value={passwordAnalysis.score}
                     className="h-2"
                   />
-                  <div className="h-2 rounded-full overflow-hidden bg-slate-100">
-                    <div className={`h-full ${passwordAnalysis.color} rounded-full transition-all duration-500`}
-                      style={{ width: `${passwordAnalysis.score}%` }}
-                    />
-                  </div>
 
                   <Separator />
 
