@@ -98,6 +98,7 @@ The project uses a custom lightweight `intlStub.ts` + JSON locale files. It work
 ### 15. Auth improvements | Улучшения авторизации
 - [x] CredentialsProvider demo fallback exists — works without OAuth
 - [x] API routes protected with session check
+- [x] Middleware auth guard — `next-auth/middleware` with `withAuth`
 - [ ] Add role-based access control (admin/user) — optional
 
 ---
@@ -105,8 +106,7 @@ The project uses a custom lightweight `intlStub.ts` + JSON locale files. It work
 ## Low Priority | Низкий приоритет
 
 - [ ] Replace `console.error` with Sentry or another monitoring solution
-- [ ] Code splitting for heavy components (`react-syntax-highlighter`, `OWASPTop10`)
-- [ ] Lazy load modules via `next/dynamic`
+- [x] Code splitting for heavy components — `react-syntax-highlighter` dynamically imported
 - [ ] Keyboard shortcuts for navigation and quiz
 - [ ] Theme persistence across sessions (verify DB sync)
 - [x] `CHANGELOG.md` — not applicable
