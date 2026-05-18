@@ -27,6 +27,7 @@ interface AppState {
   authChallengeScores: { correct: number; total: number; answered: number[] };
   headersChallengeScores: { correct: number; total: number; answered: number[] };
   secureCodingChallengeScores: { correct: number; total: number; answered: number[] };
+  csrfViewedChallenges: number[];
   userId: string | null;
   syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
   lastSyncedAt: Date | null;
@@ -46,6 +47,7 @@ interface AppActions {
   setAuthChallengeScore: (correct: number, answered: number[]) => void;
   setHeadersChallengeScore: (correct: number, answered: number[]) => void;
   setSecureCodingChallengeScore: (correct: number, answered: number[]) => void;
+  markCsrfChallengeViewed: (index: number) => void;
   setUserId: (userId: string | null) => void;
   syncWithDatabase: () => Promise<void>;
   loadFromDatabase: (userId: string) => Promise<void>;
@@ -204,6 +206,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   authChallengeScores: { correct: 0, total: 0, answered: [] },
   headersChallengeScores: { correct: 0, total: 0, answered: [] },
   secureCodingChallengeScores: { correct: 0, total: 0, answered: [] },
+  csrfViewedChallenges: [],
   userId: null,
   syncStatus: 'idle',
   lastSyncedAt: null,
@@ -239,6 +242,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       authChallengeScores: { correct: 0, total: 0, answered: [] },
       headersChallengeScores: { correct: 0, total: 0, answered: [] },
       secureCodingChallengeScores: { correct: 0, total: 0, answered: [] },
+      csrfViewedChallenges: [],
     });
     await ensureSync(get, set);
   },
@@ -283,6 +287,14 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     set({ secureCodingChallengeScores: { correct, total: answered.length, answered } });
   },
 
+  markCsrfChallengeViewed: (index: number) => {
+    set((state) => ({
+      csrfViewedChallenges: state.csrfViewedChallenges.includes(index)
+        ? state.csrfViewedChallenges
+        : [...state.csrfViewedChallenges, index],
+    }));
+  },
+
   setUserId: (userId: string | null) => set({ userId }),
 
   syncWithDatabase: async () => {
@@ -310,6 +322,7 @@ const useAppStore = create<AppStore>()(
       authChallengeScores: state.authChallengeScores,
       headersChallengeScores: state.headersChallengeScores,
       secureCodingChallengeScores: state.secureCodingChallengeScores,
+      csrfViewedChallenges: state.csrfViewedChallenges,
       // syncStatus and lastSyncedAt are runtime-only, not persisted
     }),
   })

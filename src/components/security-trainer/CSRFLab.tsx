@@ -19,7 +19,7 @@ const levelColors: Record<string, string> = {
 };
 
 export default function CSRFLab() {
-  const { completedModules, completeModule, setCurrentPage } = useAppStore();
+  const { completedModules, completeModule, setCurrentPage, csrfViewedChallenges, markCsrfChallengeViewed } = useAppStore();
   const t = useTranslations('csrf');
   const [activeChallenge, setActiveChallenge] = useState(0);
   const [showDefense, setShowDefense] = useState(false);
@@ -38,8 +38,10 @@ export default function CSRFLab() {
 
   const handleNext = () => {
     if (activeChallenge < csrfChallenges.length - 1) {
+      markCsrfChallengeViewed(activeChallenge);
       setActiveChallenge(activeChallenge + 1);
     } else {
+      markCsrfChallengeViewed(activeChallenge);
       setShowDefense(true);
     }
   };
@@ -238,7 +240,9 @@ export default function CSRFLab() {
               onClick={() => { setActiveChallenge(i); setShowDefense(false); }}
               aria-label={`Перейти к челленджу ${i + 1}`}
               className={`w-2.5 h-2.5 rounded-full transition-all ${
-                i === activeChallenge && !showDefense ? 'bg-emerald-500' : 'bg-slate-300'
+                i === activeChallenge && !showDefense ? 'bg-emerald-500'
+                  : csrfViewedChallenges.includes(i) ? 'bg-emerald-300'
+                    : 'bg-slate-300'
               }`}
             />
           ))}

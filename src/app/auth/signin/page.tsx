@@ -6,7 +6,7 @@ import { Github, Loader2, LogIn } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function SignInPage() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [demoMode, setDemoMode] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -26,12 +26,12 @@ export default function SignInPage() {
   }, []);
 
   const handleSignIn = (provider: string) => {
-    setIsLoading(true);
+    setLoadingProvider(provider);
     signIn(provider, { callbackUrl: "/" });
   };
 
   const handleDemo = () => {
-    setIsLoading(true);
+    setLoadingProvider("credentials");
     signIn("credentials", { callbackUrl: "/" });
   };
 
@@ -60,9 +60,9 @@ export default function SignInPage() {
               variant="outline"
               className="w-full"
               onClick={() => handleSignIn("github")}
-              disabled={isLoading}
+              disabled={loadingProvider === "github"}
             >
-              {isLoading ? (
+              {loadingProvider === "github" ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Github className="mr-2 h-4 w-4" />
@@ -76,9 +76,9 @@ export default function SignInPage() {
               variant="outline"
               className="w-full"
               onClick={() => handleSignIn("google")}
-              disabled={isLoading}
+              disabled={loadingProvider === "google"}
             >
-              {isLoading ? (
+              {loadingProvider === "google" ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -108,9 +108,9 @@ export default function SignInPage() {
             <Button
               className="w-full bg-emerald-600 hover:bg-emerald-700"
               onClick={handleDemo}
-              disabled={isLoading}
+              disabled={loadingProvider === "credentials"}
             >
-              {isLoading ? (
+              {loadingProvider === "credentials" ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <LogIn className="mr-2 h-4 w-4" />
