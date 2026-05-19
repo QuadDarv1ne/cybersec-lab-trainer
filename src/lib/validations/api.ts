@@ -21,6 +21,20 @@ export const glossarySearchSchema = z.object({
   category: z.string().optional(),
 });
 
+// Schema для пакетной синхронизации (заменяет N+1 вызовов)
+export const batchSyncSchema = z.object({
+  modules: z.array(z.object({
+    moduleId: z.string().min(1),
+    completed: z.boolean(),
+    score: z.number().int().min(0).max(100).optional(),
+  })).optional().default([]),
+  quizzes: z.array(z.object({
+    quizId: z.string().min(1),
+    score: z.number().int().min(0),
+    total: z.number().int().min(1),
+  })).optional().default([]),
+});
+
 // Schema для пользовательских данных
 export const userDataSchema = z.object({
   userId: z.string().min(1, 'userId обязателен'),

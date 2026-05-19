@@ -137,9 +137,27 @@ const apiClient = {
 
     return response.json();
   },
+
+  async saveBatch(modules: { moduleId: string; completed: boolean; score?: number }[], quizzes: { quizId: string; score: number; total: number }[]) {
+    const response = await fetch('/api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'batch-sync',
+        payload: { modules, quizzes },
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || 'Failed to batch sync');
+    }
+
+    return response.json();
+  },
 };
 
-// Функция для синхронизации с БД через API
+// Функция для синхронизации с БД через API (батчевый вызов)
 const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore>) => void) => {
   if (!state.userId) {
     set({ syncStatus: 'idle' });
@@ -148,22 +166,23 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
 
   set({ syncStatus: 'syncing' });
   try {
-    // Save each completed module individually
-    for (const moduleId of state.completedModules) {
-      await apiClient.saveProgress(moduleId, true, 100);
-    }
+    const modules = state.completedModules.map((moduleId) => ({
+      moduleId, completed: true, score: 100,
+    }));
 
     // Save aggregate 'all' record for backward compatibility with load-progress
     if (state.completedModules.length > 0) {
       const maxQuizScore = Math.max(0, ...Object.values(state.quizScores));
-      await apiClient.saveProgress('all', true, maxQuizScore);
+      modules.push({ moduleId: 'all', completed: true, score: maxQuizScore });
     }
 
-    // Save quiz results (each category upserted by quizId unique constraint)
-    for (const [category, score] of Object.entries(state.quizScores)) {
-      const total = quizCategories.find((c) => c.id === category)?.count ?? 100;
-      await apiClient.saveQuizResults(category, score, total);
-    }
+    const quizzes = Object.entries(state.quizScores).map(([category, score]) => ({
+      quizId: category,
+      score,
+      total: quizCategories.find((c) => c.id === category)?.count ?? 100,
+    }));
+
+    await apiClient.saveBatch(modules, quizzes);
 
     set({ syncStatus: 'synced', lastSyncedAt: new Date() });
   } catch {

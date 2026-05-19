@@ -2,7 +2,7 @@ import { z } from "zod";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { quizResultSchema, progressUpdateSchema, glossarySearchSchema } from "@/lib/validations/api";
+import { quizResultSchema, progressUpdateSchema, glossarySearchSchema, batchSyncSchema } from "@/lib/validations/api";
 import { db } from "@/lib/db";
 import { glossaryTerms } from "@/lib/data/glossary-data";
 import { rateLimit, getClientIP, addRateLimitHeaders } from "@/lib/rate-limit";
@@ -167,9 +167,43 @@ export async function POST(request: Request) {
         break;
       }
 
+      case 'batch-sync': {
+        const data = batchSyncSchema.parse(payload);
+        const { modules, quizzes } = data;
+
+        if (modules.length === 0 && quizzes.length === 0) {
+          result = { saved: { modules: 0, quizzes: 0 } };
+          break;
+        }
+
+        const [moduleResults, quizResults] = await Promise.all([
+          modules.length > 0
+            ? Promise.all(modules.map((m) =>
+                db.progress.upsert({
+                  where: { userId_moduleId: { userId, moduleId: m.moduleId } },
+                  create: { userId, moduleId: m.moduleId, completed: m.completed, score: m.score ?? 0, lastAccessed: new Date() },
+                  update: { completed: m.completed, score: m.score ?? 0, lastAccessed: new Date() },
+                })
+              ))
+            : Promise.resolve([]),
+          quizzes.length > 0
+            ? Promise.all(quizzes.map((q) =>
+                db.quizResult.upsert({
+                  where: { userId_quizId: { userId, quizId: q.quizId } },
+                  create: { userId, quizId: q.quizId, score: q.score, total: q.total, percentage: q.total > 0 ? (q.score / q.total) * 100 : 0 },
+                  update: { score: q.score, total: q.total, percentage: q.total > 0 ? (q.score / q.total) * 100 : 0 },
+                })
+              ))
+            : Promise.resolve([]),
+        ]);
+
+        result = { saved: { modules: moduleResults.length, quizzes: quizResults.length }, message: "Batch sync completed" };
+        break;
+      }
+
       default:
         return NextResponse.json(
-          { error: `Unknown request type: ${type}. Expected: progress, quiz-answers, glossary-search` },
+          { error: `Unknown request type: ${type}. Expected: progress, quiz-answers, glossary-search, batch-sync` },
           { status: 400 }
         );
     }
