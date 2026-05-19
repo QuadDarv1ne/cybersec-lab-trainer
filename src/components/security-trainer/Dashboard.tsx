@@ -1,7 +1,7 @@
 'use client';
 
 import { useAppStore } from '@/lib/store';
-import { modules, achievements } from '@/lib/security-data';
+import { modules, achievements, glossaryTerms } from '@/lib/security-data';
 import { quizCategories } from '@/lib/data/quiz-data';
 import { getAchievementStatus } from '@/lib/achievement-utils';
 import { useTranslations } from '@/lib/intlStub';
@@ -418,7 +418,7 @@ export default function Dashboard() {
                       <Badge className="bg-violet-100 text-violet-700 border-0 text-[10px]">
                         {t('achievementsCard.unlocked', { unlocked: unlockedAchievements.length, total: achievements.length })}
                       </Badge>
-                      <span className="text-[11px] text-slate-400">{t('achievementsCard.terms', { count: 34 })}</span>
+                      <span className="text-[11px] text-slate-400">{t('achievementsCard.terms', { count: glossaryTerms.length })}</span>
                     </div>
                   </div>
                 </div>
