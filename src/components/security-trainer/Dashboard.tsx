@@ -31,6 +31,8 @@ import {
   Zap,
   ShieldCheck,
   ShieldAlert,
+  LayoutList,
+  Award,
 } from 'lucide-react';
 import type { PageType } from '@/lib/store';
 
@@ -70,6 +72,12 @@ const achievementIcons: Record<string, React.ReactNode> = {
   'crypto-ninja': <Lock size={18} />,
   'full-completion': <Zap size={18} />,
   'headers-master': <ShieldCheck size={18} />,
+  'owasp-challenger': <ShieldAlert size={18} />,
+  'auth-challenger': <KeyRound size={18} />,
+  'quiz-streak': <Zap size={18} />,
+  'all-categories': <LayoutList size={18} />,
+  'first-challenge': <Award size={18} />,
+  'perfect-challenges': <Award size={18} />,
 };
 
 export default function Dashboard() {

@@ -25,6 +25,11 @@ import {
   Database,
   GraduationCap,
   ShieldCheck,
+  ShieldAlert,
+  KeyRound,
+  Zap,
+  LayoutList,
+  Award,
 } from 'lucide-react';
 
 const categoryColors: Record<string, string> = {
@@ -51,6 +56,12 @@ const achievementIcons: Record<string, React.ReactNode> = {
   'crypto-ninja': <LockIcon size={24} />,
   'full-completion': <GraduationCap size={24} />,
   'headers-master': <ShieldCheck size={24} />,
+  'owasp-challenger': <ShieldAlert size={24} />,
+  'auth-challenger': <KeyRound size={24} />,
+  'quiz-streak': <Zap size={24} />,
+  'all-categories': <LayoutList size={24} />,
+  'first-challenge': <Award size={24} />,
+  'perfect-challenges': <Award size={24} />,
 };
 
 export default function AchievementsAndGlossary() {
