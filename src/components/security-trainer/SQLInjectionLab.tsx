@@ -21,7 +21,7 @@ export default function SQLInjectionLab() {
   const [showHint, setShowHint] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
 
-  const challenge = sqlChallenges[activeChallenge];
+const challenge = sqlChallenges[activeChallenge];
 
   const isCompleted = challenge ? sqlCompletedLevels.includes(challenge.id) : false;
   const allCompleted = sqlCompletedLevels.length === sqlChallenges.length;
@@ -77,7 +77,15 @@ export default function SQLInjectionLab() {
     }
   };
 
+  const resetState = () => {
+    setUserInput('');
+    setShowResult(false);
+    setShowHint(false);
+    setShowExplanation(false);
+  };
+
   const tryExample = () => {
+    resetState();
     setUserInput(challenge.exampleInput);
   };
 
@@ -93,13 +101,6 @@ export default function SQLInjectionLab() {
       setActiveChallenge(activeChallenge - 1);
       resetState();
     }
-  };
-
-  const resetState = () => {
-    setUserInput('');
-    setShowResult(false);
-    setShowHint(false);
-    setShowExplanation(false);
   };
 
   const getModifiedQuery = () => {
