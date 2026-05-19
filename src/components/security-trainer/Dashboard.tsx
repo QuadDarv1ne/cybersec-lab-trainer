@@ -30,6 +30,7 @@ import {
   ArrowRight,
   Zap,
   ShieldCheck,
+  ShieldAlert,
 } from 'lucide-react';
 import type { PageType } from '@/lib/store';
 
@@ -54,6 +55,7 @@ const iconMap: Record<string, React.ReactNode> = {
   Lock: <Lock size={28} />,
   Code: <Code size={28} />,
   KeyRound: <KeyRound size={28} />,
+  ShieldAlert: <ShieldAlert size={28} />,
 };
 
 const achievementIcons: Record<string, React.ReactNode> = {

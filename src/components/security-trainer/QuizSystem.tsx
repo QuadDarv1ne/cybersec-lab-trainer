@@ -53,11 +53,15 @@ export default function QuizSystem() {
   const [timerActive, setTimerActive] = useState(false);
   const timeUpRef = useRef(false);
   const currentQuestionRef = useRef(0);
+  const correctCountRef = useRef(0);
 
-  // Keep ref in sync with current question index
+  // Keep refs in sync with state
   useEffect(() => {
     currentQuestionRef.current = currentQuestion;
   }, [currentQuestion]);
+  useEffect(() => {
+    correctCountRef.current = correctCount;
+  }, [correctCount]);
 
   // Stable callback for time-up — uses ref to avoid stale closure
   const handleTimeUp = useCallback(() => {
@@ -129,14 +133,11 @@ export default function QuizSystem() {
       setTimeLeft(30);
       setTimerActive(true);
     } else {
-      setCorrectCount((finalCount) => {
-        const catId = activeCategory;
-        const score = Math.round((finalCount / totalQuestions) * 100);
-        setQuizScore(catId, score);
-        setTimerActive(false);
-        setQuizState('result');
-        return finalCount;
-      });
+      const catId = activeCategory;
+      const score = Math.round((correctCountRef.current / totalQuestions) * 100);
+      setQuizScore(catId, score);
+      setTimerActive(false);
+      setQuizState('result');
     }
   };
 
