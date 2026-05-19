@@ -68,8 +68,8 @@ export default function Sidebar() {
     { id: 'achievements', label: t('achievements'), iconKey: 'Trophy' },
   ];
 
-  // Count trackable items (excluding dashboard and achievements)
-  const trackableItems = navItems.filter((item) => item.id !== 'dashboard' && item.id !== 'achievements');
+  // Count trackable items (excluding dashboard, achievements, quiz)
+  const trackableItems = navItems.filter((item) => item.id !== 'dashboard' && item.id !== 'achievements' && item.id !== 'quiz');
   const completedCount = trackableItems.filter((item) => completedModules.includes(item.id)).length;
   const progressPct = trackableItems.length > 0 ? Math.round((completedCount / trackableItems.length) * 100) : 0;
 

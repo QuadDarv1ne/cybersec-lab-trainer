@@ -298,7 +298,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   setUserId: (userId: string | null) => set({ userId }),
 
   syncWithDatabase: async () => {
-    await syncWithDatabase(get(), set);
+    await ensureSync(get, set);
   },
 
   loadFromDatabase: async (userId: string) => {
