@@ -11,7 +11,8 @@ interface SessionProviderProps {
 }
 
 export function SessionProvider({ children, session }: SessionProviderProps) {
-  const { setUserId, loadFromDatabase } = useAppStore();
+  const setUserId = useAppStore((s) => s.setUserId);
+  const loadFromDatabase = useAppStore((s) => s.loadFromDatabase);
 
   useEffect(() => {
     if (session?.user?.id) {
