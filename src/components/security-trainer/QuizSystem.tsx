@@ -105,6 +105,7 @@ export default function QuizSystem() {
     const cat = quizCategories.find((c) => c.id === categoryId);
     if (!cat) return;
     const questions = quizQuestions.filter((q) => q.category === cat.name);
+    if (questions.length === 0) return;
     setActiveCategory(cat.id);
     setCurrentQuestion(0);
     setCorrectCount(0);
@@ -118,6 +119,11 @@ export default function QuizSystem() {
 
   const nextQuestion = () => {
     const totalQuestions = categoryQuestions.length;
+    if (totalQuestions === 0) {
+      setTimerActive(false);
+      setQuizState('result');
+      return;
+    }
     if (currentQuestion < totalQuestions - 1) {
       setCurrentQuestion((q) => q + 1);
       setSelectedAnswer('');
@@ -246,7 +252,7 @@ export default function QuizSystem() {
                 </div>
               </div>
               <Progress
-                value={((currentQuestion + 1) / categoryQuestions.length) * 100}
+                value={categoryQuestions.length > 0 ? ((currentQuestion + 1) / categoryQuestions.length) * 100 : 0}
                 className="h-2"
               />
             </CardContent>
