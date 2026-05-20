@@ -64,7 +64,12 @@ const challenge = sqlChallenges[activeChallenge];
       const lower = val.toLowerCase();
       const keywords = requiredKeywords[challengeId] ?? ["'", '"', '--', ';', 'union', 'select'];
       return keywords.every(kw => {
-        // Use word boundary matching to prevent false positives (e.g., 'or' in "normal")
+        // For keywords with non-word chars (like '--'), use simple substring matching.
+        // For word keywords, use word boundary to prevent false positives (e.g., 'or' in "normal").
+        const hasWordChars = /\w/.test(kw);
+        if (!hasWordChars) {
+          return lower.includes(kw.toLowerCase());
+        }
         const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const wordBoundaryRegex = new RegExp(`\\b${escaped}\\b`, 'i');
         return wordBoundaryRegex.test(lower);

@@ -57,6 +57,7 @@ export default function CSRFLab() {
     if (showDefense) {
       setShowDefense(false);
     } else {
+      markCsrfChallengeViewed(activeChallenge);
       setActiveChallenge(Math.max(0, activeChallenge - 1));
     }
   };

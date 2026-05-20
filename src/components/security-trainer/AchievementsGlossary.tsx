@@ -69,6 +69,7 @@ export default function AchievementsAndGlossary() {
   const { setCurrentPage, completedModules, quizScores, owaspChallengeScores, authChallengeScores } = useAppStore();
   const [activeTab, setActiveTab] = useState<'achievements' | 'glossary'>('achievements');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const challengeStats = {
     owaspCorrect: owaspChallengeScores.correct,
@@ -79,9 +80,12 @@ export default function AchievementsAndGlossary() {
   const unlockedCount = achievementDefs.filter((a) => getAchievementStatus(a.id, completedModules, quizScores, challengeStats)).length;
 
   const filteredTerms = glossaryTerms.filter(
-    (t) =>
-      t.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.definition.toLowerCase().includes(searchTerm.toLowerCase())
+    (t) => {
+      const matchesSearch = t.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        t.definition.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = !selectedCategory || t.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    }
   );
 
   return (
@@ -201,14 +205,16 @@ export default function AchievementsAndGlossary() {
               <Badge
                 key={cat}
                 variant="secondary"
-                className={`text-[10px] cursor-pointer hover:opacity-80 ${categoryColors[cat]}`}
-                onClick={() => setSearchTerm(cat)}
+                className={`text-[10px] cursor-pointer hover:opacity-80 transition-opacity ${
+                  selectedCategory === cat ? 'ring-2 ring-emerald-400' : ''
+                } ${categoryColors[cat]}`}
+                onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
               >
                 {cat}
               </Badge>
             ))}
-            {searchTerm && (
-              <Badge variant="outline" className="text-[10px] cursor-pointer" onClick={() => setSearchTerm('')}>
+            {selectedCategory && (
+              <Badge variant="outline" className="text-[10px] cursor-pointer" onClick={() => setSelectedCategory(null)}>
                 {t('clear')}
               </Badge>
             )}
