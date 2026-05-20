@@ -72,23 +72,29 @@ export async function GET(request: Request) {
     }
   } catch (error) {
     logger.error('Failed to load progress:', error);
-    return NextResponse.json({ error: "Failed to load progress" }, { status: 500 });
+    const response = NextResponse.json({ error: "Failed to load progress" }, { status: 500 });
+    addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
+    return response;
   }
 
-  return NextResponse.json(
+  const response = NextResponse.json(
     { error: `Unknown action. Expected: load-progress` },
     { status: 400 }
   );
+  addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
+  return response;
 }
 
 export async function POST(request: Request) {
+  let rateLimitResult: Awaited<ReturnType<typeof applyRateLimit>> | null = null;
+
   try {
     const body = await request.json();
     const { type, payload } = body;
 
     // glossary-search is public (no auth needed) — apply rate limit
     if (type === 'glossary-search') {
-      const rateLimitResult = await applyRateLimit(request);
+      rateLimitResult = await applyRateLimit(request);
       if (rateLimitResult.response) {
         return rateLimitResult.response;
       }
@@ -126,7 +132,7 @@ export async function POST(request: Request) {
     const userId = session.user.id;
 
     // Apply rate limit only for authenticated requests
-    const rateLimitResult = await applyRateLimit(request);
+    rateLimitResult = await applyRateLimit(request);
     if (rateLimitResult.response) {
       return rateLimitResult.response;
     }
@@ -264,11 +270,14 @@ export async function POST(request: Request) {
         break;
       }
 
-      default:
-        return NextResponse.json(
+      default: {
+        const response = NextResponse.json(
           { error: `Unknown request type. Expected: progress, quiz-answers, glossary-search, batch-sync, challenge-progress-sync, reset-progress` },
           { status: 400 }
         );
+        addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
+        return response;
+      }
     }
 
     const response = NextResponse.json({
@@ -282,15 +291,19 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       const details = error.flatten().fieldErrors;
-      return NextResponse.json(
+      const response = NextResponse.json(
         { error: "Validation failed", details },
         { status: 400 }
       );
+      addRateLimitHeaders(response, rateLimitResult!.remaining, rateLimitResult!.reset);
+      return response;
     }
     logger.error('API POST error:', error);
-    return NextResponse.json(
+    const response = NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
     );
+    addRateLimitHeaders(response, rateLimitResult!.remaining, rateLimitResult!.reset);
+    return response;
   }
 }
