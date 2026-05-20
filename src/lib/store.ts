@@ -58,14 +58,30 @@ type AppStore = AppState & AppActions;
 
 // Debounced sync coalescer — batches rapid state changes into a single API call.
 // Uses a timer to wait SYNC_DELAY_MS after the last trigger before flushing.
+// Tracks whether a sync is currently executing so that state changes during
+// an in-flight sync are not silently lost — a follow-up sync is scheduled.
 let syncTimeout: ReturnType<typeof setTimeout> | null = null;
 let pendingPromise: Promise<void> | null = null;
 let pendingResolve: (() => void) | null = null;
+let isExecuting = false; // true while syncWithDatabase is actually running
+let followUpScheduled = false;
 const SYNC_DELAY_MS = 500;
 
-const ensureSync = async (_get: () => AppStore, set: (partial: Partial<AppStore>) => void) => {
-  // If there's already a pending promise, return it (coalesce concurrent calls)
+const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>) => void) => {
+  // If a sync is actively executing, schedule a follow-up so latest state isn't lost.
+  if (isExecuting) {
+    if (!followUpScheduled) {
+      followUpScheduled = true;
+    }
+    // Still return the current pending promise so callers can await it.
+    if (pendingPromise) return pendingPromise;
+  }
+
+  // If there's already a pending promise (waiting in debounce), just return it.
   if (pendingPromise) return pendingPromise;
+
+  // Capture the current state snapshot at call time.
+  const stateSnapshot = get();
 
   // Create a new deferred promise
   pendingPromise = new Promise<void>((resolve) => {
@@ -81,8 +97,20 @@ const ensureSync = async (_get: () => AppStore, set: (partial: Partial<AppStore>
     const resolve = pendingResolve;
     pendingResolve = null;
 
+    isExecuting = true;
     set({ syncStatus: 'syncing' });
-    await syncWithDatabase(_get(), set);
+    await syncWithDatabase(stateSnapshot, set);
+    isExecuting = false;
+
+    // If a follow-up was requested while we were syncing, schedule it now.
+    const shouldFollowUp = followUpScheduled;
+    followUpScheduled = false;
+    if (shouldFollowUp) {
+      const latestState = get();
+      set({ syncStatus: 'syncing' });
+      await syncWithDatabase(latestState, set);
+    }
+
     resolve?.();
   }, SYNC_DELAY_MS);
 
