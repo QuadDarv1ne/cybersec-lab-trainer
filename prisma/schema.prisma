@@ -92,6 +92,24 @@ model QuizResult {
   @@map("quiz_results")
 }
 
+// Прогресс выполнения челленджей
+model ChallengeProgress {
+  id            String   @id @default(cuid())
+  userId        String
+  challengeType String   // owasp, auth, headers, secure-coding
+  correct       Int      @default(0)
+  total         Int      @default(0)
+  answered      Json?    // Массив номеров отвеченных вопросов
+  selectedOptions Json?  // Карта выбранных ответов
+  updatedAt     DateTime @default(now())
+  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, challengeType])
+  @@map("challenge_progress")
+}
+
 // Верификационные токены для аутентификации
 model VerificationToken {
   identifier String

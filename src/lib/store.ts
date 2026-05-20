@@ -31,7 +31,7 @@ interface AppState {
   csrfViewedChallenges: number[];
   userId: string | null;
   syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
-  lastSyncedAt: Date | null;
+  lastSyncedAt: number | null;
 }
 
 interface AppActions {
@@ -184,7 +184,7 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
 
     await apiClient.saveBatch(modules, quizzes);
 
-    set({ syncStatus: 'synced', lastSyncedAt: new Date() });
+    set({ syncStatus: 'synced', lastSyncedAt: Date.now() });
   } catch (error) {
     logger.error('Failed to save progress to database:', error);
     set({ syncStatus: 'error' });

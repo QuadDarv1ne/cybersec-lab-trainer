@@ -6,7 +6,7 @@
   "description": "🛡️ Интерактивный тренажёр по информационной безопасности — учебный проект для направления 09.03.04 Программная инженерия",
   "license": "MIT",
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev",
     "build": "next build",
     "start": "cross-env NODE_ENV=production bun .next/standalone/server.js > server.log 2>&1",
     "lint": "eslint .",

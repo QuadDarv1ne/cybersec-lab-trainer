@@ -32,12 +32,12 @@ export default function SyncIndicator() {
   );
 }
 
-function formatTime(date: Date): string {
-  const now = new Date();
-  const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+function formatTime(timestamp: number): string {
+  const now = Date.now();
+  const diff = Math.floor((now - timestamp) / 1000);
 
   if (diff < 5) return 'just now';
   if (diff < 60) return `${diff}s ago`;
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  return date.toLocaleTimeString();
+  return new Date(timestamp).toLocaleTimeString();
 }

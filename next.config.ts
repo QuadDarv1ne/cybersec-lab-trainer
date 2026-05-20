@@ -13,7 +13,9 @@ const nextConfig: NextConfig = {
       headers: [
         {
           key: 'Content-Security-Policy',
-          value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://github.com https://accounts.google.com; frame-src 'self' https://github.com https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+          value: process.env.NODE_ENV === 'development'
+            ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://github.com https://accounts.google.com; frame-src 'self' https://github.com https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+            : "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://github.com https://accounts.google.com; frame-src 'self' https://github.com https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
         },
         { key: 'X-DNS-Prefetch-Control', value: 'on' },
         { key: 'X-Content-Type-Options', value: 'nosniff' },

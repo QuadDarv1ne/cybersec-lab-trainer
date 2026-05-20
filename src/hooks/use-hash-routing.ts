@@ -40,11 +40,19 @@ const hashToPage: Record<string, PageType> = {
 export function useHashRouting() {
   const { currentPage, setCurrentPage } = useAppStore();
 
-  // Initialize page from URL hash on mount
+  // Initialize page from URL hash on mount and listen for hash changes (back/forward)
   useEffect(() => {
-    const hash = window.location.hash.replace('#', '') as string;
-    const page = hashToPage[hash] ?? 'dashboard';
-    setCurrentPage(page);
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '') as string;
+      const page = hashToPage[hash] ?? 'dashboard';
+      setCurrentPage(page);
+    };
+
+    // Read initial hash on mount
+    handleHashChange();
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, [setCurrentPage]);
 
   // Update URL hash when currentPage changes
@@ -59,16 +67,4 @@ export function useHashRouting() {
       }
     }
   }, [currentPage]);
-
-  // Listen for hash changes (back/forward browser buttons)
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '') as string;
-      const page = hashToPage[hash] ?? 'dashboard';
-      setCurrentPage(page);
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [setCurrentPage]);
 }
