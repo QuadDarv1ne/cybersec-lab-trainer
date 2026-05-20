@@ -41,10 +41,13 @@ export default function SecureCodingLab() {
   useEffect(() => {
     setShowResult(isAnswered);
     if (isAnswered) {
-      const correctIndex = challenge?.options.findIndex(o => o.correct) ?? -1;
-      setSelectedOption(correctIndex);
+      const selectedIndex = secureCodingChallengeScores.selectedOptions?.[activeChallenge] ?? -1;
+      setSelectedOption(selectedIndex >= 0 ? selectedIndex : null);
+    } else {
+      setSelectedOption(null);
+      setShowResult(false);
     }
-  }, [secureCodingChallengeScores.answered, isAnswered, challenge]);
+  }, [secureCodingChallengeScores.answered, secureCodingChallengeScores.selectedOptions, activeChallenge]);
 
   // Complete module when all challenges are answered with >= 70% correct
   useEffect(() => {
@@ -70,10 +73,11 @@ export default function SecureCodingLab() {
 
   const navigateToChallenge = (index: number) => {
     setActiveChallenge(index);
-    const isAnswered = new Set(secureCodingChallengeScores.answered).has(index);
+    const answeredSet = new Set(secureCodingChallengeScores.answered);
+    const isAnswered = answeredSet.has(index);
     if (isAnswered) {
-      const correctIndex = secureCodingChallenges[index].options.findIndex(o => o.correct);
-      setSelectedOption(correctIndex);
+      const selectedIndex = secureCodingChallengeScores.selectedOptions?.[index] ?? -1;
+      setSelectedOption(selectedIndex >= 0 ? selectedIndex : null);
     } else {
       setSelectedOption(null);
     }
@@ -86,8 +90,9 @@ export default function SecureCodingLab() {
     const newScores = {
       correct: secureCodingChallengeScores.correct + (isCorrect ? 1 : 0),
       answered: [...secureCodingChallengeScores.answered, activeChallenge],
+      selectedOptions: { ...secureCodingChallengeScores.selectedOptions, [activeChallenge]: selectedOption },
     };
-    setSecureCodingChallengeScore(newScores.correct, newScores.answered);
+    setSecureCodingChallengeScore(newScores.correct, newScores.answered, newScores.selectedOptions);
     setShowResult(true);
   };
 

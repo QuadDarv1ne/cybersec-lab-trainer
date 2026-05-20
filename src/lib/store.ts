@@ -26,7 +26,7 @@ interface AppState {
   owaspChallengeScores: { correct: number; total: number; answered: number[] };
   authChallengeScores: { correct: number; total: number; answered: number[] };
   headersChallengeScores: { correct: number; total: number; answered: number[] };
-  secureCodingChallengeScores: { correct: number; total: number; answered: number[] };
+  secureCodingChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<number, number> };
   csrfViewedChallenges: number[];
   userId: string | null;
   syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
@@ -46,7 +46,7 @@ interface AppActions {
   setOwaspChallengeScore: (correct: number, answered: number[]) => void;
   setAuthChallengeScore: (correct: number, answered: number[]) => void;
   setHeadersChallengeScore: (correct: number, answered: number[]) => void;
-  setSecureCodingChallengeScore: (correct: number, answered: number[]) => void;
+  setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => void;
   markCsrfChallengeViewed: (index: number) => void;
   setUserId: (userId: string | null) => void;
   syncWithDatabase: () => Promise<void>;
@@ -55,36 +55,42 @@ interface AppActions {
 
 type AppStore = AppState & AppActions;
 
-// Prevent concurrent sync calls; always reads latest state via get()
-let isSyncing = false;
-let syncRequested = false;
-let pendingSyncResolve: (() => void)[] = [];
+// Debounced sync coalescer — batches rapid state changes into a single API call.
+// Uses a timer to wait SYNC_DELAY_MS after the last trigger before flushing.
+let syncTimeout: ReturnType<typeof setTimeout> | null = null;
+let pendingPromise: Promise<void> | null = null;
+let pendingResolve: (() => void) | null = null;
+const SYNC_DELAY_MS = 500;
 
-const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>) => void) => {
-  // If already syncing, queue this caller to wait for the current sync to finish
-  if (isSyncing) {
-    syncRequested = true;
-    return new Promise<void>((resolve) => {
-      pendingSyncResolve.push(resolve);
-    });
-  }
-  isSyncing = true;
-  syncRequested = true; // trigger at least one sync
+const ensureSync = async (_get: () => AppStore, set: (partial: Partial<AppStore>) => void) => {
+  // If there's already a pending promise, return it (coalesce concurrent calls)
+  if (pendingPromise) return pendingPromise;
 
-  try {
-    // Loop to handle pending sync requests — always reads latest state
-    while (syncRequested) {
-      syncRequested = false;
-      await syncWithDatabase(get(), set);
-    }
-  } finally {
-    isSyncing = false;
-    // Resolve all queued callers
-    const resolves = pendingSyncResolve;
-    pendingSyncResolve = [];
-    for (const resolve of resolves) resolve();
-  }
+  // Create a new deferred promise
+  pendingPromise = new Promise<void>((resolve) => {
+    pendingResolve = resolve;
+  });
+
+  // Clear any existing timer and start a new one
+  if (syncTimeout) clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(async () => {
+    syncTimeout = null;
+    const promise = pendingPromise;
+    pendingPromise = null;
+    const resolve = pendingResolve;
+    pendingResolve = null;
+
+    set({ syncStatus: 'syncing' });
+    await syncWithDatabase(_get(), set);
+    resolve?.();
+  }, SYNC_DELAY_MS);
+
+  return pendingPromise;
 };
+
+// Helper: add item to array only if not already present (avoids 5 duplicate patterns)
+const addUnique = <T>(array: T[], item: T): T[] =>
+  array.includes(item) ? array : [...array, item];
 
 // API client functions
 const apiClient = {
@@ -218,7 +224,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   owaspChallengeScores: { correct: 0, total: 0, answered: [] },
   authChallengeScores: { correct: 0, total: 0, answered: [] },
   headersChallengeScores: { correct: 0, total: 0, answered: [] },
-  secureCodingChallengeScores: { correct: 0, total: 0, answered: [] },
+  secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
   csrfViewedChallenges: [],
   userId: null,
   syncStatus: 'idle',
@@ -228,23 +234,25 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setSidebarOpen: (open: boolean) => set({ sidebarOpen: open }),
   
-  completeModule: async (moduleId: string) => {
+  completeModule: (moduleId: string) => {
     set((state) => ({
       completedModules: state.completedModules.includes(moduleId) 
         ? state.completedModules 
         : [...state.completedModules, moduleId],
     }));
-    await ensureSync(get, set);
+    void ensureSync(get, set);
+    return Promise.resolve();
   },
 
-  setQuizScore: async (category: string, score: number) => {
+  setQuizScore: (category: string, score: number) => {
     set((state) => ({
       quizScores: { ...state.quizScores, [category]: score },
     }));
-    await ensureSync(get, set);
+    void ensureSync(get, set);
+    return Promise.resolve();
   },
 
-  resetProgress: async () => {
+  resetProgress: () => {
     set({
       completedModules: [],
       quizScores: {},
@@ -254,33 +262,28 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       owaspChallengeScores: { correct: 0, total: 0, answered: [] },
       authChallengeScores: { correct: 0, total: 0, answered: [] },
       headersChallengeScores: { correct: 0, total: 0, answered: [] },
-      secureCodingChallengeScores: { correct: 0, total: 0, answered: [] },
+      secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
       csrfViewedChallenges: [],
     });
-    await ensureSync(get, set);
+    void ensureSync(get, set);
+    return Promise.resolve();
   },
 
   addStudiedOwasp: (id: string) => {
     set((state) => ({
-      studiedOwaspItems: state.studiedOwaspItems.includes(id)
-        ? state.studiedOwaspItems
-        : [...state.studiedOwaspItems, id],
+      studiedOwaspItems: addUnique(state.studiedOwaspItems, id),
     }));
   },
 
   addSqlLevel: (level: string) => {
     set((state) => ({
-      sqlCompletedLevels: state.sqlCompletedLevels.includes(level)
-        ? state.sqlCompletedLevels
-        : [...state.sqlCompletedLevels, level],
+      sqlCompletedLevels: addUnique(state.sqlCompletedLevels, level),
     }));
   },
 
   addXssLevel: (level: string) => {
     set((state) => ({
-      xssCompletedLevels: state.xssCompletedLevels.includes(level)
-        ? state.xssCompletedLevels
-        : [...state.xssCompletedLevels, level],
+      xssCompletedLevels: addUnique(state.xssCompletedLevels, level),
     }));
   },
 
@@ -296,15 +299,13 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     set({ headersChallengeScores: { correct, total: answered.length, answered } });
   },
 
-  setSecureCodingChallengeScore: (correct: number, answered: number[]) => {
-    set({ secureCodingChallengeScores: { correct, total: answered.length, answered } });
+  setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => {
+    set({ secureCodingChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
   },
 
   markCsrfChallengeViewed: (index: number) => {
     set((state) => ({
-      csrfViewedChallenges: state.csrfViewedChallenges.includes(index)
-        ? state.csrfViewedChallenges
-        : [...state.csrfViewedChallenges, index],
+      csrfViewedChallenges: addUnique(state.csrfViewedChallenges, index),
     }));
   },
 
@@ -323,21 +324,12 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
 const useAppStore = create<AppStore>()(
   persist(createStore, {
     name: 'security-trainer-progress',
-    partialize: (state) => ({
-      currentPage: state.currentPage,
-      sidebarOpen: state.sidebarOpen,
-      completedModules: state.completedModules,
-      quizScores: state.quizScores,
-      studiedOwaspItems: state.studiedOwaspItems,
-      sqlCompletedLevels: state.sqlCompletedLevels,
-      xssCompletedLevels: state.xssCompletedLevels,
-      owaspChallengeScores: state.owaspChallengeScores,
-      authChallengeScores: state.authChallengeScores,
-      headersChallengeScores: state.headersChallengeScores,
-      secureCodingChallengeScores: state.secureCodingChallengeScores,
-      csrfViewedChallenges: state.csrfViewedChallenges,
-      // syncStatus and lastSyncedAt are runtime-only, not persisted
-    }),
+    // Persist all fields except runtime-only ones that should not survive page reload.
+    // This approach is resilient to new state additions — no need to update partialize when adding new persistent fields.
+    partialize: (state) => {
+      const { syncStatus: _ss, lastSyncedAt: _lsa, ...rest } = state;
+      return rest as Omit<AppState, 'syncStatus' | 'lastSyncedAt'>;
+    },
   })
 );
 
