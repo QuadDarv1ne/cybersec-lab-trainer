@@ -70,10 +70,8 @@ const SYNC_DELAY_MS = 500;
 const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>) => void) => {
   // If a sync is actively executing, schedule a follow-up so latest state isn't lost.
   if (isExecuting) {
-    if (!followUpScheduled) {
-      followUpScheduled = true;
-    }
-    // Still return the current pending promise so callers can await it.
+    followUpScheduled = true;
+    // Return existing pending promise so callers can await it.
     if (pendingPromise) return pendingPromise;
   }
 
@@ -92,23 +90,26 @@ const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>)
   if (syncTimeout) clearTimeout(syncTimeout);
   syncTimeout = setTimeout(async () => {
     syncTimeout = null;
-    const _promise = pendingPromise;
-    pendingPromise = null;
     const resolve = pendingResolve;
     pendingResolve = null;
+    // Keep pendingPromise alive until the full sync cycle completes so
+    // concurrent callers still receive the same promise.
 
     isExecuting = true;
     set({ syncStatus: 'syncing' });
-    await syncWithDatabase(stateSnapshot, set);
-    isExecuting = false;
 
-    // If a follow-up was requested while we were syncing, schedule it now.
-    const shouldFollowUp = followUpScheduled;
-    followUpScheduled = false;
-    if (shouldFollowUp) {
-      const latestState = get();
-      set({ syncStatus: 'syncing' });
-      await syncWithDatabase(latestState, set);
+    try {
+      // Loop: sync, and if changes happened during sync, re-sync with latest state.
+      let shouldFollowUp = true;
+      while (shouldFollowUp) {
+        followUpScheduled = false;
+        const currentState = get();
+        await syncWithDatabase(currentState, set);
+        shouldFollowUp = followUpScheduled;
+      }
+    } finally {
+      isExecuting = false;
+      pendingPromise = null;
     }
 
     resolve?.();
