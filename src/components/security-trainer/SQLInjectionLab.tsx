@@ -63,7 +63,12 @@ const challenge = sqlChallenges[activeChallenge];
     const validateForChallenge = (val: string, challengeId: string): boolean => {
       const lower = val.toLowerCase();
       const keywords = requiredKeywords[challengeId] ?? ["'", '"', '--', ';', 'union', 'select'];
-      return keywords.every(kw => lower.includes(kw));
+      return keywords.every(kw => {
+        // Use word boundary matching to prevent false positives (e.g., 'or' in "normal")
+        const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const wordBoundaryRegex = new RegExp(`\\b${escaped}\\b`, 'i');
+        return wordBoundaryRegex.test(lower);
+      });
     };
 
     if (validateForChallenge(input, challenge.id)) {

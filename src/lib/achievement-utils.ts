@@ -8,7 +8,7 @@ export function getAchievementStatus(
   id: string,
   completedModules: string[],
   quizScores: Record<string, number>,
-  challengeStats?: { owaspCorrect: number; authCorrect: number }
+  challengeStats?: { owaspCorrect: number; authCorrect: number; owaspTotal?: number; authTotal?: number }
 ): boolean {
   switch (id) {
     case 'first-steps': return completedModules.length >= 1;
@@ -34,7 +34,13 @@ export function getAchievementStatus(
     }
     case 'first-challenge': return (challengeStats?.owaspCorrect ?? 0) > 0 || (challengeStats?.authCorrect ?? 0) > 0;
     case 'perfect-challenges': {
-      return (challengeStats?.owaspCorrect ?? 0) >= 11 || (challengeStats?.authCorrect ?? 0) >= 8;
+      const owaspTotal = challengeStats?.owaspTotal ?? 0;
+      const authTotal = challengeStats?.authTotal ?? 0;
+      const owaspCorrect = challengeStats?.owaspCorrect ?? 0;
+      const authCorrect = challengeStats?.authCorrect ?? 0;
+      const totalAnswered = owaspTotal + authTotal;
+      const totalCorrect = owaspCorrect + authCorrect;
+      return totalAnswered > 0 && totalCorrect === totalAnswered;
     }
     default: return false;
   }

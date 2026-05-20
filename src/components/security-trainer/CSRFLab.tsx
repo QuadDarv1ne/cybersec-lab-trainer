@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { csrfChallenges, csrfMitigations } from '@/lib/data/csrf-data';
 import CodeBlock from './CodeBlock';
@@ -27,6 +27,13 @@ export default function CSRFLab() {
 
   const isCompleted = completedModules.includes('csrf');
   const challenge = csrfChallenges[activeChallenge];
+
+  // Auto-complete module when all challenges are viewed
+  useEffect(() => {
+    if (csrfViewedChallenges.length === csrfChallenges.length && !isCompleted) {
+      completeModule('csrf');
+    }
+  }, [csrfViewedChallenges.length, isCompleted, completeModule]);
 
   if (!challenge) {
     return (

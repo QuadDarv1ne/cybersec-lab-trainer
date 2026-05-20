@@ -101,8 +101,13 @@ export default function Dashboard() {
   }, [quizScores]);
 
   const challengeStats = useMemo(() =>
-    ({ owaspCorrect: owaspChallengeScores.correct, authCorrect: authChallengeScores.correct })
-  , [owaspChallengeScores.correct, authChallengeScores.correct]);
+    ({
+      owaspCorrect: owaspChallengeScores.correct,
+      authCorrect: authChallengeScores.correct,
+      owaspTotal: owaspChallengeScores.total,
+      authTotal: authChallengeScores.total,
+    })
+  , [owaspChallengeScores, authChallengeScores]);
 
   const unlockedAchievements = useMemo(() =>
     achievements.filter((a) => getAchievementStatus(a.id, completedModules, quizScores, challengeStats))
