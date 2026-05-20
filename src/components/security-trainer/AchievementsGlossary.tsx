@@ -66,7 +66,7 @@ const achievementIcons: Record<string, React.ReactNode> = {
 
 export default function AchievementsAndGlossary() {
   const t = useTranslations('achievements');
-  const { setCurrentPage, completedModules, quizScores, owaspChallengeScores, authChallengeScores } = useAppStore();
+  const { setCurrentPage, completedModules, quizScores, owaspChallengeScores, authChallengeScores, headersChallengeScores, secureCodingChallengeScores } = useAppStore();
   const [activeTab, setActiveTab] = useState<'achievements' | 'glossary'>('achievements');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -76,6 +76,10 @@ export default function AchievementsAndGlossary() {
     authCorrect: authChallengeScores.correct,
     owaspTotal: owaspChallengeScores.total,
     authTotal: authChallengeScores.total,
+    headersCorrect: headersChallengeScores.correct,
+    headersTotal: headersChallengeScores.total,
+    secureCodingCorrect: secureCodingChallengeScores.correct,
+    secureCodingTotal: secureCodingChallengeScores.total,
   };
   const unlockedCount = achievementDefs.filter((a) => getAchievementStatus(a.id, completedModules, quizScores, challengeStats)).length;
 

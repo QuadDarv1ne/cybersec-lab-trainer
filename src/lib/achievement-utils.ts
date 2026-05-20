@@ -8,7 +8,11 @@ export function getAchievementStatus(
   id: string,
   completedModules: string[],
   quizScores: Record<string, number>,
-  challengeStats?: { owaspCorrect: number; authCorrect: number; owaspTotal?: number; authTotal?: number }
+  challengeStats?: {
+    owaspCorrect: number; authCorrect: number; owaspTotal?: number; authTotal?: number;
+    headersCorrect?: number; headersTotal?: number;
+    secureCodingCorrect?: number; secureCodingTotal?: number;
+  }
 ): boolean {
   switch (id) {
     case 'first-steps': return completedModules.length >= 1;
@@ -32,14 +36,22 @@ export function getAchievementStatus(
       const categoryCount = Object.keys(quizScores).length;
       return categoryCount >= 8;
     }
-    case 'first-challenge': return (challengeStats?.owaspCorrect ?? 0) > 0 || (challengeStats?.authCorrect ?? 0) > 0;
+    case 'first-challenge': {
+      const anyCorrect = (challengeStats?.owaspCorrect ?? 0) > 0
+        || (challengeStats?.authCorrect ?? 0) > 0
+        || (challengeStats?.headersCorrect ?? 0) > 0
+        || (challengeStats?.secureCodingCorrect ?? 0) > 0;
+      return anyCorrect;
+    }
     case 'perfect-challenges': {
-      const owaspTotal = challengeStats?.owaspTotal ?? 0;
-      const authTotal = challengeStats?.authTotal ?? 0;
-      const owaspCorrect = challengeStats?.owaspCorrect ?? 0;
-      const authCorrect = challengeStats?.authCorrect ?? 0;
-      const totalAnswered = owaspTotal + authTotal;
-      const totalCorrect = owaspCorrect + authCorrect;
+      const totalAnswered = (challengeStats?.owaspTotal ?? 0)
+        + (challengeStats?.authTotal ?? 0)
+        + (challengeStats?.headersTotal ?? 0)
+        + (challengeStats?.secureCodingTotal ?? 0);
+      const totalCorrect = (challengeStats?.owaspCorrect ?? 0)
+        + (challengeStats?.authCorrect ?? 0)
+        + (challengeStats?.headersCorrect ?? 0)
+        + (challengeStats?.secureCodingCorrect ?? 0);
       return totalAnswered > 0 && totalCorrect === totalAnswered;
     }
     default: return false;

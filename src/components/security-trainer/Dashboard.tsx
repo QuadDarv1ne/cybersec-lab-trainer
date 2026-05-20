@@ -84,7 +84,7 @@ const achievementIcons: Record<string, React.ReactNode> = {
 };
 
 export default function Dashboard() {
-  const { setCurrentPage, completedModules, quizScores, toggleSidebar, owaspChallengeScores, authChallengeScores } = useAppStore();
+  const { setCurrentPage, completedModules, quizScores, toggleSidebar, owaspChallengeScores, authChallengeScores, headersChallengeScores, secureCodingChallengeScores } = useAppStore();
   const t = useTranslations('dashboard');
   const tCommon = useTranslations('common');
 
@@ -109,8 +109,12 @@ export default function Dashboard() {
       authCorrect: authChallengeScores.correct,
       owaspTotal: owaspChallengeScores.total,
       authTotal: authChallengeScores.total,
+      headersCorrect: headersChallengeScores.correct,
+      headersTotal: headersChallengeScores.total,
+      secureCodingCorrect: secureCodingChallengeScores.correct,
+      secureCodingTotal: secureCodingChallengeScores.total,
     })
-  , [owaspChallengeScores, authChallengeScores]);
+  , [owaspChallengeScores, authChallengeScores, headersChallengeScores, secureCodingChallengeScores]);
 
   const { unlockedAchievements, nextAchievement } = useMemo(() => {
     const unlocked: typeof achievements = [];
