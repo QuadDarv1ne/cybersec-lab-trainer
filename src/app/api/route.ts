@@ -289,13 +289,14 @@ export async function POST(request: Request) {
     addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
     return response;
   } catch (error) {
+    const rl = rateLimitResult ?? { remaining: 0, reset: 0 };
     if (error instanceof z.ZodError) {
       const details = error.flatten().fieldErrors;
       const response = NextResponse.json(
         { error: "Validation failed", details },
         { status: 400 }
       );
-      addRateLimitHeaders(response, rateLimitResult!.remaining, rateLimitResult!.reset);
+      addRateLimitHeaders(response, rl.remaining, rl.reset);
       return response;
     }
     logger.error('API POST error:', error);
@@ -303,7 +304,7 @@ export async function POST(request: Request) {
       { error: "Internal server error" },
       { status: 500 }
     );
-    addRateLimitHeaders(response, rateLimitResult!.remaining, rateLimitResult!.reset);
+    addRateLimitHeaders(response, rl.remaining, rl.reset);
     return response;
   }
 }
