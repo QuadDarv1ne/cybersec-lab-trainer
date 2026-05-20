@@ -2,7 +2,7 @@ import { z } from "zod";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { quizResultSchema, progressUpdateSchema, glossarySearchSchema, batchSyncSchema } from "@/lib/validations/api";
+import { quizResultSchema, progressUpdateSchema, glossarySearchSchema, batchSyncSchema, challengeProgressSchema, challengeBatchSchema } from "@/lib/validations/api";
 import { db } from "@/lib/db";
 import { glossaryTerms } from "@/lib/data/glossary-data";
 import { rateLimit, getClientIP, addRateLimitHeaders } from "@/lib/rate-limit";
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
     const action = url.searchParams.get('action');
 
     if (action === 'load-progress') {
-      const [progressRecords, quizResults] = await Promise.all([
+      const [progressRecords, quizResults, challengeProgress] = await Promise.all([
         db.progress.findMany({
           where: { userId },
           orderBy: { lastAccessed: 'desc' },
@@ -39,6 +39,9 @@ export async function GET(request: Request) {
         db.quizResult.findMany({
           where: { userId },
           orderBy: { createdAt: 'desc' },
+        }),
+        db.challengeProgress.findMany({
+          where: { userId },
         }),
       ]);
 
@@ -53,7 +56,17 @@ export async function GET(request: Request) {
         }
       }
 
-      const response = NextResponse.json({ completedModules, quizScores });
+      const challenges: Record<string, { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> }> = {};
+      for (const cp of challengeProgress) {
+        challenges[cp.challengeType] = {
+          correct: cp.correct,
+          total: cp.total,
+          answered: (cp.answered as number[]) ?? [],
+          selectedOptions: (cp.selectedOptions as Record<string, number>) ?? {},
+        };
+      }
+
+      const response = NextResponse.json({ completedModules, quizScores, challenges });
       addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
       return response;
     }
@@ -205,9 +218,44 @@ export async function POST(request: Request) {
         break;
       }
 
+      case 'challenge-progress-sync': {
+        const data = challengeBatchSchema.parse(payload);
+        const { challenges } = data;
+
+        if (challenges.length === 0) {
+          result = { saved: { challenges: 0 } };
+          break;
+        }
+
+        const challengeResults = await Promise.all(
+          challenges.map((c) =>
+            db.challengeProgress.upsert({
+              where: { userId_challengeType: { userId, challengeType: c.challengeType } },
+              create: {
+                userId,
+                challengeType: c.challengeType,
+                correct: c.correct,
+                total: c.total,
+                answered: c.answered ?? [],
+                selectedOptions: c.selectedOptions ?? {},
+              },
+              update: {
+                correct: c.correct,
+                total: c.total,
+                answered: c.answered ?? [],
+                selectedOptions: c.selectedOptions ?? {},
+              },
+            })
+          )
+        );
+
+        result = { saved: { challenges: challengeResults.length }, message: "Challenge progress sync completed" };
+        break;
+      }
+
       default:
         return NextResponse.json(
-          { error: `Unknown request type. Expected: progress, quiz-answers, glossary-search, batch-sync` },
+          { error: `Unknown request type. Expected: progress, quiz-answers, glossary-search, batch-sync, challenge-progress-sync` },
           { status: 400 }
         );
     }

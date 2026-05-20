@@ -34,7 +34,22 @@ export const batchSyncSchema = z.object({
   })).optional().default([]),
 });
 
+// Schema для сохранения прогресса челленджей
+export const challengeProgressSchema = z.object({
+  challengeType: z.enum(['owasp', 'auth', 'headers', 'secure-coding']),
+  correct: z.number().int().min(0),
+  total: z.number().int().min(0),
+  answered: z.array(z.number()).optional(),
+  selectedOptions: z.record(z.string(), z.number()).optional(),
+});
+
+// Schema для пакетной синхронизации челленджей
+export const challengeBatchSchema = z.object({
+  challenges: z.array(challengeProgressSchema).optional().default([]),
+});
+
 // Типы для схем
 export type QuizResult = z.infer<typeof quizResultSchema>;
 export type ProgressUpdate = z.infer<typeof progressUpdateSchema>;
 export type GlossarySearch = z.infer<typeof glossarySearchSchema>;
+export type ChallengeProgress = z.infer<typeof challengeProgressSchema>;

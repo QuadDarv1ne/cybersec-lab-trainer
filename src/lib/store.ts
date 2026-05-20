@@ -161,6 +161,24 @@ const apiClient = {
 
     return response.json();
   },
+
+  async saveChallengeProgress(challenges: { challengeType: string; correct: number; total: number; answered?: number[]; selectedOptions?: Record<string, number> }[]) {
+    const response = await fetch('/api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'challenge-progress-sync',
+        payload: { challenges },
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || 'Failed to sync challenge progress');
+    }
+
+    return response.json();
+  },
 };
 
 // Sync with database via API (batch call)
@@ -182,7 +200,17 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
       total: quizCategories.find((c) => c.id === category)?.count ?? 100,
     }));
 
-    await apiClient.saveBatch(modules, quizzes);
+    const challenges = [
+      { challengeType: 'owasp', ...state.owaspChallengeScores },
+      { challengeType: 'auth', ...state.authChallengeScores },
+      { challengeType: 'headers', ...state.headersChallengeScores },
+      { challengeType: 'secure-coding', ...state.secureCodingChallengeScores },
+    ].filter((c) => c.total > 0);
+
+    await Promise.all([
+      apiClient.saveBatch(modules, quizzes),
+      challenges.length > 0 ? apiClient.saveChallengeProgress(challenges) : Promise.resolve(),
+    ]);
 
     set({ syncStatus: 'synced', lastSyncedAt: Date.now() });
   } catch (error) {
@@ -206,6 +234,16 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
       });
     } else {
       set({ userId, syncStatus: 'synced' });
+    }
+
+    // Restore challenge progress if available
+    if (data.challenges) {
+      set({
+        owaspChallengeScores: data.challenges.owasp ?? { correct: 0, total: 0, answered: [], selectedOptions: {} },
+        authChallengeScores: data.challenges.auth ?? { correct: 0, total: 0, answered: [], selectedOptions: {} },
+        headersChallengeScores: data.challenges.headers ?? { correct: 0, total: 0, answered: [], selectedOptions: {} },
+        secureCodingChallengeScores: data.challenges['secure-coding'] ?? { correct: 0, total: 0, answered: [], selectedOptions: {} },
+      });
     }
   } catch (error) {
     logger.error('Failed to load progress from database:', error);
