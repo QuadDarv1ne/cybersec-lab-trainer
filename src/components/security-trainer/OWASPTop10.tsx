@@ -40,7 +40,7 @@ export default function OWASPTop10() {
       setSelectedOption(null);
       setShowResult(false);
     }
-  }, [owaspChallengeScores.correct, owaspChallengeScores.answered, owaspChallengeScores.selectedOptions, activeChallenge]);
+  }, [owaspChallengeScores.correct, owaspChallengeScores.answered, owaspChallengeScores.selectedOptions, activeChallenge, answeredChallenges]);
 
   const studiedCount = studiedOwaspItems.length;
   const totalCount = owaspTopics.length;

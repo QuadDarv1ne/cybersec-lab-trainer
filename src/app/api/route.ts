@@ -6,6 +6,7 @@ import { quizResultSchema, progressUpdateSchema, glossarySearchSchema, batchSync
 import { db } from "@/lib/db";
 import { glossaryTerms } from "@/lib/data/glossary-data";
 import { rateLimit, getClientIP, addRateLimitHeaders } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 async function applyRateLimit(request: Request): Promise<{ response: NextResponse | null; remaining: number; reset: number }> {
   const ip = getClientIP(request);
@@ -57,7 +58,7 @@ export async function GET(request: Request) {
       return response;
     }
   } catch (error) {
-    console.error('[API] Failed to load progress:', error);
+    logger.error('Failed to load progress:', error);
     return NextResponse.json({ error: "Failed to load progress" }, { status: 500 });
   }
 

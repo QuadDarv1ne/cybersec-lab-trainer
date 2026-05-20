@@ -3,6 +3,7 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 interface Props {
   children: ReactNode;
@@ -36,8 +37,8 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Отправка ошибки в лог (в production можно отправить в Sentry)
-    console.error(`[ErrorBoundary] Uncaught error: ${error.toString()}`);
-    console.error(`[ErrorBoundary] Component stack: ${errorInfo.componentStack}`);
+    logger.error(`Uncaught error: ${error.toString()}`);
+    logger.error(`Component stack: ${errorInfo.componentStack}`);
 
     this.setState({ errorInfo });
   }

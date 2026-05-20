@@ -47,7 +47,7 @@ export default function SecureCodingLab() {
       setSelectedOption(null);
       setShowResult(false);
     }
-  }, [secureCodingChallengeScores.answered, secureCodingChallengeScores.selectedOptions, activeChallenge]);
+  }, [secureCodingChallengeScores.answered, secureCodingChallengeScores.selectedOptions, activeChallenge, isAnswered]);
 
   // Complete module when all challenges are answered with >= 70% correct
   useEffect(() => {

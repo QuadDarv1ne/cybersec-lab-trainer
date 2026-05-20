@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { quizCategories } from './data/quiz-data';
+import { logger } from './logger';
 
 export type PageType =
   | 'dashboard'
@@ -75,7 +76,7 @@ const ensureSync = async (_get: () => AppStore, set: (partial: Partial<AppStore>
   if (syncTimeout) clearTimeout(syncTimeout);
   syncTimeout = setTimeout(async () => {
     syncTimeout = null;
-    const promise = pendingPromise;
+    const _promise = pendingPromise;
     pendingPromise = null;
     const resolve = pendingResolve;
     pendingResolve = null;
@@ -185,7 +186,7 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
 
     set({ syncStatus: 'synced', lastSyncedAt: new Date() });
   } catch (error) {
-    console.error('Failed to save progress to database:', error);
+    logger.error('Failed to save progress to database:', error);
     set({ syncStatus: 'error' });
   }
 };
@@ -207,7 +208,7 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
       set({ userId, syncStatus: 'synced' });
     }
   } catch (error) {
-    console.error('Failed to load progress from database:', error);
+    logger.error('Failed to load progress from database:', error);
     set({ syncStatus: 'error' });
   }
 };
