@@ -128,15 +128,22 @@ export async function rateLimit(ip: string): Promise<{ response: NextResponse | 
 }
 
 export function getClientIP(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
+  // X-Real-IP is set by the reverse proxy from $remote_addr (trusted, not spoofable).
   const realIP = request.headers.get("x-real-ip");
-
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
   if (realIP) {
-    return realIP;
+    return realIP.trim();
   }
+
+  // X-Forwarded-For may contain a client-spoofed chain.
+  // Nginx appends the real IP to the END via $proxy_add_x_forwarded_for,
+  // so take the last entry as the trusted client IP.
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const entries = forwarded.split(",").map((e) => e.trim());
+    const last = entries[entries.length - 1];
+    if (last) return last;
+  }
+
   // Shared bucket for all anonymous requests — prevents rate limit bypass.
   // Without this, each request gets a unique ID and rate limiting becomes useless.
   return "anonymous";
