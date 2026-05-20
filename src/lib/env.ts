@@ -10,9 +10,7 @@ const envSchema = z.object({
   GITHUB_SECRET: z.string().min(1).optional(),
   GOOGLE_CLIENT_ID: z.string().min(1).optional(),
   GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
-  JWT_SECRET: process.env.NODE_ENV === 'production'
-    ? z.string().min(1, 'JWT_SECRET is required in production')
-    : z.string().optional(),
+  JWT_SECRET: z.string().optional(),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });
 
