@@ -150,7 +150,9 @@ export default function AuthSecurityLab() {
 
   const nextChallenge = () => {
     if (activeChallenge < authChallenges.length - 1) {
-      const newSelectedOptions = { ...authChallengeScores.selectedOptions, [activeChallenge]: selectedOption };
+      const newSelectedOptions = selectedOption !== null
+        ? { ...authChallengeScores.selectedOptions, [activeChallenge]: selectedOption }
+        : { ...authChallengeScores.selectedOptions };
       setAuthChallengeScore(correctCount, [...answeredChallenges], newSelectedOptions);
       setActiveChallenge(activeChallenge + 1);
       setShowResult(false);
@@ -159,7 +161,9 @@ export default function AuthSecurityLab() {
 
   const prevChallenge = () => {
     if (activeChallenge > 0) {
-      const newSelectedOptions = { ...authChallengeScores.selectedOptions, [activeChallenge]: selectedOption };
+      const newSelectedOptions = selectedOption !== null
+        ? { ...authChallengeScores.selectedOptions, [activeChallenge]: selectedOption }
+        : { ...authChallengeScores.selectedOptions };
       setAuthChallengeScore(correctCount, [...answeredChallenges], newSelectedOptions);
       setActiveChallenge(activeChallenge - 1);
       setShowResult(false);
