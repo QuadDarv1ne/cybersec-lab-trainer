@@ -20,6 +20,7 @@ const requestCounts = new Map<string, { count: number; resetTime: number }>();
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 let cleanupInterval: ReturnType<typeof setInterval> | null = null;
 let fallbackUsed = false;
+let signalListenersRegistered = false;
 
 function ensureCleanupInterval(): void {
   if (cleanupInterval !== null) return;
@@ -32,9 +33,10 @@ function ensureCleanupInterval(): void {
     }
   }, CLEANUP_INTERVAL_MS);
 
-  if (typeof process !== 'undefined' && typeof process.on === 'function') {
+  if (typeof process !== 'undefined' && typeof process.on === 'function' && !signalListenersRegistered) {
     process.on('SIGTERM', stopCleanupInterval);
     process.on('SIGINT', stopCleanupInterval);
+    signalListenersRegistered = true;
   }
 }
 

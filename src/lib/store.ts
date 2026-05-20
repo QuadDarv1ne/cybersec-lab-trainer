@@ -156,7 +156,7 @@ const apiClient = {
   },
 };
 
-// Функция для синхронизации с БД через API (батчевый вызов)
+// Sync with database via API (batch call)
 const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore>) => void) => {
   if (!state.userId) {
     set({ syncStatus: 'idle' });
@@ -178,12 +178,13 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
     await apiClient.saveBatch(modules, quizzes);
 
     set({ syncStatus: 'synced', lastSyncedAt: new Date() });
-  } catch {
+  } catch (error) {
+    console.error('Failed to save progress to database:', error);
     set({ syncStatus: 'error' });
   }
 };
 
-// Функция для загрузки из БД
+// Load progress from database
 const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppStore) => Partial<AppStore>)) => void, _get: () => AppStore, userId: string) => {
   set({ syncStatus: 'syncing' });
   try {
@@ -205,7 +206,7 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
   }
 };
 
-// Создаём store
+// Create the store
 const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Partial<AppStore>)) => void, get: () => AppStore): AppStore => ({
   currentPage: 'dashboard',
   sidebarOpen: false,
@@ -318,7 +319,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   },
 });
 
-// Создаём store с persist
+// Create the store with persistence
 const useAppStore = create<AppStore>()(
   persist(createStore, {
     name: 'security-trainer-progress',
