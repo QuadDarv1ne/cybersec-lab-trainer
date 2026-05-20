@@ -45,7 +45,7 @@ if (providers.length === 0) {
 
 // Only use PrismaAdapter when OAuth providers are configured
 // Demo mode (CredentialsProvider) doesn't need DB-backed sessions
-const hasOAuth = providers.length > 0 && !providers.some(p => p.type === "credentials");
+const hasOAuth = providers.some((p) => p.type === "oauth");
 
 export const authOptions: NextAuthOptions = {
   ...(hasOAuth ? { adapter: PrismaAdapter(db) } : {}),

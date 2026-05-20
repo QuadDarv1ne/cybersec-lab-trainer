@@ -60,9 +60,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Failed to load progress" }, { status: 500 });
   }
 
-  const response = NextResponse.json({ message: "Hello, world!" });
-  addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
-  return response;
+  return NextResponse.json(
+    { error: `Unknown action. Expected: load-progress` },
+    { status: 400 }
+  );
 }
 
 export async function POST(request: Request) {
