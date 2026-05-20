@@ -127,7 +127,6 @@ const apiClient = {
   async loadProgress() {
     const response = await fetch('/api?action=load-progress', {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
     });
 
     if (!response.ok) {
@@ -169,12 +168,6 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
     const modules = state.completedModules.map((moduleId) => ({
       moduleId, completed: true, score: 100,
     }));
-
-    // Save aggregate 'all' record for backward compatibility with load-progress
-    if (state.completedModules.length > 0) {
-      const maxQuizScore = Math.max(0, ...Object.values(state.quizScores));
-      modules.push({ moduleId: 'all', completed: true, score: maxQuizScore });
-    }
 
     const quizzes = Object.entries(state.quizScores).map(([category, score]) => ({
       quizId: category,

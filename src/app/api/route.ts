@@ -86,8 +86,9 @@ export async function POST(request: Request) {
       );
 
       if (data.category) {
+        const category = data.category;
         results = results.filter((term) =>
-          term.category.toLowerCase().includes(data.category!.toLowerCase())
+          term.category.toLowerCase().includes(category.toLowerCase())
         );
       }
 
@@ -203,7 +204,7 @@ export async function POST(request: Request) {
 
       default:
         return NextResponse.json(
-          { error: `Unknown request type: ${type}. Expected: progress, quiz-answers, glossary-search, batch-sync` },
+          { error: `Unknown request type. Expected: progress, quiz-answers, glossary-search, batch-sync` },
           { status: 400 }
         );
     }
