@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import { useAppStore, type PageType } from '@/lib/store';
 import { useTranslations } from '@/lib/intlStub';
 import {
@@ -70,9 +69,9 @@ export default function Sidebar() {
   ];
 
   // Count trackable items (excluding dashboard, achievements, quiz)
-  const trackableItems = useMemo(() => navItems.filter((item) => item.id !== 'dashboard' && item.id !== 'achievements' && item.id !== 'quiz'), []);
-  const completedCount = useMemo(() => trackableItems.filter((item) => completedModules.includes(item.id)).length, [trackableItems, completedModules]);
-  const progressPct = useMemo(() => trackableItems.length > 0 ? Math.round((completedCount / trackableItems.length) * 100) : 0, [trackableItems, completedCount]);
+  const trackableItems = navItems.filter((item) => item.id !== 'dashboard' && item.id !== 'achievements' && item.id !== 'quiz');
+  const completedCount = trackableItems.filter((item) => completedModules.includes(item.id)).length;
+  const progressPct = trackableItems.length > 0 ? Math.round((completedCount / trackableItems.length) * 100) : 0;
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-slate-900 text-white">

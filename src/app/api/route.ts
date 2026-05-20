@@ -2,7 +2,7 @@ import { z } from "zod";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { quizResultSchema, progressUpdateSchema, glossarySearchSchema, batchSyncSchema, challengeProgressSchema, challengeBatchSchema } from "@/lib/validations/api";
+import { quizResultSchema, progressUpdateSchema, glossarySearchSchema, batchSyncSchema, challengeBatchSchema } from "@/lib/validations/api";
 import { db } from "@/lib/db";
 import { glossaryTerms } from "@/lib/data/glossary-data";
 import { rateLimit, getClientIP, addRateLimitHeaders } from "@/lib/rate-limit";

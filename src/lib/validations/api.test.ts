@@ -160,7 +160,7 @@ describe('challengeProgressSchema', () => {
 
 describe('challengeBatchSchema', () => {
   it('rejects more than 50 challenges', () => {
-    const challenges = Array.from({ length: 51 }, (_, i) => ({
+    const challenges = Array.from({ length: 51 }, () => ({
       challengeType: 'owasp',
       correct: 5,
       total: 10,
