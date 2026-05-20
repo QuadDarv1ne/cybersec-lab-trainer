@@ -40,7 +40,8 @@ export default function OWASPTop10() {
       setSelectedOption(null);
       setShowResult(false);
     }
-  }, [owaspChallengeScores.correct, owaspChallengeScores.answered, owaspChallengeScores.selectedOptions, activeChallenge, answeredChallenges]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- including answeredChallenges would cause infinite re-render loop (effect sets it with new Set reference each time)
+  }, [owaspChallengeScores.correct, owaspChallengeScores.answered, owaspChallengeScores.selectedOptions, activeChallenge]);
 
   const studiedCount = useMemo(() => studiedOwaspItems.length, [studiedOwaspItems]);
   const totalCount = useMemo(() => owaspTopics.length, []);
