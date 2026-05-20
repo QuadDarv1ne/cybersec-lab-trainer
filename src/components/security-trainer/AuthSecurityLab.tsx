@@ -51,7 +51,12 @@ export default function AuthSecurityLab() {
   useEffect(() => {
     setCorrectCount(authChallengeScores.correct);
     setAnsweredChallenges(new Set(authChallengeScores.answered));
-  }, [authChallengeScores.correct, authChallengeScores.answered]);
+    if (authChallengeScores.selectedOptions[activeChallenge] !== undefined) {
+      setSelectedOption(authChallengeScores.selectedOptions[activeChallenge]);
+    } else {
+      setSelectedOption(null);
+    }
+  }, [authChallengeScores.correct, authChallengeScores.answered, authChallengeScores.selectedOptions, activeChallenge]);
 
   // Simulated hash using Web Crypto API (SHA-256)
   useEffect(() => {
@@ -139,21 +144,24 @@ export default function AuthSecurityLab() {
     const isCorrect = currentChallenge.options[selectedOption].correct;
     const newCorrect = isCorrect ? correctCount + 1 : correctCount;
     setCorrectCount(newCorrect);
-    setAuthChallengeScore(newCorrect, [...newAnswered]);
+    const newSelectedOptions = { ...authChallengeScores.selectedOptions, [activeChallenge]: selectedOption };
+    setAuthChallengeScore(newCorrect, [...newAnswered], newSelectedOptions);
   };
 
   const nextChallenge = () => {
     if (activeChallenge < authChallenges.length - 1) {
+      const newSelectedOptions = { ...authChallengeScores.selectedOptions, [activeChallenge]: selectedOption };
+      setAuthChallengeScore(correctCount, [...answeredChallenges], newSelectedOptions);
       setActiveChallenge(activeChallenge + 1);
-      setSelectedOption(null);
       setShowResult(false);
     }
   };
 
   const prevChallenge = () => {
     if (activeChallenge > 0) {
+      const newSelectedOptions = { ...authChallengeScores.selectedOptions, [activeChallenge]: selectedOption };
+      setAuthChallengeScore(correctCount, [...answeredChallenges], newSelectedOptions);
       setActiveChallenge(activeChallenge - 1);
-      setSelectedOption(null);
       setShowResult(false);
     }
   };

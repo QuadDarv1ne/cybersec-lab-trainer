@@ -24,8 +24,8 @@ interface AppState {
   sqlCompletedLevels: string[];
   xssCompletedLevels: string[];
   owaspChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<number, number> };
-  authChallengeScores: { correct: number; total: number; answered: number[] };
-  headersChallengeScores: { correct: number; total: number; answered: number[] };
+  authChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<number, number> };
+  headersChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<number, number> };
   secureCodingChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<number, number> };
   csrfViewedChallenges: number[];
   userId: string | null;
@@ -44,8 +44,8 @@ interface AppActions {
   addSqlLevel: (level: string) => void;
   addXssLevel: (level: string) => void;
   setOwaspChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => void;
-  setAuthChallengeScore: (correct: number, answered: number[]) => void;
-  setHeadersChallengeScore: (correct: number, answered: number[]) => void;
+  setAuthChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => void;
+  setHeadersChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => void;
   setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => void;
   markCsrfChallengeViewed: (index: number) => void;
   setUserId: (userId: string | null) => void;
@@ -222,8 +222,8 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   sqlCompletedLevels: [],
   xssCompletedLevels: [],
   owaspChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
-  authChallengeScores: { correct: 0, total: 0, answered: [] },
-  headersChallengeScores: { correct: 0, total: 0, answered: [] },
+  authChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
+  headersChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
   secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
   csrfViewedChallenges: [],
   userId: null,
@@ -260,8 +260,8 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       sqlCompletedLevels: [],
       xssCompletedLevels: [],
       owaspChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
-      authChallengeScores: { correct: 0, total: 0, answered: [] },
-      headersChallengeScores: { correct: 0, total: 0, answered: [] },
+      authChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
+      headersChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
       secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
       csrfViewedChallenges: [],
     });
@@ -291,12 +291,12 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     set({ owaspChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
   },
 
-  setAuthChallengeScore: (correct: number, answered: number[]) => {
-    set({ authChallengeScores: { correct, total: answered.length, answered } });
+  setAuthChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => {
+    set({ authChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
   },
 
-  setHeadersChallengeScore: (correct: number, answered: number[]) => {
-    set({ headersChallengeScores: { correct, total: answered.length, answered } });
+  setHeadersChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => {
+    set({ headersChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
   },
 
   setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => {

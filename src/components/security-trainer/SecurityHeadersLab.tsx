@@ -37,7 +37,12 @@ export default function SecurityHeadersLab() {
   useEffect(() => {
     setCorrectCount(headersChallengeScores.correct);
     setAnsweredChallenges(new Set(headersChallengeScores.answered));
-  }, [headersChallengeScores.correct, headersChallengeScores.answered]);
+    if (headersChallengeScores.selectedOptions[activeChallenge] !== undefined) {
+      setSelectedOption(headersChallengeScores.selectedOptions[activeChallenge]);
+    } else {
+      setSelectedOption(null);
+    }
+  }, [headersChallengeScores.correct, headersChallengeScores.answered, headersChallengeScores.selectedOptions, activeChallenge]);
 
   const challenge = headerChallenges[activeChallenge];
   const isAnswered = answeredChallenges.has(activeChallenge);
@@ -73,21 +78,24 @@ export default function SecurityHeadersLab() {
     setAnsweredChallenges(newAnswered);
     const newCorrect = isCorrect ? correctCount + 1 : correctCount;
     setCorrectCount(newCorrect);
-    setHeadersChallengeScore(newCorrect, [...newAnswered]);
+    const newSelectedOptions = { ...headersChallengeScores.selectedOptions, [activeChallenge]: selectedOption };
+    setHeadersChallengeScore(newCorrect, [...newAnswered], newSelectedOptions);
   };
 
   const nextChallenge = () => {
     if (activeChallenge < headerChallenges.length - 1) {
+      const newSelectedOptions = { ...headersChallengeScores.selectedOptions, [activeChallenge]: selectedOption };
+      setHeadersChallengeScore(correctCount, [...answeredChallenges], newSelectedOptions);
       setActiveChallenge(activeChallenge + 1);
-      setSelectedOption(null);
       setShowResult(false);
     }
   };
 
   const prevChallenge = () => {
     if (activeChallenge > 0) {
+      const newSelectedOptions = { ...headersChallengeScores.selectedOptions, [activeChallenge]: selectedOption };
+      setHeadersChallengeScore(correctCount, [...answeredChallenges], newSelectedOptions);
       setActiveChallenge(activeChallenge - 1);
-      setSelectedOption(null);
       setShowResult(false);
     }
   };
