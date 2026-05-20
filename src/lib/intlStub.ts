@@ -6,13 +6,18 @@ const locales: Record<string, typeof ru> = {
   en,
 };
 
+let cachedLocale: string | null = null;
+
 function getLocale(): string {
+  if (cachedLocale) return cachedLocale;
+
   if (typeof window !== 'undefined') {
     const browserLang = navigator.language.toLowerCase();
-    if (browserLang.startsWith('en')) return 'en';
-    if (browserLang.startsWith('ru')) return 'ru';
+    if (browserLang.startsWith('en')) cachedLocale = 'en';
+    else if (browserLang.startsWith('ru')) cachedLocale = 'ru';
   }
-  return 'ru'; // default fallback
+  cachedLocale ??= 'ru'; // default fallback
+  return cachedLocale;
 }
 
 function getNestedValue(obj: Record<string, unknown>, path: string): string {
@@ -30,11 +35,18 @@ function getNestedValue(obj: Record<string, unknown>, path: string): string {
   return typeof current === 'string' ? current : path;
 }
 
+const translationCache = new Map<string, (key: string, values?: Record<string, string | number>) => string>();
+
 export function useTranslations(namespace: string) {
   const locale = getLocale();
   const translations = locales[locale] || locales.ru;
 
-  return (key: string, values?: Record<string, string | number>) => {
+  // Return cached translator if available
+  const cacheKey = `${locale}:${namespace}`;
+  const cached = translationCache.get(cacheKey);
+  if (cached) return cached;
+
+  const translator = (key: string, values?: Record<string, string | number>) => {
     const fullKey = `${namespace}.${key}`;
     let text = getNestedValue(translations, fullKey);
 
@@ -47,4 +59,7 @@ export function useTranslations(namespace: string) {
 
     return text;
   };
+
+  translationCache.set(cacheKey, translator);
+  return translator;
 }

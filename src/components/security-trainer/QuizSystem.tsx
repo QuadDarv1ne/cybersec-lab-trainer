@@ -63,31 +63,33 @@ export default function QuizSystem() {
     correctCountRef.current = correctCount;
   }, [correctCount]);
 
-  // Timer using setInterval — time-up handled in a separate effect
+  // Single-effect timer with integrated time-up logic — avoids race condition between decrement and time-up detection
   useEffect(() => {
-    if (!timerActive) return;
+    if (!timerActive || timeLeft <= 0) return;
     timeUpRef.current = false;
 
     const interval = setInterval(() => {
-      setTimeLeft((t) => t - 1);
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          // Time is up — handle directly inside the interval to avoid race condition
+          clearInterval(interval);
+          timeUpRef.current = true;
+          setTimerActive(false);
+          setShowAnswer(true);
+          setAnswers((answersPrev) => {
+            const idx = currentQuestionRef.current;
+            if (answersPrev[idx] !== null && answersPrev[idx] !== undefined) return answersPrev;
+            const newAnswers = [...answersPrev];
+            newAnswers[idx] = false;
+            return newAnswers;
+          });
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timerActive]);
-
-  // Detect when time reaches zero and trigger time-up logic
-  useEffect(() => {
-    if (!timerActive || timeLeft > 0 || timeUpRef.current) return;
-    timeUpRef.current = true;
-    setTimerActive(false);
-    setShowAnswer(true);
-    setAnswers((prev) => {
-      const idx = currentQuestionRef.current;
-      if (prev[idx] !== null && prev[idx] !== undefined) return prev;
-      const newAnswers = [...prev];
-      newAnswers[idx] = false;
-      return newAnswers;
-    });
   }, [timerActive, timeLeft]);
 
   const activeCategoryName = useMemo(

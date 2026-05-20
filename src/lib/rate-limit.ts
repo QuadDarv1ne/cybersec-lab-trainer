@@ -137,7 +137,8 @@ export function getClientIP(request: Request): string {
   if (realIP) {
     return realIP;
   }
-  return "unknown";
+  // Fallback to a unique per-request identifier to avoid shared rate limit buckets
+  return `anon-${crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)}`;
 }
 
 export function addRateLimitHeaders(response: NextResponse, remaining: number, reset: number): void {

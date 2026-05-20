@@ -116,24 +116,29 @@ export default function ToolsLab() {
     const allChars = classes.join('');
     const password: string[] = [];
 
-    // Guarantee at least one character from each enabled class
-    const randBytes = new Uint32Array(pwLength);
-    crypto.getRandomValues(randBytes);
+    // Unbiased random selection using rejection sampling
+    const unbiasedRandomIndex = (max: number): number => {
+      const limit = 0xFFFFFFFF - (0xFFFFFFFF % max);
+      const buf = new Uint32Array(1);
+      do {
+        crypto.getRandomValues(buf);
+      } while (buf[0] >= limit);
+      return buf[0] % max;
+    };
 
+    // Guarantee at least one character from each enabled class
     for (let i = 0; i < classes.length && i < pwLength; i++) {
-      password.push(classes[i][randBytes[i] % classes[i].length]);
+      password.push(classes[i][unbiasedRandomIndex(classes[i].length)]);
     }
 
     // Fill remaining positions randomly from all chars
     for (let i = classes.length; i < pwLength; i++) {
-      password.push(allChars[randBytes[i] % allChars.length]);
+      password.push(allChars[unbiasedRandomIndex(allChars.length)]);
     }
 
-    // Fisher-Yates shuffle using crypto-random values
-    const shuffleBytes = new Uint32Array(password.length);
-    crypto.getRandomValues(shuffleBytes);
+    // Fisher-Yates shuffle using unbiased random indices
     for (let i = password.length - 1; i > 0; i--) {
-      const j = shuffleBytes[i] % (i + 1);
+      const j = unbiasedRandomIndex(i + 1);
       [password[i], password[j]] = [password[j], password[i]];
     }
 
