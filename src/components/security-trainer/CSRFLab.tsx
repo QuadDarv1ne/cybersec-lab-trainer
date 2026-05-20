@@ -98,7 +98,7 @@ export default function CSRFLab() {
         {csrfChallenges.map((c, i) => (
           <button
             key={c.id}
-            onClick={() => { setActiveChallenge(i); setShowDefense(false); }}
+            onClick={() => { setActiveChallenge(i); setShowDefense(false); markCsrfChallengeViewed(i); }}
             aria-label={`Челлендж ${c.title}`}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               i === activeChallenge && !showDefense

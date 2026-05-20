@@ -70,7 +70,12 @@ export default function AchievementsAndGlossary() {
   const [activeTab, setActiveTab] = useState<'achievements' | 'glossary'>('achievements');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const challengeStats = { owaspCorrect: owaspChallengeScores.correct, authCorrect: authChallengeScores.correct };
+  const challengeStats = {
+    owaspCorrect: owaspChallengeScores.correct,
+    authCorrect: authChallengeScores.correct,
+    owaspTotal: owaspChallengeScores.total,
+    authTotal: authChallengeScores.total,
+  };
   const unlockedCount = achievementDefs.filter((a) => getAchievementStatus(a.id, completedModules, quizScores, challengeStats)).length;
 
   const filteredTerms = glossaryTerms.filter(
