@@ -145,11 +145,12 @@ export default function QuizSystem() {
     setShowAnswer(true);
     const question = categoryQuestions[currentQuestion];
     const isCorrect = parseInt(selectedAnswer) === question.correctIndex;
-    if (isCorrect) setCorrectCount((c) => c + 1);
     const qIdx = currentQuestion;
     setAnswers((prev) => {
+      if (prev[qIdx] !== null && prev[qIdx] !== undefined) return prev;
       const newAnswers = [...prev];
       newAnswers[qIdx] = isCorrect;
+      if (isCorrect) setCorrectCount((c) => c + 1);
       return newAnswers;
     });
   };
