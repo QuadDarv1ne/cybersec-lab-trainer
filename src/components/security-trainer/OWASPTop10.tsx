@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import { owaspTopics, owaspChallenges } from '@/lib/security-data';
 import { useTranslations } from '@/lib/intlStub';
@@ -42,9 +42,9 @@ export default function OWASPTop10() {
     }
   }, [owaspChallengeScores.correct, owaspChallengeScores.answered, owaspChallengeScores.selectedOptions, activeChallenge, answeredChallenges]);
 
-  const studiedCount = studiedOwaspItems.length;
-  const totalCount = owaspTopics.length;
-  const allStudied = studiedCount === totalCount;
+  const studiedCount = useMemo(() => studiedOwaspItems.length, [studiedOwaspItems]);
+  const totalCount = useMemo(() => owaspTopics.length, []);
+  const allStudied = useMemo(() => studiedCount === totalCount, [studiedCount, totalCount]);
 
   // Complete module when all topics studied
   useEffect(() => {

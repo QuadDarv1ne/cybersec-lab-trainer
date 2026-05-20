@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import { achievements as achievementDefs, glossaryTerms } from '@/lib/security-data';
 import { getAchievementStatus } from '@/lib/achievement-utils';
@@ -71,7 +71,7 @@ export default function AchievementsAndGlossary() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const challengeStats = {
+  const challengeStats = useMemo(() => ({
     owaspCorrect: owaspChallengeScores.correct,
     authCorrect: authChallengeScores.correct,
     owaspTotal: owaspChallengeScores.total,
@@ -80,17 +80,21 @@ export default function AchievementsAndGlossary() {
     headersTotal: headersChallengeScores.total,
     secureCodingCorrect: secureCodingChallengeScores.correct,
     secureCodingTotal: secureCodingChallengeScores.total,
-  };
-  const unlockedCount = achievementDefs.filter((a) => getAchievementStatus(a.id, completedModules, quizScores, challengeStats)).length;
+  }), [owaspChallengeScores, authChallengeScores, headersChallengeScores, secureCodingChallengeScores]);
 
-  const filteredTerms = glossaryTerms.filter(
+  const unlockedCount = useMemo(() =>
+    achievementDefs.filter((a) => getAchievementStatus(a.id, completedModules, quizScores, challengeStats)).length,
+    [completedModules, quizScores, challengeStats]
+  );
+
+  const filteredTerms = useMemo(() => glossaryTerms.filter(
     (t) => {
       const matchesSearch = t.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
         t.definition.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = !selectedCategory || t.category === selectedCategory;
       return matchesSearch && matchesCategory;
     }
-  );
+  ), [searchTerm, selectedCategory]);
 
   return (
     <div className="space-y-6">
