@@ -84,10 +84,6 @@ export default function SecurityHeadersLab() {
 
   const nextChallenge = () => {
     if (activeChallenge < headerChallenges.length - 1) {
-      const newSelectedOptions = selectedOption !== null
-        ? { ...headersChallengeScores.selectedOptions, [activeChallenge]: selectedOption }
-        : { ...headersChallengeScores.selectedOptions };
-      setHeadersChallengeScore(correctCount, [...answeredChallenges], newSelectedOptions);
       setActiveChallenge(activeChallenge + 1);
       setShowResult(false);
     }
@@ -95,10 +91,6 @@ export default function SecurityHeadersLab() {
 
   const prevChallenge = () => {
     if (activeChallenge > 0) {
-      const newSelectedOptions = selectedOption !== null
-        ? { ...headersChallengeScores.selectedOptions, [activeChallenge]: selectedOption }
-        : { ...headersChallengeScores.selectedOptions };
-      setHeadersChallengeScore(correctCount, [...answeredChallenges], newSelectedOptions);
       setActiveChallenge(activeChallenge - 1);
       setShowResult(false);
     }
