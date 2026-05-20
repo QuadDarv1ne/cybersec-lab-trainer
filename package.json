@@ -6,9 +6,9 @@
   "description": "🛡️ Интерактивный тренажёр по информационной безопасности — учебный проект для направления 09.03.04 Программная инженерия",
   "license": "MIT",
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/find-port.mjs --run next dev",
     "build": "next build",
-    "start": "cross-env NODE_ENV=production bun .next/standalone/server.js > server.log 2>&1",
+    "start": "cross-env NODE_ENV=production node scripts/find-port.mjs --run bun .next/standalone/server.js",
     "lint": "eslint .",
     "test": "vitest",
     "test:run": "vitest run",
@@ -17,7 +17,11 @@
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "db:setup": "node scripts/setup-database.mjs",
+    "db:postgresql": "cross-env DATABASE_TYPE=postgresql node scripts/setup-database.mjs && prisma generate && prisma db push",
+    "db:mysql": "cross-env DATABASE_TYPE=mysql node scripts/setup-database.mjs && prisma generate && prisma db push",
+    "db:sqlite": "cross-env DATABASE_TYPE=sqlite node scripts/setup-database.mjs && prisma generate && prisma db push"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",

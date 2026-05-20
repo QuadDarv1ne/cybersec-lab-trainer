@@ -8,7 +8,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-cybersec}:${POSTGRES_PASSWORD:-cybersec}@db:5432/${POSTGRES_DB:-cybersec_trainer}
+      - DATABASE_TYPE=${DATABASE_TYPE:-postgresql}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://${POSTGRES_USER:-cybersec}:${POSTGRES_PASSWORD:-cybersec}@db:5432/${POSTGRES_DB:-cybersec_trainer}}
       - NEXTAUTH_URL=http://localhost:3000
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me-in-production}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
@@ -19,11 +20,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      mysql-db:
+        condition: service_healthy
+        required: false
     restart: unless-stopped
     networks:
       - cybersec
 
   db:
+    profiles: ["postgres"]
     image: postgres:16-alpine
     ports:
       - "5432:5432"
@@ -42,8 +47,28 @@ services:
     networks:
       - cybersec
 
+  mysql-db:
+    profiles: ["mysql"]
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-cybersec}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-cybersec_trainer}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - cybersec
+
 volumes:
   postgres_data:
+  mysql_data:
 
 networks:
   cybersec:
