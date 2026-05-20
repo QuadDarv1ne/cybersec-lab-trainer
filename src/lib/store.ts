@@ -24,10 +24,10 @@ interface AppState {
   studiedOwaspItems: string[];
   sqlCompletedLevels: string[];
   xssCompletedLevels: string[];
-  owaspChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<number, number> };
-  authChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<number, number> };
-  headersChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<number, number> };
-  secureCodingChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<number, number> };
+  owaspChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> };
+  authChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> };
+  headersChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> };
+  secureCodingChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> };
   csrfViewedChallenges: number[];
   userId: string | null;
   syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
@@ -44,10 +44,10 @@ interface AppActions {
   addStudiedOwasp: (id: string) => void;
   addSqlLevel: (level: string) => void;
   addXssLevel: (level: string) => void;
-  setOwaspChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => void;
-  setAuthChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => void;
-  setHeadersChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => void;
-  setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => void;
+  setOwaspChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => void;
+  setAuthChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => void;
+  setHeadersChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => void;
+  setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => void;
   markCsrfChallengeViewed: (index: number) => void;
   setUserId: (userId: string | null) => void;
   syncWithDatabase: () => Promise<void>;
@@ -331,19 +331,19 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     }));
   },
 
-  setOwaspChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => {
+  setOwaspChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ owaspChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
   },
 
-  setAuthChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => {
+  setAuthChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ authChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
   },
 
-  setHeadersChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => {
+  setHeadersChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ headersChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
   },
 
-  setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => {
+  setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ secureCodingChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
   },
 

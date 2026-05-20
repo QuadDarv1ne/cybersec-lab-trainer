@@ -30,13 +30,13 @@ vi.mock('@/lib/store', () => {
     studiedOwaspItems: [] as string[],
     sqlCompletedLevels: [] as string[],
     xssCompletedLevels: [] as string[],
-    owaspChallengeScores: { correct: 0, total: 0, answered: [] as number[] },
-    authChallengeScores: { correct: 0, total: 0, answered: [] as number[] },
-    headersChallengeScores: { correct: 0, total: 0, answered: [] as number[] },
-    secureCodingChallengeScores: { correct: 0, total: 0, answered: [] as number[] },
+    owaspChallengeScores: { correct: 0, total: 0, answered: [] as number[], selectedOptions: {} as Record<string, number> },
+    authChallengeScores: { correct: 0, total: 0, answered: [] as number[], selectedOptions: {} as Record<string, number> },
+    headersChallengeScores: { correct: 0, total: 0, answered: [] as number[], selectedOptions: {} as Record<string, number> },
+    secureCodingChallengeScores: { correct: 0, total: 0, answered: [] as number[], selectedOptions: {} as Record<string, number> },
     userId: null as string | null,
     syncStatus: 'idle' as const,
-    lastSyncedAt: null as Date | null,
+    lastSyncedAt: null as number | null,
     ...mockFns,
   };
 
