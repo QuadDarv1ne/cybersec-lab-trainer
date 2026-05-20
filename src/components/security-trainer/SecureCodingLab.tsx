@@ -37,6 +37,15 @@ export default function SecureCodingLab() {
   const isAnswered = answeredSet.has(activeChallenge);
   const isCompleted = completedModules.includes('secure-coding');
 
+  // Re-sync local UI state when store values change (e.g., after rehydration)
+  useEffect(() => {
+    setShowResult(isAnswered);
+    if (isAnswered) {
+      const correctIndex = challenge?.options.findIndex(o => o.correct) ?? -1;
+      setSelectedOption(correctIndex);
+    }
+  }, [secureCodingChallengeScores.answered, isAnswered, challenge]);
+
   // Complete module when all challenges are answered with >= 70% correct
   useEffect(() => {
     if (secureCodingChallengeScores.answered.length === secureCodingChallenges.length &&

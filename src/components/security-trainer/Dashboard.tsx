@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   Shield,
   Database,
@@ -86,22 +86,31 @@ export default function Dashboard() {
   const tCommon = useTranslations('common');
 
   const totalModules = modules.length;
-  const completedCount = completedModules.filter((id) =>
-    modules.some((m) => m.id === id)
-  ).length;
+  const completedCount = useMemo(() =>
+    completedModules.filter((id) =>
+      modules.some((m) => m.id === id)
+    ).length
+  , [completedModules]);
   const totalProgress = Math.round((completedCount / totalModules) * 100);
 
-  const avgQuizScore =
-    Object.keys(quizScores).length > 0
-      ? Math.round(
-          Object.values(quizScores).reduce((a, b) => a + b, 0) /
-            Object.values(quizScores).length
-        )
+  const avgQuizScore = useMemo(() => {
+    const scores = Object.values(quizScores);
+    return scores.length > 0
+      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
       : 0;
+  }, [quizScores]);
 
-  const challengeStats = { owaspCorrect: owaspChallengeScores.correct, authCorrect: authChallengeScores.correct };
-  const unlockedAchievements = achievements.filter((a) => getAchievementStatus(a.id, completedModules, quizScores, challengeStats));
-  const nextAchievement = achievements.find((a) => !getAchievementStatus(a.id, completedModules, quizScores, challengeStats));
+  const challengeStats = useMemo(() =>
+    ({ owaspCorrect: owaspChallengeScores.correct, authCorrect: authChallengeScores.correct })
+  , [owaspChallengeScores.correct, authChallengeScores.correct]);
+
+  const unlockedAchievements = useMemo(() =>
+    achievements.filter((a) => getAchievementStatus(a.id, completedModules, quizScores, challengeStats))
+  , [completedModules, quizScores, challengeStats]);
+
+  const nextAchievement = useMemo(() =>
+    achievements.find((a) => !getAchievementStatus(a.id, completedModules, quizScores, challengeStats))
+  , [completedModules, quizScores, challengeStats]);
 
   // Recommendations
   const getRecommendation = () => {
