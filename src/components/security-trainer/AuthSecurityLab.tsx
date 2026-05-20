@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import CodeBlock from './CodeBlock';
 import { Card, CardContent } from '@/components/ui/card';
@@ -85,6 +85,35 @@ export default function AuthSecurityLab() {
     }
   }, [answeredChallenges.size, correctCount, isCompleted, completeModule]);
 
+  // Password strength checker
+  const passwordAnalysis = useMemo(() => {
+    if (!password) return { score: 0, label: '', color: '', checks: [] };
+
+    const checks = [
+      { label: 'Минимум 8 символов', passed: password.length >= 8 },
+      { label: 'Строчные буквы (a-z)', passed: /[a-z]/.test(password) },
+      { label: 'Заглавные буквы (A-Z)', passed: /[A-Z]/.test(password) },
+      { label: 'Цифры (0-9)', passed: /[0-9]/.test(password) },
+      { label: 'Спецсимволы (!@#$...)', passed: /[^a-zA-Z0-9]/.test(password) },
+      { label: 'Минимум 12 символов', passed: password.length >= 12 },
+      { label: 'Нет повторяющихся символов', passed: !/(.)\1{2,}/.test(password) },
+      { label: 'Нет последовательностей (abc, 123)', passed: !/(?:abc|bcd|cde|def|efg|012|123|234|345|456|567|678|789)/i.test(password) },
+    ];
+
+    const passedCount = checks.filter((c) => c.passed).length;
+    let score = 0;
+    let label = '';
+    let color = '';
+
+    if (passedCount <= 2) { score = 20; label = 'Очень слабый'; color = 'bg-red-500'; }
+    else if (passedCount <= 3) { score = 40; label = 'Слабый'; color = 'bg-red-400'; }
+    else if (passedCount <= 5) { score = 60; label = 'Средний'; color = 'bg-yellow-500'; }
+    else if (passedCount <= 6) { score = 80; label = 'Надёжный'; color = 'bg-emerald-500'; }
+    else { score = 100; label = 'Отличный'; color = 'bg-emerald-600'; }
+
+    return { score, label, color, checks };
+  }, [password]);
+
   const currentChallenge = authChallenges[activeChallenge];
   const isChallengeAnswered = answeredChallenges.has(activeChallenge);
 
@@ -128,36 +157,6 @@ export default function AuthSecurityLab() {
       setShowResult(false);
     }
   };
-
-  // Password strength checker
-  const getPasswordAnalysis = () => {
-    if (!password) return { score: 0, label: '', color: '', checks: [] };
-
-    const checks = [
-      { label: 'Минимум 8 символов', passed: password.length >= 8 },
-      { label: 'Строчные буквы (a-z)', passed: /[a-z]/.test(password) },
-      { label: 'Заглавные буквы (A-Z)', passed: /[A-Z]/.test(password) },
-      { label: 'Цифры (0-9)', passed: /[0-9]/.test(password) },
-      { label: 'Спецсимволы (!@#$...)', passed: /[^a-zA-Z0-9]/.test(password) },
-      { label: 'Минимум 12 символов', passed: password.length >= 12 },
-      { label: 'Нет повторяющихся символов', passed: !/(.)\1{2,}/.test(password) },
-      { label: 'Нет последовательностей (abc, 123)', passed: !/(?:abc|bcd|cde|def|efg|012|123|234|345|456|567|678|789)/i.test(password) },
-    ];
-
-    const passedCount = checks.filter((c) => c.passed).length;
-    let score = 0;
-    let label = '';
-    let color = '';
-
-    if (passedCount <= 2) { score = 20; label = 'Очень слабый'; color = 'bg-red-500'; }
-    else if (passedCount <= 3) { score = 40; label = 'Слабый'; color = 'bg-red-400'; }
-    else if (passedCount <= 5) { score = 60; label = 'Средний'; color = 'bg-yellow-500'; }
-    else if (passedCount <= 6) { score = 80; label = 'Надёжный'; color = 'bg-emerald-500'; }
-    else { score = 100; label = 'Отличный'; color = 'bg-emerald-600'; }
-
-    return { score, label, color, checks };
-  };
-  const passwordAnalysis = getPasswordAnalysis();
 
   const formatTime = (seconds: number) => {
     if (seconds < 1) return 'Мгновенно';
@@ -242,6 +241,8 @@ export default function AuthSecurityLab() {
                 <button
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                  type="button"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
