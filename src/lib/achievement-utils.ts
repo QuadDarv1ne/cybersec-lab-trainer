@@ -34,7 +34,7 @@ export function getAchievementStatus(
     }
     case 'first-challenge': return (challengeStats?.owaspCorrect ?? 0) > 0 || (challengeStats?.authCorrect ?? 0) > 0;
     case 'perfect-challenges': {
-      return (challengeStats?.owaspCorrect === 11) || (challengeStats?.authCorrect === 8);
+      return (challengeStats?.owaspCorrect ?? 0) >= 11 || (challengeStats?.authCorrect ?? 0) >= 8;
     }
     default: return false;
   }

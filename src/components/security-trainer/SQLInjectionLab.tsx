@@ -45,7 +45,6 @@ const challenge = sqlChallenges[activeChallenge];
   const checkAnswer = () => {
     const input = userInput.trim();
     if (!input) return;
-    setShowResult(true);
 
     // Per-challenge validation: input must contain keywords specific to this challenge
     const requiredKeywords: Record<string, string[]> = {
@@ -71,9 +70,7 @@ const challenge = sqlChallenges[activeChallenge];
       if (!isCompleted) {
         addSqlLevel(challenge.id);
       }
-    } else {
-      setShowResult(false);
-      return;
+      setShowResult(true);
     }
   };
 

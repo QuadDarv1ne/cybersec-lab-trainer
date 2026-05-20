@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import { quizQuestions, quizCategories } from '@/lib/security-data';
 import { useTranslations } from '@/lib/intlStub';
@@ -63,11 +63,24 @@ export default function QuizSystem() {
     correctCountRef.current = correctCount;
   }, [correctCount]);
 
-  // Stable callback for time-up — uses ref to avoid stale closure
-  const handleTimeUp = useCallback(() => {
+  // Timer using setInterval — time-up handled in a separate effect
+  useEffect(() => {
+    if (!timerActive) return;
+    timeUpRef.current = false;
+
+    const interval = setInterval(() => {
+      setTimeLeft((t) => t - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timerActive]);
+
+  // Detect when time reaches zero and trigger time-up logic
+  useEffect(() => {
+    if (!timerActive || timeLeft > 0 || timeUpRef.current) return;
+    timeUpRef.current = true;
     setTimerActive(false);
     setShowAnswer(true);
-    // Only mark as wrong if no answer was recorded yet
     setAnswers((prev) => {
       const idx = currentQuestionRef.current;
       if (prev[idx] !== null && prev[idx] !== undefined) return prev;
@@ -75,29 +88,7 @@ export default function QuizSystem() {
       newAnswers[idx] = false;
       return newAnswers;
     });
-  }, []);
-
-  // Timer using setInterval to avoid overlapping timeouts
-  useEffect(() => {
-    if (!timerActive) return;
-    timeUpRef.current = false;
-
-    const interval = setInterval(() => {
-      setTimeLeft((t) => {
-        if (t <= 1) {
-          clearInterval(interval);
-          if (!timeUpRef.current) {
-            timeUpRef.current = true;
-            handleTimeUp();
-          }
-          return 0;
-        }
-        return t - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [timerActive, handleTimeUp]);
+  }, [timerActive, timeLeft]);
 
   const activeCategoryName = useMemo(
     () => quizCategories.find((c) => c.id === activeCategory)?.name || activeCategory,
