@@ -3,26 +3,41 @@
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Github, Loader2, LogIn } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function SignInPage() {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [demoMode, setDemoMode] = useState(false);
   const [providersLoading, setProvidersLoading] = useState(true);
+  const abortRef = useRef(false);
 
   useEffect(() => {
-    fetch("/api/auth/providers")
+    const controller = new AbortController();
+    abortRef.current = false;
+
+    fetch("/api/auth/providers", { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
-        setAvailableProviders(data.providers ?? []);
-        setDemoMode(data.demoMode ?? false);
+        if (!abortRef.current) {
+          setAvailableProviders(data.providers ?? []);
+          setDemoMode(data.demoMode ?? false);
+        }
       })
-      .catch(() => {
-        setAvailableProviders([]);
-        setDemoMode(true);
+      .catch((error) => {
+        if (error.name !== 'AbortError' && !abortRef.current) {
+          setAvailableProviders([]);
+          setDemoMode(true);
+        }
       })
-      .finally(() => setProvidersLoading(false));
+      .finally(() => {
+        if (!abortRef.current) setProvidersLoading(false);
+      });
+
+    return () => {
+      abortRef.current = true;
+      controller.abort();
+    };
   }, []);
 
   const handleSignIn = async (provider: string) => {

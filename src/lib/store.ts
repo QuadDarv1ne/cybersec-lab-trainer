@@ -51,7 +51,7 @@ interface AppActions {
   markCsrfChallengeViewed: (index: number) => void;
   setUserId: (userId: string | null) => void;
   syncWithDatabase: () => Promise<void>;
-  loadFromDatabase: (userId: string) => Promise<void>;
+  loadFromDatabase: (userId: string, signal?: AbortSignal) => Promise<void>;
 }
 
 type AppStore = AppState & AppActions;
@@ -131,9 +131,10 @@ const apiClient = {
     return response.json();
   },
 
-  async loadProgress() {
+  async loadProgress(signal?: AbortSignal) {
     const response = await fetch('/api?action=load-progress', {
       method: 'GET',
+      signal,
     });
 
     if (!response.ok) {
@@ -220,10 +221,13 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
 };
 
 // Load progress from database
-const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppStore) => Partial<AppStore>)) => void, _get: () => AppStore, userId: string) => {
+const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppStore) => Partial<AppStore>)) => void, _get: () => AppStore, userId: string, signal?: AbortSignal) => {
   set({ syncStatus: 'syncing' });
   try {
-    const data = await apiClient.loadProgress();
+    const data = await apiClient.loadProgress(signal);
+
+    // Check if request was aborted
+    if (signal?.aborted) return;
 
     if (data.completedModules.length > 0 || Object.keys(data.quizScores).length > 0) {
       set({
@@ -246,6 +250,7 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
       });
     }
   } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') return;
     logger.error('Failed to load progress from database:', error);
     set({ syncStatus: 'error' });
   }
@@ -354,8 +359,8 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     await ensureSync(get, set);
   },
 
-  loadFromDatabase: async (userId: string) => {
-    await loadFromDatabase(set, get, userId);
+  loadFromDatabase: async (userId: string, signal?: AbortSignal) => {
+    await loadFromDatabase(set, get, userId, signal);
   },
 });
 
