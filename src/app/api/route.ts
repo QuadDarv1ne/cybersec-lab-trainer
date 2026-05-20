@@ -254,7 +254,7 @@ export async function POST(request: Request) {
       }
 
       case 'reset-progress': {
-        await Promise.all([
+        await db.$transaction([
           db.progress.deleteMany({ where: { userId } }),
           db.quizResult.deleteMany({ where: { userId } }),
           db.challengeProgress.deleteMany({ where: { userId } }),
