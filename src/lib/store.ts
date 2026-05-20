@@ -255,6 +255,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       headersChallengeScores: { correct: 0, total: 0, answered: [] },
       secureCodingChallengeScores: { correct: 0, total: 0, answered: [] },
       csrfViewedChallenges: [],
+      userId: null,
     });
     await ensureSync(get, set);
   },

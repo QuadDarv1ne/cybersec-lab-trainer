@@ -109,13 +109,18 @@ export default function Dashboard() {
     })
   , [owaspChallengeScores, authChallengeScores]);
 
-  const unlockedAchievements = useMemo(() =>
-    achievements.filter((a) => getAchievementStatus(a.id, completedModules, quizScores, challengeStats))
-  , [completedModules, quizScores, challengeStats]);
-
-  const nextAchievement = useMemo(() =>
-    achievements.find((a) => !getAchievementStatus(a.id, completedModules, quizScores, challengeStats))
-  , [completedModules, quizScores, challengeStats]);
+  const { unlockedAchievements, nextAchievement } = useMemo(() => {
+    const unlocked: typeof achievements = [];
+    let next: typeof achievements[number] | undefined;
+    for (const a of achievements) {
+      if (getAchievementStatus(a.id, completedModules, quizScores, challengeStats)) {
+        unlocked.push(a);
+      } else if (!next) {
+        next = a;
+      }
+    }
+    return { unlockedAchievements: unlocked, nextAchievement: next };
+  }, [completedModules, quizScores, challengeStats]);
 
   // Recommendations
   const getRecommendation = () => {
