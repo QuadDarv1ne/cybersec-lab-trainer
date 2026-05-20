@@ -164,7 +164,7 @@ export async function POST(request: Request) {
           },
         });
 
-        result = { quizResult, answers: data.answers?.length ?? 0, message: "Quiz answers saved" };
+        result = { quizResult, message: "Quiz result saved" };
         break;
       }
 
