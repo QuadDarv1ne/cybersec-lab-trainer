@@ -253,9 +253,20 @@ export async function POST(request: Request) {
         break;
       }
 
+      case 'reset-progress': {
+        await Promise.all([
+          db.progress.deleteMany({ where: { userId } }),
+          db.quizResult.deleteMany({ where: { userId } }),
+          db.challengeProgress.deleteMany({ where: { userId } }),
+        ]);
+
+        result = { message: "Progress reset successfully" };
+        break;
+      }
+
       default:
         return NextResponse.json(
-          { error: `Unknown request type. Expected: progress, quiz-answers, glossary-search, batch-sync, challenge-progress-sync` },
+          { error: `Unknown request type. Expected: progress, quiz-answers, glossary-search, batch-sync, challenge-progress-sync, reset-progress` },
           { status: 400 }
         );
     }

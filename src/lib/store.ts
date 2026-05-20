@@ -180,6 +180,24 @@ const apiClient = {
 
     return response.json();
   },
+
+  async resetProgress() {
+    const response = await fetch('/api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'reset-progress',
+        payload: {},
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || 'Failed to reset progress');
+    }
+
+    return response.json();
+  },
 };
 
 // Sync with database via API (batch call)
@@ -296,7 +314,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     return Promise.resolve();
   },
 
-  resetProgress: () => {
+  resetProgress: async () => {
     set({
       completedModules: [],
       quizScores: {},
@@ -308,8 +326,15 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       headersChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
       secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
       csrfViewedChallenges: [],
+      syncStatus: 'syncing',
     });
-    void ensureSync(get, set);
+    try {
+      await apiClient.resetProgress();
+      set({ syncStatus: 'synced', lastSyncedAt: Date.now() });
+    } catch (error) {
+      logger.error('Failed to reset progress:', error);
+      set({ syncStatus: 'error' });
+    }
     return Promise.resolve();
   },
 
