@@ -203,7 +203,7 @@ export default function AuthSecurityLab() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')}>
+        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')} aria-label="Вернуться на главную">
           <ChevronLeft size={20} />
         </Button>
         <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
@@ -325,6 +325,7 @@ export default function AuthSecurityLab() {
                     value={crackLength}
                     onChange={(e) => setCrackLength(Number(e.target.value))}
                     className="w-full accent-emerald-600"
+                    aria-label="Длина парожа"
                   />
                   <div className="flex justify-between text-[10px] text-slate-400">
                     <span>4</span>
@@ -353,6 +354,7 @@ export default function AuthSecurityLab() {
                     value={crackComplexity}
                     onChange={(e) => setCrackComplexity(Number(e.target.value))}
                     className="w-full accent-emerald-600"
+                    aria-label="Сложность парожа"
                   />
                   <div className="flex justify-between text-[10px] text-slate-400">
                     <span>Строчные</span>

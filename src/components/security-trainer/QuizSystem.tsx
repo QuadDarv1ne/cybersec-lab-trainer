@@ -174,7 +174,7 @@ export default function QuizSystem() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => { resetQuiz(); setCurrentPage('dashboard'); }}>
+        <Button variant="ghost" size="icon" onClick={() => { resetQuiz(); setCurrentPage('dashboard'); }} aria-label="Вернуться на главную">
           <ChevronLeft size={20} />
         </Button>
         <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">

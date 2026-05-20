@@ -112,8 +112,7 @@ const challenge = sqlChallenges[activeChallenge];
 
   const getModifiedQuery = () => {
     if (!userInput.trim()) return challenge.initialQuery;
-    // Use a replacement function to avoid interpreting special patterns like $&, $', $`
-    return challenge.initialQuery.replace('[ВВОД]', () => userInput.trim());
+    return challenge.initialQuery.replaceAll('[ВВОД]', userInput.trim());
   };
 
   const levelColors: Record<string, string> = {
@@ -127,7 +126,7 @@ const challenge = sqlChallenges[activeChallenge];
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')}>
+        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')} aria-label="Вернуться на главную">
           <ChevronLeft size={20} />
         </Button>
         <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">

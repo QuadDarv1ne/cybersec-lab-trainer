@@ -276,6 +276,7 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+    logger.error('API POST error:', error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
