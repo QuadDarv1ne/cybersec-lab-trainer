@@ -386,24 +386,29 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
 
   setOwaspChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ owaspChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
+    void ensureSync(get, set);
   },
 
   setAuthChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ authChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
+    void ensureSync(get, set);
   },
 
   setHeadersChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ headersChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
+    void ensureSync(get, set);
   },
 
   setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ secureCodingChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
+    void ensureSync(get, set);
   },
 
   markCsrfChallengeViewed: (index: number) => {
     set((state) => ({
       csrfViewedChallenges: addUnique(state.csrfViewedChallenges, index),
     }));
+    void ensureSync(get, set);
   },
 
   setUserId: (userId: string | null) => set({ userId }),
