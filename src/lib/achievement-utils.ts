@@ -1,4 +1,3 @@
-import { achievements } from '@/lib/security-data';
 import { modules } from '@/lib/data/modules-data';
 
 /**
@@ -41,13 +40,3 @@ export function getAchievementStatus(
   }
 }
 
-/** Returns the number of unlocked achievements. */
-export function countUnlockedAchievements(
-  completedModules: string[],
-  quizScores: Record<string, number>,
-  challengeStats?: { owaspCorrect: number; authCorrect: number }
-): number {
-  return achievements.filter((a) =>
-    getAchievementStatus(a.id, completedModules, quizScores, challengeStats)
-  ).length;
-}

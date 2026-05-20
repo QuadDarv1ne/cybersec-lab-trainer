@@ -35,21 +35,7 @@ export const batchSyncSchema = z.object({
   })).optional().default([]),
 });
 
-// Schema для пользовательских данных
-export const userDataSchema = z.object({
-  userId: z.string().min(1, 'userId обязателен'),
-  action: z.enum(['complete', 'progress', 'quiz']),
-  data: z.record(z.string(), z.union([
-    z.string(),
-    z.number(),
-    z.boolean(),
-    z.array(z.string()),
-    z.record(z.string(), z.unknown()),
-  ])),
-});
-
 // Типы для схем
 export type QuizResult = z.infer<typeof quizResultSchema>;
 export type ProgressUpdate = z.infer<typeof progressUpdateSchema>;
 export type GlossarySearch = z.infer<typeof glossarySearchSchema>;
-export type UserData = z.infer<typeof userDataSchema>;

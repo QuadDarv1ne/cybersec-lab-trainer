@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import {
   progressUpdateSchema,
   glossarySearchSchema,
-  userDataSchema,
 } from './api';
 
 describe('progressUpdateSchema', () => {
@@ -54,31 +53,3 @@ describe('glossarySearchSchema', () => {
   });
 });
 
-describe('userDataSchema', () => {
-  it('validates correct input', () => {
-    const result = userDataSchema.safeParse({
-      userId: 'user1',
-      action: 'complete',
-      data: { key: 'value' },
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it('rejects invalid action', () => {
-    const result = userDataSchema.safeParse({
-      userId: 'user1',
-      action: 'invalid',
-      data: {},
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects empty userId', () => {
-    const result = userDataSchema.safeParse({
-      userId: '',
-      action: 'complete',
-      data: {},
-    });
-    expect(result.success).toBe(false);
-  });
-});
