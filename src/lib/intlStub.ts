@@ -6,18 +6,14 @@ const locales: Record<string, typeof ru> = {
   en,
 };
 
-let cachedLocale: string | null = null;
-
-function getLocale(): string {
-  if (cachedLocale) return cachedLocale;
-
+// Read current locale from browser — no permanent caching to allow runtime language switching.
+function getCurrentLocale(): string {
   if (typeof window !== 'undefined') {
     const browserLang = navigator.language.toLowerCase();
-    if (browserLang.startsWith('en')) cachedLocale = 'en';
-    else if (browserLang.startsWith('ru')) cachedLocale = 'ru';
+    if (browserLang.startsWith('en')) return 'en';
+    if (browserLang.startsWith('ru')) return 'ru';
   }
-  cachedLocale ??= 'ru'; // default fallback
-  return cachedLocale;
+  return 'ru'; // default fallback
 }
 
 function getNestedValue(obj: Record<string, unknown>, path: string): string {
@@ -35,16 +31,22 @@ function getNestedValue(obj: Record<string, unknown>, path: string): string {
   return typeof current === 'string' ? current : path;
 }
 
-const translationCache = new Map<string, (key: string, values?: Record<string, string | number>) => string>();
+// Per-namespace translator cache keyed by locale — cleared when locale changes.
+const translatorCache = new Map<string, (key: string, values?: Record<string, string | number>) => string>();
+let cachedLocale: string | null = null;
 
-export function useTranslations(namespace: string) {
-  const locale = getLocale();
-  const translations = locales[locale] || locales.ru;
+function getTranslator(locale: string, namespace: string) {
+  // Clear entire cache if locale changed since last call
+  if (cachedLocale !== null && cachedLocale !== locale) {
+    translatorCache.clear();
+  }
+  cachedLocale = locale;
 
-  // Return cached translator if available
   const cacheKey = `${locale}:${namespace}`;
-  const cached = translationCache.get(cacheKey);
+  const cached = translatorCache.get(cacheKey);
   if (cached) return cached;
+
+  const translations = locales[locale] || locales.ru;
 
   const translator = (key: string, values?: Record<string, string | number>) => {
     const fullKey = `${namespace}.${key}`;
@@ -60,6 +62,11 @@ export function useTranslations(namespace: string) {
     return text;
   };
 
-  translationCache.set(cacheKey, translator);
+  translatorCache.set(cacheKey, translator);
   return translator;
+}
+
+export function useTranslations(namespace: string) {
+  const locale = getCurrentLocale();
+  return getTranslator(locale, namespace);
 }
