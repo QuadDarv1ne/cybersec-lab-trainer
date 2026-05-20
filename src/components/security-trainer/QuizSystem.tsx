@@ -53,11 +53,15 @@ export default function QuizSystem() {
   const [timerActive, setTimerActive] = useState(false);
   const timeUpRef = useRef(false);
   const currentQuestionRef = useRef(0);
+  const correctCountRef = useRef(0);
 
-  // Keep currentQuestion ref in sync for timer callback
+  // Keep refs in sync for use in callbacks and timers
   useEffect(() => {
     currentQuestionRef.current = currentQuestion;
   }, [currentQuestion]);
+  useEffect(() => {
+    correctCountRef.current = correctCount;
+  }, [correctCount]);
 
   // Timer effect — interval is created once when timerActive changes, not on every tick.
   // Uses ref for currentQuestion to avoid stale closures.
@@ -128,7 +132,7 @@ export default function QuizSystem() {
       setTimerActive(true);
     } else {
       const catId = activeCategory;
-      const score = Math.round((correctCount / totalQuestions) * 100);
+      const score = Math.round((correctCountRef.current / totalQuestions) * 100);
       setQuizScore(catId, score);
       setTimerActive(false);
       setQuizState('result');
