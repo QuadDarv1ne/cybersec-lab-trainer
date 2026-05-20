@@ -139,9 +139,10 @@ export default function QuizSystem() {
     const question = categoryQuestions[currentQuestion];
     const isCorrect = parseInt(selectedAnswer) === question.correctIndex;
     if (isCorrect) setCorrectCount((c) => c + 1);
+    const qIdx = currentQuestion;
     setAnswers((prev) => {
       const newAnswers = [...prev];
-      newAnswers[currentQuestion] = isCorrect;
+      newAnswers[qIdx] = isCorrect;
       return newAnswers;
     });
   };

@@ -13,13 +13,15 @@ const config: RateLimitConfig = {
   windowMs: 60 * 1000,
 };
 
-// In-memory fallback store
+// In-memory fallback store with size cap
+const MAX_MAP_SIZE = 10_000;
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
 
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 let cleanupInterval: ReturnType<typeof setInterval> | null = null;
+let fallbackUsed = false;
 
-function startCleanupInterval(): void {
+function ensureCleanupInterval(): void {
   if (cleanupInterval !== null) return;
   cleanupInterval = setInterval(() => {
     const now = Date.now();
@@ -29,6 +31,11 @@ function startCleanupInterval(): void {
       }
     }
   }, CLEANUP_INTERVAL_MS);
+
+  if (typeof process !== 'undefined' && typeof process.on === 'function') {
+    process.on('SIGTERM', stopCleanupInterval);
+    process.on('SIGINT', stopCleanupInterval);
+  }
 }
 
 function stopCleanupInterval(): void {
@@ -38,18 +45,20 @@ function stopCleanupInterval(): void {
   }
 }
 
-if (typeof process !== 'undefined' && typeof process.on === 'function') {
-  process.on('SIGTERM', stopCleanupInterval);
-  process.on('SIGINT', stopCleanupInterval);
-}
-
-startCleanupInterval();
-
 async function inMemoryRateLimit(ip: string): Promise<{ success: boolean; limit: number; remaining: number; reset: number }> {
+  if (!fallbackUsed) {
+    fallbackUsed = true;
+    ensureCleanupInterval();
+  }
+
   const now = Date.now();
   const record = requestCounts.get(ip);
 
   if (!record || now > record.resetTime) {
+    if (!record && requestCounts.size >= MAX_MAP_SIZE) {
+      const oldest = requestCounts.entries().next().value;
+      if (oldest) requestCounts.delete(oldest[0]);
+    }
     requestCounts.set(ip, { count: 1, resetTime: now + config.windowMs });
     return { success: true, limit: config.maxRequests, remaining: config.maxRequests - 1, reset: now + config.windowMs };
   }
