@@ -31,7 +31,16 @@ export default function OWASPTop10() {
   useEffect(() => {
     setCorrectCount(owaspChallengeScores.correct);
     setAnsweredChallenges(new Set(owaspChallengeScores.answered));
-  }, [owaspChallengeScores.correct, owaspChallengeScores.answered]);
+    // Restore user's actual selection for the current challenge
+    const savedSelection = owaspChallengeScores.selectedOptions?.[activeChallenge];
+    if (savedSelection !== undefined && answeredChallenges.has(activeChallenge)) {
+      setSelectedOption(savedSelection);
+      setShowResult(true);
+    } else {
+      setSelectedOption(null);
+      setShowResult(false);
+    }
+  }, [owaspChallengeScores.correct, owaspChallengeScores.answered, owaspChallengeScores.selectedOptions, activeChallenge]);
 
   const studiedCount = studiedOwaspItems.length;
   const totalCount = owaspTopics.length;
@@ -69,7 +78,8 @@ export default function OWASPTop10() {
     const isCorrect = currentChallenge.options[selectedOption].correct;
     const newCorrect = isCorrect ? correctCount + 1 : correctCount;
     setCorrectCount(newCorrect);
-    setOwaspChallengeScore(newCorrect, [...newAnswered]);
+    const newSelectedOptions = { ...owaspChallengeScores.selectedOptions, [activeChallenge]: selectedOption };
+    setOwaspChallengeScore(newCorrect, [...newAnswered], newSelectedOptions);
   };
 
   const nextChallenge = () => {

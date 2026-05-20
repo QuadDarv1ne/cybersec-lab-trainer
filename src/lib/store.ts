@@ -23,7 +23,7 @@ interface AppState {
   studiedOwaspItems: string[];
   sqlCompletedLevels: string[];
   xssCompletedLevels: string[];
-  owaspChallengeScores: { correct: number; total: number; answered: number[] };
+  owaspChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<number, number> };
   authChallengeScores: { correct: number; total: number; answered: number[] };
   headersChallengeScores: { correct: number; total: number; answered: number[] };
   secureCodingChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<number, number> };
@@ -43,7 +43,7 @@ interface AppActions {
   addStudiedOwasp: (id: string) => void;
   addSqlLevel: (level: string) => void;
   addXssLevel: (level: string) => void;
-  setOwaspChallengeScore: (correct: number, answered: number[]) => void;
+  setOwaspChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => void;
   setAuthChallengeScore: (correct: number, answered: number[]) => void;
   setHeadersChallengeScore: (correct: number, answered: number[]) => void;
   setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => void;
@@ -221,7 +221,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   studiedOwaspItems: [],
   sqlCompletedLevels: [],
   xssCompletedLevels: [],
-  owaspChallengeScores: { correct: 0, total: 0, answered: [] },
+  owaspChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
   authChallengeScores: { correct: 0, total: 0, answered: [] },
   headersChallengeScores: { correct: 0, total: 0, answered: [] },
   secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
@@ -259,7 +259,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       studiedOwaspItems: [],
       sqlCompletedLevels: [],
       xssCompletedLevels: [],
-      owaspChallengeScores: { correct: 0, total: 0, answered: [] },
+      owaspChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
       authChallengeScores: { correct: 0, total: 0, answered: [] },
       headersChallengeScores: { correct: 0, total: 0, answered: [] },
       secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
@@ -287,8 +287,8 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     }));
   },
 
-  setOwaspChallengeScore: (correct: number, answered: number[]) => {
-    set({ owaspChallengeScores: { correct, total: answered.length, answered } });
+  setOwaspChallengeScore: (correct: number, answered: number[], selectedOptions: Record<number, number>) => {
+    set({ owaspChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
   },
 
   setAuthChallengeScore: (correct: number, answered: number[]) => {
