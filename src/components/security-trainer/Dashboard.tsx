@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import {
   Shield,
   Database,
@@ -37,11 +37,14 @@ import {
 import type { PageType } from '@/lib/store';
 
 function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: string }) {
-  const count = useMotionValue(0);
+  const count = useMotionValue(value);
   const rounded = useTransform(count, (v) => Math.round(v));
   const text = useTransform(rounded, (v) => `${v}${suffix}`);
+  const prevValueRef = useRef(value);
 
   useEffect(() => {
+    if (prevValueRef.current === value) return;
+    prevValueRef.current = value;
     const controls = animate(count, value, { duration: 1, ease: 'easeOut' });
     return controls.stop;
   }, [value, count]);

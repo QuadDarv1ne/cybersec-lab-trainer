@@ -63,15 +63,14 @@ export default function QuizSystem() {
     correctCountRef.current = correctCount;
   }, [correctCount]);
 
-  // Single-effect timer with integrated time-up logic — avoids race condition between decrement and time-up detection
+  // Timer effect — interval is created once when timerActive changes, not on every tick.
+  // Uses refs for currentQuestion and correctCount to avoid stale closures.
   useEffect(() => {
-    if (!timerActive || timeLeft <= 0) return;
-    timeUpRef.current = false;
+    if (!timerActive) return;
 
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          // Time is up — handle directly inside the interval to avoid race condition
           clearInterval(interval);
           timeUpRef.current = true;
           setTimerActive(false);
@@ -90,7 +89,7 @@ export default function QuizSystem() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timerActive, timeLeft]);
+  }, [timerActive]);
 
   const activeCategoryName = useMemo(
     () => quizCategories.find((c) => c.id === activeCategory)?.name || activeCategory,

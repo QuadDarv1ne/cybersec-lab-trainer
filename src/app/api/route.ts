@@ -56,7 +56,8 @@ export async function GET(request: Request) {
       addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
       return response;
     }
-  } catch {
+  } catch (error) {
+    console.error('[API] Failed to load progress:', error);
     return NextResponse.json({ error: "Failed to load progress" }, { status: 500 });
   }
 
