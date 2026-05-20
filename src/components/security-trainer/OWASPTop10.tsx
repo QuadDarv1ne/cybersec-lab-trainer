@@ -325,7 +325,7 @@ export default function OWASPTop10() {
               <div className="flex gap-2">
                 {owaspChallenges.map((c, i) => (
                   <button
-                    key={i}
+                    key={c.id}
                     onClick={() => { setActiveChallenge(i); setSelectedOption(null); setShowResult(false); }}
                     className={`flex-1 h-2 rounded-full transition-all ${
                       answeredChallenges.has(i) ? 'bg-emerald-500' : i === activeChallenge ? 'bg-emerald-300' : 'bg-slate-200'
@@ -365,7 +365,7 @@ export default function OWASPTop10() {
 
                     return (
                       <button
-                        key={i}
+                        key={option.text}
                         onClick={() => handleSelectOption(i)}
                         disabled={isChallengeAnswered}
                         className={`w-full text-left p-3 rounded-lg border-2 transition-all duration-200 ${optionStyle}`}

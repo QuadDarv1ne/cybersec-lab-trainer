@@ -235,7 +235,7 @@ export default function SecurityHeadersLab() {
           <div className="flex gap-2">
             {headerChallenges.map((challenge, i) => (
               <button
-                key={i}
+                key={challenge.id}
                 onClick={() => {
                   setActiveChallenge(i);
                   setSelectedOption(null);
@@ -286,7 +286,7 @@ export default function SecurityHeadersLab() {
 
                 return (
                   <button
-                    key={i}
+                    key={option.text}
                     onClick={() => handleSelectOption(i)}
                     disabled={isAnswered}
                     className={`w-full text-left p-3 rounded-lg border-2 transition-all duration-200 ${optionStyle}`}

@@ -141,7 +141,7 @@ export default function SecureCodingLab() {
           <div className="flex gap-2">
             {secureCodingChallenges.map((challenge, i) => (
               <button
-                key={i}
+                key={challenge.id}
                 onClick={() => navigateToChallenge(i)}
                 aria-label={`Перейти к заданию ${i + 1}: ${challenge.title}`}
                 className={`flex-1 h-2 rounded-full transition-all ${
@@ -196,7 +196,7 @@ export default function SecureCodingLab() {
 
                   return (
                     <button
-                      key={i}
+                      key={option.text}
                       onClick={() => handleSelectOption(i)}
                       disabled={isAnswered}
                       className={`w-full text-left p-3 rounded-lg border-2 transition-all duration-200 ${optionStyle}`}

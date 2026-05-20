@@ -197,7 +197,7 @@ export default function CSRFLab() {
           <div className="space-y-3">
             {csrfMitigations.map((m, i) => (
               <Card
-                key={i}
+                key={m.technique}
                 className="border-slate-200 cursor-pointer hover:border-emerald-300 transition-colors"
                 onClick={() => setActiveMitigation(activeMitigation === i ? null : i)}
               >
@@ -242,9 +242,9 @@ export default function CSRFLab() {
         </Button>
 
         <div className="flex gap-1">
-          {csrfChallenges.map((_, i) => (
+          {csrfChallenges.map((challenge, i) => (
             <button
-              key={i}
+              key={challenge.id}
               onClick={() => { setActiveChallenge(i); setShowDefense(false); }}
               aria-label={`Перейти к челленджу ${i + 1}`}
               className={`w-2.5 h-2.5 rounded-full transition-all ${

@@ -285,13 +285,13 @@ export default function QuizSystem() {
 
                   return (
                     <div
-                      key={i}
+                      key={option}
                       className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${optionClass}`}
                       onClick={() => !showAnswer && setSelectedAnswer(String(i))}
                     >
-                      <RadioGroupItem value={String(i)} id={`opt-${i}`} />
+                      <RadioGroupItem value={String(i)} id={`opt-${option.substring(0, 20)}`} />
                       <Label
-                        htmlFor={`opt-${i}`}
+                        htmlFor={`opt-${option.substring(0, 20)}`}
                         className="flex-1 text-sm cursor-pointer leading-relaxed"
                       >
                         {option}
