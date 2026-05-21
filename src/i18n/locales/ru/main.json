@@ -22,6 +22,7 @@
       "owaspStart": "Начните с изучения OWASP Top 10",
       "sqlTry": "Попробуйте SQL-инъекции",
       "xssLearn": "Изучите XSS-атаки",
+      "csrfLearn": "Изучите CSRF-атаки",
       "quizCheck": "Проверьте знания в квизе",
       "toolsTry": "Попробуйте инструменты",
       "completeRemaining": "Завершите оставшиеся модули",
@@ -374,7 +375,10 @@
     "incorrect": "Неправильно",
     "score": "Ваш счёт: {score}%",
     "category": "Категория: {category}",
-    "new": "Новый"
+    "new": "Новый",
+    "quizHistory": "История квизов",
+    "attempts": "попыток",
+    "correctAnswersShort": "правильных"
   },
   "securityHeaders": {
     "title": "Заголовки безопасности",

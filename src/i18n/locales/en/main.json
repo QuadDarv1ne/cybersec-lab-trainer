@@ -22,6 +22,7 @@
       "owaspStart": "Start with OWASP Top 10",
       "sqlTry": "Try SQL injections",
       "xssLearn": "Learn XSS attacks",
+      "csrfLearn": "Learn CSRF attacks",
       "quizCheck": "Check your knowledge in quiz",
       "toolsTry": "Try security tools",
       "completeRemaining": "Complete remaining modules",
@@ -374,7 +375,10 @@
     "incorrect": "Incorrect",
     "score": "Your score: {score}%",
     "category": "Category: {category}",
-    "new": "New"
+    "new": "New",
+    "quizHistory": "Quiz History",
+    "attempts": "attempts",
+    "correctAnswersShort": "correct"
   },
   "securityHeaders": {
     "title": "Security Headers",

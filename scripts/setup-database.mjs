@@ -11,7 +11,7 @@
  * and prints the recommended DATABASE_URL.
  */
 
-import { readFileSync, copyFileSync, existsSync } from 'fs';
+import { copyFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 

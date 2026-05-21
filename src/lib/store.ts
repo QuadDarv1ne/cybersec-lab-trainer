@@ -16,11 +16,23 @@ export type PageType =
   | 'quiz'
   | 'achievements';
 
+export interface QuizAttempt {
+  id: string;
+  categoryId: string;
+  categoryName: string;
+  score: number;
+  correct: number;
+  total: number;
+  answers: (boolean | null)[];
+  timestamp: number;
+}
+
 interface AppState {
   currentPage: PageType;
   sidebarOpen: boolean;
   completedModules: string[];
   quizScores: Record<string, number>;
+  quizHistory: QuizAttempt[];
   studiedOwaspItems: string[];
   sqlCompletedLevels: string[];
   xssCompletedLevels: string[];
@@ -39,7 +51,9 @@ interface AppActions {
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
   completeModule: (moduleId: string) => Promise<void>;
-  setQuizScore: (category: string, score: number) => Promise<void>;
+  setQuizScore: (category: string, score: number, attempt?: QuizAttempt) => Promise<void>;
+  addQuizAttempt: (attempt: QuizAttempt) => void;
+  clearQuizHistory: () => void;
   resetProgress: () => Promise<void>;
   addStudiedOwasp: (id: string) => void;
   addSqlLevel: (level: string) => void;
@@ -50,6 +64,19 @@ interface AppActions {
   setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => void;
   markCsrfChallengeViewed: (index: number) => void;
   setUserId: (userId: string | null) => void;
+  importProgressData: (data: {
+    completedModules: string[];
+    quizScores: Record<string, number>;
+    studiedOwaspItems: string[];
+    sqlCompletedLevels: string[];
+    xssCompletedLevels: string[];
+    owaspChallengeScores: AppStore['owaspChallengeScores'];
+    authChallengeScores: AppStore['authChallengeScores'];
+    headersChallengeScores: AppStore['headersChallengeScores'];
+    secureCodingChallengeScores: AppStore['secureCodingChallengeScores'];
+    csrfViewedChallenges: number[];
+    quizHistory: AppStore['quizHistory'];
+  }) => void;
   syncWithDatabase: () => Promise<void>;
   loadFromDatabase: (userId: string, signal?: AbortSignal) => Promise<void>;
 }
@@ -67,6 +94,9 @@ let isExecuting = false; // true while syncWithDatabase is actually running
 let followUpScheduled = false;
 const SYNC_DELAY_MS = 500;
 
+// Abort controller for in-flight loadFromDatabase requests
+let loadAbortController: AbortController | null = null;
+
 const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>) => void) => {
   // If a sync is actively executing, schedule a follow-up so latest state isn't lost.
   if (isExecuting) {
@@ -77,9 +107,6 @@ const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>)
 
   // If there's already a pending promise (waiting in debounce), just return it.
   if (pendingPromise) return pendingPromise;
-
-  // Capture the current state snapshot at call time.
-  const stateSnapshot = get();
 
   // Create a new deferred promise
   pendingPromise = new Promise<void>((resolve) => {
@@ -124,42 +151,6 @@ const addUnique = <T>(array: T[], item: T): T[] =>
 
 // API client functions
 const apiClient = {
-  async saveProgress(moduleId: string, completed: boolean, score?: number) {
-    const response = await fetch('/api', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'progress',
-        payload: { moduleId, completed, score },
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(error.error || 'Failed to save progress');
-    }
-
-    return response.json();
-  },
-
-  async saveQuizResults(quizId: string, score: number, total: number) {
-    const response = await fetch('/api', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'quiz-answers',
-        payload: { quizId, score, total },
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(error.error || 'Failed to save quiz results');
-    }
-
-    return response.json();
-  },
-
   async loadProgress(signal?: AbortSignal) {
     const response = await fetch('/api?action=load-progress', {
       method: 'GET',
@@ -255,10 +246,17 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
       { challengeType: 'secure-coding', ...state.secureCodingChallengeScores },
     ].filter((c) => c.total > 0);
 
-    await Promise.all([
-      apiClient.saveBatch(modules, quizzes),
-      challenges.length > 0 ? apiClient.saveChallengeProgress(challenges) : Promise.resolve(),
-    ]);
+    const savePromises: Promise<unknown>[] = [];
+    if (modules.length > 0 || quizzes.length > 0) {
+      savePromises.push(apiClient.saveBatch(modules, quizzes));
+    }
+    if (challenges.length > 0) {
+      savePromises.push(apiClient.saveChallengeProgress(challenges));
+    }
+
+    if (savePromises.length > 0) {
+      await Promise.all(savePromises);
+    }
 
     set({ syncStatus: 'synced', lastSyncedAt: Date.now() });
   } catch (error) {
@@ -309,6 +307,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   sidebarOpen: false,
   completedModules: [],
   quizScores: {},
+  quizHistory: [],
   studiedOwaspItems: [],
   sqlCompletedLevels: [],
   xssCompletedLevels: [],
@@ -335,18 +334,32 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     return Promise.resolve();
   },
 
-  setQuizScore: (category: string, score: number) => {
+  setQuizScore: (category: string, score: number, attempt?: QuizAttempt) => {
     set((state) => ({
       quizScores: { ...state.quizScores, [category]: score },
+      quizHistory: attempt ? [attempt, ...state.quizHistory].slice(0, 50) : state.quizHistory,
     }));
     void ensureSync(get, set);
     return Promise.resolve();
+  },
+
+  addQuizAttempt: (attempt: QuizAttempt) => {
+    set((state) => ({
+      quizHistory: [attempt, ...state.quizHistory].slice(0, 50),
+    }));
+    void ensureSync(get, set);
+  },
+
+  clearQuizHistory: () => {
+    set({ quizHistory: [] });
+    void ensureSync(get, set);
   },
 
   resetProgress: async () => {
     set({
       completedModules: [],
       quizScores: {},
+      quizHistory: [],
       studiedOwaspItems: [],
       sqlCompletedLevels: [],
       xssCompletedLevels: [],
@@ -414,12 +427,43 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
 
   setUserId: (userId: string | null) => set({ userId }),
 
+  importProgressData: (data) => {
+    set({
+      completedModules: data.completedModules,
+      quizScores: data.quizScores,
+      studiedOwaspItems: data.studiedOwaspItems,
+      sqlCompletedLevels: data.sqlCompletedLevels,
+      xssCompletedLevels: data.xssCompletedLevels,
+      owaspChallengeScores: data.owaspChallengeScores,
+      authChallengeScores: data.authChallengeScores,
+      headersChallengeScores: data.headersChallengeScores,
+      secureCodingChallengeScores: data.secureCodingChallengeScores,
+      csrfViewedChallenges: data.csrfViewedChallenges,
+      quizHistory: data.quizHistory,
+    });
+    void ensureSync(get, set);
+  },
+
   syncWithDatabase: async () => {
     await ensureSync(get, set);
   },
 
   loadFromDatabase: async (userId: string, signal?: AbortSignal) => {
-    await loadFromDatabase(set, get, userId, signal);
+    // Abort any prior in-flight load request
+    if (loadAbortController) {
+      loadAbortController.abort();
+    }
+    loadAbortController = new AbortController();
+    // Use provided signal if available, otherwise use our abort controller
+    const effectiveSignal = signal ?? loadAbortController.signal;
+    try {
+      await loadFromDatabase(set, get, userId, effectiveSignal);
+    } finally {
+      // Clear the abort controller when this call completes
+      if (loadAbortController?.signal === effectiveSignal) {
+        loadAbortController = null;
+      }
+    }
   },
 });
 

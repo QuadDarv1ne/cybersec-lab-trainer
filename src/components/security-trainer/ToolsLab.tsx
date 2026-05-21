@@ -573,6 +573,9 @@ function vigenereEncrypt(text, key) {
                   <button
                     key={opt.label}
                     onClick={() => opt.setter(!opt.value)}
+                    role="switch"
+                    aria-checked={opt.value}
+                    aria-label={opt.label}
                     className={`flex items-center gap-2 p-3 rounded-lg border-2 text-xs transition-all ${
                       opt.value ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-400'
                     }`}

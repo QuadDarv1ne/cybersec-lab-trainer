@@ -16,6 +16,9 @@ import {
   X,
   CheckCircle2,
   ShieldAlert,
+  Keyboard,
+  LogIn,
+  LogOut,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
@@ -25,7 +28,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { useSession } from '@/hooks/use-session';
 import { signIn, signOut } from 'next-auth/react';
-import { LogIn, LogOut } from 'lucide-react';
 import SyncIndicator from './SyncIndicator';
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -197,6 +199,10 @@ export default function Sidebar() {
         <p className="text-[11px] text-slate-500 mt-2">
           {t('modulesCompleted', { completed: completedCount, total: trackableItems.length })}
         </p>
+        <div className="flex items-center gap-1.5 mt-3 text-[11px] text-slate-500">
+          <Keyboard size={12} />
+          <span>1-9, 0: navigate · Ctrl+K: search · Alt+A: achievements · Esc: dashboard</span>
+        </div>
         <div className="mt-2">
           <SyncIndicator />
         </div>

@@ -2,12 +2,14 @@
 
 import { useAppStore } from '@/lib/store';
 import { useHashRouting } from '@/hooks/use-hash-routing';
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
+import { useAchievementToasts } from '@/hooks/use-achievement-toasts';
 import Sidebar from '@/components/security-trainer/Sidebar';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import dynamic from 'next/dynamic';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 const Dashboard = dynamic(() => import('@/components/security-trainer/Dashboard'), { ssr: false, loading: () => <PageSkeleton /> });
 const OWASPTop10 = dynamic(() => import('@/components/security-trainer/OWASPTop10'), { ssr: false, loading: () => <PageSkeleton /> });
@@ -20,6 +22,7 @@ const ToolsLab = dynamic(() => import('@/components/security-trainer/ToolsLab'),
 const QuizSystem = dynamic(() => import('@/components/security-trainer/QuizSystem'), { ssr: false, loading: () => <PageSkeleton /> });
 const AchievementsGlossary = dynamic(() => import('@/components/security-trainer/AchievementsGlossary'), { ssr: false, loading: () => <PageSkeleton /> });
 const SecurityHeadersLab = dynamic(() => import('@/components/security-trainer/SecurityHeadersLab'), { ssr: false, loading: () => <PageSkeleton /> });
+const ContentSearch = dynamic(() => import('@/components/security-trainer/ContentSearch'), { ssr: false });
 
 const pages: Record<string, React.ComponentType> = {
   dashboard: Dashboard,
@@ -55,7 +58,10 @@ function PageSkeleton() {
 
 export default function Home() {
   const { currentPage } = useAppStore();
+  const [searchOpen, setSearchOpen] = useState(false);
   useHashRouting();
+  useKeyboardShortcuts({ onOpenSearch: () => setSearchOpen(true) });
+  useAchievementToasts();
   const mainRef = useRef<HTMLElement>(null);
 
   const Page = pages[currentPage] || Dashboard;
@@ -86,6 +92,7 @@ export default function Home() {
         </div>
       </main>
       <Toaster position="top-right" />
+      <ContentSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   );
 }

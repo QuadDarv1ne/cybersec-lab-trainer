@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import { secureCodingChallenges } from '@/lib/security-data';
 import CodeBlock from './CodeBlock';
@@ -33,7 +33,7 @@ export default function SecureCodingLab() {
 
   const challenge = secureCodingChallenges[activeChallenge];
 
-  const answeredSet = new Set(secureCodingChallengeScores.answered);
+  const answeredSet = useMemo(() => new Set(secureCodingChallengeScores.answered), [secureCodingChallengeScores.answered]);
   const isAnswered = answeredSet.has(activeChallenge);
   const isCompleted = completedModules.includes('secure-coding');
 

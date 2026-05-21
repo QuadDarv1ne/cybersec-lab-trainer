@@ -38,7 +38,8 @@ const hashToPage: Record<string, PageType> = {
  * - On hash change (back/forward): navigates to the corresponding page
  */
 export function useHashRouting() {
-  const { currentPage, setCurrentPage } = useAppStore();
+  const currentPage = useAppStore((s) => s.currentPage);
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
 
   // Initialize page from URL hash on mount and listen for hash changes (back/forward)
   useEffect(() => {

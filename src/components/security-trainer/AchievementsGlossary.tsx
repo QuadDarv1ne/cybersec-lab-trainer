@@ -208,7 +208,7 @@ export default function AchievementsAndGlossary() {
           </div>
 
           {/* Category filter */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по категориям">
             {Object.keys(categoryColors).map((cat) => (
               <Badge
                 key={cat}
@@ -217,12 +217,34 @@ export default function AchievementsAndGlossary() {
                   selectedCategory === cat ? 'ring-2 ring-emerald-400' : ''
                 } ${categoryColors[cat]}`}
                 onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                onKeyDown={(e: React.KeyboardEvent) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedCategory(selectedCategory === cat ? null : cat);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-pressed={selectedCategory === cat}
               >
                 {cat}
               </Badge>
             ))}
             {selectedCategory && (
-              <Badge variant="outline" className="text-[10px] cursor-pointer" onClick={() => setSelectedCategory(null)}>
+              <Badge
+                variant="outline"
+                className="text-[10px] cursor-pointer"
+                onClick={() => setSelectedCategory(null)}
+                onKeyDown={(e: React.KeyboardEvent) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedCategory(null);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label="Сбросить фильтр"
+              >
                 {t('clear')}
               </Badge>
             )}

@@ -13,6 +13,7 @@ describe('App Store', () => {
       sidebarOpen: false,
       completedModules: [],
       quizScores: {},
+      quizHistory: [],
       studiedOwaspItems: [],
       sqlCompletedLevels: [],
       xssCompletedLevels: [],
@@ -69,6 +70,7 @@ describe('App Store', () => {
     useAppStore.setState({
       completedModules: ['owasp'],
       quizScores: { sql: 85 },
+      quizHistory: [{ id: 'test', categoryId: 'sql', categoryName: 'SQL', score: 85, correct: 8, total: 10, answers: [], timestamp: Date.now() }],
       studiedOwaspItems: ['item1'],
       sqlCompletedLevels: ['level1'],
       xssCompletedLevels: ['level1'],
@@ -80,5 +82,38 @@ describe('App Store', () => {
     expect(state.studiedOwaspItems).toEqual([]);
     expect(state.sqlCompletedLevels).toEqual([]);
     expect(state.xssCompletedLevels).toEqual([]);
+    expect(state.quizHistory).toEqual([]);
+  });
+
+  it('addQuizAttempt stores attempt in history', () => {
+    const attempt = {
+      id: 'test-1',
+      categoryId: 'sql',
+      categoryName: 'SQL Injection',
+      score: 90,
+      correct: 9,
+      total: 10,
+      answers: [true, true, true, true, true, true, true, true, true, false],
+      timestamp: Date.now(),
+    };
+    useAppStore.getState().addQuizAttempt(attempt);
+    expect(useAppStore.getState().quizHistory.length).toBe(1);
+    expect(useAppStore.getState().quizHistory[0].id).toBe('test-1');
+  });
+
+  it('clearQuizHistory removes all attempts', () => {
+    useAppStore.getState().addQuizAttempt({
+      id: 'test-2',
+      categoryId: 'xss',
+      categoryName: 'XSS',
+      score: 70,
+      correct: 7,
+      total: 10,
+      answers: [],
+      timestamp: Date.now(),
+    });
+    expect(useAppStore.getState().quizHistory.length).toBeGreaterThan(0);
+    useAppStore.getState().clearQuizHistory();
+    expect(useAppStore.getState().quizHistory).toEqual([]);
   });
 });

@@ -33,7 +33,7 @@ if (providers.length === 0) {
       credentials: {},
       async authorize() {
         return {
-          id: `demo-${crypto.randomUUID()}`,
+          id: 'demo-user',
           name: "Demo User",
           email: "demo@example.com",
           image: null,

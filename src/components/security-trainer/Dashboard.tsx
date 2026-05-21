@@ -5,6 +5,7 @@ import { modules, achievements, glossaryTerms } from '@/lib/security-data';
 import { quizCategories } from '@/lib/data/quiz-data';
 import { getAchievementStatus } from '@/lib/achievement-utils';
 import { useTranslations } from '@/lib/intlStub';
+import { exportProgress, importProgress } from '@/lib/progress-export';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,7 +34,11 @@ import {
   ShieldAlert,
   LayoutList,
   Award,
+  Download,
+  Upload,
+  AlertTriangle,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import type { PageType } from '@/lib/store';
 
 function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: string }) {
@@ -47,7 +52,8 @@ function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: strin
     prevValueRef.current = value;
     const controls = animate(count, value, { duration: 1, ease: 'easeOut' });
     return controls.stop;
-  }, [value, count]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
 
   return <motion.span>{text}</motion.span>;
 }
@@ -84,9 +90,10 @@ const achievementIcons: Record<string, React.ReactNode> = {
 };
 
 export default function Dashboard() {
-  const { setCurrentPage, completedModules, quizScores, toggleSidebar, owaspChallengeScores, authChallengeScores, headersChallengeScores, secureCodingChallengeScores } = useAppStore();
+  const { setCurrentPage, completedModules, quizScores, toggleSidebar, owaspChallengeScores, authChallengeScores, headersChallengeScores, secureCodingChallengeScores, studiedOwaspItems, sqlCompletedLevels, xssCompletedLevels, csrfViewedChallenges, quizHistory, importProgressData } = useAppStore();
   const t = useTranslations('dashboard');
   const tCommon = useTranslations('common');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const totalModules = modules.length;
   const completedCount = useMemo(() =>
@@ -130,7 +137,7 @@ export default function Dashboard() {
   }, [completedModules, quizScores, challengeStats]);
 
   // Recommendations
-  const getRecommendation = () => {
+  const recommendation = useMemo(() => {
     if (completedModules.length === 0) {
       return { text: t('recommendations.owaspStart'), page: 'owasp' as PageType };
     }
@@ -141,7 +148,7 @@ export default function Dashboard() {
       return { text: t('recommendations.xssLearn'), page: 'xss' as PageType };
     }
     if (!completedModules.includes('csrf')) {
-      return { text: t('recommendations.quizCheck'), page: 'csrf' as PageType };
+      return { text: t('recommendations.csrfLearn'), page: 'csrf' as PageType };
     }
     if (!completedModules.includes('tools')) {
       return { text: t('recommendations.toolsTry'), page: 'tools' as PageType };
@@ -151,9 +158,7 @@ export default function Dashboard() {
       return { text: t('recommendations.completeRemaining'), page: (remainingModule?.id ?? 'dashboard') as PageType };
     }
     return { text: t('recommendations.wellDone'), page: 'achievements' as PageType };
-  };
-
-  const recommendation = getRecommendation();
+  }, [completedModules, totalProgress, t]);
 
   const handleStartModule = (moduleId: string) => {
     setCurrentPage(moduleId as PageType);
@@ -474,6 +479,69 @@ export default function Dashboard() {
                 ? t('overallProgress.notStarted')
                 : t('overallProgress.inProgress', { remaining: totalModules - completedCount })}
           </p>
+        </CardContent>
+      </Card>
+
+      {/* Data management */}
+      <Card className="border-slate-200">
+        <CardContent className="p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Upload size={16} className="text-slate-500" />
+            <h3 className="font-semibold text-sm">Экспорт / Импорт данных</h3>
+          </div>
+          <p className="text-xs text-slate-500 mb-4">
+            Сохраните резервную копию прогресса или восстановите из файла
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const state = {
+                  completedModules, quizScores, studiedOwaspItems, sqlCompletedLevels,
+                  xssCompletedLevels, owaspChallengeScores, authChallengeScores,
+                  headersChallengeScores, secureCodingChallengeScores, csrfViewedChallenges,
+                  quizHistory,
+                };
+                const exportedAt = exportProgress(state);
+                toast.success(`Прогресс экспортирован (${new Date(exportedAt).toLocaleString('ru-RU')})`);
+              }}
+            >
+              <Download size={14} className="mr-1.5" /> Экспорт
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload size={14} className="mr-1.5" /> Импорт
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                  const content = ev.target?.result as string;
+                  const data = importProgress(content);
+                  if (data) {
+                    importProgressData(data);
+                    toast.success('Прогресс успешно восстановлен');
+                  } else {
+                    toast.error('Неверный формат файла', {
+                      icon: <AlertTriangle size={16} />,
+                    });
+                  }
+                };
+                reader.readAsText(file);
+                e.target.value = '';
+              }}
+            />
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -26,6 +26,7 @@ import {
   RotateCcw,
   Trophy,
   Target,
+  History,
 } from 'lucide-react';
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -40,7 +41,7 @@ const iconMap: Record<string, React.ReactNode> = {
 type QuizState = 'select' | 'playing' | 'result';
 
 export default function QuizSystem() {
-  const { quizScores, setQuizScore, setCurrentPage } = useAppStore();
+  const { quizScores, quizHistory, setQuizScore, setCurrentPage } = useAppStore();
   const t = useTranslations('quiz');
   const [quizState, setQuizState] = useState<QuizState>('select');
   const [activeCategory, setActiveCategory] = useState('');
@@ -54,14 +55,14 @@ export default function QuizSystem() {
   const timeUpRef = useRef(false);
   const currentQuestionRef = useRef(0);
   const correctCountRef = useRef(0);
+  const answersRef = useRef<(boolean | null)[]>([]);
 
   // Keep refs in sync for use in callbacks and timers
   useEffect(() => {
     currentQuestionRef.current = currentQuestion;
-  }, [currentQuestion]);
-  useEffect(() => {
     correctCountRef.current = correctCount;
-  }, [correctCount]);
+    answersRef.current = answers;
+  }, [currentQuestion, correctCount, answers]);
 
   // Timer effect — interval is created once when timerActive changes, not on every tick.
   // Uses ref for currentQuestion to avoid stale closures.
@@ -133,7 +134,21 @@ export default function QuizSystem() {
     } else {
       const catId = activeCategory;
       const score = Math.round((correctCountRef.current / totalQuestions) * 100);
-      setQuizScore(catId, score);
+
+      // Save quiz attempt to history
+      const cat = quizCategories.find((c) => c.id === catId);
+      const attempt = {
+        id: `attempt-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
+        categoryId: catId,
+        categoryName: cat?.name || activeCategoryName,
+        score,
+        correct: correctCountRef.current,
+        total: totalQuestions,
+        answers: [...answersRef.current],
+        timestamp: Date.now(),
+      };
+      setQuizScore(catId, score, attempt);
+
       setTimerActive(false);
       setQuizState('result');
     }
@@ -288,7 +303,14 @@ export default function QuizSystem() {
                     <div
                       key={option}
                       className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${optionClass}`}
-                      onClick={() => !showAnswer && setSelectedAnswer(String(i))}
+                      onClick={(e) => {
+                        if (showAnswer) return;
+                        // Only handle clicks directly on the div, not on the RadioGroupItem/Label
+                        const target = e.target as HTMLElement;
+                        if (target.tagName === 'INPUT' || target.tagName === 'LABEL') return;
+                        setSelectedAnswer(String(i));
+                      }}
+                      role="presentation"
                     >
                       <RadioGroupItem value={String(i)} id={`opt-${option.substring(0, 20)}`} />
                       <Label
@@ -407,6 +429,67 @@ export default function QuizSystem() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Quiz history for this category */}
+          {quizHistory.filter((h) => h.categoryId === activeCategory).length > 0 && (
+            <Card className="border-slate-200">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <History size={16} className="text-slate-500" />
+                    <h3 className="text-sm font-semibold">{t('quizHistory')}</h3>
+                  </div>
+                  <Badge variant="secondary" className="text-[10px]">
+                    {quizHistory.filter((h) => h.categoryId === activeCategory).length} {t('attempts')}
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  {quizHistory
+                    .filter((h) => h.categoryId === activeCategory)
+                    .slice(0, 10)
+                    .map((attempt) => (
+                      <div
+                        key={attempt.id}
+                        className="flex items-center gap-3 p-3 rounded-lg bg-slate-50"
+                      >
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold ${
+                          attempt.score >= 80 ? 'bg-emerald-500' : attempt.score >= 60 ? 'bg-amber-500' : 'bg-red-500'
+                        }`}>
+                          {attempt.score}%
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium">
+                            {attempt.correct}/{attempt.total} {t('correctAnswersShort')}
+                          </p>
+                          <p className="text-[11px] text-slate-400">
+                            {new Date(attempt.timestamp).toLocaleString('ru-RU', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                        </div>
+                        <div className="flex gap-1">
+                          {attempt.answers.slice(0, 10).map((a, i) => (
+                            <div
+                              key={i}
+                              className={`w-2 h-2 rounded-full ${
+                                a === null ? 'bg-slate-300' : a ? 'bg-emerald-400' : 'bg-red-400'
+                              }`}
+                            />
+                          ))}
+                          {attempt.answers.length > 10 && (
+                            <span className="text-[10px] text-slate-400 ml-1">+{attempt.answers.length - 10}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </motion.div>
       )}
     </div>

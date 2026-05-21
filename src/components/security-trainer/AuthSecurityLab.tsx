@@ -317,7 +317,7 @@ export default function AuthSecurityLab() {
                     value={crackLength}
                     onChange={(e) => setCrackLength(Number(e.target.value))}
                     className="w-full accent-emerald-600"
-                    aria-label="Длина парожа"
+                    aria-label="Длина пароля"
                   />
                   <div className="flex justify-between text-[10px] text-slate-400">
                     <span>4</span>
