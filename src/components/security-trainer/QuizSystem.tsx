@@ -89,7 +89,10 @@ export default function QuizSystem() {
       });
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      timeUpRef.current = false;
+    };
   }, [timerActive]);
 
   const activeCategoryName = useMemo(

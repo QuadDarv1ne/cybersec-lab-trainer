@@ -91,18 +91,20 @@ vi.mock('@/lib/achievement-utils', () => ({
   getAchievementStatus: vi.fn(() => false),
 }));
 
-vi.mock('framer-motion', async () => {
-  const actual = await vi.importActual('framer-motion');
+vi.mock('framer-motion', () => {
   const Div = ({ children, ...props }: React.HTMLAttributes<HTMLElement> & { initial?: unknown; animate?: unknown; transition?: unknown; exit?: unknown; key?: string }) => <div {...props}>{children}</div>;
   return {
-    ...actual,
     motion: {
       div: Div,
-      span: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
+      section: Div,
+      article: Div,
+      header: Div,
+      main: Div,
+      p: Div,
+      h1: Div,
+      h2: Div,
+      h3: Div,
     },
-    useMotionValue: (initial: number) => ({ get: () => initial }),
-    useTransform: () => '0',
-    animate: vi.fn(() => ({ stop: vi.fn() })),
     AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   };
 });

@@ -79,14 +79,15 @@ vi.mock('@/hooks/use-session', () => ({
   }),
 }));
 
-vi.mock('framer-motion', async () => {
-  const actual = await vi.importActual('framer-motion');
+vi.mock('framer-motion', () => {
   const El = ({ children, ...props }: React.HTMLAttributes<HTMLElement> & { initial?: unknown; animate?: unknown; exit?: unknown; transition?: unknown }) => <div {...props}>{children}</div>;
   return {
-    ...actual,
     motion: {
       div: El,
       aside: El,
+      nav: El,
+      ul: El,
+      li: El,
     },
     AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   };

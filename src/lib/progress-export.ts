@@ -1,4 +1,10 @@
 import { logger } from '@/lib/logger';
+import { modules } from '@/lib/data/modules-data';
+import { quizCategories } from '@/lib/data/quiz-data';
+
+// Build sets of valid IDs for import validation
+const validModuleIds = new Set(modules.map((m) => m.id));
+const validQuizCategoryIds = new Set(quizCategories.map((c) => c.id));
 
 type ChallengeScores = {
   correct: number;
@@ -139,6 +145,15 @@ export function importProgress(jsonString: string): {
         logger.error(`Invalid quiz score for category: ${key}`);
         return null;
       }
+      if (!validQuizCategoryIds.has(key)) {
+        logger.warn(`Unknown quiz category: ${key} (may be from a newer version)`);
+      }
+    }
+
+    // Validate module IDs against known valid IDs
+    const unknownModules = d.completedModules.filter((id) => typeof id !== 'string' || !validModuleIds.has(id));
+    if (unknownModules.length > 0) {
+      logger.warn(`Unknown or invalid module IDs in import: ${unknownModules.join(', ')} (may be from a newer version)`);
     }
 
     // Validate challenge score objects

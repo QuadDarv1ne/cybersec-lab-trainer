@@ -5,8 +5,14 @@ import { authOptions } from "@/lib/auth";
 import { quizResultSchema, progressUpdateSchema, glossarySearchSchema, batchSyncSchema, challengeBatchSchema } from "@/lib/validations/api";
 import { db } from "@/lib/db";
 import { glossaryTerms } from "@/lib/data/glossary-data";
+import { modules } from "@/lib/data/modules-data";
+import { quizCategories } from "@/lib/data/quiz-data";
 import { rateLimit, getClientIP, addRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+
+// Build sets of valid IDs for validation
+const validModuleIds = new Set(modules.map((m) => m.id));
+const validQuizIds = new Set(quizCategories.map((c) => c.id));
 
 async function applyRateLimit(request: Request): Promise<{ response: NextResponse | null; remaining: number; reset: number }> {
   const ip = getClientIP(request);
@@ -192,10 +198,27 @@ export async function POST(request: Request) {
 
       case 'batch-sync': {
         const data = batchSyncSchema.parse(payload);
-        const { modules, quizzes } = data;
+        let { modules, quizzes } = data;
+
+        // Validate module IDs against known valid IDs
+        const invalidModuleIds = modules.filter((m) => !validModuleIds.has(m.moduleId)).map((m) => m.moduleId);
+        if (invalidModuleIds.length > 0) {
+          logger.warn('Ignoring unknown module IDs:', invalidModuleIds);
+          modules = modules.filter((m) => validModuleIds.has(m.moduleId));
+        }
+
+        // Validate quiz IDs against known valid IDs
+        const invalidQuizIds = quizzes.filter((q) => !validQuizIds.has(q.quizId)).map((q) => q.quizId);
+        if (invalidQuizIds.length > 0) {
+          logger.warn('Ignoring unknown quiz IDs:', invalidQuizIds);
+          quizzes = quizzes.filter((q) => validQuizIds.has(q.quizId));
+        }
 
         if (modules.length === 0 && quizzes.length === 0) {
-          result = { saved: { modules: 0, quizzes: 0 } };
+          const warning = invalidModuleIds.length > 0 || invalidQuizIds.length > 0
+            ? 'All provided IDs were invalid'
+            : 'No modules or quizzes to sync';
+          result = { saved: { modules: 0, quizzes: 0 }, warning };
           break;
         }
 

@@ -1,3 +1,5 @@
+'use client';
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { quizCategories } from './data/quiz-data';
@@ -229,8 +231,26 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
 
   set({ syncStatus: 'syncing' });
   try {
+    // Calculate actual scores for challenge-based modules
+    const getModuleScore = (moduleId: string): number => {
+      if (moduleId === 'owasp' && state.owaspChallengeScores.total > 0) {
+        return Math.round((state.owaspChallengeScores.correct / state.owaspChallengeScores.total) * 100);
+      }
+      if (moduleId === 'auth' && state.authChallengeScores.total > 0) {
+        return Math.round((state.authChallengeScores.correct / state.authChallengeScores.total) * 100);
+      }
+      if (moduleId === 'security-headers' && state.headersChallengeScores.total > 0) {
+        return Math.round((state.headersChallengeScores.correct / state.headersChallengeScores.total) * 100);
+      }
+      if (moduleId === 'secure-coding' && state.secureCodingChallengeScores.total > 0) {
+        return Math.round((state.secureCodingChallengeScores.correct / state.secureCodingChallengeScores.total) * 100);
+      }
+      // For non-challenge modules or when no challenges completed, use 100
+      return 100;
+    };
+
     const modules = state.completedModules.map((moduleId) => ({
-      moduleId, completed: true, score: 100,
+      moduleId, completed: true, score: getModuleScore(moduleId),
     }));
 
     const quizzes = Object.entries(state.quizScores).map(([category, score]) => ({

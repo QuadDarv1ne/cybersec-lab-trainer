@@ -26,8 +26,7 @@ vi.mock('next-themes', () => ({
 }));
 
 // Mock framer-motion
-vi.mock('framer-motion', async () => {
-  const actual = await vi.importActual('framer-motion');
+vi.mock('framer-motion', () => {
   const createMockComponent = (tag: string) => {
     return ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => {
       const Element = tag;
@@ -35,7 +34,6 @@ vi.mock('framer-motion', async () => {
     };
   };
   return {
-    ...actual,
     motion: {
       div: createMockComponent('div'),
       button: createMockComponent('button'),
@@ -48,7 +46,18 @@ vi.mock('framer-motion', async () => {
       section: createMockComponent('section'),
       header: createMockComponent('header'),
       main: createMockComponent('main'),
+      aside: createMockComponent('aside'),
+      nav: createMockComponent('nav'),
+      a: createMockComponent('a'),
+      img: createMockComponent('img'),
+      svg: createMockComponent('svg'),
+      path: createMockComponent('path'),
     },
     AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
+    useMotionValue: (initial: number) => ({ get: () => initial, set: vi.fn() }),
+    useTransform: (value: unknown, transform: (v: number) => unknown) => ({ get: () => transform(typeof initial === 'number' ? initial : 0) }),
+    useAnimation: () => ({ start: vi.fn(), stop: vi.fn() }),
+    useInView: () => [null, false],
+    useScroll: () => ({ scrollX: { get: () => 0 }, scrollY: { get: () => 0 } }),
   };
 });
