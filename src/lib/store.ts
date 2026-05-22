@@ -5,6 +5,7 @@ import { persist } from 'zustand/middleware';
 import { quizCategories } from './data/quiz-data';
 import { logger } from './logger';
 import { XP_REWARDS, calculateLevel, calculateXPBreakdown, levelProgress, type XPBreakdown } from './xp-system';
+import { type NotesMap, type Note, generateNoteId } from './notes-system';
 
 export type PageType =
   | 'dashboard'
@@ -17,7 +18,8 @@ export type PageType =
   | 'tools'
   | 'security-headers'
   | 'quiz'
-  | 'achievements';
+  | 'achievements'
+  | 'notes';
 
 export interface QuizAttempt {
   id: string;
@@ -45,6 +47,7 @@ interface AppState {
   secureCodingChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> };
   csrfViewedChallenges: number[];
   totalXP: number;
+  notes: NotesMap;
   userId: string | null;
   syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
   lastSyncedAt: number | null;
@@ -85,6 +88,10 @@ interface AppActions {
   awardXP: (amount: number) => void;
   getXPLevel: () => { level: number; progress: number; xpToNext: number; totalXP: number };
   getXPBreakdown: () => XPBreakdown;
+  addNote: (itemId: string, moduleId: string, moduleName: string, content: string) => void;
+  updateNote: (noteId: string, content: string) => void;
+  deleteNote: (noteId: string) => void;
+  getNotesForItem: (itemId: string) => Note[];
   syncWithDatabase: () => Promise<void>;
   loadFromDatabase: (userId: string, signal?: AbortSignal) => Promise<void>;
 }
@@ -343,6 +350,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
   csrfViewedChallenges: [],
   totalXP: 0,
+  notes: {},
   userId: null,
   syncStatus: 'idle',
   lastSyncedAt: null,
@@ -363,7 +371,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         totalXP: state.totalXP + xpGain,
       };
     });
-    void ensureSync(get, set);
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after completeModule:', err));
     return Promise.resolve();
   },
 
@@ -376,7 +384,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         totalXP: state.totalXP + xpGain,
       };
     });
-    void ensureSync(get, set);
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after setQuizScore:', err));
     return Promise.resolve();
   },
 
@@ -384,12 +392,12 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     set((state) => ({
       quizHistory: [attempt, ...state.quizHistory].slice(0, 50),
     }));
-    void ensureSync(get, set);
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after addQuizAttempt:', err));
   },
 
   clearQuizHistory: () => {
     set({ quizHistory: [] });
-    void ensureSync(get, set);
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after clearQuizHistory:', err));
   },
 
   resetProgress: async () => {
@@ -406,6 +414,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
       csrfViewedChallenges: [],
       totalXP: 0,
+      notes: {},
       syncStatus: 'syncing',
     });
     try {
@@ -438,29 +447,29 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
 
   setOwaspChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ owaspChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
-    void ensureSync(get, set);
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after setOwaspChallengeScore:', err));
   },
 
   setAuthChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ authChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
-    void ensureSync(get, set);
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after setAuthChallengeScore:', err));
   },
 
   setHeadersChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ headersChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
-    void ensureSync(get, set);
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after setHeadersChallengeScore:', err));
   },
 
   setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ secureCodingChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
-    void ensureSync(get, set);
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after setSecureCodingChallengeScore:', err));
   },
 
   markCsrfChallengeViewed: (index: number) => {
     set((state) => ({
       csrfViewedChallenges: addUnique(state.csrfViewedChallenges, index),
     }));
-    void ensureSync(get, set);
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after markCsrfChallengeViewed:', err));
   },
 
   setUserId: (userId: string | null) => set({ userId }),
@@ -496,6 +505,44 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     return calculateXPBreakdown(state.completedModules, state.quizScores, totalChallengeCorrect);
   },
 
+  addNote: (itemId: string, moduleId: string, moduleName: string, content: string) => {
+    const now = Date.now();
+    const noteId = generateNoteId();
+    set((state) => ({
+      notes: {
+        ...state.notes,
+        [noteId]: { id: noteId, itemId, moduleId, moduleName, content, createdAt: now, updatedAt: now },
+      },
+    }));
+  },
+
+  updateNote: (noteId: string, content: string) => {
+    set((state) => {
+      const existing = state.notes[noteId];
+      if (!existing) return state;
+      return {
+        notes: {
+          ...state.notes,
+          [noteId]: { ...existing, content, updatedAt: Date.now() },
+        },
+      };
+    });
+  },
+
+  deleteNote: (noteId: string) => {
+    set((state) => {
+      const { [noteId]: _removed, ...rest } = state.notes;
+      return { notes: rest };
+    });
+  },
+
+  getNotesForItem: (itemId: string) => {
+    const state = get();
+    return Object.values(state.notes)
+      .filter((n) => n.itemId === itemId)
+      .sort((a, b) => b.updatedAt - a.updatedAt);
+  },
+
   importProgressData: (data) => {
     set({
       completedModules: data.completedModules,
@@ -510,8 +557,9 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       csrfViewedChallenges: data.csrfViewedChallenges,
       quizHistory: data.quizHistory,
       totalXP: data.totalXP ?? 0,
+      notes: (data as Record<string, unknown>).notes as NotesMap | undefined ?? {},
     });
-    void ensureSync(get, set);
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after importProgressData:', err));
   },
 
   syncWithDatabase: async () => {
