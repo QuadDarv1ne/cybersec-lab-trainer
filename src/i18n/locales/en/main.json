@@ -23,8 +23,11 @@
       "sqlTry": "Try SQL injections",
       "xssLearn": "Learn XSS attacks",
       "csrfLearn": "Learn CSRF attacks",
-      "quizCheck": "Check your knowledge in quiz",
+      "authLearn": "Learn authentication",
+      "secureCodingLearn": "Learn secure coding",
       "toolsTry": "Try security tools",
+      "headersLearn": "Learn security headers",
+      "quizCheck": "Check your knowledge in quiz",
       "completeRemaining": "Complete remaining modules",
       "wellDone": "Great job! All modules completed."
     },

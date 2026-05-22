@@ -151,8 +151,17 @@ export default function Dashboard() {
     if (!completedModules.includes('csrf')) {
       return { text: t('recommendations.csrfLearn'), page: 'csrf' as PageType };
     }
+    if (!completedModules.includes('auth')) {
+      return { text: t('recommendations.authLearn'), page: 'auth' as PageType };
+    }
+    if (!completedModules.includes('secure-coding')) {
+      return { text: t('recommendations.secureCodingLearn'), page: 'secure-coding' as PageType };
+    }
     if (!completedModules.includes('tools')) {
       return { text: t('recommendations.toolsTry'), page: 'tools' as PageType };
+    }
+    if (!completedModules.includes('security-headers')) {
+      return { text: t('recommendations.headersLearn'), page: 'security-headers' as PageType };
     }
     if (totalProgress < 100) {
       const remainingModule = modules.find((m) => !completedModules.includes(m.id));

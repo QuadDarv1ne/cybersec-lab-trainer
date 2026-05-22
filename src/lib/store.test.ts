@@ -1,5 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { useAppStore } from './store';
+
+vi.useFakeTimers();
 
 describe('App Store', () => {
   beforeEach(() => {
@@ -21,10 +23,20 @@ describe('App Store', () => {
       authChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
       headersChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
       secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
+      csrfViewedChallenges: [],
+      totalXP: 0,
+      notes: {},
+      studySessions: [],
       userId: null,
       syncStatus: 'idle',
       lastSyncedAt: null,
     });
+    vi.clearAllTimers();
+  });
+
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.restoreAllMocks();
   });
 
   it('setCurrentPage changes page and closes sidebar', () => {
