@@ -92,20 +92,37 @@ vi.mock('@/lib/achievement-utils', () => ({
 }));
 
 vi.mock('framer-motion', () => {
-  const Div = ({ children, ...props }: React.HTMLAttributes<HTMLElement> & { initial?: unknown; animate?: unknown; transition?: unknown; exit?: unknown; key?: string }) => <div {...props}>{children}</div>;
+  const extractValue = (child: unknown): unknown => {
+    if (child && typeof child === 'object' && 'get' in child && typeof (child as { get: () => unknown }).get === 'function') {
+      return (child as { get: () => unknown }).get();
+    }
+    return child;
+  };
+
+  const MotionComponent = ({ children, ...props }: React.HTMLAttributes<HTMLElement> & { as?: string }) => {
+    const renderedChildren = extractValue(children);
+    return <div {...props}>{renderedChildren}</div>;
+  };
+
   return {
     motion: {
-      div: Div,
-      section: Div,
-      article: Div,
-      header: Div,
-      main: Div,
-      p: Div,
-      h1: Div,
-      h2: Div,
-      h3: Div,
+      div: MotionComponent,
+      section: MotionComponent,
+      article: MotionComponent,
+      header: MotionComponent,
+      main: MotionComponent,
+      p: MotionComponent,
+      h1: MotionComponent,
+      h2: MotionComponent,
+      h3: MotionComponent,
+      span: MotionComponent,
     },
     AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    useMotionValue: (initial: number) => ({ get: () => initial, set: vi.fn(), on: vi.fn() }),
+    useTransform: (value: { get: () => number }, transform: (v: number) => number | string) => ({ get: () => transform(value.get()), on: vi.fn() }),
+    animate: (_value: { get: () => number }, _to: number, _options?: { duration?: number; ease?: unknown }) => ({
+      stop: vi.fn(),
+    }),
   };
 });
 

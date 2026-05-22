@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
+import React from 'react';
 
 // Mock next-auth
 vi.mock('next-auth/react', () => ({
@@ -25,39 +26,50 @@ vi.mock('next-themes', () => ({
   ThemeProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-// Mock framer-motion
-vi.mock('framer-motion', () => {
-  const createMockComponent = (tag: string) => {
-    return ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => {
-      const Element = tag;
-      return <Element {...props}>{children}</Element>;
-    };
+// Create mock motion components
+const createMockComponent = (tag: keyof JSX.IntrinsicElements) => {
+  const MockComponent = ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => {
+    return React.createElement(tag, props, children);
   };
-  return {
-    motion: {
-      div: createMockComponent('div'),
-      button: createMockComponent('button'),
-      h1: createMockComponent('h1'),
-      h2: createMockComponent('h2'),
-      p: createMockComponent('p'),
-      span: createMockComponent('span'),
-      ul: createMockComponent('ul'),
-      li: createMockComponent('li'),
-      section: createMockComponent('section'),
-      header: createMockComponent('header'),
-      main: createMockComponent('main'),
-      aside: createMockComponent('aside'),
-      nav: createMockComponent('nav'),
-      a: createMockComponent('a'),
-      img: createMockComponent('img'),
-      svg: createMockComponent('svg'),
-      path: createMockComponent('path'),
-    },
-    AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
-    useMotionValue: (initial: number) => ({ get: () => initial, set: vi.fn() }),
-    useTransform: (value: unknown, transform: (v: number) => unknown) => ({ get: () => transform(typeof initial === 'number' ? initial : 0) }),
-    useAnimation: () => ({ start: vi.fn(), stop: vi.fn() }),
-    useInView: () => [null, false],
-    useScroll: () => ({ scrollX: { get: () => 0 }, scrollY: { get: () => 0 } }),
-  };
-});
+  MockComponent.displayName = `motion.${tag}`;
+  return MockComponent;
+};
+
+// Mock framer-motion with hoisted values
+vi.mock('framer-motion', () => ({
+  motion: {
+    div: createMockComponent('div'),
+    button: createMockComponent('button'),
+    h1: createMockComponent('h1'),
+    h2: createMockComponent('h2'),
+    p: createMockComponent('p'),
+    span: createMockComponent('span'),
+    ul: createMockComponent('ul'),
+    li: createMockComponent('li'),
+    section: createMockComponent('section'),
+    header: createMockComponent('header'),
+    main: createMockComponent('main'),
+    aside: createMockComponent('aside'),
+    nav: createMockComponent('nav'),
+    a: createMockComponent('a'),
+    img: createMockComponent('img'),
+    svg: createMockComponent('svg'),
+    path: createMockComponent('path'),
+  },
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
+  useMotionValue: (initial: number) => ({ 
+    get: () => initial, 
+    set: vi.fn(), 
+    on: vi.fn(),
+  }),
+  useTransform: (value: { get: () => number }, transform: (v: number) => number | string) => ({ 
+    get: () => transform(value.get()),
+    on: vi.fn(),
+  }),
+  animate: (value: { get: () => number }, to: number, options?: { duration?: number; ease?: unknown }) => ({
+    stop: vi.fn(),
+  }),
+  useAnimation: () => ({ start: vi.fn(), stop: vi.fn() }),
+  useInView: () => [null, false],
+  useScroll: () => ({ scrollX: { get: () => 0 }, scrollY: { get: () => 0 } }),
+}));
