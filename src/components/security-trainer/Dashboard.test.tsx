@@ -20,6 +20,10 @@ vi.mock('@/lib/store', () => {
     setUserId: vi.fn(),
     syncWithDatabase: vi.fn(),
     loadFromDatabase: vi.fn(),
+    importProgressData: vi.fn(),
+    awardXP: vi.fn(),
+    getXPLevel: () => ({ level: 1, progress: 0, xpToNext: 100, totalXP: 0 }),
+    getXPBreakdown: () => ({ modules: 0, quizzes: 0, challenges: 0, bonuses: 0, total: 0 }),
   };
 
   const defaultState = {
@@ -34,6 +38,8 @@ vi.mock('@/lib/store', () => {
     authChallengeScores: { correct: 0, total: 0, answered: [] as number[], selectedOptions: {} as Record<string, number> },
     headersChallengeScores: { correct: 0, total: 0, answered: [] as number[], selectedOptions: {} as Record<string, number> },
     secureCodingChallengeScores: { correct: 0, total: 0, answered: [] as number[], selectedOptions: {} as Record<string, number> },
+    csrfViewedChallenges: [] as number[],
+    totalXP: 0,
     userId: null as string | null,
     syncStatus: 'idle' as const,
     lastSyncedAt: null as number | null,

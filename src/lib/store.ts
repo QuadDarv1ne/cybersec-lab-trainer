@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { quizCategories } from './data/quiz-data';
 import { logger } from './logger';
+import { XP_REWARDS, calculateLevel, calculateXPBreakdown, levelProgress, type XPBreakdown } from './xp-system';
 
 export type PageType =
   | 'dashboard'
@@ -43,6 +44,7 @@ interface AppState {
   headersChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> };
   secureCodingChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> };
   csrfViewedChallenges: number[];
+  totalXP: number;
   userId: string | null;
   syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
   lastSyncedAt: number | null;
@@ -78,7 +80,11 @@ interface AppActions {
     secureCodingChallengeScores: AppStore['secureCodingChallengeScores'];
     csrfViewedChallenges: number[];
     quizHistory: AppStore['quizHistory'];
+    totalXP?: number;
   }) => void;
+  awardXP: (amount: number) => void;
+  getXPLevel: () => { level: number; progress: number; xpToNext: number; totalXP: number };
+  getXPBreakdown: () => XPBreakdown;
   syncWithDatabase: () => Promise<void>;
   loadFromDatabase: (userId: string, signal?: AbortSignal) => Promise<void>;
 }
@@ -336,6 +342,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   headersChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
   secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
   csrfViewedChallenges: [],
+  totalXP: 0,
   userId: null,
   syncStatus: 'idle',
   lastSyncedAt: null,
@@ -345,20 +352,30 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   setSidebarOpen: (open: boolean) => set({ sidebarOpen: open }),
   
   completeModule: (moduleId: string) => {
-    set((state) => ({
-      completedModules: state.completedModules.includes(moduleId) 
-        ? state.completedModules 
-        : [...state.completedModules, moduleId],
-    }));
+    set((state) => {
+      if (state.completedModules.includes(moduleId)) return state;
+      const isFirstModule = state.completedModules.length === 0;
+      const willBeAllComplete = state.completedModules.length + 1 >= 8;
+      let xpGain = XP_REWARDS.completeModule + (isFirstModule ? XP_REWARDS.firstModuleComplete : 0);
+      if (willBeAllComplete) xpGain += XP_REWARDS.allModulesComplete;
+      return {
+        completedModules: [...state.completedModules, moduleId],
+        totalXP: state.totalXP + xpGain,
+      };
+    });
     void ensureSync(get, set);
     return Promise.resolve();
   },
 
   setQuizScore: (category: string, score: number, attempt?: QuizAttempt) => {
-    set((state) => ({
-      quizScores: { ...state.quizScores, [category]: score },
-      quizHistory: attempt ? [attempt, ...state.quizHistory].slice(0, 50) : state.quizHistory,
-    }));
+    set((state) => {
+      const xpGain = XP_REWARDS.quizPass + Math.round(score * XP_REWARDS.quizBonusPerPercent);
+      return {
+        quizScores: { ...state.quizScores, [category]: score },
+        quizHistory: attempt ? [attempt, ...state.quizHistory].slice(0, 50) : state.quizHistory,
+        totalXP: state.totalXP + xpGain,
+      };
+    });
     void ensureSync(get, set);
     return Promise.resolve();
   },
@@ -388,6 +405,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       headersChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
       secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
       csrfViewedChallenges: [],
+      totalXP: 0,
       syncStatus: 'syncing',
     });
     try {
@@ -447,6 +465,37 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
 
   setUserId: (userId: string | null) => set({ userId }),
 
+  awardXP: (amount: number) => {
+    set((state) => ({ totalXP: state.totalXP + Math.max(0, amount) }));
+  },
+
+  getXPLevel: () => {
+    const state = get();
+    return {
+      level: calculateLevel(state.totalXP),
+      progress: levelProgress(state.totalXP),
+      xpToNext: (() => {
+        const level = calculateLevel(state.totalXP);
+        if (level >= 50) return 0;
+        let accumulated = 0;
+        for (let i = 1; i < level; i++) accumulated += i * 100;
+        const currentLevelXP = state.totalXP - accumulated;
+        return level * 100 - currentLevelXP;
+      })(),
+      totalXP: state.totalXP,
+    };
+  },
+
+  getXPBreakdown: () => {
+    const state = get();
+    const totalChallengeCorrect =
+      state.owaspChallengeScores.correct +
+      state.authChallengeScores.correct +
+      state.headersChallengeScores.correct +
+      state.secureCodingChallengeScores.correct;
+    return calculateXPBreakdown(state.completedModules, state.quizScores, totalChallengeCorrect);
+  },
+
   importProgressData: (data) => {
     set({
       completedModules: data.completedModules,
@@ -460,6 +509,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       secureCodingChallengeScores: data.secureCodingChallengeScores,
       csrfViewedChallenges: data.csrfViewedChallenges,
       quizHistory: data.quizHistory,
+      totalXP: data.totalXP ?? 0,
     });
     void ensureSync(get, set);
   },

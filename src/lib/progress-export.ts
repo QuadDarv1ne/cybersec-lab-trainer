@@ -24,7 +24,7 @@ type QuizHistoryEntry = {
   timestamp: number;
 };
 
-const EXPORT_VERSION = 1;
+const EXPORT_VERSION = 2;
 
 export interface ExportData {
   version: number;
@@ -41,6 +41,7 @@ export interface ExportData {
     secureCodingChallengeScores: ChallengeScores;
     csrfViewedChallenges: number[];
     quizHistory: QuizHistoryEntry[];
+    totalXP: number;
   };
 }
 
@@ -59,6 +60,7 @@ export function exportProgress(state: {
   secureCodingChallengeScores: ChallengeScores;
   csrfViewedChallenges: number[];
   quizHistory: QuizHistoryEntry[];
+  totalXP: number;
 }): string {
   const exportData: ExportData = {
     version: EXPORT_VERSION,
@@ -75,6 +77,7 @@ export function exportProgress(state: {
       secureCodingChallengeScores: state.secureCodingChallengeScores,
       csrfViewedChallenges: state.csrfViewedChallenges,
       quizHistory: state.quizHistory,
+      totalXP: state.totalXP,
     },
   };
 
@@ -110,11 +113,12 @@ export function importProgress(jsonString: string): {
   secureCodingChallengeScores: ChallengeScores;
   csrfViewedChallenges: number[];
   quizHistory: QuizHistoryEntry[];
+  totalXP: number;
 } | null {
   try {
     const parsed: ExportData = JSON.parse(jsonString);
 
-    if (!parsed.version || parsed.version !== EXPORT_VERSION) {
+    if (!parsed.version || (parsed.version !== 1 && parsed.version !== EXPORT_VERSION)) {
       logger.error(`Unsupported export version: ${parsed?.version}`);
       return null;
     }
@@ -175,7 +179,10 @@ export function importProgress(jsonString: string): {
       }
     }
 
-    return d;
+    return {
+      ...d,
+      totalXP: typeof d.totalXP === 'number' ? d.totalXP : 0,
+    };
   } catch (error) {
     logger.error('Failed to parse import file:', error);
     return null;

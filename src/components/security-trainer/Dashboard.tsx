@@ -6,6 +6,7 @@ import { quizCategories } from '@/lib/data/quiz-data';
 import { getAchievementStatus } from '@/lib/achievement-utils';
 import { useTranslations } from '@/lib/intlStub';
 import { exportProgress, importProgress } from '@/lib/progress-export';
+import XPDisplay from './XPDisplay';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -90,7 +91,7 @@ const achievementIcons: Record<string, React.ReactNode> = {
 };
 
 export default function Dashboard() {
-  const { setCurrentPage, completedModules, quizScores, toggleSidebar, owaspChallengeScores, authChallengeScores, headersChallengeScores, secureCodingChallengeScores, studiedOwaspItems, sqlCompletedLevels, xssCompletedLevels, csrfViewedChallenges, quizHistory, importProgressData } = useAppStore();
+  const { setCurrentPage, completedModules, quizScores, toggleSidebar, owaspChallengeScores, authChallengeScores, headersChallengeScores, secureCodingChallengeScores, studiedOwaspItems, sqlCompletedLevels, xssCompletedLevels, csrfViewedChallenges, quizHistory, importProgressData, totalXP } = useAppStore();
   const t = useTranslations('dashboard');
   const tCommon = useTranslations('common');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -242,6 +243,13 @@ export default function Dashboard() {
           </div>
         </div>
       </motion.div>
+
+      {/* XP & Level */}
+      <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50">
+        <CardContent className="p-5">
+          <XPDisplay />
+        </CardContent>
+      </Card>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4" aria-live="polite" aria-label="Learning statistics">
@@ -501,7 +509,7 @@ export default function Dashboard() {
                   completedModules, quizScores, studiedOwaspItems, sqlCompletedLevels,
                   xssCompletedLevels, owaspChallengeScores, authChallengeScores,
                   headersChallengeScores, secureCodingChallengeScores, csrfViewedChallenges,
-                  quizHistory,
+                  quizHistory, totalXP,
                 };
                 const exportedAt = exportProgress(state);
                 toast.success(`Прогресс экспортирован (${new Date(exportedAt).toLocaleString('ru-RU')})`);
