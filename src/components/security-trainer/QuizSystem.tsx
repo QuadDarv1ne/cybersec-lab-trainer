@@ -141,7 +141,7 @@ export default function QuizSystem() {
       // Save quiz attempt to history
       const cat = quizCategories.find((c) => c.id === catId);
       const attempt = {
-        id: `attempt-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
+        id: `attempt-${Date.now()}-${crypto.randomUUID()}`,
         categoryId: catId,
         categoryName: cat?.name || activeCategoryName,
         score,

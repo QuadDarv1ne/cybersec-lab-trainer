@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { quizCategories } from './data/quiz-data';
 import { logger } from './logger';
-import { XP_REWARDS, calculateLevel, calculateXPBreakdown, levelProgress, type XPBreakdown } from './xp-system';
+import { XP_REWARDS, calculateLevel, xpToNextLevel, calculateXPBreakdown, levelProgress, type XPBreakdown } from './xp-system';
 import { type NotesMap, type Note, generateNoteId } from './notes-system';
 import { type StudySession, calculateSessionXP, generateSessionId, getTodayTotalMs, getTotalStudyTimeMs } from './study-sessions';
 
@@ -494,14 +494,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     return {
       level: calculateLevel(state.totalXP),
       progress: levelProgress(state.totalXP),
-      xpToNext: (() => {
-        const level = calculateLevel(state.totalXP);
-        if (level >= 50) return 0;
-        let accumulated = 0;
-        for (let i = 1; i < level; i++) accumulated += i * 100;
-        const currentLevelXP = state.totalXP - accumulated;
-        return level * 100 - currentLevelXP;
-      })(),
+      xpToNext: xpToNextLevel(state.totalXP),
       totalXP: state.totalXP,
     };
   },
@@ -580,6 +573,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     }));
     activeSessionStart = null;
     activeSessionPage = null;
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after endStudySession:', err));
   },
 
   getTodayStudyTime: () => {
@@ -616,18 +610,21 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   },
 
   loadFromDatabase: async (userId: string, signal?: AbortSignal) => {
-    // Abort any prior in-flight load request
-    if (loadAbortController) {
+    // Abort any prior in-flight load request that used an internally created controller
+    if (loadAbortController && !loadAbortController.signal.aborted) {
       loadAbortController.abort();
     }
-    loadAbortController = new AbortController();
-    // Use provided signal if available, otherwise use our abort controller
-    const effectiveSignal = signal ?? loadAbortController.signal;
+    // Only create a new internal controller if no signal was provided
+    const isInternalSignal = !signal;
+    if (isInternalSignal) {
+      loadAbortController = new AbortController();
+    }
+    const effectiveSignal = signal ?? loadAbortController!.signal;
     try {
       await loadFromDatabase(set, get, userId, effectiveSignal);
     } finally {
-      // Clear the abort controller when this call completes
-      if (loadAbortController?.signal === effectiveSignal) {
+      // Only clear the internal controller if it hasn't been replaced by another call
+      if (isInternalSignal && loadAbortController?.signal === effectiveSignal) {
         loadAbortController = null;
       }
     }

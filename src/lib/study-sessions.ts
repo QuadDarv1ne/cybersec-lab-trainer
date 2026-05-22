@@ -141,5 +141,5 @@ export function getWeeklyStats(sessions: StudySession[], weeksBack = 1): WeeklyS
 }
 
 export function generateSessionId(): string {
-  return `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  return `session-${Date.now()}-${crypto.randomUUID()}`;
 }

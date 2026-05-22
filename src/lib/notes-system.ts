@@ -12,9 +12,9 @@ export interface Note {
 
 export type NotesMap = Record<string, Note>; // keyed by note id
 
-// Generate a simple unique ID
+// Generate a unique ID using the Web Crypto API
 export function generateNoteId(): string {
-  return `note-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  return `note-${Date.now()}-${crypto.randomUUID()}`;
 }
 
 // Count notes by module

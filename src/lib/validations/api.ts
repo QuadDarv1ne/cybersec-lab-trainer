@@ -34,9 +34,9 @@ export const batchSyncSchema = z.object({
     quizId: z.string().min(1),
     score: z.number().int().min(0),
     total: z.number().int().min(1),
-  })).refine((items) => items.every((item) => item.score <= item.total), {
+  })).max(50).refine((items) => items.every((item) => item.score <= item.total), {
     message: 'score не может превышать total',
-  }).max(50).optional().default([]),
+  }).optional().default([]),
 });
 
 // Schema для сохранения прогресса челленджей
