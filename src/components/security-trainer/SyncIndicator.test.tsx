@@ -11,9 +11,9 @@ vi.mock('@/lib/store', () => ({
   useAppStore: vi.fn(),
 }));
 
-// Then create mock references
-const mockUseSession = vi.mocked(require('@/hooks/use-session').useSession);
-const mockUseAppStore = vi.mocked(require('@/lib/store').useAppStore);
+// Then create mock references using dynamic imports
+const mockUseSession = vi.mocked((await import('@/hooks/use-session')).useSession);
+const mockUseAppStore = vi.mocked((await import('@/lib/store')).useAppStore);
 
 describe('SyncIndicator', () => {
   beforeEach(() => {

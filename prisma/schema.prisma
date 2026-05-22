@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -37,12 +37,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -101,8 +101,8 @@ model ChallengeProgress {
   challengeType String   // owasp, auth, headers, secure-coding
   correct       Int      @default(0)
   total         Int      @default(0)
-  answered      Json?    // Массив номеров отвеченных вопросов
-  selectedOptions Json?  // Карта выбранных ответов
+  answered      String?  // JSON string (SQLite stores Json as Text)
+  selectedOptions String?  // JSON string (SQLite stores Json as Text)
   updatedAt     DateTime @updatedAt @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -126,7 +126,7 @@ model ItemProgress {
   id        String   @id @default(cuid())
   userId    String
   moduleId  String   // sql-injection, xss, owasp
-  itemIds   Json     // Массив ID изученных элементов (уровни, темы и т.д.)
+  itemIds   String   // JSON string of array IDs изученных элементов (уровни, темы и т.д.)
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
