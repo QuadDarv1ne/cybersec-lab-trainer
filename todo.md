@@ -60,7 +60,7 @@ The project uses a custom lightweight `intlStub.ts` + JSON locale files. It work
 
 ### 9. TypeScript strictness ~~COMPLETED~~
 - [x] `strict: true` and `noImplicitAny: true` in `tsconfig.json`
-- [x] No `as unknown as` in `db.ts`
+- [x] `as unknown as` in `db.ts` is the standard Prisma hot-reload singleton pattern — intentional and accepted
 
 ---
 

@@ -65,7 +65,7 @@ vi.mock('next/headers', () => ({
 
 // Import route handlers after mocking
 import { GET, POST } from '@/app/api/route';
-import { getServerSession } from 'next-auth';
+import { getServerSession, Session } from 'next-auth';
 import { db } from '@/lib/db';
 
 // Get mock references after imports
@@ -74,6 +74,12 @@ const mockQuizResult = db.quizResult;
 const mockChallengeProgress = db.challengeProgress;
 const mockItemProgress = db.itemProgress;
 const mockTransaction = db.$transaction;
+
+// Typed mock session helper
+const mockSession: Session = {
+  user: { id: 'test-user-1', name: null, email: null, image: null },
+  expires: new Date(Date.now() + 86400000).toISOString(),
+};
 
 // Helper to create POST requests with CSRF token
 function createPostRequest(url: string, body: Record<string, unknown>) {
@@ -104,7 +110,7 @@ describe('API Route GET /api', () => {
   });
 
   it('returns 400 for unknown action', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({ user: { id: 'test-user-1' } } as any);
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
     const request = new NextRequest('http://localhost:3000/api?action=unknown-action');
     const response = await GET(request);
@@ -115,7 +121,7 @@ describe('API Route GET /api', () => {
   });
 
   it('loads progress when authenticated', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({ user: { id: 'test-user-1' } } as any);
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
     mockProgress.findMany.mockResolvedValue([
       { moduleId: 'owasp-top-10', completed: true, score: 85, userId: 'test-user-1', lastAccessed: new Date() },
@@ -136,7 +142,7 @@ describe('API Route GET /api', () => {
   });
 
   it('returns best quiz scores when multiple quiz results exist', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({ user: { id: 'test-user-1' } } as any);
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
     mockProgress.findMany.mockResolvedValue([]);
     mockQuizResult.findMany.mockResolvedValue([
@@ -188,7 +194,7 @@ describe('API Route POST /api', () => {
   });
 
   it('saves progress when authenticated', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({ user: { id: 'test-user-1' } } as any);
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
     mockProgress.upsert.mockResolvedValue({
       moduleId: 'owasp-top-10',
@@ -213,7 +219,7 @@ describe('API Route POST /api', () => {
   });
 
   it('saves quiz answers when authenticated', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({ user: { id: 'test-user-1' } } as any);
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
     mockQuizResult.upsert.mockResolvedValue({
       quizId: 'owasp',
@@ -237,7 +243,7 @@ describe('API Route POST /api', () => {
   });
 
   it('performs batch sync when authenticated', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({ user: { id: 'test-user-1' } } as any);
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
     mockProgress.upsert.mockResolvedValue({ moduleId: 'sql-injection', completed: true, userId: 'test-user-1' });
     mockQuizResult.upsert.mockResolvedValue({ quizId: 'owasp', score: 9, total: 10, userId: 'test-user-1' });
@@ -260,7 +266,7 @@ describe('API Route POST /api', () => {
   });
 
   it('syncs challenge progress when authenticated', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({ user: { id: 'test-user-1' } } as any);
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
     mockChallengeProgress.upsert.mockResolvedValue({
       challengeType: 'owasp',
@@ -284,7 +290,7 @@ describe('API Route POST /api', () => {
   });
 
   it('syncs item progress when authenticated', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({ user: { id: 'test-user-1' } } as any);
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
     mockItemProgress.upsert.mockResolvedValue({
       moduleId: 'sql-injection',
@@ -307,7 +313,7 @@ describe('API Route POST /api', () => {
   });
 
   it('resets progress when authenticated', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({ user: { id: 'test-user-1' } } as any);
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
     mockTransaction.mockResolvedValue([{}, {}, {}, {}]);
 
@@ -325,7 +331,7 @@ describe('API Route POST /api', () => {
   });
 
   it('returns 400 for unknown request type', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({ user: { id: 'test-user-1' } } as any);
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
     const request = createPostRequest('http://localhost:3000/api', {
       type: 'unknown-type',
@@ -340,7 +346,7 @@ describe('API Route POST /api', () => {
   });
 
   it('returns 400 for validation errors', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({ user: { id: 'test-user-1' } } as any);
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
     // Missing required fields for progress
     const request = createPostRequest('http://localhost:3000/api', {
@@ -356,7 +362,7 @@ describe('API Route POST /api', () => {
   });
 
   it('filters invalid module IDs in batch-sync', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({ user: { id: 'test-user-1' } } as any);
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
     mockProgress.upsert.mockResolvedValue({ moduleId: 'sql-injection', completed: true });
 

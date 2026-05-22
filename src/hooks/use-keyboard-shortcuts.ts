@@ -179,6 +179,7 @@ export function getShortcutList(): { keys: string[]; description: string }[] {
   return [
     { keys: ['1', '2', '3', '...'], description: 'Navigate to pages' },
     { keys: ['Alt', 'A'], description: 'Open Achievements' },
+    { keys: ['Ctrl', 'K'], description: 'Search' },
     { keys: ['Ctrl', '/'], description: 'Toggle sidebar' },
     { keys: ['Alt', '→'], description: 'Next page' },
     { keys: ['Alt', '←'], description: 'Previous page' },
