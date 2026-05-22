@@ -118,8 +118,8 @@ vi.mock('framer-motion', () => {
       span: MotionComponent,
     },
     AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    useMotionValue: (initial: number) => ({ get: () => initial, set: vi.fn(), on: vi.fn() }),
-    useTransform: (value: { get: () => number }, transform: (v: number) => number | string) => ({ get: () => transform(value.get()), on: vi.fn() }),
+    useMotionValue: (initial: number) => ({ get: () => initial, set: vi.fn(), on: vi.fn(), subscribe: vi.fn() }),
+    useTransform: (value: { get: () => number }, transform: (v: number) => number | string) => ({ get: () => transform(typeof value.get === 'function' ? value.get() : value), on: vi.fn(), subscribe: vi.fn() }),
     animate: (_value: { get: () => number }, _to: number, _options?: { duration?: number; ease?: unknown }) => ({
       stop: vi.fn(),
     }),

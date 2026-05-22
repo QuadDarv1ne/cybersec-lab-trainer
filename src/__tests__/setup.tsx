@@ -61,10 +61,12 @@ vi.mock('framer-motion', () => ({
     get: () => initial, 
     set: vi.fn(), 
     on: vi.fn(),
+    subscribe: vi.fn(),
   }),
-  useTransform: (value: { get: () => number }, transform: (v: number) => number | string) => ({ 
-    get: () => transform(value.get()),
+  useTransform: (value: { get: () => number }, transform: (v: number) => number | string) => ({
+    get: () => transform(typeof value.get === 'function' ? value.get() : value),
     on: vi.fn(),
+    subscribe: vi.fn(),
   }),
   animate: (value: { get: () => number }, to: number, options?: { duration?: number; ease?: unknown }) => ({
     stop: vi.fn(),
