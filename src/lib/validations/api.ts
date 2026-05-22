@@ -68,6 +68,39 @@ export const itemProgressBatchSchema = z.object({
   items: z.array(itemProgressSchema).max(20).optional().default([]),
 });
 
+// Schema для создания/обновления заметки
+export const noteSchema = z.object({
+  noteId: z.string().optional(), // present for update/delete, absent for create
+  itemId: z.string().min(1, 'itemId обязателен'),
+  moduleId: z.string().min(1, 'moduleId обязателен'),
+  moduleName: z.string().min(1, 'moduleName обязателен').max(200),
+  content: z.string().min(1, 'content обязателен').max(10000),
+});
+
+// Schema для удаления заметки
+export const noteDeleteSchema = z.object({
+  noteId: z.string().min(1, 'noteId обязателен'),
+});
+
+// Schema для синхронизации заметок (batch)
+export const notesSyncSchema = z.object({
+  notes: z.array(noteSchema.omit({ noteId: true }).extend({ id: z.string().optional() })).max(200).optional().default([]),
+});
+
+// Schema для сохранения учебной сессии
+export const studySessionSchema = z.object({
+  sessionId: z.string().optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date должен быть в формате YYYY-MM-DD'),
+  durationMs: z.number().int().min(0, 'durationMs должен быть >= 0'),
+  pageType: z.string().min(1, 'pageType обязателен').max(100),
+  xpEarned: z.number().int().min(0).max(100).optional().default(0),
+});
+
+// Schema для синхронизации учебных сессий (batch)
+export const studySessionsSyncSchema = z.object({
+  sessions: z.array(studySessionSchema.omit({ sessionId: true }).extend({ id: z.string().optional() })).max(500).optional().default([]),
+});
+
 // Типы для схем
 export type QuizResult = z.infer<typeof quizResultSchema>;
 export type ProgressUpdate = z.infer<typeof progressUpdateSchema>;

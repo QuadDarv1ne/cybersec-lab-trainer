@@ -2,7 +2,7 @@ import { z } from "zod";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { quizResultSchema, progressUpdateSchema, glossarySearchSchema, batchSyncSchema, challengeBatchSchema, itemProgressBatchSchema } from "@/lib/validations/api";
+import { quizResultSchema, progressUpdateSchema, glossarySearchSchema, batchSyncSchema, challengeBatchSchema, itemProgressBatchSchema, notesSyncSchema, noteDeleteSchema, studySessionsSyncSchema } from "@/lib/validations/api";
 import { db } from "@/lib/db";
 import { glossaryTerms } from "@/lib/data/glossary-data";
 import { modules } from "@/lib/data/modules-data";
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     const action = url.searchParams.get('action');
 
     if (action === 'load-progress') {
-      const [progressRecords, quizResults, challengeProgressRecords, itemProgressRecords] = await Promise.all([
+      const [progressRecords, quizResults, challengeProgressRecords, itemProgressRecords, notesRecords, studySessionRecords] = await Promise.all([
         db.progress.findMany({
           where: { userId },
           orderBy: { lastAccessed: 'desc' },
@@ -53,6 +53,15 @@ export async function GET(request: Request) {
         }),
         db.itemProgress.findMany({
           where: { userId },
+        }),
+        db.note.findMany({
+          where: { userId },
+          orderBy: { updatedAt: 'desc' },
+        }),
+        db.studySession.findMany({
+          where: { userId },
+          orderBy: { createdAt: 'desc' },
+          take: 1000, // limit to last 1000 sessions
         }),
       ]);
 
@@ -83,8 +92,32 @@ export async function GET(request: Request) {
         itemProgress[ip.moduleId] = ip.itemIds ? JSON.parse(ip.itemIds) : [];
       }
 
+      // Build notes map
+      const notes: Record<string, { id: string; itemId: string; moduleId: string; moduleName: string; content: string; createdAt: number; updatedAt: number }> = {};
+      for (const note of notesRecords) {
+        notes[note.id] = {
+          id: note.id,
+          itemId: note.itemId,
+          moduleId: note.moduleId,
+          moduleName: note.moduleName,
+          content: note.content,
+          createdAt: note.createdAt.getTime(),
+          updatedAt: note.updatedAt.getTime(),
+        };
+      }
+
+      // Build study sessions array
+      const studySessions = studySessionRecords.map((ss) => ({
+        id: ss.id,
+        date: ss.date,
+        durationMs: ss.durationMs,
+        pageType: ss.pageType,
+        xpEarned: ss.xpEarned,
+        createdAt: ss.createdAt.getTime(),
+      }));
+
       const csrfToken = await setCsrfCookie();
-      const response = NextResponse.json({ completedModules, quizScores, challenges, itemProgress, csrfToken, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() });
+      const response = NextResponse.json({ completedModules, quizScores, challenges, itemProgress, notes, studySessions, csrfToken, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() });
       addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
       return response;
     }
@@ -331,12 +364,93 @@ export async function POST(request: Request) {
         break;
       }
 
+      case 'notes-sync': {
+        const data = notesSyncSchema.parse(payload);
+        const { notes } = data;
+
+        if (notes.length === 0) {
+          result = { saved: { notes: 0 } };
+          break;
+        }
+
+        // Use transaction for batch upsert
+        const noteResults = await db.$transaction(
+          notes.map((note) =>
+            db.note.upsert({
+              where: { id: note.id || '' },
+              create: {
+                userId,
+                itemId: note.itemId,
+                moduleId: note.moduleId,
+                moduleName: note.moduleName,
+                content: note.content,
+              },
+              update: {
+                itemId: note.itemId,
+                moduleId: note.moduleId,
+                moduleName: note.moduleName,
+                content: note.content,
+              },
+            })
+          )
+        );
+
+        result = { saved: { notes: noteResults.length }, message: "Notes sync completed" };
+        break;
+      }
+
+      case 'note-delete': {
+        const data = noteDeleteSchema.parse(payload);
+        const { noteId } = data;
+
+        await db.note.deleteMany({
+          where: {
+            id: noteId,
+            userId,
+          },
+        });
+
+        result = { deleted: { noteId }, message: "Note deleted successfully" };
+        break;
+      }
+
+      case 'study-sessions-sync': {
+        const data = studySessionsSyncSchema.parse(payload);
+        const { sessions } = data;
+
+        if (sessions.length === 0) {
+          result = { saved: { sessions: 0 } };
+          break;
+        }
+
+        // Use transaction for batch insert
+        const sessionResults = await db.$transaction(
+          sessions.map((session) =>
+            db.studySession.create({
+              data: {
+                userId,
+                id: session.id || undefined,
+                date: session.date,
+                durationMs: session.durationMs,
+                pageType: session.pageType,
+                xpEarned: session.xpEarned ?? 0,
+              },
+            })
+          )
+        );
+
+        result = { saved: { sessions: sessionResults.length }, message: "Study sessions sync completed" };
+        break;
+      }
+
       case 'reset-progress': {
         await db.$transaction([
           db.progress.deleteMany({ where: { userId } }),
           db.quizResult.deleteMany({ where: { userId } }),
           db.challengeProgress.deleteMany({ where: { userId } }),
           db.itemProgress.deleteMany({ where: { userId } }),
+          db.note.deleteMany({ where: { userId } }),
+          db.studySession.deleteMany({ where: { userId } }),
         ]);
 
         result = { message: "Progress reset successfully" };
@@ -345,7 +459,7 @@ export async function POST(request: Request) {
 
       default: {
         const response = NextResponse.json(
-          { error: `Unknown request type. Expected: progress, quiz-answers, glossary-search, batch-sync, challenge-progress-sync, item-progress-sync, reset-progress` },
+          { error: `Unknown request type. Expected: progress, quiz-answers, glossary-search, batch-sync, challenge-progress-sync, item-progress-sync, notes-sync, note-delete, study-sessions-sync, reset-progress` },
           { status: 400 }
         );
         addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);

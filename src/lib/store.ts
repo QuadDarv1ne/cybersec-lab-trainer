@@ -291,6 +291,72 @@ const apiClient = {
 
     return response.json();
   },
+
+  async saveNotes(notes: { id?: string; itemId: string; moduleId: string; moduleName: string; content: string }[]) {
+    const csrfToken = getCsrfToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
+
+    const response = await fetch('/api', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        type: 'notes-sync',
+        payload: { notes },
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || 'Failed to sync notes');
+    }
+
+    return response.json();
+  },
+
+  async deleteNote(noteId: string) {
+    const csrfToken = getCsrfToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
+
+    const response = await fetch('/api', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        type: 'note-delete',
+        payload: { noteId },
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || 'Failed to delete note');
+    }
+
+    return response.json();
+  },
+
+  async saveStudySessions(sessions: { id?: string; date: string; durationMs: number; pageType: string; xpEarned: number }[]) {
+    const csrfToken = getCsrfToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
+
+    const response = await fetch('/api', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        type: 'study-sessions-sync',
+        payload: { sessions },
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || 'Failed to sync study sessions');
+    }
+
+    return response.json();
+  },
 };
 
 // Sync with database via API (batch call)
@@ -356,6 +422,35 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
       savePromises.push(apiClient.saveItemProgress(itemProgress));
     }
 
+    // Sync notes
+    const notesArray = Object.values(state.notes).map((note) => ({
+      id: note.id,
+      itemId: note.itemId,
+      moduleId: note.moduleId,
+      moduleName: note.moduleName,
+      content: note.content,
+    }));
+
+    if (notesArray.length > 0) {
+      savePromises.push(apiClient.saveNotes(notesArray));
+    }
+
+    // Sync new study sessions (only those without an id that matches DB)
+    const newSessions = state.studySessions.filter((ss) => !ss.id || !ss.id.startsWith('session-'));
+    const sessionsToSync = state.studySessions
+      .filter((ss) => ss.id?.startsWith('session-') || !ss.id)
+      .map((ss) => ({
+        id: ss.id,
+        date: ss.date,
+        durationMs: ss.durationMs,
+        pageType: ss.pageType,
+        xpEarned: ss.xpEarned,
+      }));
+
+    if (sessionsToSync.length > 0) {
+      savePromises.push(apiClient.saveStudySessions(sessionsToSync));
+    }
+
     if (savePromises.length > 0) {
       await Promise.all(savePromises);
     }
@@ -404,6 +499,16 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
         sqlCompletedLevels: data.itemProgress['sql-injection'] ?? [],
         xssCompletedLevels: data.itemProgress.xss ?? [],
       });
+    }
+
+    // Restore notes if available
+    if (data.notes) {
+      set({ notes: data.notes });
+    }
+
+    // Restore study sessions if available
+    if (data.studySessions) {
+      set({ studySessions: data.studySessions.slice(0, 100) });
     }
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') return;
@@ -591,6 +696,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         [noteId]: { id: noteId, itemId, moduleId, moduleName, content, createdAt: now, updatedAt: now },
       },
     }));
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after addNote:', err));
   },
 
   updateNote: (noteId: string, content: string) => {
@@ -604,6 +710,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         },
       };
     });
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after updateNote:', err));
   },
 
   deleteNote: (noteId: string) => {
@@ -611,6 +718,11 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       const { [noteId]: _removed, ...rest } = state.notes;
       return { notes: rest };
     });
+    // Delete from DB immediately, then trigger full sync to reconcile
+    if (get().userId) {
+      apiClient.deleteNote(noteId).catch((err) => logger.error('Failed to delete note from DB:', err));
+    }
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after deleteNote:', err));
   },
 
   getNotesForItem: (itemId: string) => {
