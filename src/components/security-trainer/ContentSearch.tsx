@@ -343,7 +343,7 @@ export default function ContentSearch({ open, onClose }: ContentSearchProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50"
+            className="fixed inset-0 bg-black/50 z-[60]"
             onClick={onClose}
           />
 
@@ -353,7 +353,7 @@ export default function ContentSearch({ open, onClose }: ContentSearchProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
             transition={{ duration: 0.15 }}
-            className="fixed top-[15%] left-1/2 -translate-x-1/2 w-full max-w-2xl z-50"
+            className="fixed top-[15%] left-1/2 -translate-x-1/2 w-full max-w-2xl z-[60]"
             role="dialog"
             aria-modal="true"
             aria-label="Поиск по контенту"

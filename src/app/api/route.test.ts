@@ -123,12 +123,12 @@ describe('API Route GET /api', () => {
   it('loads progress when authenticated', async () => {
     vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
-    mockProgress.findMany.mockResolvedValue([
+    (mockProgress.findMany as any).mockResolvedValue([
       { moduleId: 'owasp-top-10', completed: true, score: 85, userId: 'test-user-1', lastAccessed: new Date() },
     ]);
-    mockQuizResult.findMany.mockResolvedValue([]);
-    mockChallengeProgress.findMany.mockResolvedValue([]);
-    mockItemProgress.findMany.mockResolvedValue([]);
+    (mockQuizResult.findMany as any).mockResolvedValue([]);
+    (mockChallengeProgress.findMany as any).mockResolvedValue([]);
+    (mockItemProgress.findMany as any).mockResolvedValue([]);
 
     const request = new NextRequest('http://localhost:3000/api?action=load-progress');
     const response = await GET(request);
@@ -144,13 +144,13 @@ describe('API Route GET /api', () => {
   it('returns best quiz scores when multiple quiz results exist', async () => {
     vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
-    mockProgress.findMany.mockResolvedValue([]);
-    mockQuizResult.findMany.mockResolvedValue([
+    (mockProgress.findMany as any).mockResolvedValue([]);
+    (mockQuizResult.findMany as any).mockResolvedValue([
       { quizId: 'owasp', score: 7, total: 10, percentage: 70, userId: 'test-user-1', createdAt: new Date() },
       { quizId: 'owasp', score: 9, total: 10, percentage: 90, userId: 'test-user-1', createdAt: new Date() },
     ]);
-    mockChallengeProgress.findMany.mockResolvedValue([]);
-    mockItemProgress.findMany.mockResolvedValue([]);
+    (mockChallengeProgress.findMany as any).mockResolvedValue([]);
+    (mockItemProgress.findMany as any).mockResolvedValue([]);
 
     const request = new NextRequest('http://localhost:3000/api?action=load-progress');
     const response = await GET(request);
@@ -196,7 +196,7 @@ describe('API Route POST /api', () => {
   it('saves progress when authenticated', async () => {
     vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
-    mockProgress.upsert.mockResolvedValue({
+    (mockProgress.upsert as any).mockResolvedValue({
       moduleId: 'owasp-top-10',
       completed: true,
       score: 0,
@@ -221,7 +221,7 @@ describe('API Route POST /api', () => {
   it('saves quiz answers when authenticated', async () => {
     vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
-    mockQuizResult.upsert.mockResolvedValue({
+    (mockQuizResult.upsert as any).mockResolvedValue({
       quizId: 'owasp',
       score: 8,
       total: 10,
@@ -245,8 +245,8 @@ describe('API Route POST /api', () => {
   it('performs batch sync when authenticated', async () => {
     vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
-    mockProgress.upsert.mockResolvedValue({ moduleId: 'sql-injection', completed: true, userId: 'test-user-1' });
-    mockQuizResult.upsert.mockResolvedValue({ quizId: 'owasp', score: 9, total: 10, userId: 'test-user-1' });
+    (mockProgress.upsert as any).mockResolvedValue({ moduleId: 'sql-injection', completed: true, userId: 'test-user-1' });
+    (mockQuizResult.upsert as any).mockResolvedValue({ quizId: 'owasp', score: 9, total: 10, userId: 'test-user-1' });
 
     const request = createPostRequest('http://localhost:3000/api', {
       type: 'batch-sync',
@@ -268,7 +268,7 @@ describe('API Route POST /api', () => {
   it('syncs challenge progress when authenticated', async () => {
     vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
-    mockChallengeProgress.upsert.mockResolvedValue({
+    (mockChallengeProgress.upsert as any).mockResolvedValue({
       challengeType: 'owasp',
       correct: 5,
       total: 10,
@@ -292,7 +292,7 @@ describe('API Route POST /api', () => {
   it('syncs item progress when authenticated', async () => {
     vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
-    mockItemProgress.upsert.mockResolvedValue({
+    (mockItemProgress.upsert as any).mockResolvedValue({
       moduleId: 'sql-injection',
       itemIds: JSON.stringify(['level-1', 'level-2']),
       userId: 'test-user-1',
@@ -315,7 +315,7 @@ describe('API Route POST /api', () => {
   it('resets progress when authenticated', async () => {
     vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
-    mockTransaction.mockResolvedValue([{}, {}, {}, {}]);
+    (mockTransaction as any).mockResolvedValue([{}, {}, {}, {}]);
 
     const request = createPostRequest('http://localhost:3000/api', {
       type: 'reset-progress',
@@ -364,7 +364,7 @@ describe('API Route POST /api', () => {
   it('filters invalid module IDs in batch-sync', async () => {
     vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
-    mockProgress.upsert.mockResolvedValue({ moduleId: 'sql-injection', completed: true });
+    (mockProgress.upsert as any).mockResolvedValue({ moduleId: 'sql-injection', completed: true });
 
     const request = createPostRequest('http://localhost:3000/api', {
       type: 'batch-sync',

@@ -52,7 +52,7 @@ export default function AuthSecurityLab() {
   useEffect(() => {
     setCorrectCount(authChallengeScores.correct);
     setAnsweredChallenges(new Set(authChallengeScores.answered));
-    if (authChallengeScores.selectedOptions[activeChallenge] !== undefined) {
+    if (authChallengeScores.selectedOptions?.[activeChallenge] !== undefined) {
       setSelectedOption(authChallengeScores.selectedOptions[activeChallenge]);
     } else {
       setSelectedOption(null);
@@ -209,7 +209,7 @@ export default function AuthSecurityLab() {
       </div>
 
       <Tabs defaultValue="password" className="space-y-4">
-        <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
+        <TabsList className="grid grid-cols-2 lg:grid-cols-5 w-full">
           <TabsTrigger value="password" className="text-xs">
             <KeyRound size={14} className="mr-1" /> {t('passwordStrength')}
           </TabsTrigger>
@@ -347,7 +347,7 @@ export default function AuthSecurityLab() {
                     value={crackComplexity}
                     onChange={(e) => setCrackComplexity(Number(e.target.value))}
                     className="w-full accent-emerald-600"
-                    aria-label="Сложность парожа"
+                    aria-label="Сложность пароля"
                   />
                   <div className="flex justify-between text-[10px] text-slate-400">
                     <span>Строчные</span>
@@ -616,7 +616,7 @@ function authenticate(req, res, next) {
 
                     return (
                       <button
-                        key={option.text}
+                        key={`${currentChallenge.id}-${i}`}
                         onClick={() => handleSelectOption(i)}
                         disabled={isChallengeAnswered}
                         className={`w-full text-left p-3 rounded-lg border-2 transition-all duration-200 ${optionStyle}`}

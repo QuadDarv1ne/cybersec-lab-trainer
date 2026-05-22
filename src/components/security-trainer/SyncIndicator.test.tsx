@@ -15,6 +15,25 @@ vi.mock('@/lib/store', () => ({
 const mockUseSession = vi.mocked((await import('@/hooks/use-session')).useSession);
 const mockUseAppStore = vi.mocked((await import('@/lib/store')).useAppStore);
 
+// Helper to create a valid session object with required expires field
+function createMockSession() {
+  return {
+    user: { id: 'user-123', name: 'Test User', email: null, image: null },
+    expires: new Date(Date.now() + 86400000).toISOString(),
+  };
+}
+
+// Helper to create a minimal AppStore mock with only the fields SyncIndicator uses
+function createAppStoreMock(overrides: Partial<{ syncStatus: 'idle' | 'syncing' | 'synced' | 'error'; lastSyncedAt: number | null; userId: string | null }> = {}) {
+  const state = {
+    syncStatus: 'idle' as const,
+    lastSyncedAt: null,
+    userId: null,
+    ...overrides,
+  };
+  return state;
+}
+
 describe('SyncIndicator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -23,15 +42,14 @@ describe('SyncIndicator', () => {
       isAuthenticated: false,
       session: null,
       isLoading: false,
+      status: 'unauthenticated' as const,
+      user: undefined,
+      update: vi.fn(),
     });
     
     mockUseAppStore.mockImplementation((selector) => {
-      const state = {
-        syncStatus: 'idle' as const,
-        lastSyncedAt: null as number | null,
-        userId: null as string | null,
-      };
-      return selector ? selector(state) : state;
+      const state = createAppStoreMock();
+      return selector ? selector(state as any) : state;
     });
   });
 
@@ -43,17 +61,16 @@ describe('SyncIndicator', () => {
   it('returns null when user is authenticated but no userId', () => {
     mockUseSession.mockReturnValue({
       isAuthenticated: true,
-      session: { user: { id: '123', name: 'Test User' } },
+      session: createMockSession(),
       isLoading: false,
+      status: 'authenticated' as const,
+      user: createMockSession().user,
+      update: vi.fn(),
     });
 
     mockUseAppStore.mockImplementation((selector) => {
-      const state = {
-        syncStatus: 'idle' as const,
-        lastSyncedAt: null,
-        userId: null,
-      };
-      return selector ? selector(state) : state;
+      const state = createAppStoreMock({ userId: null });
+      return selector ? selector(state as any) : state;
     });
 
     const { container } = render(<SyncIndicator />);
@@ -63,17 +80,16 @@ describe('SyncIndicator', () => {
   it('renders when user is authenticated and has userId', () => {
     mockUseSession.mockReturnValue({
       isAuthenticated: true,
-      session: { user: { id: '123', name: 'Test User' } },
+      session: createMockSession(),
       isLoading: false,
+      status: 'authenticated' as const,
+      user: createMockSession().user,
+      update: vi.fn(),
     });
 
     mockUseAppStore.mockImplementation((selector) => {
-      const state = {
-        syncStatus: 'idle' as const,
-        lastSyncedAt: null,
-        userId: 'user-123',
-      };
-      return selector ? selector(state) : state;
+      const state = createAppStoreMock({ userId: 'user-123' });
+      return selector ? selector(state as any) : state;
     });
 
     render(<SyncIndicator />);
@@ -83,17 +99,16 @@ describe('SyncIndicator', () => {
   it('shows idle state with offline icon', () => {
     mockUseSession.mockReturnValue({
       isAuthenticated: true,
-      session: { user: { id: '123', name: 'Test User' } },
+      session: createMockSession(),
       isLoading: false,
+      status: 'authenticated' as const,
+      user: createMockSession().user,
+      update: vi.fn(),
     });
 
     mockUseAppStore.mockImplementation((selector) => {
-      const state = {
-        syncStatus: 'idle' as const,
-        lastSyncedAt: null,
-        userId: 'user-123',
-      };
-      return selector ? selector(state) : state;
+      const state = createAppStoreMock({ userId: 'user-123' });
+      return selector ? selector(state as any) : state;
     });
 
     render(<SyncIndicator />);
@@ -103,17 +118,16 @@ describe('SyncIndicator', () => {
   it('shows syncing state with pulsing icon', () => {
     mockUseSession.mockReturnValue({
       isAuthenticated: true,
-      session: { user: { id: '123', name: 'Test User' } },
+      session: createMockSession(),
       isLoading: false,
+      status: 'authenticated' as const,
+      user: createMockSession().user,
+      update: vi.fn(),
     });
 
     mockUseAppStore.mockImplementation((selector) => {
-      const state = {
-        syncStatus: 'syncing' as const,
-        lastSyncedAt: null,
-        userId: 'user-123',
-      };
-      return selector ? selector(state) : state;
+      const state = createAppStoreMock({ syncStatus: 'syncing', userId: 'user-123' });
+      return selector ? selector(state as any) : state;
     });
 
     render(<SyncIndicator />);
@@ -123,17 +137,16 @@ describe('SyncIndicator', () => {
   it('shows synced state with check icon', () => {
     mockUseSession.mockReturnValue({
       isAuthenticated: true,
-      session: { user: { id: '123', name: 'Test User' } },
+      session: createMockSession(),
       isLoading: false,
+      status: 'authenticated' as const,
+      user: createMockSession().user,
+      update: vi.fn(),
     });
 
     mockUseAppStore.mockImplementation((selector) => {
-      const state = {
-        syncStatus: 'synced' as const,
-        lastSyncedAt: Date.now() - 3000, // 3 seconds ago
-        userId: 'user-123',
-      };
-      return selector ? selector(state) : state;
+      const state = createAppStoreMock({ syncStatus: 'synced', lastSyncedAt: Date.now() - 3000, userId: 'user-123' });
+      return selector ? selector(state as any) : state;
     });
 
     render(<SyncIndicator />);
@@ -143,17 +156,16 @@ describe('SyncIndicator', () => {
   it('shows error state with alert icon', () => {
     mockUseSession.mockReturnValue({
       isAuthenticated: true,
-      session: { user: { id: '123', name: 'Test User' } },
+      session: createMockSession(),
       isLoading: false,
+      status: 'authenticated' as const,
+      user: createMockSession().user,
+      update: vi.fn(),
     });
 
     mockUseAppStore.mockImplementation((selector) => {
-      const state = {
-        syncStatus: 'error' as const,
-        lastSyncedAt: null,
-        userId: 'user-123',
-      };
-      return selector ? selector(state) : state;
+      const state = createAppStoreMock({ syncStatus: 'error', userId: 'user-123' });
+      return selector ? selector(state as any) : state;
     });
 
     render(<SyncIndicator />);
@@ -163,17 +175,16 @@ describe('SyncIndicator', () => {
   it('formats time correctly for "just now"', () => {
     mockUseSession.mockReturnValue({
       isAuthenticated: true,
-      session: { user: { id: '123', name: 'Test User' } },
+      session: createMockSession(),
       isLoading: false,
+      status: 'authenticated' as const,
+      user: createMockSession().user,
+      update: vi.fn(),
     });
 
     mockUseAppStore.mockImplementation((selector) => {
-      const state = {
-        syncStatus: 'synced' as const,
-        lastSyncedAt: Date.now() - 2000, // 2 seconds ago
-        userId: 'user-123',
-      };
-      return selector ? selector(state) : state;
+      const state = createAppStoreMock({ syncStatus: 'synced', lastSyncedAt: Date.now() - 2000, userId: 'user-123' });
+      return selector ? selector(state as any) : state;
     });
 
     render(<SyncIndicator />);
@@ -183,17 +194,16 @@ describe('SyncIndicator', () => {
   it('formats time correctly for seconds ago', () => {
     mockUseSession.mockReturnValue({
       isAuthenticated: true,
-      session: { user: { id: '123', name: 'Test User' } },
+      session: createMockSession(),
       isLoading: false,
+      status: 'authenticated' as const,
+      user: createMockSession().user,
+      update: vi.fn(),
     });
 
     mockUseAppStore.mockImplementation((selector) => {
-      const state = {
-        syncStatus: 'synced' as const,
-        lastSyncedAt: Date.now() - 45000, // 45 seconds ago
-        userId: 'user-123',
-      };
-      return selector ? selector(state) : state;
+      const state = createAppStoreMock({ syncStatus: 'synced', lastSyncedAt: Date.now() - 45000, userId: 'user-123' });
+      return selector ? selector(state as any) : state;
     });
 
     render(<SyncIndicator />);
@@ -203,17 +213,16 @@ describe('SyncIndicator', () => {
   it('formats time correctly for minutes ago', () => {
     mockUseSession.mockReturnValue({
       isAuthenticated: true,
-      session: { user: { id: '123', name: 'Test User' } },
+      session: createMockSession(),
       isLoading: false,
+      status: 'authenticated' as const,
+      user: createMockSession().user,
+      update: vi.fn(),
     });
 
     mockUseAppStore.mockImplementation((selector) => {
-      const state = {
-        syncStatus: 'synced' as const,
-        lastSyncedAt: Date.now() - 120000, // 2 minutes ago
-        userId: 'user-123',
-      };
-      return selector ? selector(state) : state;
+      const state = createAppStoreMock({ syncStatus: 'synced', lastSyncedAt: Date.now() - 120000, userId: 'user-123' });
+      return selector ? selector(state as any) : state;
     });
 
     render(<SyncIndicator />);
@@ -223,17 +232,16 @@ describe('SyncIndicator', () => {
   it('has accessible text for screen readers', () => {
     mockUseSession.mockReturnValue({
       isAuthenticated: true,
-      session: { user: { id: '123', name: 'Test User' } },
+      session: createMockSession(),
       isLoading: false,
+      status: 'authenticated' as const,
+      user: createMockSession().user,
+      update: vi.fn(),
     });
 
     mockUseAppStore.mockImplementation((selector) => {
-      const state = {
-        syncStatus: 'synced' as const,
-        lastSyncedAt: Date.now(),
-        userId: 'user-123',
-      };
-      return selector ? selector(state) : state;
+      const state = createAppStoreMock({ syncStatus: 'synced', lastSyncedAt: Date.now(), userId: 'user-123' });
+      return selector ? selector(state as any) : state;
     });
 
     render(<SyncIndicator />);

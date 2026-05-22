@@ -197,7 +197,7 @@ export default function SecureCodingLab() {
 
                   return (
                     <button
-                      key={option.text}
+                      key={`${challenge.id}-${i}`}
                       onClick={() => handleSelectOption(i)}
                       disabled={isAnswered}
                       className={`w-full text-left p-3 rounded-lg border-2 transition-all duration-200 ${optionStyle}`}

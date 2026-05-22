@@ -56,6 +56,7 @@ export default function QuizSystem() {
   const currentQuestionRef = useRef(0);
   const correctCountRef = useRef(0);
   const answersRef = useRef<(boolean | null)[]>([]);
+  const mountedRef = useRef(true);
 
   // Keep refs in sync for use in callbacks and timers
   useEffect(() => {
@@ -67,6 +68,7 @@ export default function QuizSystem() {
   // Timer effect — interval is created once when timerActive changes, not on every tick.
   // Uses ref for currentQuestion to avoid stale closures.
   useEffect(() => {
+    mountedRef.current = true;
     if (!timerActive) return;
 
     const interval = setInterval(() => {
@@ -75,6 +77,7 @@ export default function QuizSystem() {
           clearInterval(interval);
           timeUpRef.current = true;
           setTimerActive(false);
+          if (!mountedRef.current) return 0;
           setShowAnswer(true);
           setAnswers((answersPrev) => {
             const idx = currentQuestionRef.current;
@@ -90,6 +93,7 @@ export default function QuizSystem() {
     }, 1000);
 
     return () => {
+      mountedRef.current = false;
       clearInterval(interval);
       timeUpRef.current = false;
     };
@@ -307,7 +311,7 @@ export default function QuizSystem() {
 
                   return (
                     <div
-                      key={option}
+                      key={`${question.id}-${i}`}
                       className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${optionClass}`}
                       onClick={(e) => {
                         if (showAnswer) return;

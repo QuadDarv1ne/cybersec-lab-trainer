@@ -42,16 +42,13 @@ const pages: Record<string, React.ComponentType> = {
 
 function PageSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-pulse">
+      <Skeleton className="h-10 w-48 rounded-lg" />
+      <Skeleton className="h-6 w-72 rounded" />
       <Skeleton className="h-48 w-full rounded-2xl" />
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-24" />
-        ))}
-      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-28" />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-32 rounded-xl" />
         ))}
       </div>
     </div>

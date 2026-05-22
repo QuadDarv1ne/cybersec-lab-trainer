@@ -178,7 +178,7 @@ export default function ToolsLab() {
       </div>
 
       <Tabs defaultValue="ciphers" className="space-y-4">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
+        <TabsList className="grid grid-cols-2 lg:grid-cols-4 w-full">
           <TabsTrigger value="ciphers" className="text-xs">
             <Lock size={14} className="mr-1" /> {t('ciphers')}
           </TabsTrigger>

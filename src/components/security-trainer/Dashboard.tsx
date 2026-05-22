@@ -102,7 +102,7 @@ export default function Dashboard() {
       modules.some((m) => m.id === id)
     ).length
   , [completedModules]);
-  const totalProgress = Math.round((completedCount / totalModules) * 100);
+  const totalProgress = totalModules > 0 ? Math.round((completedCount / totalModules) * 100) : 0;
 
   const avgQuizScore = useMemo(() => {
     const scores = Object.values(quizScores);
@@ -196,10 +196,10 @@ export default function Dashboard() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 text-white p-8 md:p-10"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 text-white p-4 sm:p-6 md:p-10"
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-500/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-500/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
         <div className="relative z-10">
           <Badge className="bg-emerald-600/30 text-emerald-300 border-emerald-600/30 mb-4">
             09.03.04 Программная инженерия
@@ -269,19 +269,19 @@ export default function Dashboard() {
           { label: t('stats.achievements'), value: unlockedAchievements.length, total: achievements.length, color: 'text-violet-600' },
         ].map((stat, i) => (
           <motion.div
-            key={stat.label}
+            key={`stat-${i}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
           >
             <Card className="border-none shadow-sm bg-white">
               <CardContent className="p-4 text-center">
-                <p className={`text-2xl font-bold ${stat.color}`}>
+                <p className={`text-xl sm:text-2xl font-bold ${stat.color}`}>
                   <AnimatedCounter value={stat.value} />
                   {stat.total !== undefined ? <span>/{stat.total}</span> : null}
                   {stat.suffix && !stat.total ? stat.suffix : ''}
                 </p>
-                <p className="text-xs text-slate-500 mt-1">{stat.label}</p>
+                <p className="text-xs text-slate-500 mt-1 leading-tight">{stat.label}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -553,6 +553,12 @@ export default function Dashboard() {
                       icon: <AlertTriangle size={16} />,
                     });
                   }
+                };
+                reader.onerror = () => {
+                  toast.error('Ошибка чтения файла', {
+                    icon: <AlertTriangle size={16} />,
+                  });
+                  if (fileInputRef.current) fileInputRef.current.value = '';
                 };
                 reader.readAsText(file);
                 e.target.value = '';

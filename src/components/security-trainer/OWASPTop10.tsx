@@ -370,7 +370,7 @@ export default function OWASPTop10() {
 
                     return (
                       <button
-                        key={option.text}
+                        key={`${currentChallenge.id}-${i}`}
                         onClick={() => handleSelectOption(i)}
                         disabled={isChallengeAnswered}
                         className={`w-full text-left p-3 rounded-lg border-2 transition-all duration-200 ${optionStyle}`}

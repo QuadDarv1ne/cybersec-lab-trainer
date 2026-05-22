@@ -231,7 +231,7 @@ export default function Sidebar() {
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed left-0 top-0 bottom-0 w-[280px] z-50 md:hidden"
+              className="fixed left-0 top-0 bottom-0 w-[260px] max-w-[85vw] z-50 md:hidden"
             >
               {sidebarContent}
             </motion.aside>
@@ -240,7 +240,7 @@ export default function Sidebar() {
       </AnimatePresence>
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:block w-[260px] shrink-0 sticky top-0 h-screen">
+      <aside className="hidden md:block w-[220px] lg:w-[260px] shrink-0 sticky top-0 h-screen">
         {sidebarContent}
       </aside>
     </>

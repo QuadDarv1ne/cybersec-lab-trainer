@@ -44,7 +44,7 @@ export default function SignInPage() {
     setLoadingProvider(provider);
     try {
       await signIn(provider, { callbackUrl: "/" });
-    } catch (_error) {
+    } catch {
       setLoadingProvider(null);
     }
   };
@@ -53,7 +53,7 @@ export default function SignInPage() {
     setLoadingProvider("credentials");
     try {
       await signIn("credentials", { callbackUrl: "/" });
-    } catch (_error) {
+    } catch {
       setLoadingProvider(null);
     }
   };

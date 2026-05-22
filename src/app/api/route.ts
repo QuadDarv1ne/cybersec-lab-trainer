@@ -71,15 +71,15 @@ export async function GET(request: Request) {
         challenges[cp.challengeType] = {
           correct: cp.correct,
           total: cp.total,
-          answered: (cp.answered as number[]) ?? [],
-          selectedOptions: (cp.selectedOptions as Record<string, number>) ?? {},
+          answered: cp.answered ? JSON.parse(cp.answered) : [],
+          selectedOptions: cp.selectedOptions ? JSON.parse(cp.selectedOptions) : {},
         };
       }
 
       // Build item-level progress map
       const itemProgress: Record<string, string[]> = {};
       for (const ip of itemProgressRecords) {
-        itemProgress[ip.moduleId] = (ip.itemIds as string[]) ?? [];
+        itemProgress[ip.moduleId] = ip.itemIds ? JSON.parse(ip.itemIds) : [];
       }
 
       const csrfToken = await setCsrfCookie();
@@ -284,14 +284,14 @@ export async function POST(request: Request) {
                 challengeType: c.challengeType,
                 correct: c.correct,
                 total: c.total,
-                answered: c.answered ?? [],
-                selectedOptions: c.selectedOptions ?? {},
+                answered: c.answered ? JSON.stringify(c.answered) : null,
+                selectedOptions: c.selectedOptions ? JSON.stringify(c.selectedOptions) : null,
               },
               update: {
                 correct: c.correct,
                 total: c.total,
-                answered: c.answered ?? [],
-                selectedOptions: c.selectedOptions ?? {},
+                answered: c.answered ? JSON.stringify(c.answered) : null,
+                selectedOptions: c.selectedOptions ? JSON.stringify(c.selectedOptions) : null,
               },
             })
           )
@@ -317,10 +317,10 @@ export async function POST(request: Request) {
               create: {
                 userId,
                 moduleId: item.moduleId,
-                itemIds: item.itemIds,
+                itemIds: JSON.stringify(item.itemIds),
               },
               update: {
-                itemIds: item.itemIds,
+                itemIds: JSON.stringify(item.itemIds),
               },
             })
           )
