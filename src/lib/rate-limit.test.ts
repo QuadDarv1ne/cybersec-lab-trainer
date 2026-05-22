@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { getClientIP } from './rate-limit';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { getClientIP, addRateLimitHeaders } from './rate-limit';
+import { NextResponse } from 'next/server';
 
 describe('getClientIP', () => {
   function makeRequest(headers: Record<string, string>): Request {
@@ -41,5 +42,32 @@ describe('getClientIP', () => {
   it('trims whitespace from IP addresses', () => {
     const req = makeRequest({ 'x-real-ip': '  10.0.0.1  ' });
     expect(getClientIP(req)).toBe('10.0.0.1');
+  });
+});
+
+describe('addRateLimitHeaders', () => {
+  it('sets correct rate limit headers', () => {
+    const response = new NextResponse();
+    addRateLimitHeaders(response, 95, 1700000060);
+
+    expect(response.headers.get('X-RateLimit-Limit')).toBe('100');
+    expect(response.headers.get('X-RateLimit-Remaining')).toBe('95');
+    // reset is in seconds (ceil of ms/1000)
+    expect(response.headers.get('X-RateLimit-Reset')).toBe('1700001');
+  });
+
+  it('clamps negative remaining to 0', () => {
+    const response = new NextResponse();
+    addRateLimitHeaders(response, -5, 1700000060);
+
+    expect(response.headers.get('X-RateLimit-Remaining')).toBe('0');
+  });
+
+  it('rounds up reset time to nearest second', () => {
+    const response = new NextResponse();
+    // 1700000000500 ms = 1700000000.5 seconds -> ceil = 1700000001
+    addRateLimitHeaders(response, 50, 1700000000500);
+
+    expect(response.headers.get('X-RateLimit-Reset')).toBe('1700000001');
   });
 });

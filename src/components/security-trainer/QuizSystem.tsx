@@ -119,6 +119,7 @@ export default function QuizSystem() {
     setAnswers(new Array(questions.length).fill(null));
     setTimerActive(true);
     setQuizState('playing');
+    timeUpRef.current = false;
   };
 
   const nextQuestion = () => {
@@ -159,6 +160,8 @@ export default function QuizSystem() {
 
   const handleAnswer = () => {
     if (!selectedAnswer) return;
+    // If timer already fired and recorded the answer, don't overwrite it
+    if (timeUpRef.current) return;
     setTimerActive(false);
     setShowAnswer(true);
     const question = categoryQuestions[currentQuestion];

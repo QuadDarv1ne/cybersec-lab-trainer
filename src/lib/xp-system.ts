@@ -80,8 +80,8 @@ export function calculateXPBreakdown(
   totalModules = 8
 ): XPBreakdown {
   const moduleXP = completedModules.length * XP_REWARDS.completeModule;
-  // First module bonus: only awarded on the very first completion
-  const bonusesXP = completedModules.length === 1 ? XP_REWARDS.firstModuleComplete : 0;
+  // First module bonus: awarded once the first module is completed (persists in breakdown)
+  const bonusesXP = completedModules.length >= 1 ? XP_REWARDS.firstModuleComplete : 0;
   const allModulesBonusXP = completedModules.length >= totalModules ? XP_REWARDS.allModulesComplete : 0;
 
   let quizXP = 0;
