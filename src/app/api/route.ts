@@ -9,7 +9,8 @@ import { modules } from "@/lib/data/modules-data";
 import { quizCategories } from "@/lib/data/quiz-data";
 import { rateLimit, getClientIP, addRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
-import { setCsrfCookie, validateCsrfToken, getCsrfCookieName, getCsrfHeaderName } from "@/lib/csrf";
+import { setCsrfCookie, validateCsrfToken } from "@/lib/csrf-server";
+import { getCsrfCookieName, getCsrfHeaderName } from "@/lib/csrf";
 
 // Build sets of valid IDs for validation
 const validModuleIds = new Set(modules.map((m) => m.id));
