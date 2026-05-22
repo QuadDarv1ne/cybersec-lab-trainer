@@ -76,11 +76,13 @@ export function calculateXPBreakdown(
   completedModules: string[],
   quizScores: Record<string, number>,
   challengeCorrect: number,
-  studySessionXP = 0
+  studySessionXP = 0,
+  totalModules = 8
 ): XPBreakdown {
   const moduleXP = completedModules.length * XP_REWARDS.completeModule;
-  const bonusesXP = completedModules.length > 0 ? XP_REWARDS.firstModuleComplete : 0;
-  const allModulesBonusXP = completedModules.length >= 8 ? XP_REWARDS.allModulesComplete : 0;
+  // First module bonus: only awarded on the very first completion
+  const bonusesXP = completedModules.length === 1 ? XP_REWARDS.firstModuleComplete : 0;
+  const allModulesBonusXP = completedModules.length >= totalModules ? XP_REWARDS.allModulesComplete : 0;
 
   let quizXP = 0;
   for (const score of Object.values(quizScores)) {

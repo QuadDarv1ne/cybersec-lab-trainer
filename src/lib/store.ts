@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { quizCategories } from './data/quiz-data';
+import { modules } from './data/modules-data';
 import { logger } from './logger';
 import { XP_REWARDS, calculateLevel, xpToNextLevel, calculateXPBreakdown, levelProgress, type XPBreakdown } from './xp-system';
 import { type NotesMap, type Note, generateNoteId } from './notes-system';
@@ -374,7 +375,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     set((state) => {
       if (state.completedModules.includes(moduleId)) return state;
       const isFirstModule = state.completedModules.length === 0;
-      const willBeAllComplete = state.completedModules.length + 1 >= 8;
+      const willBeAllComplete = state.completedModules.length + 1 >= modules.length;
       let xpGain = XP_REWARDS.completeModule + (isFirstModule ? XP_REWARDS.firstModuleComplete : 0);
       if (willBeAllComplete) xpGain += XP_REWARDS.allModulesComplete;
       return {
@@ -508,7 +509,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       state.secureCodingChallengeScores.correct;
     const todayTotalMs = getTodayTotalMs(state.studySessions);
     const studySessionXP = calculateSessionXP(todayTotalMs);
-    return calculateXPBreakdown(state.completedModules, state.quizScores, totalChallengeCorrect, studySessionXP);
+    return calculateXPBreakdown(state.completedModules, state.quizScores, totalChallengeCorrect, studySessionXP, modules.length);
   },
 
   addNote: (itemId: string, moduleId: string, moduleName: string, content: string) => {
@@ -568,7 +569,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
           pageType: activeSessionPage!,
           xpEarned,
         },
-      ],
+      ].slice(0, 100),
       totalXP: state.totalXP + xpEarned,
     }));
     activeSessionStart = null;
