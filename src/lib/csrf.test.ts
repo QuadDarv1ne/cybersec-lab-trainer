@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { generateCsrfToken, hashToken, setCsrfCookie, validateCsrfToken, getCsrfCookieName, getCsrfHeaderName } from './csrf';
+import { generateCsrfToken, hashToken, getCsrfCookieName, getCsrfHeaderName } from './csrf';
+import { setCsrfCookie, validateCsrfToken } from './csrf-server';
 
 // Mock Next.js cookies
 const mockCookieStore = {

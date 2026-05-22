@@ -29,13 +29,18 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 if (providers.length === 0) {
   providers.push(
     CredentialsProvider({
-      name: "Demo",
-      credentials: {},
-      async authorize() {
+      name: 'Demo',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        name: { label: 'Name', type: 'text' },
+      },
+      async authorize(credentials) {
+        const email = (credentials?.email as string) || 'demo@example.com';
+        const name = (credentials?.name as string) || 'Demo User';
         return {
-          id: 'demo-user',
-          name: "Demo User",
-          email: "demo@example.com",
+          id: `demo-${email.replace(/[^a-zA-Z0-9]/g, '-')}`,
+          name,
+          email,
           image: null,
         };
       },

@@ -6,9 +6,11 @@ const locales: Record<string, typeof ru> = {
   en,
 };
 
-// Read current locale from browser — no permanent caching to allow runtime language switching.
+// Read current locale: check localStorage first, then browser language
 function getCurrentLocale(): string {
   if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('app-locale');
+    if (stored === 'en' || stored === 'ru') return stored;
     const browserLang = navigator.language.toLowerCase();
     if (browserLang.startsWith('en')) return 'en';
     if (browserLang.startsWith('ru')) return 'ru';
