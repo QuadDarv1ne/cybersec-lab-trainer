@@ -244,6 +244,24 @@ const apiClient = {
 
     return response.json();
   },
+
+  async saveItemProgress(items: { moduleId: string; itemIds: string[] }[]) {
+    const response = await fetch('/api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'item-progress-sync',
+        payload: { items },
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || 'Failed to sync item progress');
+    }
+
+    return response.json();
+  },
 };
 
 // Sync with database via API (batch call)
@@ -298,6 +316,17 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
       savePromises.push(apiClient.saveChallengeProgress(challenges));
     }
 
+    // Sync item-level progress (SQL levels, XSS levels, OWASP items)
+    const itemProgress = [
+      { moduleId: 'sql-injection', itemIds: state.sqlCompletedLevels },
+      { moduleId: 'xss', itemIds: state.xssCompletedLevels },
+      { moduleId: 'owasp', itemIds: state.studiedOwaspItems },
+    ].filter((ip) => ip.itemIds.length > 0);
+
+    if (itemProgress.length > 0) {
+      savePromises.push(apiClient.saveItemProgress(itemProgress));
+    }
+
     if (savePromises.length > 0) {
       await Promise.all(savePromises);
     }
@@ -336,6 +365,15 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
         authChallengeScores: data.challenges.auth ?? { correct: 0, total: 0, answered: [], selectedOptions: {} },
         headersChallengeScores: data.challenges.headers ?? { correct: 0, total: 0, answered: [], selectedOptions: {} },
         secureCodingChallengeScores: data.challenges['secure-coding'] ?? { correct: 0, total: 0, answered: [], selectedOptions: {} },
+      });
+    }
+
+    // Restore item-level progress if available
+    if (data.itemProgress) {
+      set({
+        studiedOwaspItems: data.itemProgress.owasp ?? [],
+        sqlCompletedLevels: data.itemProgress['sql-injection'] ?? [],
+        xssCompletedLevels: data.itemProgress.xss ?? [],
       });
     }
   } catch (error) {
@@ -443,18 +481,21 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     set((state) => ({
       studiedOwaspItems: addUnique(state.studiedOwaspItems, id),
     }));
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after addStudiedOwasp:', err));
   },
 
   addSqlLevel: (level: string) => {
     set((state) => ({
       sqlCompletedLevels: addUnique(state.sqlCompletedLevels, level),
     }));
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after addSqlLevel:', err));
   },
 
   addXssLevel: (level: string) => {
     set((state) => ({
       xssCompletedLevels: addUnique(state.xssCompletedLevels, level),
     }));
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after addXssLevel:', err));
   },
 
   setOwaspChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {

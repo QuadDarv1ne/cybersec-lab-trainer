@@ -2,7 +2,7 @@ import { z } from "zod";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { quizResultSchema, progressUpdateSchema, glossarySearchSchema, batchSyncSchema, challengeBatchSchema } from "@/lib/validations/api";
+import { quizResultSchema, progressUpdateSchema, glossarySearchSchema, batchSyncSchema, challengeBatchSchema, itemProgressBatchSchema } from "@/lib/validations/api";
 import { db } from "@/lib/db";
 import { glossaryTerms } from "@/lib/data/glossary-data";
 import { modules } from "@/lib/data/modules-data";
@@ -37,7 +37,7 @@ export async function GET(request: Request) {
     const action = url.searchParams.get('action');
 
     if (action === 'load-progress') {
-      const [progressRecords, quizResults, challengeProgress] = await Promise.all([
+      const [progressRecords, quizResults, challengeProgressRecords, itemProgressRecords] = await Promise.all([
         db.progress.findMany({
           where: { userId },
           orderBy: { lastAccessed: 'desc' },
@@ -47,6 +47,9 @@ export async function GET(request: Request) {
           orderBy: { createdAt: 'desc' },
         }),
         db.challengeProgress.findMany({
+          where: { userId },
+        }),
+        db.itemProgress.findMany({
           where: { userId },
         }),
       ]);
@@ -63,7 +66,7 @@ export async function GET(request: Request) {
       }
 
       const challenges: Record<string, { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> }> = {};
-      for (const cp of challengeProgress) {
+      for (const cp of challengeProgressRecords) {
         challenges[cp.challengeType] = {
           correct: cp.correct,
           total: cp.total,
@@ -72,7 +75,13 @@ export async function GET(request: Request) {
         };
       }
 
-      const response = NextResponse.json({ completedModules, quizScores, challenges });
+      // Build item-level progress map
+      const itemProgress: Record<string, string[]> = {};
+      for (const ip of itemProgressRecords) {
+        itemProgress[ip.moduleId] = (ip.itemIds as string[]) ?? [];
+      }
+
+      const response = NextResponse.json({ completedModules, quizScores, challenges, itemProgress });
       addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
       return response;
     }
@@ -282,11 +291,41 @@ export async function POST(request: Request) {
         break;
       }
 
+      case 'item-progress-sync': {
+        const data = itemProgressBatchSchema.parse(payload);
+        const { items } = data;
+
+        if (items.length === 0) {
+          result = { saved: { items: 0 } };
+          break;
+        }
+
+        const itemResults = await Promise.all(
+          items.map((item) =>
+            db.itemProgress.upsert({
+              where: { userId_moduleId: { userId, moduleId: item.moduleId } },
+              create: {
+                userId,
+                moduleId: item.moduleId,
+                itemIds: item.itemIds,
+              },
+              update: {
+                itemIds: item.itemIds,
+              },
+            })
+          )
+        );
+
+        result = { saved: { items: itemResults.length }, message: "Item progress sync completed" };
+        break;
+      }
+
       case 'reset-progress': {
         await db.$transaction([
           db.progress.deleteMany({ where: { userId } }),
           db.quizResult.deleteMany({ where: { userId } }),
           db.challengeProgress.deleteMany({ where: { userId } }),
+          db.itemProgress.deleteMany({ where: { userId } }),
         ]);
 
         result = { message: "Progress reset successfully" };
@@ -295,7 +334,7 @@ export async function POST(request: Request) {
 
       default: {
         const response = NextResponse.json(
-          { error: `Unknown request type. Expected: progress, quiz-answers, glossary-search, batch-sync, challenge-progress-sync, reset-progress` },
+          { error: `Unknown request type. Expected: progress, quiz-answers, glossary-search, batch-sync, challenge-progress-sync, item-progress-sync, reset-progress` },
           { status: 400 }
         );
         addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);

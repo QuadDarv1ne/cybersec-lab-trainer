@@ -58,6 +58,16 @@ export const challengeBatchSchema = z.object({
   challenges: z.array(challengeProgressSchema).max(50).optional().default([]),
 });
 
+// Schema для синхронизации детализированного прогресса по элементам модулей
+export const itemProgressSchema = z.object({
+  moduleId: z.string().min(1, 'moduleId обязателен'),
+  itemIds: z.array(z.string().min(1)).max(500).optional().default([]),
+});
+
+export const itemProgressBatchSchema = z.object({
+  items: z.array(itemProgressSchema).max(20).optional().default([]),
+});
+
 // Типы для схем
 export type QuizResult = z.infer<typeof quizResultSchema>;
 export type ProgressUpdate = z.infer<typeof progressUpdateSchema>;
