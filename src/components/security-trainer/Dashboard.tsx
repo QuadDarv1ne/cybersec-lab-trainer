@@ -91,7 +91,7 @@ const achievementIcons: Record<string, React.ReactNode> = {
 };
 
 export default function Dashboard() {
-  const { setCurrentPage, completedModules, quizScores, toggleSidebar, owaspChallengeScores, authChallengeScores, headersChallengeScores, secureCodingChallengeScores, studiedOwaspItems, sqlCompletedLevels, xssCompletedLevels, csrfViewedChallenges, quizHistory, importProgressData, totalXP } = useAppStore();
+  const { setCurrentPage, completedModules, quizScores, toggleSidebar, owaspChallengeScores, authChallengeScores, headersChallengeScores, secureCodingChallengeScores, studiedOwaspItems, sqlCompletedLevels, xssCompletedLevels, csrfViewedChallenges, quizHistory, importProgressData, totalXP, notes } = useAppStore();
   const t = useTranslations('dashboard');
   const tCommon = useTranslations('common');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -509,7 +509,7 @@ export default function Dashboard() {
                   completedModules, quizScores, studiedOwaspItems, sqlCompletedLevels,
                   xssCompletedLevels, owaspChallengeScores, authChallengeScores,
                   headersChallengeScores, secureCodingChallengeScores, csrfViewedChallenges,
-                  quizHistory, totalXP,
+                  quizHistory, totalXP, notes,
                 };
                 const exportedAt = exportProgress(state);
                 toast.success(`Прогресс экспортирован (${new Date(exportedAt).toLocaleString('ru-RU')})`);

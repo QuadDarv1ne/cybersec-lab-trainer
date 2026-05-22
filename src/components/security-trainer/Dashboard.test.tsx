@@ -107,7 +107,7 @@ vi.mock('framer-motion', () => {
 
   const MotionComponent = ({ children, ...props }: React.HTMLAttributes<HTMLElement> & { as?: string }) => {
     const renderedChildren = extractValue(children);
-    return <div {...props}>{renderedChildren}</div>;
+    return <div {...props}>{renderedChildren as React.ReactNode}</div>;
   };
 
   return {
@@ -125,7 +125,7 @@ vi.mock('framer-motion', () => {
     },
     AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
     useMotionValue: (initial: number) => ({ get: () => initial, set: vi.fn(), on: vi.fn(), subscribe: vi.fn() }),
-    useTransform: (value: { get: () => number }, transform: (v: number) => number | string) => ({ get: () => transform(typeof value.get === 'function' ? value.get() : value), on: vi.fn(), subscribe: vi.fn() }),
+    useTransform: (value: { get: () => number } | number, transform: (v: number) => number | string) => ({ get: () => transform(typeof value === 'object' && 'get' in value ? value.get() : value), on: vi.fn(), subscribe: vi.fn() }),
     animate: (_value: { get: () => number }, _to: number, _options?: { duration?: number; ease?: unknown }) => ({
       stop: vi.fn(),
     }),

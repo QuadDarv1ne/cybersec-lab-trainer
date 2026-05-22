@@ -19,6 +19,7 @@ vi.mock('@/lib/store', () => {
     setUserId: vi.fn(),
     syncWithDatabase: vi.fn(),
     loadFromDatabase: vi.fn(),
+    getNotesForItem: vi.fn(() => []),
   };
 
   const defaultState = {

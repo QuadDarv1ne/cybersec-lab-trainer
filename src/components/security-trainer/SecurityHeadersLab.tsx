@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import InlineNotes from './InlineNotes';
 import { useAppStore } from '@/lib/store';
 import { securityHeaders, headerChallenges } from '@/lib/data/security-headers-data';
 import CodeBlock from './CodeBlock';
@@ -372,6 +373,9 @@ export default function SecurityHeadersLab() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Notes */}
+      {challenge && <InlineNotes itemId={challenge.id} moduleId="security-headers" moduleName="Заголовки безопасности" />}
     </div>
   );
 }

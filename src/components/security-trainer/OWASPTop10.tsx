@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, ChevronLeft, CheckCircle2, AlertTriangle, Shield, Target, XCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
+import InlineNotes from './InlineNotes';
 
 export default function OWASPTop10() {
   const { studiedOwaspItems, addStudiedOwasp, completeModule, setCurrentPage, completedModules, setOwaspChallengeScore, owaspChallengeScores } = useAppStore();
@@ -284,6 +285,9 @@ export default function OWASPTop10() {
                           </Button>
                         </div>
                       </div>
+
+                      {/* Notes */}
+                      <InlineNotes itemId={item.id} moduleId="owasp" moduleName="OWASP Top 10" />
                     </div>
                   </AccordionContent>
                 </AccordionItem>

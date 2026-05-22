@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { exportProgress, importProgress, type ExportData } from './progress-export';
+import { importProgress, type ExportData } from './progress-export';
 
 describe('progress-export', () => {
   const validExportData: ExportData = {
-    version: 1,
+    version: 3,
     exportedAt: '2024-01-01T00:00:00.000Z',
     data: {
       completedModules: ['owasp', 'sql-injection'],
@@ -17,6 +17,8 @@ describe('progress-export', () => {
       secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
       csrfViewedChallenges: [],
       quizHistory: [],
+      totalXP: 0,
+      notes: {},
     },
   };
 

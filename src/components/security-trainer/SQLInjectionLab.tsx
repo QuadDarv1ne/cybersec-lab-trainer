@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import InlineNotes from './InlineNotes';
 import { useAppStore } from '@/lib/store';
 import { sqlChallenges } from '@/lib/security-data';
 import { useTranslations } from '@/lib/intlStub';
@@ -301,6 +302,9 @@ const challenge = sqlChallenges[activeChallenge];
                     </motion.div>
                   )}
                 </AnimatePresence>
+
+                {/* Notes */}
+                {challenge && <InlineNotes itemId={challenge.id} moduleId="sql-injection" moduleName="SQL-инъекции" />}
 
                 {/* Navigation */}
                 <div className="flex justify-between pt-2">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import InlineNotes from './InlineNotes';
 import { useAppStore } from '@/lib/store';
 import { secureCodingChallenges } from '@/lib/security-data';
 import CodeBlock from './CodeBlock';
@@ -295,6 +296,9 @@ export default function SecureCodingLab() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Notes */}
+      {challenge && <InlineNotes itemId={challenge.id} moduleId="secure-coding" moduleName="Безопасное кодирование" />}
     </div>
   );
 }

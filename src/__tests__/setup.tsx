@@ -27,7 +27,7 @@ vi.mock('next-themes', () => ({
 }));
 
 // Create mock motion components
-const createMockComponent = (tag: keyof JSX.IntrinsicElements) => {
+const createMockComponent = (tag: string) => {
   const MockComponent = ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => {
     return React.createElement(tag, props, children);
   };
@@ -63,12 +63,12 @@ vi.mock('framer-motion', () => ({
     on: vi.fn(),
     subscribe: vi.fn(),
   }),
-  useTransform: (value: { get: () => number }, transform: (v: number) => number | string) => ({
-    get: () => transform(typeof value.get === 'function' ? value.get() : value),
+  useTransform: (value: { get: () => number } | number, transform: (v: number) => number | string) => ({
+    get: () => transform(typeof value === 'object' && 'get' in value ? value.get() : value),
     on: vi.fn(),
     subscribe: vi.fn(),
   }),
-  animate: (value: { get: () => number }, to: number, options?: { duration?: number; ease?: unknown }) => ({
+  animate: (_value: { get: () => number }, _to: number, _options?: { duration?: number; ease?: unknown }) => ({
     stop: vi.fn(),
   }),
   useAnimation: () => ({ start: vi.fn(), stop: vi.fn() }),

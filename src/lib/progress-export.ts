@@ -24,7 +24,7 @@ type QuizHistoryEntry = {
   timestamp: number;
 };
 
-const EXPORT_VERSION = 2;
+const EXPORT_VERSION = 3;
 
 export interface ExportData {
   version: number;
@@ -42,6 +42,7 @@ export interface ExportData {
     csrfViewedChallenges: number[];
     quizHistory: QuizHistoryEntry[];
     totalXP: number;
+    notes: Record<string, { id: string; itemId: string; moduleId: string; moduleName: string; content: string; createdAt: number; updatedAt: number }>;
   };
 }
 
@@ -61,6 +62,7 @@ export function exportProgress(state: {
   csrfViewedChallenges: number[];
   quizHistory: QuizHistoryEntry[];
   totalXP: number;
+  notes: Record<string, { id: string; itemId: string; moduleId: string; moduleName: string; content: string; createdAt: number; updatedAt: number }>;
 }): string {
   const exportData: ExportData = {
     version: EXPORT_VERSION,
@@ -78,6 +80,7 @@ export function exportProgress(state: {
       csrfViewedChallenges: state.csrfViewedChallenges,
       quizHistory: state.quizHistory,
       totalXP: state.totalXP,
+      notes: state.notes,
     },
   };
 
@@ -118,7 +121,7 @@ export function importProgress(jsonString: string): {
   try {
     const parsed: ExportData = JSON.parse(jsonString);
 
-    if (!parsed.version || (parsed.version !== 1 && parsed.version !== EXPORT_VERSION)) {
+    if (!parsed.version || parsed.version < 1 || parsed.version > EXPORT_VERSION) {
       logger.error(`Unsupported export version: ${parsed?.version}`);
       return null;
     }

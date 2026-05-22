@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import InlineNotes from './InlineNotes';
 import { useAppStore } from '@/lib/store';
 import CodeBlock from './CodeBlock';
 import { Card, CardContent } from '@/components/ui/card';
@@ -694,6 +695,9 @@ function authenticate(req, res, next) {
           <CheckCircle2 size={16} /> {t('moduleComplete')}
         </div>
       )}
+
+      {/* Notes for current challenge */}
+      {currentChallenge && <InlineNotes itemId={currentChallenge.id} moduleId="auth" moduleName="Аутентификация" />}
     </div>
   );
 }

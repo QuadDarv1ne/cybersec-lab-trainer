@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import InlineNotes from './InlineNotes';
 import { useAppStore } from '@/lib/store';
 import { csrfChallenges, csrfMitigations } from '@/lib/data/csrf-data';
 import CodeBlock from './CodeBlock';
@@ -282,6 +283,9 @@ export default function CSRFLab() {
             </Button>
           )
         )}
+
+        {/* Notes */}
+        {challenge && <InlineNotes itemId={`csrf-${activeChallenge + 1}`} moduleId="csrf" moduleName="CSRF-атаки" />}
       </div>
     </div>
   );

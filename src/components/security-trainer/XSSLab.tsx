@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import InlineNotes from './InlineNotes';
 import { useAppStore } from '@/lib/store';
 import { xssTypes } from '@/lib/security-data';
 import CodeBlock from './CodeBlock';
@@ -316,6 +317,9 @@ export default function XSSLab() {
                   <CheckCircle2 size={16} /> {t('markComplete')}
                 </div>
               )}
+
+              {/* Notes */}
+              <InlineNotes itemId={xss.id} moduleId="xss" moduleName="XSS-атаки" />
             </motion.div>
           </TabsContent>
         ))}

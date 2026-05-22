@@ -22,6 +22,7 @@ const ToolsLab = dynamic(() => import('@/components/security-trainer/ToolsLab'),
 const QuizSystem = dynamic(() => import('@/components/security-trainer/QuizSystem'), { ssr: false, loading: () => <PageSkeleton /> });
 const AchievementsGlossary = dynamic(() => import('@/components/security-trainer/AchievementsGlossary'), { ssr: false, loading: () => <PageSkeleton /> });
 const SecurityHeadersLab = dynamic(() => import('@/components/security-trainer/SecurityHeadersLab'), { ssr: false, loading: () => <PageSkeleton /> });
+const NotesPage = dynamic(() => import('@/components/security-trainer/Notes'), { ssr: false, loading: () => <PageSkeleton /> });
 const ContentSearch = dynamic(() => import('@/components/security-trainer/ContentSearch'), { ssr: false });
 
 const pages: Record<string, React.ComponentType> = {
@@ -36,6 +37,7 @@ const pages: Record<string, React.ComponentType> = {
   quiz: QuizSystem,
   achievements: AchievementsGlossary,
   owasp: OWASPTop10,
+  notes: NotesPage,
 };
 
 function PageSkeleton() {

@@ -15,6 +15,7 @@ const pageToHash: Record<PageType, string> = {
   tools: 'tools',
   quiz: 'quiz',
   achievements: 'achievements',
+  notes: 'notes',
 };
 
 const hashToPage: Record<string, PageType> = {
@@ -29,6 +30,7 @@ const hashToPage: Record<string, PageType> = {
   tools: 'tools',
   quiz: 'quiz',
   achievements: 'achievements',
+  notes: 'notes',
 };
 
 /**
