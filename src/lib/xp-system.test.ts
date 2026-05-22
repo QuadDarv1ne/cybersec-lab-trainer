@@ -69,9 +69,9 @@ describe('xpToNextLevel', () => {
     expect(xpToNextLevel(100)).toBe(200);
   });
 
-  it('returns 150 XP needed from 150 XP (level 2, halfway)', () => {
-    // At 150 XP: level 2, need 200 total for level 3, so 50 more
-    expect(xpToNextLevel(150)).toBe(50);
+  it('returns 150 XP needed from 150 XP (level 2)', () => {
+    // At 150 XP: level 2, need 300 total for level 3 (100+200), so 150 more needed
+    expect(xpToNextLevel(150)).toBe(150);
   });
 });
 
@@ -115,17 +115,17 @@ describe('calculateXPBreakdown', () => {
   it('awards module XP correctly', () => {
     const breakdown = calculateXPBreakdown(['owasp', 'xss'], {}, 0, 0);
     expect(breakdown.modules).toBe(2 * XP_REWARDS.completeModule);
-    expect(breakdown.total).toBe(2 * XP_REWARDS.completeModule);
+    expect(breakdown.total).toBe(2 * XP_REWARDS.completeModule + XP_REWARDS.firstModuleComplete);
   });
 
-  it('awards first module bonus only when exactly 1 module completed', () => {
+  it('awards first module bonus once and persists for all subsequent modules', () => {
     // 1 module: should get first module bonus
     const one = calculateXPBreakdown(['owasp'], {}, 0, 0);
     expect(one.bonuses).toBe(XP_REWARDS.firstModuleComplete);
 
-    // 2 modules: no first module bonus (already awarded on first)
+    // 2 modules: first module bonus still present (persisted)
     const two = calculateXPBreakdown(['owasp', 'xss'], {}, 0, 0);
-    expect(two.bonuses).toBe(0);
+    expect(two.bonuses).toBe(XP_REWARDS.firstModuleComplete);
 
     // 0 modules: no bonus
     const zero = calculateXPBreakdown([], {}, 0, 0);
@@ -136,14 +136,14 @@ describe('calculateXPBreakdown', () => {
     const totalModules = 8;
     const allCompleted = Array.from({ length: totalModules }, (_, i) => `module-${i}`);
     const breakdown = calculateXPBreakdown(allCompleted, {}, 0, 0, totalModules);
-    expect(breakdown.bonuses).toBe(XP_REWARDS.allModulesComplete);
+    expect(breakdown.bonuses).toBe(XP_REWARDS.firstModuleComplete + XP_REWARDS.allModulesComplete);
   });
 
-  it('does not award all modules bonus when not all completed', () => {
+  it('awards first module bonus but not all modules bonus when partial', () => {
     const totalModules = 8;
     const someCompleted = Array.from({ length: 5 }, (_, i) => `module-${i}`);
     const breakdown = calculateXPBreakdown(someCompleted, {}, 0, 0, totalModules);
-    expect(breakdown.bonuses).toBe(0);
+    expect(breakdown.bonuses).toBe(XP_REWARDS.firstModuleComplete);
   });
 
   it('calculates quiz XP correctly with base and bonus', () => {
@@ -190,15 +190,15 @@ describe('calculateXPBreakdown', () => {
   });
 
   it('uses default totalModules=8 when not specified', () => {
-    // 8 modules with default should trigger all-modules bonus
+    // 8 modules with default should trigger all-modules bonus + first module bonus
     const eight = Array.from({ length: 8 }, (_, i) => `module-${i}`);
     const breakdown = calculateXPBreakdown(eight, {}, 0, 0);
-    expect(breakdown.bonuses).toBe(XP_REWARDS.allModulesComplete);
+    expect(breakdown.bonuses).toBe(XP_REWARDS.firstModuleComplete + XP_REWARDS.allModulesComplete);
 
-    // 7 modules should not
+    // 7 modules should only have first module bonus
     const seven = Array.from({ length: 7 }, (_, i) => `module-${i}`);
     const breakdown7 = calculateXPBreakdown(seven, {}, 0, 0);
-    expect(breakdown7.bonuses).toBe(0);
+    expect(breakdown7.bonuses).toBe(XP_REWARDS.firstModuleComplete);
   });
 });
 

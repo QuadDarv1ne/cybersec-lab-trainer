@@ -8,6 +8,7 @@ import { logger } from './logger';
 import { XP_REWARDS, calculateLevel, xpToNextLevel, calculateXPBreakdown, levelProgress, type XPBreakdown } from './xp-system';
 import { type NotesMap, type Note, generateNoteId } from './notes-system';
 import { type StudySession, calculateSessionXP, generateSessionId, getTodayTotalMs, getTotalStudyTimeMs } from './study-sessions';
+import { getCsrfCookieName, getCsrfHeaderName } from './csrf';
 
 export type PageType =
   | 'dashboard'
@@ -175,6 +176,18 @@ const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>)
 const addUnique = <T>(array: T[], item: T): T[] =>
   array.includes(item) ? array : [...array, item];
 
+// Get CSRF token from cookie
+const getCsrfToken = (): string | undefined => {
+  if (typeof document === 'undefined') return undefined;
+  const name = getCsrfCookieName() + '=';
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const c = cookie.trim();
+    if (c.startsWith(name)) return c.substring(name.length);
+  }
+  return undefined;
+};
+
 // API client functions
 const apiClient = {
   async loadProgress(signal?: AbortSignal) {
@@ -192,9 +205,13 @@ const apiClient = {
   },
 
   async saveBatch(modules: { moduleId: string; completed: boolean; score?: number }[], quizzes: { quizId: string; score: number; total: number }[]) {
+    const csrfToken = getCsrfToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
+
     const response = await fetch('/api', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         type: 'batch-sync',
         payload: { modules, quizzes },
@@ -210,9 +227,13 @@ const apiClient = {
   },
 
   async saveChallengeProgress(challenges: { challengeType: string; correct: number; total: number; answered?: number[]; selectedOptions?: Record<string, number> }[]) {
+    const csrfToken = getCsrfToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
+
     const response = await fetch('/api', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         type: 'challenge-progress-sync',
         payload: { challenges },
@@ -228,9 +249,13 @@ const apiClient = {
   },
 
   async resetProgress() {
+    const csrfToken = getCsrfToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
+
     const response = await fetch('/api', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         type: 'reset-progress',
         payload: {},
@@ -246,9 +271,13 @@ const apiClient = {
   },
 
   async saveItemProgress(items: { moduleId: string; itemIds: string[] }[]) {
+    const csrfToken = getCsrfToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
+
     const response = await fetch('/api', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         type: 'item-progress-sync',
         payload: { items },

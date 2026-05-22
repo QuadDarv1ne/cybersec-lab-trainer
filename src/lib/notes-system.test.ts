@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { generateNoteId, getNotesByModule, searchNotes, type Note, type NotesMap } from './notes-system';
 
 describe('notes-system', () => {

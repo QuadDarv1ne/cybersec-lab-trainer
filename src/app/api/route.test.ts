@@ -53,6 +53,16 @@ vi.mock('@/lib/logger', () => ({
   },
 }));
 
+// Mock next/headers for CSRF cookie handling
+const mockCookieStore = {
+  set: vi.fn(),
+  get: vi.fn().mockReturnValue({ value: 'test-csrf-token' }),
+};
+
+vi.mock('next/headers', () => ({
+  cookies: vi.fn(() => mockCookieStore),
+}));
+
 // Import route handlers after mocking
 import { GET, POST } from '@/app/api/route';
 import { getServerSession } from 'next-auth';
@@ -64,6 +74,18 @@ const mockQuizResult = db.quizResult;
 const mockChallengeProgress = db.challengeProgress;
 const mockItemProgress = db.itemProgress;
 const mockTransaction = db.$transaction;
+
+// Helper to create POST requests with CSRF token
+function createPostRequest(url: string, body: Record<string, unknown>) {
+  return new NextRequest(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-csrf-token': 'test-csrf-token',
+    },
+    body: JSON.stringify(body),
+  });
+}
 
 describe('API Route GET /api', () => {
   beforeEach(() => {
@@ -139,12 +161,9 @@ describe('API Route POST /api', () => {
   });
 
   it('allows glossary-search without authentication', async () => {
-    const request = new NextRequest('http://localhost:3000/api', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'glossary-search',
-        payload: { query: 'sql' },
-      }),
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'glossary-search',
+      payload: { query: 'sql' },
     });
 
     const response = await POST(request);
@@ -158,12 +177,9 @@ describe('API Route POST /api', () => {
   it('returns 401 for authenticated actions when not logged in', async () => {
     vi.mocked(getServerSession).mockResolvedValue(null);
 
-    const request = new NextRequest('http://localhost:3000/api', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'progress',
-        payload: { moduleId: 'owasp-top-10', completed: true },
-      }),
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'progress',
+      payload: { moduleId: 'owasp-top-10', completed: true },
     });
 
     const response = await POST(request);
@@ -182,12 +198,9 @@ describe('API Route POST /api', () => {
       lastAccessed: new Date(),
     });
 
-    const request = new NextRequest('http://localhost:3000/api', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'progress',
-        payload: { moduleId: 'owasp-top-10', completed: true },
-      }),
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'progress',
+      payload: { moduleId: 'owasp-top-10', completed: true },
     });
 
     const response = await POST(request);
@@ -210,12 +223,9 @@ describe('API Route POST /api', () => {
       userId: 'test-user-1',
     });
 
-    const request = new NextRequest('http://localhost:3000/api', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'quiz-answers',
-        payload: { quizId: 'owasp', score: 8, total: 10 },
-      }),
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'quiz-answers',
+      payload: { quizId: 'owasp', score: 8, total: 10 },
     });
 
     const response = await POST(request);
@@ -232,15 +242,12 @@ describe('API Route POST /api', () => {
     mockProgress.upsert.mockResolvedValue({ moduleId: 'sql-injection', completed: true, userId: 'test-user-1' });
     mockQuizResult.upsert.mockResolvedValue({ quizId: 'owasp', score: 9, total: 10, userId: 'test-user-1' });
 
-    const request = new NextRequest('http://localhost:3000/api', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'batch-sync',
-        payload: {
-          modules: [{ moduleId: 'sql-injection', completed: true, score: 85 }],
-          quizzes: [{ quizId: 'owasp', score: 9, total: 10 }],
-        },
-      }),
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'batch-sync',
+      payload: {
+        modules: [{ moduleId: 'sql-injection', completed: true, score: 85 }],
+        quizzes: [{ quizId: 'owasp', score: 9, total: 10 }],
+      },
     });
 
     const response = await POST(request);
@@ -262,14 +269,11 @@ describe('API Route POST /api', () => {
       userId: 'test-user-1',
     });
 
-    const request = new NextRequest('http://localhost:3000/api', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'challenge-progress-sync',
-        payload: {
-          challenges: [{ challengeType: 'owasp', correct: 5, total: 10, answered: [], selectedOptions: {} }],
-        },
-      }),
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'challenge-progress-sync',
+      payload: {
+        challenges: [{ challengeType: 'owasp', correct: 5, total: 10, answered: [], selectedOptions: {} }],
+      },
     });
 
     const response = await POST(request);
@@ -288,14 +292,11 @@ describe('API Route POST /api', () => {
       userId: 'test-user-1',
     });
 
-    const request = new NextRequest('http://localhost:3000/api', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'item-progress-sync',
-        payload: {
-          items: [{ moduleId: 'sql-injection', itemIds: ['level-1', 'level-2'] }],
-        },
-      }),
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'item-progress-sync',
+      payload: {
+        items: [{ moduleId: 'sql-injection', itemIds: ['level-1', 'level-2'] }],
+      },
     });
 
     const response = await POST(request);
@@ -310,11 +311,9 @@ describe('API Route POST /api', () => {
 
     mockTransaction.mockResolvedValue([{}, {}, {}, {}]);
 
-    const request = new NextRequest('http://localhost:3000/api', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'reset-progress',
-      }),
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'reset-progress',
+      payload: {},
     });
 
     const response = await POST(request);
@@ -328,12 +327,9 @@ describe('API Route POST /api', () => {
   it('returns 400 for unknown request type', async () => {
     vi.mocked(getServerSession).mockResolvedValue({ user: { id: 'test-user-1' } } as any);
 
-    const request = new NextRequest('http://localhost:3000/api', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'unknown-type',
-        payload: {},
-      }),
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'unknown-type',
+      payload: {},
     });
 
     const response = await POST(request);
@@ -347,12 +343,9 @@ describe('API Route POST /api', () => {
     vi.mocked(getServerSession).mockResolvedValue({ user: { id: 'test-user-1' } } as any);
 
     // Missing required fields for progress
-    const request = new NextRequest('http://localhost:3000/api', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'progress',
-        payload: { moduleId: 'invalid-module-id-with-special-chars-!@#$%^&*' },
-      }),
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'progress',
+      payload: { moduleId: 'invalid-module-id-with-special-chars-!@#$%^&*' },
     });
 
     const response = await POST(request);
@@ -367,18 +360,15 @@ describe('API Route POST /api', () => {
 
     mockProgress.upsert.mockResolvedValue({ moduleId: 'sql-injection', completed: true });
 
-    const request = new NextRequest('http://localhost:3000/api', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'batch-sync',
-        payload: {
-          modules: [
-            { moduleId: 'sql-injection', completed: true },
-            { moduleId: 'non-existent-module', completed: true },
-          ],
-          quizzes: [],
-        },
-      }),
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'batch-sync',
+      payload: {
+        modules: [
+          { moduleId: 'sql-injection', completed: true },
+          { moduleId: 'non-existent-module', completed: true },
+        ],
+        quizzes: [],
+      },
     });
 
     const response = await POST(request);

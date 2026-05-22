@@ -9,6 +9,7 @@ import { modules } from "@/lib/data/modules-data";
 import { quizCategories } from "@/lib/data/quiz-data";
 import { rateLimit, getClientIP, addRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { setCsrfCookie, validateCsrfToken, getCsrfCookieName, getCsrfHeaderName } from "@/lib/csrf";
 
 // Build sets of valid IDs for validation
 const validModuleIds = new Set(modules.map((m) => m.id));
@@ -81,19 +82,22 @@ export async function GET(request: Request) {
         itemProgress[ip.moduleId] = (ip.itemIds as string[]) ?? [];
       }
 
-      const response = NextResponse.json({ completedModules, quizScores, challenges, itemProgress });
+      const csrfToken = await setCsrfCookie();
+      const response = NextResponse.json({ completedModules, quizScores, challenges, itemProgress, csrfToken, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() });
       addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
       return response;
     }
   } catch (error) {
     logger.error('Failed to load progress:', error);
-    const response = NextResponse.json({ error: "Failed to load progress" }, { status: 500 });
+    const csrfToken = await setCsrfCookie();
+    const response = NextResponse.json({ error: "Failed to load progress", csrfToken, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() }, { status: 500 });
     addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
     return response;
   }
 
+  const csrfToken = await setCsrfCookie();
   const response = NextResponse.json(
-    { error: `Unknown action. Expected: load-progress` },
+    { error: `Unknown action. Expected: load-progress`, csrfToken, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() },
     { status: 400 }
   );
   addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
@@ -150,6 +154,12 @@ export async function POST(request: Request) {
     rateLimitResult = await applyRateLimit(request);
     if (rateLimitResult.response) {
       return rateLimitResult.response;
+    }
+
+    // Validate CSRF token for all authenticated POST requests
+    const csrfValid = await validateCsrfToken(request);
+    if (!csrfValid) {
+      return NextResponse.json({ error: "Invalid or missing CSRF token" }, { status: 403 });
     }
 
     let result: Record<string, unknown>;
