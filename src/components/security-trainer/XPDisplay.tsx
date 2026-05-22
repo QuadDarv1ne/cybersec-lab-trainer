@@ -74,7 +74,8 @@ export default function XPDisplay() {
             { label: 'Тесты', value: breakdown.quizzes, icon: <Star size={14} className="text-amber-500" /> },
             { label: 'Челленджи', value: breakdown.challenges, icon: <Star size={14} className="text-sky-500" /> },
             { label: 'Бонусы', value: breakdown.bonuses, icon: <Star size={14} className="text-violet-500" /> },
-          ].map((item) => (
+            { label: 'Учёба', value: breakdown.studySessions, icon: <Star size={14} className="text-rose-500" /> },
+          ].filter((item) => item.value > 0).map((item) => (
             <div key={item.label} className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-1.5">
                 {item.icon}

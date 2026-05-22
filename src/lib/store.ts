@@ -6,6 +6,7 @@ import { quizCategories } from './data/quiz-data';
 import { logger } from './logger';
 import { XP_REWARDS, calculateLevel, calculateXPBreakdown, levelProgress, type XPBreakdown } from './xp-system';
 import { type NotesMap, type Note, generateNoteId } from './notes-system';
+import { type StudySession, calculateSessionXP, generateSessionId, getTodayTotalMs, getTotalStudyTimeMs } from './study-sessions';
 
 export type PageType =
   | 'dashboard'
@@ -48,6 +49,7 @@ interface AppState {
   csrfViewedChallenges: number[];
   totalXP: number;
   notes: NotesMap;
+  studySessions: StudySession[];
   userId: string | null;
   syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
   lastSyncedAt: number | null;
@@ -92,6 +94,10 @@ interface AppActions {
   updateNote: (noteId: string, content: string) => void;
   deleteNote: (noteId: string) => void;
   getNotesForItem: (itemId: string) => Note[];
+  startStudySession: (pageType: PageType) => void;
+  endStudySession: () => void;
+  getTodayStudyTime: () => number;
+  getTotalStudyTime: () => number;
   syncWithDatabase: () => Promise<void>;
   loadFromDatabase: (userId: string, signal?: AbortSignal) => Promise<void>;
 }
@@ -111,6 +117,10 @@ const SYNC_DELAY_MS = 500;
 
 // Abort controller for in-flight loadFromDatabase requests
 let loadAbortController: AbortController | null = null;
+
+// Active study session tracking (runtime only, not persisted)
+let activeSessionStart: number | null = null;
+let activeSessionPage: PageType | null = null;
 
 const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>) => void) => {
   // If a sync is actively executing, schedule a follow-up so latest state isn't lost.
@@ -351,6 +361,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   csrfViewedChallenges: [],
   totalXP: 0,
   notes: {},
+  studySessions: [],
   userId: null,
   syncStatus: 'idle',
   lastSyncedAt: null,
@@ -502,7 +513,9 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       state.authChallengeScores.correct +
       state.headersChallengeScores.correct +
       state.secureCodingChallengeScores.correct;
-    return calculateXPBreakdown(state.completedModules, state.quizScores, totalChallengeCorrect);
+    const todayTotalMs = getTodayTotalMs(state.studySessions);
+    const studySessionXP = calculateSessionXP(todayTotalMs);
+    return calculateXPBreakdown(state.completedModules, state.quizScores, totalChallengeCorrect, studySessionXP);
   },
 
   addNote: (itemId: string, moduleId: string, moduleName: string, content: string) => {
@@ -541,6 +554,42 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     return Object.values(state.notes)
       .filter((n) => n.itemId === itemId)
       .sort((a, b) => b.updatedAt - a.updatedAt);
+  },
+
+  startStudySession: (pageType: PageType) => {
+    activeSessionStart = Date.now();
+    activeSessionPage = pageType;
+  },
+
+  endStudySession: () => {
+    if (!activeSessionStart || !activeSessionPage) return;
+    const durationMs = Date.now() - activeSessionStart;
+    const xpEarned = calculateSessionXP(durationMs);
+    set((state) => ({
+      studySessions: [
+        ...state.studySessions,
+        {
+          id: generateSessionId(),
+          date: new Date().toISOString(),
+          durationMs,
+          pageType: activeSessionPage!,
+          xpEarned,
+        },
+      ],
+      totalXP: state.totalXP + xpEarned,
+    }));
+    activeSessionStart = null;
+    activeSessionPage = null;
+  },
+
+  getTodayStudyTime: () => {
+    const state = get();
+    return getTodayTotalMs(state.studySessions);
+  },
+
+  getTotalStudyTime: () => {
+    const state = get();
+    return getTotalStudyTimeMs(state.studySessions);
   },
 
   importProgressData: (data) => {

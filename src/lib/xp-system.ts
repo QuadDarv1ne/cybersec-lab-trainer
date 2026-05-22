@@ -14,6 +14,8 @@ export const XP_REWARDS = {
   challengeCorrect: 5,      // Each correct challenge answer
   firstModuleComplete: 100, // Bonus for completing first module ever
   allModulesComplete: 500,  // Bonus for 100% completion
+  studySessionPer5Min: 1,   // XP per 5 minutes of study
+  studySessionMax: 10,      // Max XP per single study session
 } as const;
 
 // Total possible XP from all actions (approximate)
@@ -29,6 +31,7 @@ export interface XPBreakdown {
   quizzes: number;
   challenges: number;
   bonuses: number;
+  studySessions: number;
   total: number;
 }
 
@@ -72,7 +75,8 @@ export function levelProgress(totalXP: number): number {
 export function calculateXPBreakdown(
   completedModules: string[],
   quizScores: Record<string, number>,
-  challengeCorrect: number
+  challengeCorrect: number,
+  studySessionXP = 0
 ): XPBreakdown {
   const moduleXP = completedModules.length * XP_REWARDS.completeModule;
   const bonusesXP = completedModules.length > 0 ? XP_REWARDS.firstModuleComplete : 0;
@@ -85,13 +89,14 @@ export function calculateXPBreakdown(
 
   const challengeXP = challengeCorrect * XP_REWARDS.challengeCorrect;
 
-  const total = moduleXP + quizXP + challengeXP + bonusesXP + allModulesBonusXP;
+  const total = moduleXP + quizXP + challengeXP + bonusesXP + allModulesBonusXP + studySessionXP;
 
   return {
     modules: moduleXP,
     quizzes: quizXP,
     challenges: challengeXP,
     bonuses: bonusesXP + allModulesBonusXP,
+    studySessions: studySessionXP,
     total,
   };
 }
