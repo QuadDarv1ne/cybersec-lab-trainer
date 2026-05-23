@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { StickyNote, Search, Trash2, Edit2, Check, X, ChevronRight, Filter } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslations } from '@/lib/intlStub';
 
 const iconMap: Record<string, React.ReactNode> = {};
 for (const mod of modules) {
@@ -17,7 +18,8 @@ for (const mod of modules) {
 }
 
 export default function Notes() {
-  const { notes, setCurrentPage, deleteNote } = useAppStore();
+  const { notes, setCurrentPage, deleteNote, updateNote } = useAppStore();
+  const t = useTranslations('notes');
   const [search, setSearch] = useState('');
   const [moduleFilter, setModuleFilter] = useState<string>('all');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -60,14 +62,14 @@ export default function Notes() {
         <div>
           <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
             <StickyNote size={24} className="text-amber-500" />
-            Мои заметки
+            {t('title')}
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            {noteCount === 0 ? 'У вас пока нет заметок' : `${noteCount} ${noteCount === 1 ? 'заметка' : noteCount < 5 ? 'заметки' : 'заметок'}`}
+            {noteCount === 0 ? t('noNotes') : t('noteCount', { count: noteCount })}
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => setCurrentPage('dashboard')}>
-          <ChevronRight size={14} className="mr-1" /> Назад
+          <ChevronRight size={14} className="mr-1" /> {t('back')}
         </Button>
       </div>
 
@@ -78,7 +80,7 @@ export default function Notes() {
             <div className="flex-1 relative">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <Input
-                placeholder="Поиск по заметкам..."
+                placeholder={t('searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
@@ -90,7 +92,7 @@ export default function Notes() {
                 onChange={(e) => setModuleFilter(e.target.value)}
                 className="h-10 pl-3 pr-8 rounded-lg border border-slate-200 bg-white text-sm appearance-none cursor-pointer hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
-                <option value="all">Все модули</option>
+                <option value="all">{t('allModules')}</option>
                 {modules.map((m) => (
                   <option key={m.id} value={m.id}>{m.title}</option>
                 ))}
@@ -130,12 +132,12 @@ export default function Notes() {
             <StickyNote size={40} className="mx-auto text-slate-300 mb-3" />
             <p className="text-slate-500 text-sm">
               {search || moduleFilter !== 'all'
-                ? 'Ничего не найдено'
-                : 'Заметки появятся здесь, когда вы начнёте добавлять их в модулях'}
+                ? t('nothingFound')
+                : t('appearHere')}
             </p>
             {!search && moduleFilter === 'all' && (
               <Button variant="outline" size="sm" className="mt-3" onClick={() => setCurrentPage('owasp')}>
-                Начать обучение
+                {t('startLearning')}
               </Button>
             )}
           </CardContent>
@@ -173,10 +175,10 @@ export default function Notes() {
                           />
                           <div className="flex gap-1.5">
                             <Button size="sm" variant="default" className="h-7 text-xs" onClick={() => handleSaveEdit(note.id)}>
-                              <Check size={12} className="mr-1" /> Сохранить
+                              <Check size={12} className="mr-1" /> {t('save')}
                             </Button>
                             <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setEditingId(null); setEditContent(''); }}>
-                              <X size={12} className="mr-1" /> Отмена
+                              <X size={12} className="mr-1" /> {t('cancel')}
                             </Button>
                           </div>
                         </div>
@@ -191,14 +193,14 @@ export default function Notes() {
                               <button
                                 onClick={() => handleEdit(note.id, note.content)}
                                 className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-sky-600 transition-colors"
-                                aria-label="Edit note"
+                                aria-label={t('editNote')}
                               >
                                 <Edit2 size={12} />
                               </button>
                               <button
                                 onClick={() => deleteNote(note.id)}
                                 className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-red-600 transition-colors"
-                                aria-label="Delete note"
+                                aria-label={t('deleteNote')}
                               >
                                 <Trash2 size={12} />
                               </button>

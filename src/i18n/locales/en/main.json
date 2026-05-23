@@ -60,6 +60,30 @@
       "continue": "Continue: {module}"
     }
   },
+  "notes": {
+    "title": "My Notes",
+    "noNotes": "You have no notes yet",
+    "noteCount": "{count} notes",
+    "back": "Back",
+    "searchPlaceholder": "Search notes...",
+    "allModules": "All modules",
+    "nothingFound": "Nothing found",
+    "appearHere": "Notes will appear here when you start adding them in modules",
+    "startLearning": "Start learning",
+    "save": "Save",
+    "cancel": "Cancel",
+    "editNote": "Edit note",
+    "deleteNote": "Delete note"
+  },
+  "inlineNotes": {
+    "addNote": "Add note",
+    "addAnother": "Add another note",
+    "placeholder": "Your note...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "editNote": "Edit note",
+    "deleteNote": "Delete note"
+  },
   "common": {
     "completed": "Completed",
     "start": "Start",
@@ -357,7 +381,17 @@
     "noResults": "No results found...",
     "unlocked": "Unlocked",
     "locked": "Locked",
-    "progress": "Progress: {completed}/{total}"
+    "progress": "Progress: {completed}/{total}",
+    "securityLevel": "Your security level",
+    "levelMessages": {
+      "zero": "Start learning to earn your first achievements!",
+      "few": "You're on the right track! Keep exploring modules.",
+      "many": "Impressive progress! Almost there for full completion.",
+      "all": "Brilliant! All achievements unlocked!"
+    },
+    "backToDashboard": "Back to dashboard",
+    "categoryFilter": "Filter by category",
+    "resetFilter": "Reset filter"
   },
   "quiz": {
     "title": "Security Quiz",

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { StickyNote, Plus, Trash2, Edit2, Check, X } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslations } from '@/lib/intlStub';
 
 interface InlineNotesProps {
   itemId: string;
@@ -15,6 +16,7 @@ interface InlineNotesProps {
 
 export default function InlineNotes({ itemId, moduleId, moduleName }: InlineNotesProps) {
   const { addNote, updateNote, deleteNote, getNotesForItem } = useAppStore();
+  const t = useTranslations('inlineNotes');
   const itemNotes = getNotesForItem(itemId);
   const [showAdd, setShowAdd] = useState(false);
   const [newContent, setNewContent] = useState('');
@@ -52,7 +54,7 @@ export default function InlineNotes({ itemId, moduleId, moduleName }: InlineNote
         className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-emerald-600 transition-colors"
       >
         <StickyNote size={14} />
-        <span>Добавить заметку</span>
+        <span>{t('addNote')}</span>
       </button>
     );
   }
@@ -64,7 +66,7 @@ export default function InlineNotes({ itemId, moduleId, moduleName }: InlineNote
         <Card className="border-amber-200 bg-amber-50/50">
           <CardContent className="p-3 space-y-2">
             <Textarea
-              placeholder="Ваша заметка..."
+              placeholder={t('placeholder')}
               value={newContent}
               onChange={(e) => setNewContent(e.target.value)}
               className="text-sm min-h-[60px] resize-none bg-white"
@@ -73,10 +75,10 @@ export default function InlineNotes({ itemId, moduleId, moduleName }: InlineNote
             />
             <div className="flex gap-1.5">
               <Button size="sm" variant="default" className="h-7 text-xs" onClick={handleAdd}>
-                <Check size={12} className="mr-1" /> Сохранить
+                <Check size={12} className="mr-1" /> {t('save')}
               </Button>
               <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setShowAdd(false); setNewContent(''); }}>
-                <X size={12} className="mr-1" /> Отмена
+                <X size={12} className="mr-1" /> {t('cancel')}
               </Button>
             </div>
           </CardContent>
@@ -98,10 +100,10 @@ export default function InlineNotes({ itemId, moduleId, moduleName }: InlineNote
                 />
                 <div className="flex gap-1.5">
                   <Button size="sm" variant="default" className="h-7 text-xs" onClick={() => handleUpdate(note.id)}>
-                    <Check size={12} className="mr-1" /> Сохранить
+                    <Check size={12} className="mr-1" /> {t('save')}
                   </Button>
                   <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={cancelEdit}>
-                    <X size={12} className="mr-1" /> Отмена
+                    <X size={12} className="mr-1" /> {t('cancel')}
                   </Button>
                 </div>
               </div>
@@ -118,14 +120,14 @@ export default function InlineNotes({ itemId, moduleId, moduleName }: InlineNote
                   <button
                     onClick={() => startEdit(note.id, note.content)}
                     className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-sky-600 transition-colors"
-                    aria-label="Edit note"
+                    aria-label={t('editNote')}
                   >
                     <Edit2 size={12} />
                   </button>
                   <button
                     onClick={() => deleteNote(note.id)}
                     className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-red-600 transition-colors"
-                    aria-label="Delete note"
+                    aria-label={t('deleteNote')}
                   >
                     <Trash2 size={12} />
                   </button>
@@ -143,7 +145,7 @@ export default function InlineNotes({ itemId, moduleId, moduleName }: InlineNote
           className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-emerald-600 transition-colors"
         >
           <Plus size={12} />
-          <span>Ещё заметку</span>
+          <span>{t('addAnother')}</span>
         </button>
       )}
     </div>

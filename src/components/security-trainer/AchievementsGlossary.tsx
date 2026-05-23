@@ -100,7 +100,7 @@ export default function AchievementsAndGlossary() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')} aria-label="Вернуться на главную">
+        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')} aria-label={t('backToDashboard')}>
           <ChevronLeft size={20} />
         </Button>
         <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
@@ -128,15 +128,15 @@ export default function AchievementsAndGlossary() {
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="font-semibold text-sm">Ваш уровень безопасности</h2>
+                  <h2 className="font-semibold text-sm">{t('securityLevel')}</h2>
                   <p className="text-xs text-slate-500 mt-1">
                     {unlockedCount === 0
-                      ? 'Начните обучение, чтобы получить первые достижения!'
+                      ? t('levelMessages.zero')
                       : unlockedCount < 5
-                        ? 'Вы на правильном пути! Продолжайте изучать модули.'
+                        ? t('levelMessages.few')
                         : unlockedCount < achievementDefs.length
-                          ? 'Впечатляющий прогресс! Ещё немного до полного прохождения.'
-                          : 'Великолепно! Все достижения разблокированы!'}
+                          ? t('levelMessages.many')
+                          : t('levelMessages.all')}
                   </p>
                 </div>
                 <div className="text-3xl font-bold text-amber-600">{unlockedCount}/{achievementDefs.length}</div>
@@ -208,7 +208,7 @@ export default function AchievementsAndGlossary() {
           </div>
 
           {/* Category filter */}
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по категориям">
+          <div className="flex flex-wrap gap-2" role="group" aria-label={t('categoryFilter')}>
             {Object.keys(categoryColors).map((cat) => (
               <Badge
                 key={cat}
@@ -243,7 +243,7 @@ export default function AchievementsAndGlossary() {
                 }}
                 role="button"
                 tabIndex={0}
-                aria-label="Сбросить фильтр"
+                aria-label={t('resetFilter')}
               >
                 {t('clear')}
               </Badge>
