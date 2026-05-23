@@ -24,6 +24,7 @@
     "db:sqlite": "cross-env DATABASE_TYPE=sqlite node scripts/setup-database.mjs && prisma generate && prisma db push"
   },
   "dependencies": {
+    "2": "^3.0.0",
     "@hookform/resolvers": "^5.1.1",
     "@next-auth/prisma-adapter": "^1.0.7",
     "@next/third-parties": "16.2.6",

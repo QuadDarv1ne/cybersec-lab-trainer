@@ -38,10 +38,14 @@ export function Certificate() {
   const streak = useMemo(() => getStreakInfo(studySessions), [studySessions]);
 
   const challengeStats = useMemo(() => ({
-    owasp: owaspChallengeScores,
-    auth: authChallengeScores,
-    headers: headersChallengeScores,
-    secureCoding: secureCodingChallengeScores,
+    owaspCorrect: owaspChallengeScores.correct,
+    authCorrect: authChallengeScores.correct,
+    owaspTotal: owaspChallengeScores.total,
+    authTotal: authChallengeScores.total,
+    headersCorrect: headersChallengeScores.correct,
+    headersTotal: headersChallengeScores.total,
+    secureCodingCorrect: secureCodingChallengeScores.correct,
+    secureCodingTotal: secureCodingChallengeScores.total,
   }), [owaspChallengeScores, authChallengeScores, headersChallengeScores, secureCodingChallengeScores]);
 
   const unlockedAchievements = useMemo(() =>

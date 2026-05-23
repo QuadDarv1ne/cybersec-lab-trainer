@@ -66,8 +66,8 @@ export async function GET(request: Request) {
       ]);
 
       const completedModules = progressRecords
-        .filter((p) => p.completed)
-        .map((p) => p.moduleId);
+        .filter((p: { moduleId: string; completed: boolean }) => p.completed)
+        .map((p: { moduleId: string }) => p.moduleId);
 
       const quizScores: Record<string, number> = {};
       for (const result of quizResults) {
@@ -107,7 +107,7 @@ export async function GET(request: Request) {
       }
 
       // Build study sessions array
-      const studySessions = studySessionRecords.map((ss) => ({
+      const studySessions = studySessionRecords.map((ss: { id: string; date: string; durationMs: number; pageType: string; xpEarned: number; createdAt: Date }) => ({
         id: ss.id,
         date: ss.date,
         durationMs: ss.durationMs,
