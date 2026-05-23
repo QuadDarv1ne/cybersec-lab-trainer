@@ -10,6 +10,7 @@ import XPDisplay from './XPDisplay';
 import { StreakWidget } from './StreakWidget';
 import { HeatmapCalendar } from './HeatmapCalendar';
 import { LearningPath } from './LearningPath';
+import { Certificate } from './Certificate';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -514,6 +515,9 @@ export default function Dashboard() {
           </p>
         </CardContent>
       </Card>
+
+      {/* Completion Certificate - visible when all modules completed */}
+      <Certificate />
 
       {/* Data management */}
       <Card className="border-slate-200">

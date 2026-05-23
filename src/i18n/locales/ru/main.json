@@ -444,5 +444,20 @@
     "next": "Следующее",
     "correctAnswer": "Правильно!",
     "incorrectAnswer": "Неправильно"
+  },
+  "certificate": {
+    "title": "Сертификат о прохождении",
+    "certificateTitle": "Сертификат о завершении курса",
+    "subtitle": "Все 8 модулей успешно пройдены",
+    "print": "Печать",
+    "level": "Уровень",
+    "totalXP": "Всего XP",
+    "avgScore": "Средний балл",
+    "bestStreak": "Лучшая серия",
+    "modulesCompleted": "Пройденные модули",
+    "quizResults": "Результаты квизов",
+    "achievements": "Достижения ({count})",
+    "completedOn": "Завершено",
+    "platform": "платформа обучения кибербезопасности"
   }
 }

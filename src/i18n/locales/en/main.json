@@ -444,5 +444,20 @@
     "next": "Next",
     "correctAnswer": "Correct!",
     "incorrectAnswer": "Incorrect"
+  },
+  "certificate": {
+    "title": "Completion Certificate",
+    "certificateTitle": "Course Completion Certificate",
+    "subtitle": "All 8 modules successfully completed",
+    "print": "Print",
+    "level": "Level",
+    "totalXP": "Total XP",
+    "avgScore": "Average Score",
+    "bestStreak": "Best Streak",
+    "modulesCompleted": "Completed Modules",
+    "quizResults": "Quiz Results",
+    "achievements": "Achievements ({count})",
+    "completedOn": "Completed on",
+    "platform": "cybersecurity training platform"
   }
 }
