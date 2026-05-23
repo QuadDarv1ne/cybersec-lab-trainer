@@ -5,28 +5,39 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
 
   // CSP заголовки для безопасности
-  // Примечание: 'unsafe-inline' необходим для Next.js runtime inline styles.
-  // 'unsafe-eval' удалён — в production рекомендуется использовать nonce-based CSP.
-  headers: async () => [
-    {
-      source: '/:path*',
-      headers: [
-        {
-          key: 'Content-Security-Policy',
-          value: process.env.NODE_ENV === 'development'
-            ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://github.com https://accounts.google.com; frame-src 'self' https://github.com https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
-            : "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://github.com https://accounts.google.com; frame-src 'self' https://github.com https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
-        },
-        { key: 'X-DNS-Prefetch-Control', value: 'on' },
-        { key: 'X-Content-Type-Options', value: 'nosniff' },
-        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-        { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
-        ...(process.env.NODE_ENV === 'production'
-          ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }]
-          : []),
-      ],
-    },
-  ],
+  // OAuth домены добавляются только если настроены соответствующие переменные окружения
+  headers: async () => {
+    const oauthDomains: string[] = [];
+    if (process.env.GITHUB_ID && process.env.GITHUB_SECRET) {
+      oauthDomains.push("https://github.com");
+    }
+    if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+      oauthDomains.push("https://accounts.google.com");
+    }
+    const oauthSrc = oauthDomains.length > 0 ? ` ${oauthDomains.join(" ")}` : "";
+
+    const devCSP = `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'${oauthSrc}; frame-src 'self'${oauthSrc}; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`;
+    const prodCSP = `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'${oauthSrc}; frame-src 'self'${oauthSrc}; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`;
+
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: process.env.NODE_ENV === 'development' ? devCSP : prodCSP,
+          },
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          ...(process.env.NODE_ENV === 'production'
+            ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }]
+            : []),
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
