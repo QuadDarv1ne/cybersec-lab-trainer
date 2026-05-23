@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion } from 'framer-motion';
 import { useTranslations } from '@/lib/intlStub';
+import { FlashcardMode } from './FlashcardMode';
 import {
   ChevronLeft,
   Trophy,
@@ -30,6 +31,8 @@ import {
   Zap,
   LayoutList,
   Award,
+  Layers,
+  List,
 } from 'lucide-react';
 
 const categoryColors: Record<string, string> = {
@@ -70,6 +73,7 @@ export default function AchievementsAndGlossary() {
   const [activeTab, setActiveTab] = useState<'achievements' | 'glossary'>('achievements');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [glossaryView, setGlossaryView] = useState<'list' | 'flashcards'>('list');
 
   const challengeStats = useMemo(() => ({
     owaspCorrect: owaspChallengeScores.correct,
@@ -197,86 +201,114 @@ export default function AchievementsAndGlossary() {
 
         {/* ===== GLOSSARY ===== */}
         <TabsContent value="glossary" className="mt-4 space-y-4">
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <Input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={t('searchPlaceholder')}
-              className="pl-10"
-            />
+          {/* View toggle */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant={glossaryView === 'list' ? 'default' : 'outline'}
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => setGlossaryView('list')}
+              >
+                <List size={12} className="mr-1" /> Список
+              </Button>
+              <Button
+                variant={glossaryView === 'flashcards' ? 'default' : 'outline'}
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => setGlossaryView('flashcards')}
+              >
+                <Layers size={12} className="mr-1" /> Карточки
+              </Button>
+            </div>
           </div>
 
-          {/* Category filter */}
-          <div className="flex flex-wrap gap-2" role="group" aria-label={t('categoryFilter')}>
-            {Object.keys(categoryColors).map((cat) => (
-              <Badge
-                key={cat}
-                variant="secondary"
-                className={`text-[10px] cursor-pointer hover:opacity-80 transition-opacity ${
-                  selectedCategory === cat ? 'ring-2 ring-emerald-400' : ''
-                } ${categoryColors[cat]}`}
-                onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
-                onKeyDown={(e: React.KeyboardEvent) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setSelectedCategory(selectedCategory === cat ? null : cat);
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                aria-pressed={selectedCategory === cat}
-              >
-                {cat}
-              </Badge>
-            ))}
-            {selectedCategory && (
-              <Badge
-                variant="outline"
-                className="text-[10px] cursor-pointer"
-                onClick={() => setSelectedCategory(null)}
-                onKeyDown={(e: React.KeyboardEvent) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setSelectedCategory(null);
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                aria-label={t('resetFilter')}
-              >
-                {t('clear')}
-              </Badge>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            {filteredTerms.map((term, i) => (
-              <motion.div
-                key={term.id}
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.02 }}
-              >
-                <Card className="border-slate-200 hover:border-emerald-200 transition-colors">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <h3 className="text-sm font-semibold font-mono">{term.term}</h3>
-                      <Badge variant="secondary" className={`text-[10px] ${categoryColors[term.category] || 'bg-slate-100 text-slate-700'}`}>
-                        {term.category}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-slate-600 leading-relaxed">{term.definition}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-            {filteredTerms.length === 0 && (
-              <div className="text-center py-8 text-sm text-slate-400">
-                {t('noResults')} &quot;{searchTerm}&quot;
+          {glossaryView === 'flashcards' ? (
+            <FlashcardMode />
+          ) : (
+            <>
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder={t('searchPlaceholder')}
+                  className="pl-10"
+                />
               </div>
-            )}
-          </div>
+
+              {/* Category filter */}
+              <div className="flex flex-wrap gap-2" role="group" aria-label={t('categoryFilter')}>
+                {Object.keys(categoryColors).map((cat) => (
+                  <Badge
+                    key={cat}
+                    variant="secondary"
+                    className={`text-[10px] cursor-pointer hover:opacity-80 transition-opacity ${
+                      selectedCategory === cat ? 'ring-2 ring-emerald-400' : ''
+                    } ${categoryColors[cat]}`}
+                    onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                    onKeyDown={(e: React.KeyboardEvent) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedCategory(selectedCategory === cat ? null : cat);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={selectedCategory === cat}
+                  >
+                    {cat}
+                  </Badge>
+                ))}
+                {selectedCategory && (
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] cursor-pointer"
+                    onClick={() => setSelectedCategory(null)}
+                    onKeyDown={(e: React.KeyboardEvent) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedCategory(null);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={t('resetFilter')}
+                  >
+                    {t('clear')}
+                  </Badge>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                {filteredTerms.map((term, i) => (
+                  <motion.div
+                    key={term.id}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.02 }}
+                  >
+                    <Card className="border-slate-200 hover:border-emerald-200 transition-colors">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <h3 className="text-sm font-semibold font-mono">{term.term}</h3>
+                          <Badge variant="secondary" className={`text-[10px] ${categoryColors[term.category] || 'bg-slate-100 text-slate-700'}`}>
+                            {term.category}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-slate-600 leading-relaxed">{term.definition}</p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+                {filteredTerms.length === 0 && (
+                  <div className="text-center py-8 text-sm text-slate-400">
+                    {t('noResults')} &quot;{searchTerm}&quot;
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </TabsContent>
       </Tabs>
     </div>
