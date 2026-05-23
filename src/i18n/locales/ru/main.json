@@ -117,7 +117,8 @@
     "modulesCompleted": "Пройдено {completed} из {total} модулей",
     "majorCode": "09.03.04",
     "signIn": "Войти",
-    "signOut": "Выйти"
+    "signOut": "Выйти",
+    "analytics": "Аналитика"
   },
   "owasp": {
     "title": "OWASP Top 10",
@@ -489,5 +490,21 @@
     "statMedium": "Средне",
     "statHard": "Сложно",
     "sessionTime": "Время сессии: {minutes} мин"
+  },
+  "analytics": {
+    "title": "Аналитика прогресса",
+    "subtitle": "Отслеживайте свой прогресс в обучении",
+    "back": "Вернуться на главную",
+    "level": "Уровень",
+    "modules": "Модули",
+    "totalXP": "Всего XP",
+    "streak": "Серия",
+    "weeklyActivity": "Активность за неделю",
+    "totalStudyTime": "Общее время обучения",
+    "quizPerformance": "Результаты квизов",
+    "strongest": "Сильная сторона",
+    "weakest": "Нужно повторить",
+    "challengePerformance": "Результаты заданий",
+    "moduleProgress": "Прогресс модулей"
   }
 }

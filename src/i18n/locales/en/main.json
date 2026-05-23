@@ -117,7 +117,8 @@
     "modulesCompleted": "Completed {completed} of {total} modules",
     "majorCode": "09.03.04",
     "signIn": "Sign In",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "analytics": "Analytics"
   },
   "owasp": {
     "title": "OWASP Top 10",
@@ -489,5 +490,21 @@
     "statMedium": "Medium",
     "statHard": "Hard",
     "sessionTime": "Session time: {minutes} min"
+  },
+  "analytics": {
+    "title": "Progress Analytics",
+    "subtitle": "Track your learning progress",
+    "back": "Back to dashboard",
+    "level": "Level",
+    "modules": "Modules",
+    "totalXP": "Total XP",
+    "streak": "Streak",
+    "weeklyActivity": "Weekly Activity",
+    "totalStudyTime": "Total study time",
+    "quizPerformance": "Quiz Performance",
+    "strongest": "Strongest Area",
+    "weakest": "Needs Review",
+    "challengePerformance": "Challenge Performance",
+    "moduleProgress": "Module Progress"
   }
 }

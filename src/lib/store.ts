@@ -22,7 +22,8 @@ export type PageType =
   | 'security-headers'
   | 'quiz'
   | 'achievements'
-  | 'notes';
+  | 'notes'
+  | 'analytics';
 
 export interface QuizAttempt {
   id: string;
