@@ -51,6 +51,13 @@
       "completed": "Все модули пройдены!",
       "notStarted": "Начните изучение первого модуля",
       "inProgress": "Осталось модулей: {remaining}"
+    },
+    "learningPath": {
+      "title": "Учебный путь",
+      "subtitle": "Пройдено {completed} из {total}",
+      "complete": "Завершён!",
+      "done": "Пройден",
+      "continue": "Продолжить: {module}"
     }
   },
   "common": {

@@ -44,7 +44,15 @@ export function StreakWidget() {
             {streak.currentStreak}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400">
-            {streak.currentStreak === 1 ? 'день' : streak.currentStreak < 5 ? 'дня' : 'дней'}
+            {(() => {
+              const n = streak.currentStreak;
+              const lastDigit = n % 10;
+              const lastTwo = n % 100;
+              if (lastTwo >= 11 && lastTwo <= 14) return 'дней';
+              if (lastDigit === 1) return 'день';
+              if (lastDigit >= 2 && lastDigit <= 4) return 'дня';
+              return 'дней';
+            })()}
           </div>
         </div>
 

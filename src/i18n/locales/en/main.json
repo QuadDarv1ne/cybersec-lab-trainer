@@ -51,6 +51,13 @@
       "completed": "All modules completed!",
       "notStarted": "Start learning the first module",
       "inProgress": "Modules remaining: {remaining}"
+    },
+    "learningPath": {
+      "title": "Learning Path",
+      "subtitle": "{completed} of {total} completed",
+      "complete": "Complete!",
+      "done": "Done",
+      "continue": "Continue: {module}"
     }
   },
   "common": {

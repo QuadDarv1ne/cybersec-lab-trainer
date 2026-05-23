@@ -289,3 +289,49 @@ export const modules: Module[] = [
     totalSteps: 8,
   },
 ];
+
+/**
+ * Learning Path: ordered module sequence for guided learning.
+ * Each module requires the previous one to be completed.
+ * OWASP -> SQL -> XSS -> CSRF -> Auth -> Headers -> Secure Coding -> Tools
+ */
+export const learningPathOrder: string[] = [
+  'owasp',
+  'sql-injection',
+  'xss',
+  'csrf',
+  'auth',
+  'security-headers',
+  'secure-coding',
+  'tools',
+];
+
+/**
+ * Check if a module is accessible given the completed modules.
+ * In guided mode, a module is accessible only if all previous modules
+ * in the learning path have been completed.
+ */
+export function isModuleAccessible(moduleId: string, completedModules: string[]): boolean {
+  // If already completed, always accessible
+  if (completedModules.includes(moduleId)) return true;
+
+  const idx = learningPathOrder.indexOf(moduleId);
+  if (idx === -1) return true; // Not in learning path (e.g., free modules)
+  if (idx === 0) return true; // First module is always accessible
+
+  // Check if all previous modules in the path are completed
+  const previousModules = learningPathOrder.slice(0, idx);
+  return previousModules.every((prevId) => completedModules.includes(prevId));
+}
+
+/**
+ * Get the next recommended module in the learning path.
+ */
+export function getNextLearningPathModule(completedModules: string[]): string | null {
+  for (const moduleId of learningPathOrder) {
+    if (!completedModules.includes(moduleId)) {
+      return moduleId;
+    }
+  }
+  return null; // All completed
+}

@@ -9,6 +9,7 @@ import { exportProgress, importProgress } from '@/lib/progress-export';
 import XPDisplay from './XPDisplay';
 import { StreakWidget } from './StreakWidget';
 import { HeatmapCalendar } from './HeatmapCalendar';
+import { LearningPath } from './LearningPath';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -261,6 +262,9 @@ export default function Dashboard() {
           <XPDisplay />
         </CardContent>
       </Card>
+
+      {/* Learning Path */}
+      <LearningPath />
 
       {/* Streak + Heatmap */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
