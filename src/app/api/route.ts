@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { quizResultSchema, progressUpdateSchema, glossarySearchSchema, batchSyncSchema, challengeBatchSchema, itemProgressBatchSchema, notesSyncSchema, noteDeleteSchema, studySessionsSyncSchema } from "@/lib/validations/api";
-import { db } from "@/lib/db";
+import { getDbAdapter } from "@/lib/db-adapter";
 import { glossaryTerms } from "@/lib/data/glossary-data";
 import { modules } from "@/lib/data/modules-data";
 import { quizCategories } from "@/lib/data/quiz-data";
@@ -15,6 +15,18 @@ import { getCsrfCookieName, getCsrfHeaderName } from "@/lib/csrf";
 // Build sets of valid IDs for validation
 const validModuleIds = new Set(modules.map((m) => m.id));
 const validQuizIds = new Set(quizCategories.map((c) => c.id));
+
+/** Normalize a date value that may be a Date object or ISO string (MongoDB) */
+function toDate(val: unknown): Date {
+  if (val instanceof Date) return val;
+  if (typeof val === 'string') return new Date(val);
+  return new Date();
+}
+
+/** Normalize milliseconds from a date value */
+function toTime(val: unknown): number {
+  return toDate(val).getTime();
+}
 
 async function applyRateLimit(request: Request): Promise<{ response: NextResponse | null; remaining: number; reset: number }> {
   const ip = getClientIP(request);
@@ -39,81 +51,65 @@ export async function GET(request: Request) {
     const action = url.searchParams.get('action');
 
     if (action === 'load-progress') {
+      const adapter = getDbAdapter();
       const [progressRecords, quizResults, challengeProgressRecords, itemProgressRecords, notesRecords, studySessionRecords] = await Promise.all([
-        db.progress.findMany({
-          where: { userId },
-          orderBy: { lastAccessed: 'desc' },
-        }),
-        db.quizResult.findMany({
-          where: { userId },
-          orderBy: { createdAt: 'desc' },
-        }),
-        db.challengeProgress.findMany({
-          where: { userId },
-        }),
-        db.itemProgress.findMany({
-          where: { userId },
-        }),
-        db.note.findMany({
-          where: { userId },
-          orderBy: { updatedAt: 'desc' },
-        }),
-        db.studySession.findMany({
-          where: { userId },
-          orderBy: { createdAt: 'desc' },
-          take: 1000, // limit to last 1000 sessions
-        }),
+        adapter.progress.findMany({ userId }),
+        adapter.quizResult.findMany({ userId }),
+        adapter.challengeProgress.findMany({ userId }),
+        adapter.itemProgress.findMany({ userId }),
+        adapter.note.findMany({ userId }),
+        adapter.studySession.findMany({ userId }),
       ]);
 
       const completedModules = progressRecords
-        .filter((p: { moduleId: string; completed: boolean }) => p.completed)
-        .map((p: { moduleId: string }) => p.moduleId);
+        .filter((p) => p.completed)
+        .map((p) => p.moduleId) as string[];
 
       const quizScores: Record<string, number> = {};
       for (const result of quizResults) {
-        if (!quizScores[result.quizId] || result.percentage > quizScores[result.quizId]) {
-          quizScores[result.quizId] = result.percentage;
+        if (!quizScores[result.quizId as string] || (result.percentage as number) > quizScores[result.quizId as string]) {
+          quizScores[result.quizId as string] = result.percentage as number;
         }
       }
 
       const challenges: Record<string, { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> }> = {};
       for (const cp of challengeProgressRecords) {
-        challenges[cp.challengeType] = {
-          correct: cp.correct,
-          total: cp.total,
-          answered: cp.answered ? JSON.parse(cp.answered) : [],
-          selectedOptions: cp.selectedOptions ? JSON.parse(cp.selectedOptions) : {},
+        challenges[cp.challengeType as string] = {
+          correct: cp.correct as number,
+          total: cp.total as number,
+          answered: cp.answered ? JSON.parse(cp.answered as string) : [],
+          selectedOptions: cp.selectedOptions ? JSON.parse(cp.selectedOptions as string) : {},
         };
       }
 
       // Build item-level progress map
       const itemProgress: Record<string, string[]> = {};
       for (const ip of itemProgressRecords) {
-        itemProgress[ip.moduleId] = ip.itemIds ? JSON.parse(ip.itemIds) : [];
+        itemProgress[ip.moduleId as string] = ip.itemIds ? JSON.parse(ip.itemIds as string) : [];
       }
 
       // Build notes map
       const notes: Record<string, { id: string; itemId: string; moduleId: string; moduleName: string; content: string; createdAt: number; updatedAt: number }> = {};
       for (const note of notesRecords) {
-        notes[note.id] = {
-          id: note.id,
-          itemId: note.itemId,
-          moduleId: note.moduleId,
-          moduleName: note.moduleName,
-          content: note.content,
-          createdAt: note.createdAt.getTime(),
-          updatedAt: note.updatedAt.getTime(),
+        notes[note.id as string] = {
+          id: note.id as string,
+          itemId: note.itemId as string,
+          moduleId: note.moduleId as string,
+          moduleName: note.moduleName as string,
+          content: note.content as string,
+          createdAt: toTime(note.createdAt),
+          updatedAt: toTime(note.updatedAt),
         };
       }
 
       // Build study sessions array
-      const studySessions = studySessionRecords.map((ss: { id: string; date: string; durationMs: number; pageType: string; xpEarned: number; createdAt: Date }) => ({
-        id: ss.id,
-        date: ss.date,
-        durationMs: ss.durationMs,
-        pageType: ss.pageType,
-        xpEarned: ss.xpEarned,
-        createdAt: ss.createdAt.getTime(),
+      const studySessions = studySessionRecords.map((ss) => ({
+        id: ss.id as string,
+        date: ss.date as string,
+        durationMs: ss.durationMs as number,
+        pageType: ss.pageType as string,
+        xpEarned: ss.xpEarned as number,
+        createdAt: toTime(ss.createdAt),
       }));
 
       const csrfToken = await setCsrfCookie();
@@ -201,24 +197,13 @@ export async function POST(request: Request) {
     switch (type) {
       case 'progress': {
         const data = progressUpdateSchema.parse(payload);
+        const adapter = getDbAdapter();
 
-        const progress = await db.progress.upsert({
-          where: {
-            userId_moduleId: { userId, moduleId: data.moduleId },
-          },
-          create: {
-            userId,
-            moduleId: data.moduleId,
-            completed: data.completed,
-            score: data.score ?? 0,
-            lastAccessed: new Date(),
-          },
-          update: {
-            completed: data.completed,
-            score: data.score ?? 0,
-            lastAccessed: new Date(),
-          },
-        });
+        const progress = await adapter.progress.upsert(
+          { userId, moduleId: data.moduleId },
+          { userId, moduleId: data.moduleId, completed: data.completed, score: data.score ?? 0, lastAccessed: new Date().toISOString() },
+          { completed: data.completed, score: data.score ?? 0, lastAccessed: new Date().toISOString() }
+        );
 
         result = { progress };
         break;
@@ -226,24 +211,14 @@ export async function POST(request: Request) {
 
       case 'quiz-answers': {
         const data = quizResultSchema.parse(payload);
+        const adapter = getDbAdapter();
+        const percentage = data.total > 0 ? (data.score / data.total) * 100 : 0;
 
-        const quizResult = await db.quizResult.upsert({
-          where: {
-            userId_quizId: { userId, quizId: data.quizId },
-          },
-          create: {
-            userId,
-            quizId: data.quizId,
-            score: data.score,
-            total: data.total,
-            percentage: data.total > 0 ? (data.score / data.total) * 100 : 0,
-          },
-          update: {
-            score: data.score,
-            total: data.total,
-            percentage: data.total > 0 ? (data.score / data.total) * 100 : 0,
-          },
-        });
+        const quizResult = await adapter.quizResult.upsert(
+          { userId, quizId: data.quizId },
+          { userId, quizId: data.quizId, score: data.score, total: data.total, percentage, createdAt: new Date().toISOString() },
+          { score: data.score, total: data.total, percentage }
+        );
 
         result = { quizResult, message: "Quiz result saved" };
         break;
@@ -251,6 +226,7 @@ export async function POST(request: Request) {
 
       case 'batch-sync': {
         const data = batchSyncSchema.parse(payload);
+        const adapter = getDbAdapter();
         let { modules, quizzes } = data;
 
         // Validate module IDs against known valid IDs
@@ -275,24 +251,26 @@ export async function POST(request: Request) {
           break;
         }
 
+        const now = new Date().toISOString();
         const [moduleResults, quizResults] = await Promise.all([
           modules.length > 0
             ? Promise.all(modules.map((m) =>
-                db.progress.upsert({
-                  where: { userId_moduleId: { userId, moduleId: m.moduleId } },
-                  create: { userId, moduleId: m.moduleId, completed: m.completed, score: m.score ?? 0, lastAccessed: new Date() },
-                  update: { completed: m.completed, score: m.score ?? 0, lastAccessed: new Date() },
-                })
+                adapter.progress.upsert(
+                  { userId, moduleId: m.moduleId },
+                  { userId, moduleId: m.moduleId, completed: m.completed, score: m.score ?? 0, lastAccessed: now },
+                  { completed: m.completed, score: m.score ?? 0, lastAccessed: now }
+                )
               ))
             : Promise.resolve([]),
           quizzes.length > 0
-            ? Promise.all(quizzes.map((q) =>
-                db.quizResult.upsert({
-                  where: { userId_quizId: { userId, quizId: q.quizId } },
-                  create: { userId, quizId: q.quizId, score: q.score, total: q.total, percentage: q.total > 0 ? (q.score / q.total) * 100 : 0 },
-                  update: { score: q.score, total: q.total, percentage: q.total > 0 ? (q.score / q.total) * 100 : 0 },
-                })
-              ))
+            ? Promise.all(quizzes.map((q) => {
+                const pct = q.total > 0 ? (q.score / q.total) * 100 : 0;
+                return adapter.quizResult.upsert(
+                  { userId, quizId: q.quizId },
+                  { userId, quizId: q.quizId, score: q.score, total: q.total, percentage: pct, createdAt: now },
+                  { score: q.score, total: q.total, percentage: pct }
+                );
+              }))
             : Promise.resolve([]),
         ]);
 
@@ -302,6 +280,7 @@ export async function POST(request: Request) {
 
       case 'challenge-progress-sync': {
         const data = challengeBatchSchema.parse(payload);
+        const adapter = getDbAdapter();
         const { challenges } = data;
 
         if (challenges.length === 0) {
@@ -309,25 +288,14 @@ export async function POST(request: Request) {
           break;
         }
 
+        const now = new Date().toISOString();
         const challengeResults = await Promise.all(
           challenges.map((c) =>
-            db.challengeProgress.upsert({
-              where: { userId_challengeType: { userId, challengeType: c.challengeType } },
-              create: {
-                userId,
-                challengeType: c.challengeType,
-                correct: c.correct,
-                total: c.total,
-                answered: c.answered ? JSON.stringify(c.answered) : null,
-                selectedOptions: c.selectedOptions ? JSON.stringify(c.selectedOptions) : null,
-              },
-              update: {
-                correct: c.correct,
-                total: c.total,
-                answered: c.answered ? JSON.stringify(c.answered) : null,
-                selectedOptions: c.selectedOptions ? JSON.stringify(c.selectedOptions) : null,
-              },
-            })
+            adapter.challengeProgress.upsert(
+              { userId, challengeType: c.challengeType },
+              { userId, challengeType: c.challengeType, correct: c.correct, total: c.total, answered: c.answered ? JSON.stringify(c.answered) : null, selectedOptions: c.selectedOptions ? JSON.stringify(c.selectedOptions) : null, updatedAt: now },
+              { correct: c.correct, total: c.total, answered: c.answered ? JSON.stringify(c.answered) : null, selectedOptions: c.selectedOptions ? JSON.stringify(c.selectedOptions) : null, updatedAt: now }
+            )
           )
         );
 
@@ -337,6 +305,7 @@ export async function POST(request: Request) {
 
       case 'item-progress-sync': {
         const data = itemProgressBatchSchema.parse(payload);
+        const adapter = getDbAdapter();
         const { items } = data;
 
         if (items.length === 0) {
@@ -346,17 +315,11 @@ export async function POST(request: Request) {
 
         const itemResults = await Promise.all(
           items.map((item) =>
-            db.itemProgress.upsert({
-              where: { userId_moduleId: { userId, moduleId: item.moduleId } },
-              create: {
-                userId,
-                moduleId: item.moduleId,
-                itemIds: JSON.stringify(item.itemIds),
-              },
-              update: {
-                itemIds: JSON.stringify(item.itemIds),
-              },
-            })
+            adapter.itemProgress.upsert(
+              { userId, moduleId: item.moduleId },
+              { userId, moduleId: item.moduleId, itemIds: JSON.stringify(item.itemIds), updatedAt: new Date().toISOString() },
+              { itemIds: JSON.stringify(item.itemIds), updatedAt: new Date().toISOString() }
+            )
           )
         );
 
@@ -366,6 +329,7 @@ export async function POST(request: Request) {
 
       case 'notes-sync': {
         const data = notesSyncSchema.parse(payload);
+        const adapter = getDbAdapter();
         const { notes } = data;
 
         if (notes.length === 0) {
@@ -374,24 +338,13 @@ export async function POST(request: Request) {
         }
 
         // Use transaction for batch upsert
-        const noteResults = await db.$transaction(
-          notes.map((note) =>
-            db.note.upsert({
-              where: { id: note.id || '' },
-              create: {
-                userId,
-                itemId: note.itemId,
-                moduleId: note.moduleId,
-                moduleName: note.moduleName,
-                content: note.content,
-              },
-              update: {
-                itemId: note.itemId,
-                moduleId: note.moduleId,
-                moduleName: note.moduleName,
-                content: note.content,
-              },
-            })
+        const noteResults = await adapter.transaction(
+          notes.map((note) => () =>
+            adapter.note.upsert(
+              { id: note.id || '' },
+              { userId, itemId: note.itemId, moduleId: note.moduleId, moduleName: note.moduleName, content: note.content },
+              { itemId: note.itemId, moduleId: note.moduleId, moduleName: note.moduleName, content: note.content }
+            )
           )
         );
 
@@ -401,13 +354,12 @@ export async function POST(request: Request) {
 
       case 'note-delete': {
         const data = noteDeleteSchema.parse(payload);
+        const adapter = getDbAdapter();
         const { noteId } = data;
 
-        await db.note.deleteMany({
-          where: {
-            id: noteId,
-            userId,
-          },
+        await adapter.note.deleteMany({
+          id: noteId,
+          userId,
         });
 
         result = { deleted: { noteId }, message: "Note deleted successfully" };
@@ -416,6 +368,7 @@ export async function POST(request: Request) {
 
       case 'study-sessions-sync': {
         const data = studySessionsSyncSchema.parse(payload);
+        const adapter = getDbAdapter();
         const { sessions } = data;
 
         if (sessions.length === 0) {
@@ -424,18 +377,16 @@ export async function POST(request: Request) {
         }
 
         // Use transaction for batch insert
-        const sessionResults = await db.$transaction(
-          sessions.map((session) =>
-            db.studySession.create({
-              data: {
-                userId,
-                id: session.id || undefined,
-                date: session.date,
-                durationMs: session.durationMs,
-                pageType: session.pageType,
-                xpEarned: session.xpEarned ?? 0,
-              },
-            })
+        const sessionResults = await adapter.transaction(
+          sessions.map((session) => () =>
+            adapter.studySession.createMany([{
+              userId,
+              id: session.id || undefined,
+              date: session.date,
+              durationMs: session.durationMs,
+              pageType: session.pageType,
+              xpEarned: session.xpEarned ?? 0,
+            }])
           )
         );
 
@@ -444,13 +395,14 @@ export async function POST(request: Request) {
       }
 
       case 'reset-progress': {
-        await db.$transaction([
-          db.progress.deleteMany({ where: { userId } }),
-          db.quizResult.deleteMany({ where: { userId } }),
-          db.challengeProgress.deleteMany({ where: { userId } }),
-          db.itemProgress.deleteMany({ where: { userId } }),
-          db.note.deleteMany({ where: { userId } }),
-          db.studySession.deleteMany({ where: { userId } }),
+        const adapter = getDbAdapter();
+        await adapter.transaction([
+          () => adapter.progress.deleteMany({ userId }),
+          () => adapter.quizResult.deleteMany({ userId }),
+          () => adapter.challengeProgress.deleteMany({ userId }),
+          () => adapter.itemProgress.deleteMany({ userId }),
+          () => adapter.note.deleteMany({ userId }),
+          () => adapter.studySession.deleteMany({ userId }),
         ]);
 
         result = { message: "Progress reset successfully" };

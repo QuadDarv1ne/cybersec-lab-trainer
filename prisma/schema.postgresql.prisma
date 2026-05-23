@@ -1,16 +1,14 @@
-// CyberSec Lab Trainer — Prisma Schema (MySQL)
-// Для учебной платформы по информационной безопасности
+// CyberSec Lab Trainer — PostgreSQL Schema
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// Пользователи системы
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -32,7 +30,6 @@ model User {
   @@map("users")
 }
 
-// Учётные записи для аутентификации (NextAuth.js)
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -53,7 +50,6 @@ model Account {
   @@map("accounts")
 }
 
-// Сессии пользователей
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -64,13 +60,12 @@ model Session {
   @@map("sessions")
 }
 
-// Прогресс изучения модулей
 model Progress {
   id          String   @id @default(cuid())
   userId      String
-  moduleId    String   // OWASPTop10, SQLInjection, XSS, CSRF, etc.
+  moduleId    String
   completed   Boolean  @default(false)
-  score       Int?     // Оценка за модуль
+  score       Int?
   lastAccessed DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -80,14 +75,13 @@ model Progress {
   @@map("progress")
 }
 
-// Результаты квизов
 model QuizResult {
   id        String   @id @default(cuid())
   userId    String
-  quizId    String   // ID квиза (например, "owasp-top-10-quiz")
-  score     Int      // Количество правильных ответов
-  total     Int      // Общее количество вопросов
-  percentage Float  // Процент правильных ответов
+  quizId    String
+  score     Int
+  total     Int
+  percentage Float
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -96,15 +90,14 @@ model QuizResult {
   @@map("quiz_results")
 }
 
-// Прогресс выполнения челленджей
 model ChallengeProgress {
   id            String   @id @default(cuid())
   userId        String
-  challengeType String   // owasp, auth, headers, secure-coding
+  challengeType String
   correct       Int      @default(0)
   total         Int      @default(0)
-  answered      Json?    // Массив номеров отвеченных вопросов
-  selectedOptions Json?  // Карта выбранных ответов
+  answered      Json?
+  selectedOptions Json?
   updatedAt     DateTime @updatedAt @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -113,7 +106,6 @@ model ChallengeProgress {
   @@map("challenge_progress")
 }
 
-// Верификационные токены для аутентификации
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -142,7 +134,7 @@ model Note {
   itemId    String
   moduleId  String
   moduleName String
-  content   String   @db.Text
+  content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

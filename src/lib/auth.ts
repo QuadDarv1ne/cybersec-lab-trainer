@@ -2,7 +2,6 @@ import type { NextAuthOptions } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { db } from "./db";
 
 const providers: NextAuthOptions["providers"] = [];
@@ -48,12 +47,82 @@ if (providers.length === 0) {
   );
 }
 
-// Only use PrismaAdapter when OAuth providers are configured
-// Demo mode (CredentialsProvider) doesn't need DB-backed sessions
+// Only use DB adapter when OAuth providers are configured
 const hasOAuth = providers.some((p) => p.type === "oauth");
+const dbType = process.env.DATABASE_TYPE || 'sqlite';
+
+// Lazily create adapter config to avoid import errors when Prisma isn't generated
+let adapterConfig: { adapter: any } | {} = {};
+if (hasOAuth) {
+  if (dbType === 'mongodb') {
+    // MongoDB: use custom NextAuth adapter via mongoose
+    const mongoose = require('mongoose');
+    const { UserModel, AccountModel, SessionModel, VerificationTokenModel } = require('./mongoose-schema');
+    adapterConfig = {
+      adapter: {
+        createUser: async (data: any) => {
+          const user = await UserModel.create({ ...data, id: data.id || new mongoose.Types.ObjectId().toString() });
+          return { ...user.toObject(), id: user._id.toString() };
+        },
+        getUser: async (id: string) => {
+          const user = await UserModel.findById(id);
+          return user ? { ...user.toObject(), id: user._id.toString() } : null;
+        },
+        getUserByEmail: async (email: string) => {
+          const user = await UserModel.findOne({ email });
+          return user ? { ...user.toObject(), id: user._id.toString() } : null;
+        },
+        getUserByAccount: async ({ provider, providerAccountId }: { provider: string; providerAccountId: string }) => {
+          const account = await AccountModel.findOne({ provider, providerAccountId });
+          if (!account) return null;
+          const user = await UserModel.findById(account.userId);
+          return user ? { ...user.toObject(), id: user._id.toString() } : null;
+        },
+        updateUser: async (data: any) => {
+          const user = await UserModel.findByIdAndUpdate(data.id, { $set: data }, { new: true });
+          return user ? { ...user.toObject(), id: user._id.toString() } : null;
+        },
+        linkAccount: async (data: any) => {
+          return AccountModel.create(data);
+        },
+        getSessionAndUser: async (sessionToken: string) => {
+          const session = await SessionModel.findOne({ sessionToken }).populate('userId');
+          if (!session || !session.userId) return null;
+          const userDoc = session.userId as any;
+          return {
+            user: { ...userDoc.toObject(), id: userDoc._id.toString() },
+            session: { ...session.toObject(), id: session._id.toString() },
+          };
+        },
+        createSession: async (data: any) => {
+          const session = await SessionModel.create(data);
+          return { ...session.toObject(), id: session._id.toString() };
+        },
+        updateSession: async (data: any) => {
+          const session = await SessionModel.findOneAndUpdate({ sessionToken: data.sessionToken }, { $set: data }, { new: true });
+          return session ? { ...session.toObject(), id: session._id.toString() } : null;
+        },
+        deleteSession: async (sessionToken: string) => {
+          await SessionModel.deleteOne({ sessionToken });
+        },
+        createVerificationToken: async (data: any) => {
+          return VerificationTokenModel.create(data);
+        },
+        useVerificationToken: async ({ identifier, token }: { identifier: string; token: string }) => {
+          const result = await VerificationTokenModel.findOneAndDelete({ identifier, token });
+          return result ? result.toObject() : null;
+        },
+      },
+    };
+  } else {
+    // SQL: use PrismaAdapter
+    const { PrismaAdapter } = require('@next-auth/prisma-adapter');
+    adapterConfig = { adapter: PrismaAdapter(db) };
+  }
+}
 
 export const authOptions: NextAuthOptions = {
-  ...(hasOAuth ? { adapter: PrismaAdapter(db) } : {}),
+  ...adapterConfig,
   providers,
   callbacks: {
     async jwt({ token, user }) {

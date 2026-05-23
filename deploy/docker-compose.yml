@@ -10,6 +10,7 @@ services:
     environment:
       - DATABASE_TYPE=${DATABASE_TYPE:-postgresql}
       - DATABASE_URL=${DATABASE_URL:-postgresql://${POSTGRES_USER:-cybersec}:${POSTGRES_PASSWORD:-cybersec}@db:5432/${POSTGRES_DB:-cybersec_trainer}}
+      - MONGODB_URI=${MONGODB_URI:-mongodb://mongo-db:27017/cybersec_lab}
       - NEXTAUTH_URL=http://localhost:3000
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me-in-production}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
@@ -21,6 +22,9 @@ services:
       db:
         condition: service_healthy
       mysql-db:
+        condition: service_healthy
+        required: false
+      mongo-db:
         condition: service_healthy
         required: false
     restart: unless-stopped
@@ -66,9 +70,28 @@ services:
     networks:
       - cybersec
 
+  mongo-db:
+    profiles: ["mongodb"]
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=${MONGO_DB:-cybersec_lab}
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - cybersec
+
 volumes:
   postgres_data:
   mysql_data:
+  mongo_data:
 
 networks:
   cybersec:
