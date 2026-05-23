@@ -257,6 +257,15 @@ export default function QuizSystem() {
                   key={cat.id}
                   className="cursor-pointer border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all"
                   onClick={() => startQuiz(cat.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      startQuiz(cat.id);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Начать квиз: ${cat.name}, ${cat.count} вопросов`}
                 >
                   <CardContent className="p-5">
                     <div className="flex items-center gap-3">

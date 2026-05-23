@@ -152,6 +152,10 @@ export function importProgress(jsonString: string): {
         logger.error(`Invalid quiz score for category: ${key}`);
         return null;
       }
+      if (val < 0 || val > 100) {
+        logger.error(`Quiz score out of range for ${key}: ${val}`);
+        return null;
+      }
       if (!validQuizCategoryIds.has(key)) {
         logger.warn(`Unknown quiz category: ${key} (may be from a newer version)`);
       }
@@ -173,18 +177,30 @@ export function importProgress(jsonString: string): {
       }
     }
 
-    // Validate quiz history entries
+    // Validate quiz history scores are within bounds
     for (let i = 0; i < d.quizHistory.length; i++) {
       const entry = d.quizHistory[i];
       if (!entry || typeof entry !== 'object' || typeof entry.id !== 'string' || typeof entry.categoryId !== 'string' || typeof entry.score !== 'number' || typeof entry.correct !== 'number' || typeof entry.total !== 'number' || typeof entry.timestamp !== 'number' || !Array.isArray(entry.answers)) {
         logger.error(`Invalid quiz history entry at index ${i}`);
         return null;
       }
+      if (entry.score < 0 || entry.score > 100) {
+        logger.error(`Quiz history score out of range at index ${i}: ${entry.score}`);
+        return null;
+      }
+    }
+
+    // Clamp totalXP to prevent arbitrary XP injection (max ~1490 possible, allow up to 10000 for safety)
+    const MAX_REASONABLE_XP = 10000;
+    const rawXP = typeof d.totalXP === 'number' ? d.totalXP : 0;
+    const clampedXP = Math.max(0, Math.min(rawXP, MAX_REASONABLE_XP));
+    if (rawXP !== clampedXP) {
+      logger.warn(`Clamped totalXP from ${rawXP} to ${clampedXP}`);
     }
 
     return {
       ...d,
-      totalXP: typeof d.totalXP === 'number' ? d.totalXP : 0,
+      totalXP: clampedXP,
     };
   } catch (error) {
     logger.error('Failed to parse import file:', error);

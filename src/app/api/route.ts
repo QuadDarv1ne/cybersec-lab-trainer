@@ -428,6 +428,14 @@ export async function POST(request: Request) {
     addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
     return response;
   } catch (error) {
+    // Handle malformed JSON body before rate limiting was applied
+    if (error instanceof SyntaxError) {
+      return NextResponse.json(
+        { error: "Invalid JSON in request body" },
+        { status: 400 }
+      );
+    }
+
     const rl = rateLimitResult ?? { remaining: 0, reset: 0 };
     if (error instanceof z.ZodError) {
       const details = error.flatten().fieldErrors;
