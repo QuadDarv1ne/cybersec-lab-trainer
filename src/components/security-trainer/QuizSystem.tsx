@@ -27,6 +27,7 @@ import {
   Trophy,
   Target,
   History,
+  AlertCircle,
 } from 'lucide-react';
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -52,6 +53,8 @@ export default function QuizSystem() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [answers, setAnswers] = useState<(boolean | null)[]>([]);
   const [timerActive, setTimerActive] = useState(false);
+  const [wrongQuestions, setWrongQuestions] = useState<typeof quizQuestions>([]);
+  const [quizQuestionsOverride, setQuizQuestionsOverride] = useState<typeof quizQuestions | null>(null);
   const timeUpRef = useRef(false);
   const currentQuestionRef = useRef(0);
   const correctCountRef = useRef(0);
@@ -105,13 +108,17 @@ export default function QuizSystem() {
   );
 
   const categoryQuestions = useMemo(
-    () => quizQuestions.filter((q) => q.category === activeCategoryName),
-    [activeCategoryName],
+    () => {
+      const questions = quizQuestionsOverride ?? quizQuestions;
+      return questions.filter((q) => q.category === activeCategoryName);
+    },
+    [activeCategoryName, quizQuestionsOverride],
   );
 
   const startQuiz = (categoryId: string) => {
     const cat = quizCategories.find((c) => c.id === categoryId);
     if (!cat) return;
+    setQuizQuestionsOverride(null);
     const questions = quizQuestions.filter((q) => q.category === cat.name);
     if (questions.length === 0) return;
     setActiveCategory(cat.id);
@@ -189,6 +196,25 @@ export default function QuizSystem() {
     setTimeLeft(30);
     setAnswers([]);
     setTimerActive(false);
+    setQuizQuestionsOverride(null);
+    setWrongQuestions([]);
+  };
+
+  const retryWrong = () => {
+    const wrongs = categoryQuestions.filter((_, i) => !answers[i]);
+    if (wrongs.length === 0) return;
+    setWrongQuestions(wrongs);
+    setQuizQuestionsOverride(wrongs);
+    setActiveCategory(activeCategory);
+    setCurrentQuestion(0);
+    setCorrectCount(0);
+    setSelectedAnswer('');
+    setShowAnswer(false);
+    setTimeLeft(30);
+    setAnswers(new Array(wrongs.length).fill(null));
+    setTimerActive(true);
+    setQuizState('playing');
+    timeUpRef.current = false;
   };
 
   const question = categoryQuestions[currentQuestion];
@@ -200,7 +226,7 @@ export default function QuizSystem() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => { resetQuiz(); setCurrentPage('dashboard'); }} aria-label="Вернуться на главную">
+        <Button variant="ghost" size="icon" onClick={() => { resetQuiz(); setCurrentPage('dashboard'); }} aria-label={t('backToCategories')}>
           <ChevronLeft size={20} />
         </Button>
         <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
@@ -403,13 +429,18 @@ export default function QuizSystem() {
                 {t('correctAnswers', { correct: correctCount, total: categoryQuestions.length })}
               </p>
 
-              <div className="flex gap-2 justify-center">
+              <div className="flex gap-2 justify-center flex-wrap">
                 <Button variant="outline" className="text-white border-white/20 hover:bg-white/10" onClick={resetQuiz}>
                   <RotateCcw size={14} className="mr-2" /> {t('backToCategories')}
                 </Button>
                 <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => startQuiz(activeCategory)}>
                   <RotateCcw size={14} className="mr-2" /> {t('retry')}
                 </Button>
+                {categoryQuestions.some((_, i) => !answers[i]) && (
+                  <Button variant="secondary" className="bg-amber-500 hover:bg-amber-600 text-white" onClick={retryWrong}>
+                    <AlertCircle size={14} className="mr-2" /> {t('retryWrong')}
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

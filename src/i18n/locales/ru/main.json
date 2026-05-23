@@ -412,6 +412,7 @@
     "correctAnswers": "Правильных ответов: {correct} из {total}",
     "backToCategories": "К категориям",
     "retry": "Повторить",
+    "retryWrong": "Повторить ошибки",
     "answerBreakdown": "Разбор ответов",
     "correctAnswer": "Правильный ответ",
     "start": "Начать квиз",

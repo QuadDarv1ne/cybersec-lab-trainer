@@ -412,6 +412,7 @@
     "correctAnswers": "Correct answers: {correct} of {total}",
     "backToCategories": "Back to categories",
     "retry": "Retry",
+    "retryWrong": "Retry wrong answers",
     "answerBreakdown": "Answer breakdown",
     "correctAnswer": "Correct answer",
     "start": "Start Quiz",
