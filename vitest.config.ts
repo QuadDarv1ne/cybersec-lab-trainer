@@ -17,6 +17,12 @@ export default defineConfig({
         '**/*.config.{ts,js}',
         '.next/',
       ],
+      thresholds: process.env.CI ? {
+        lines: 70,
+        functions: 70,
+        branches: 60,
+        statements: 70,
+      } : undefined,
     },
   },
   resolve: {
