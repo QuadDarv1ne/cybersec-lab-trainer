@@ -786,7 +786,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       csrfViewedChallenges: data.csrfViewedChallenges,
       quizHistory: data.quizHistory,
       totalXP: data.totalXP ?? 0,
-      notes: (data as Record<string, unknown>).notes as NotesMap | undefined ?? {},
+      notes: ((data as Record<string, unknown>).notes as NotesMap | undefined) ?? {},
     });
     ensureSync(get, set).catch((err) => logger.error('Sync failed after importProgressData:', err));
   },
