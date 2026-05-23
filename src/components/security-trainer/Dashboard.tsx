@@ -4,6 +4,7 @@ import { useAppStore } from '@/lib/store';
 import { modules, achievements, glossaryTerms } from '@/lib/security-data';
 import { quizCategories } from '@/lib/data/quiz-data';
 import { getAchievementStatus } from '@/lib/achievement-utils';
+import { getWeaknessCount } from '@/lib/weakness-review';
 import { useTranslations } from '@/lib/intlStub';
 import { exportProgress, importProgress } from '@/lib/progress-export';
 import XPDisplay from './XPDisplay';
@@ -114,6 +115,18 @@ export default function Dashboard() {
       ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
       : 0;
   }, [quizScores]);
+
+  const weaknessCount = useMemo(
+    () =>
+      getWeaknessCount(
+        quizHistory,
+        owaspChallengeScores,
+        authChallengeScores,
+        headersChallengeScores,
+        secureCodingChallengeScores,
+      ),
+    [quizHistory, owaspChallengeScores, authChallengeScores, headersChallengeScores, secureCodingChallengeScores],
+  );
 
   const challengeStats = useMemo(() =>
     ({
@@ -500,6 +513,51 @@ export default function Dashboard() {
           </motion.div>
         </div>
       </div>
+
+      {/* Weakness Review */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+      >
+        <Card
+          className="border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 cursor-pointer hover:shadow-md transition-shadow group"
+          onClick={() => setCurrentPage('weakness-review')}
+          onKeyDown={(e) => handleCardKeyDown(e, () => setCurrentPage('weakness-review'))}
+          role="button"
+          tabIndex={0}
+          aria-label="Повторение ошибок"
+        >
+          <CardContent className="p-5">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center shrink-0 group-hover:bg-orange-200 transition-colors">
+                <AlertTriangle size={20} className="text-orange-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h3 className="font-semibold text-sm group-hover:text-orange-700 transition-colors">Повторение ошибок</h3>
+                    <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                      {weaknessCount > 0
+                        ? `Найдено ${weaknessCount} ошибок для повторения. Закрепите слабые места!`
+                        : 'Нет ошибок для повторения. Отличная работа!'}
+                    </p>
+                  </div>
+                  <ChevronRight size={16} className="text-slate-300 group-hover:text-orange-500 transition-colors mt-1 shrink-0" />
+                </div>
+                {weaknessCount > 0 && (
+                  <div className="flex items-center gap-2 mt-3">
+                    <Badge className="bg-orange-200 text-orange-800 border-0 text-[10px]">
+                      {weaknessCount} {weaknessCount === 1 ? 'ошибка' : weaknessCount < 5 ? 'ошибки' : 'ошибок'}
+                    </Badge>
+                    <span className="text-[11px] text-slate-400">+5 XP за каждый исправленный ответ</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Overall progress */}
       <Card className="border-none shadow-sm bg-white" aria-live="polite" aria-label="Overall progress">

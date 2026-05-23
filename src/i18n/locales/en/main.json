@@ -119,7 +119,8 @@
     "signIn": "Sign In",
     "signOut": "Sign Out",
     "analytics": "Analytics",
-    "settings": "Settings"
+    "settings": "Settings",
+    "weaknessReview": "Weakness Review"
   },
   "owasp": {
     "title": "OWASP Top 10",
@@ -535,5 +536,25 @@
     "saveGoals": "Save Goals",
     "saved": "Saved!",
     "notificationBody": "Time to continue your CyberSec Lab training!"
+  },
+  "review": {
+    "title": "Weakness Review",
+    "subtitle": "Review questions you previously answered incorrectly",
+    "back": "Back",
+    "noWeaknesses": "Great job!",
+    "noWeaknessesDesc": "No mistakes to review. Keep learning!",
+    "backToDashboard": "Go to Dashboard",
+    "completed": "Review complete!",
+    "correctCount": "Correct: {correct} of {total}",
+    "perfectScore": "Perfect score!",
+    "retry": "Retry",
+    "progress": "Question",
+    "quizType": "Quiz",
+    "challengeType": "Challenge",
+    "explanation": "Explanation:",
+    "prev": "Previous",
+    "checkAnswer": "Check answer",
+    "next": "Next",
+    "finish": "Finish"
   }
 }

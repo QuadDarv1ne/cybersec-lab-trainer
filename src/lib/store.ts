@@ -24,7 +24,8 @@ export type PageType =
   | 'achievements'
   | 'notes'
   | 'analytics'
-  | 'settings';
+  | 'settings'
+  | 'weakness-review';
 
 export interface QuizAttempt {
   id: string;

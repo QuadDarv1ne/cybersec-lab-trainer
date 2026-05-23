@@ -119,7 +119,8 @@
     "signIn": "Войти",
     "signOut": "Выйти",
     "analytics": "Аналитика",
-    "settings": "Настройки"
+    "settings": "Настройки",
+    "weaknessReview": "Повторение ошибок"
   },
   "owasp": {
     "title": "OWASP Top 10",
@@ -535,5 +536,25 @@
     "saveGoals": "Сохранить цели",
     "saved": "Сохранено!",
     "notificationBody": "Пора продолжить обучение в CyberSec Lab!"
+  },
+  "review": {
+    "title": "Повторение ошибок",
+    "subtitle": "Повторите вопросы, в которых вы допустили ошибки",
+    "back": "Назад",
+    "noWeaknesses": "Отличная работа!",
+    "noWeaknessesDesc": "У вас нет ошибок для повторения. Продолжайте обучение!",
+    "backToDashboard": "На главную",
+    "completed": "Повторение завершено!",
+    "correctCount": "Верно: {correct} из {total}",
+    "perfectScore": "Идеальный результат!",
+    "retry": "Повторить",
+    "progress": "Вопрос",
+    "quizType": "Квиз",
+    "challengeType": "Задание",
+    "explanation": "Объяснение:",
+    "prev": "Назад",
+    "checkAnswer": "Проверить ответ",
+    "next": "Далее",
+    "finish": "Завершить"
   }
 }
