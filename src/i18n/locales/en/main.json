@@ -394,7 +394,9 @@
     },
     "backToDashboard": "Back to dashboard",
     "categoryFilter": "Filter by category",
-    "resetFilter": "Reset filter"
+    "resetFilter": "Reset filter",
+    "listView": "List",
+    "flashcardView": "Flashcards"
   },
   "quiz": {
     "title": "Security Quiz",

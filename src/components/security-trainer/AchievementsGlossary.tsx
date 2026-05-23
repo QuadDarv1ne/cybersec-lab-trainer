@@ -210,7 +210,7 @@ export default function AchievementsAndGlossary() {
                 className="h-7 text-xs"
                 onClick={() => setGlossaryView('list')}
               >
-                <List size={12} className="mr-1" /> Список
+                <List size={12} className="mr-1" /> {t('listView')}
               </Button>
               <Button
                 variant={glossaryView === 'flashcards' ? 'default' : 'outline'}
@@ -218,7 +218,7 @@ export default function AchievementsAndGlossary() {
                 className="h-7 text-xs"
                 onClick={() => setGlossaryView('flashcards')}
               >
-                <Layers size={12} className="mr-1" /> Карточки
+                <Layers size={12} className="mr-1" /> {t('flashcardView')}
               </Button>
             </div>
           </div>

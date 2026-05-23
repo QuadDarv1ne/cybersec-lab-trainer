@@ -394,7 +394,9 @@
     },
     "backToDashboard": "Вернуться на главную",
     "categoryFilter": "Фильтр по категориям",
-    "resetFilter": "Сбросить фильтр"
+    "resetFilter": "Сбросить фильтр",
+    "listView": "Список",
+    "flashcardView": "Карточки"
   },
   "quiz": {
     "title": "Квиз по безопасности",
