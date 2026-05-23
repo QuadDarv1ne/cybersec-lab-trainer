@@ -112,22 +112,22 @@ export async function GET(request: Request) {
         createdAt: toTime(ss.createdAt),
       }));
 
-      const csrfToken = await setCsrfCookie();
-      const response = NextResponse.json({ completedModules, quizScores, challenges, itemProgress, notes, studySessions, csrfToken, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() });
+      await setCsrfCookie();
+      const response = NextResponse.json({ completedModules, quizScores, challenges, itemProgress, notes, studySessions, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() });
       addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
       return response;
     }
   } catch (error) {
     logger.error('Failed to load progress:', error);
-    const csrfToken = await setCsrfCookie();
-    const response = NextResponse.json({ error: "Failed to load progress", csrfToken, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() }, { status: 500 });
+    await setCsrfCookie();
+    const response = NextResponse.json({ error: "Failed to load progress", csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() }, { status: 500 });
     addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
     return response;
   }
 
-  const csrfToken = await setCsrfCookie();
+  await setCsrfCookie();
   const response = NextResponse.json(
-    { error: `Unknown action. Expected: load-progress`, csrfToken, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() },
+    { error: `Unknown action. Expected: load-progress`, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() },
     { status: 400 }
   );
   addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
