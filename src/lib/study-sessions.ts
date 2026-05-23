@@ -21,6 +21,27 @@ export interface WeeklyStats {
   dailyBreakdown: DailyBreakdown[];
 }
 
+export interface StreakInfo {
+  currentStreak: number; // consecutive days with at least one session
+  bestStreak: number; // longest consecutive day streak ever
+  todayMinutes: number;
+  todaySessions: number;
+  isActive: boolean; // true if studied today or yesterday (streak still alive)
+}
+
+export interface HeatmapDay {
+  date: string; // YYYY-MM-DD
+  minutes: number;
+  level: 0 | 1 | 2 | 3 | 4; // 0 = none, 1-4 = intensity
+}
+
+export interface HeatmapData {
+  days: HeatmapDay[];
+  weeks: number; // number of weeks spanned
+  startDate: string;
+  endDate: string;
+}
+
 const MIN_MS = 60_000;
 const XP_PER_5_MIN = 1;
 const MAX_SESSION_XP = 10;
@@ -142,4 +163,160 @@ export function getWeeklyStats(sessions: StudySession[], weeksBack = 1): WeeklyS
 
 export function generateSessionId(): string {
   return `session-${Date.now()}-${crypto.randomUUID()}`;
+}
+
+/**
+ * Convert a date to YYYY-MM-DD string in local timezone
+ */
+function toDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Parse a YYYY-MM-DD string back to a Date (at midnight local time)
+ */
+function fromDateString(dateStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+/**
+ * Get unique dates with study sessions as YYYY-MM-DD strings
+ */
+function getStudyDates(sessions: StudySession[]): Set<string> {
+  const dateSet = new Set<string>();
+  for (const session of sessions) {
+    const d = new Date(session.date);
+    dateSet.add(toDateString(d));
+  }
+  return dateSet;
+}
+
+/**
+ * Calculate streak information: current streak, best streak, today's stats
+ */
+export function getStreakInfo(sessions: StudySession[]): StreakInfo {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayStr = toDateString(today);
+
+  const todayMinutes = getTodayTotalMs(sessions) / MIN_MS;
+  const todaySessions = getTodaySessions(sessions).length;
+
+  // Get all unique study dates sorted
+  const studyDates = Array.from(getStudyDates(sessions)).sort().reverse();
+
+  if (studyDates.length === 0) {
+    return { currentStreak: 0, bestStreak: 0, todayMinutes: 0, todaySessions: 0, isActive: false };
+  }
+
+  // Check if streak is active (studied today or yesterday)
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = toDateString(yesterday);
+  const isActive = studyDates[0] === todayStr || studyDates[0] === yesterdayStr;
+
+  // Calculate current streak
+  let currentStreak = 0;
+  let checkDate = new Date(today);
+
+  // If didn't study today, start checking from yesterday
+  if (studyDates[0] !== todayStr) {
+    checkDate = new Date(yesterday);
+  }
+
+  for (const dateStr of studyDates) {
+    const expectedStr = toDateString(checkDate);
+    if (dateStr === expectedStr) {
+      currentStreak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else if (dateStr < expectedStr) {
+      // Gap found, streak broken
+      break;
+    }
+    // If dateStr > expectedStr, skip (future date or duplicate)
+  }
+
+  // Calculate best streak
+  let bestStreak = 0;
+  let tempStreak = 0;
+  let prevDate: Date | null = null;
+
+  for (const dateStr of studyDates.toReversed()) {
+    const currentDate = fromDateString(dateStr);
+    if (prevDate === null) {
+      tempStreak = 1;
+    } else {
+      const diffDays = Math.round((currentDate.getTime() - prevDate.getTime()) / (24 * 60 * 60 * 1000));
+      if (diffDays === 1) {
+        tempStreak++;
+      } else {
+        tempStreak = 1;
+      }
+    }
+    bestStreak = Math.max(bestStreak, tempStreak);
+    prevDate = currentDate;
+  }
+
+  return {
+    currentStreak,
+    bestStreak: Math.max(bestStreak, currentStreak),
+    todayMinutes: Math.floor(todayMinutes),
+    todaySessions,
+    isActive,
+  };
+}
+
+/**
+ * Generate heatmap data for the last N weeks (default 26 weeks ≈ 6 months)
+ */
+export function getHeatmapData(sessions: StudySession[], weeksBack = 26): HeatmapData {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  // Calculate start date (go back to the Sunday of the first week)
+  const startDate = new Date(now);
+  startDate.setDate(startDate.getDate() - weeksBack * 7);
+  // Adjust to start on Sunday
+  const dayOfWeek = startDate.getDay();
+  startDate.setDate(startDate.getDate() - dayOfWeek);
+
+  const endDate = new Date(now);
+
+  // Build a map of date -> minutes
+  const minutesMap = new Map<string, number>();
+  for (const session of sessions) {
+    const dateStr = toDateString(new Date(session.date));
+    const existing = minutesMap.get(dateStr) || 0;
+    minutesMap.set(dateStr, existing + Math.floor(session.durationMs / MIN_MS));
+  }
+
+  // Generate all days from startDate to endDate
+  const days: HeatmapDay[] = [];
+  const current = new Date(startDate);
+
+  while (current <= endDate) {
+    const dateStr = toDateString(current);
+    const minutes = minutesMap.get(dateStr) || 0;
+
+    // Determine intensity level (similar to GitHub contributions)
+    let level: 0 | 1 | 2 | 3 | 4 = 0;
+    if (minutes > 0) level = 1;
+    if (minutes >= 30) level = 2;
+    if (minutes >= 60) level = 3;
+    if (minutes >= 120) level = 4;
+
+    days.push({ date: dateStr, minutes, level });
+    current.setDate(current.getDate() + 1);
+  }
+
+  return {
+    days,
+    weeks: weeksBack,
+    startDate: toDateString(startDate),
+    endDate: toDateString(endDate),
+  };
 }

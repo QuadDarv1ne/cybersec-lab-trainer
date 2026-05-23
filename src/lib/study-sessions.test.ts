@@ -9,6 +9,8 @@ import {
   getTotalStudyTimeMs,
   getWeeklyStats,
   generateSessionId,
+  getStreakInfo,
+  getHeatmapData,
   type StudySession,
 } from './study-sessions';
 
@@ -233,6 +235,111 @@ describe('study-sessions', () => {
       const id1 = generateSessionId();
       const id2 = generateSessionId();
       expect(id1).not.toBe(id2);
+    });
+  });
+
+  describe('getStreakInfo', () => {
+    it('returns zero streaks when no sessions', () => {
+      const result = getStreakInfo([]);
+      expect(result.currentStreak).toBe(0);
+      expect(result.bestStreak).toBe(0);
+      expect(result.isActive).toBe(false);
+      expect(result.todayMinutes).toBe(0);
+      expect(result.todaySessions).toBe(0);
+    });
+
+    it('calculates current streak for consecutive days', () => {
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const twoDaysAgo = new Date();
+      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+      const sessions: StudySession[] = [
+        { id: '1', date: today.toISOString(), durationMs: 30 * 60_000, pageType: 'dashboard', xpEarned: 6 },
+        { id: '2', date: yesterday.toISOString(), durationMs: 20 * 60_000, pageType: 'dashboard', xpEarned: 4 },
+        { id: '3', date: twoDaysAgo.toISOString(), durationMs: 15 * 60_000, pageType: 'dashboard', xpEarned: 3 },
+      ];
+
+      const result = getStreakInfo(sessions);
+      expect(result.currentStreak).toBe(3);
+      expect(result.isActive).toBe(true);
+    });
+
+    it('marks streak as inactive when gap > 1 day', () => {
+      const twoDaysAgo = new Date();
+      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+      const sessions: StudySession[] = [
+        { id: '1', date: twoDaysAgo.toISOString(), durationMs: 30 * 60_000, pageType: 'dashboard', xpEarned: 6 },
+      ];
+
+      const result = getStreakInfo(sessions);
+      expect(result.isActive).toBe(false);
+    });
+
+    it('calculates best streak correctly', () => {
+      const today = new Date();
+      const d1 = new Date(); d1.setDate(d1.getDate() - 10);
+      const d2 = new Date(); d2.setDate(d2.getDate() - 9);
+      const d3 = new Date(); d3.setDate(d3.getDate() - 8);
+      const d4 = new Date(); d4.setDate(d4.getDate() - 5);
+      const d5 = new Date(); d5.setDate(d5.getDate() - 4);
+
+      const sessions: StudySession[] = [
+        { id: '1', date: d1.toISOString(), durationMs: 30 * 60_000, pageType: 'dashboard', xpEarned: 6 },
+        { id: '2', date: d2.toISOString(), durationMs: 30 * 60_000, pageType: 'dashboard', xpEarned: 6 },
+        { id: '3', date: d3.toISOString(), durationMs: 30 * 60_000, pageType: 'dashboard', xpEarned: 6 },
+        { id: '4', date: d4.toISOString(), durationMs: 30 * 60_000, pageType: 'dashboard', xpEarned: 6 },
+        { id: '5', date: d5.toISOString(), durationMs: 30 * 60_000, pageType: 'dashboard', xpEarned: 6 },
+        { id: '6', date: today.toISOString(), durationMs: 30 * 60_000, pageType: 'dashboard', xpEarned: 6 },
+      ];
+
+      const result = getStreakInfo(sessions);
+      expect(result.bestStreak).toBeGreaterThanOrEqual(3);
+    });
+  });
+
+  describe('getHeatmapData', () => {
+    it('returns data for the requested number of weeks', () => {
+      const result = getHeatmapData([], 4);
+      expect(result.weeks).toBe(4);
+      // 4 weeks + possible padding to Sunday
+      expect(result.days.length).toBeGreaterThan(28);
+      expect(result.days.length).toBeLessThanOrEqual(35);
+    });
+
+    it('correctly aggregates minutes from sessions', () => {
+      const today = new Date();
+      const sessions: StudySession[] = [
+        { id: '1', date: today.toISOString(), durationMs: 45 * 60_000, pageType: 'dashboard', xpEarned: 9 },
+      ];
+
+      const result = getHeatmapData(sessions, 1);
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const todayData = result.days.find((d) => d.date === todayStr);
+
+      expect(todayData).toBeDefined();
+      expect(todayData?.minutes).toBe(45);
+      expect(todayData?.level).toBe(2); // 30+ min = level 2
+    });
+
+    it('returns level 0 for days without sessions', () => {
+      const result = getHeatmapData([], 1);
+      expect(result.days.every((d) => d.level === 0)).toBe(true);
+    });
+
+    it('caps level at 4 for 120+ minutes', () => {
+      const today = new Date();
+      const sessions: StudySession[] = [
+        { id: '1', date: today.toISOString(), durationMs: 180 * 60_000, pageType: 'dashboard', xpEarned: 10 },
+      ];
+
+      const result = getHeatmapData(sessions, 1);
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const todayData = result.days.find((d) => d.date === todayStr);
+
+      expect(todayData?.level).toBe(4);
     });
   });
 });
