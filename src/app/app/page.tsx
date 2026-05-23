@@ -23,6 +23,7 @@ const QuizSystem = dynamic(() => import('@/components/security-trainer/QuizSyste
 const AchievementsGlossary = dynamic(() => import('@/components/security-trainer/AchievementsGlossary'), { ssr: false, loading: () => <PageSkeleton /> });
 const SecurityHeadersLab = dynamic(() => import('@/components/security-trainer/SecurityHeadersLab'), { ssr: false, loading: () => <PageSkeleton /> });
 const NotesPage = dynamic(() => import('@/components/security-trainer/Notes'), { ssr: false, loading: () => <PageSkeleton /> });
+const SettingsPage = dynamic(() => import('@/components/security-trainer/SettingsPage'), { ssr: false, loading: () => <PageSkeleton /> });
 const ContentSearch = dynamic(() => import('@/components/security-trainer/ContentSearch'), { ssr: false });
 const ProgressAnalytics = dynamic(() => import('@/components/security-trainer/ProgressAnalytics'), { ssr: false, loading: () => <PageSkeleton /> });
 
@@ -40,6 +41,7 @@ const pages: Record<string, React.ComponentType> = {
   owasp: OWASPTop10,
   notes: NotesPage,
   analytics: ProgressAnalytics,
+  settings: SettingsPage,
 };
 
 function PageSkeleton() {

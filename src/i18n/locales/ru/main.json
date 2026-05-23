@@ -118,7 +118,8 @@
     "majorCode": "09.03.04",
     "signIn": "Войти",
     "signOut": "Выйти",
-    "analytics": "Аналитика"
+    "analytics": "Аналитика",
+    "settings": "Настройки"
   },
   "owasp": {
     "title": "OWASP Top 10",
@@ -506,5 +507,33 @@
     "weakest": "Нужно повторить",
     "challengePerformance": "Результаты заданий",
     "moduleProgress": "Прогресс модулей"
+  },
+  "settings": {
+    "title": "Настройки обучения",
+    "subtitle": "Управляйте целями и уведомлениями",
+    "back": "Назад",
+    "todayProgress": "Сегодняшний прогресс",
+    "weeklyProgress": "Недельный прогресс",
+    "minutesStudied": "Изучено: {minutes} мин",
+    "goal": "Цель: {minutes} мин",
+    "daysStudied": "Дней: {days}",
+    "goalDays": "Цель: {days} дн.",
+    "dailyGoal": "Дневная цель",
+    "minutesPerDay": "Минут в день",
+    "minutes": "минут",
+    "weeklyGoal": "Недельная цель",
+    "daysPerWeek": "Дней в неделю",
+    "days": "дней",
+    "day": "день",
+    "notifications": "Уведомления",
+    "notificationsEnabled": "Уведомления включены",
+    "reminderTime": "Время напоминания",
+    "reminderExplanation": "Напоминание сработает один раз в указанное время. Перезагрузите страницу, чтобы обновить таймер.",
+    "notificationsDenied": "Уведомления заблокированы браузером. Разрешите их в настройках сайта.",
+    "streakInfo": "Серия обучения",
+    "streakExplanation": "Серия подсчитывает последовательные дни, когда вы занимались хотя бы одну минуту. Не пропускайте дни!",
+    "saveGoals": "Сохранить цели",
+    "saved": "Сохранено!",
+    "notificationBody": "Пора продолжить обучение в CyberSec Lab!"
   }
 }

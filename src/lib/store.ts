@@ -23,7 +23,8 @@ export type PageType =
   | 'quiz'
   | 'achievements'
   | 'notes'
-  | 'analytics';
+  | 'analytics'
+  | 'settings';
 
 export interface QuizAttempt {
   id: string;

@@ -21,6 +21,7 @@ import {
   LogOut,
   StickyNote,
   BarChart3,
+  Settings,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
@@ -46,6 +47,7 @@ const iconMap: Record<string, React.ReactNode> = {
   ShieldAlert: <ShieldAlert size={20} />,
   StickyNote: <StickyNote size={20} />,
   BarChart3: <BarChart3 size={20} />,
+  Settings: <Settings size={20} />,
 };
 
 export default function Sidebar() {
@@ -74,6 +76,7 @@ export default function Sidebar() {
     { id: 'achievements', label: t('achievements'), iconKey: 'Trophy' },
     { id: 'notes', label: 'Заметки', iconKey: 'StickyNote' },
     { id: 'analytics', label: t('analytics'), iconKey: 'BarChart3' },
+    { id: 'settings', label: t('settings'), iconKey: 'Settings' },
   ];
 
   // Count trackable items (excluding dashboard, achievements, quiz)
