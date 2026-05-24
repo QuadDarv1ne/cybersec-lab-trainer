@@ -199,7 +199,7 @@ export default function QuizSystem() {
   };
 
   const retryWrong = () => {
-    const wrongs = categoryQuestions.filter((_, i) => !answers[i]);
+    const wrongs = categoryQuestions.filter((_, i) => !answersRef.current[i]);
     if (wrongs.length === 0) return;
     setQuizQuestionsOverride(wrongs);
     setActiveCategory(activeCategory);
