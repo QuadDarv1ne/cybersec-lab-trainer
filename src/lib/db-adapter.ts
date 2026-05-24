@@ -83,6 +83,9 @@ export interface DbAdapter {
   session: SessionAdapter;
   verificationToken: VerificationTokenAdapter;
 
+  // Atomic delete of all user data across all tables
+  deleteAllForUser: (userId: string) => Promise<void>;
+
   // Disconnect
   disconnect: () => Promise<void>;
 }
@@ -172,6 +175,17 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
     verificationToken: {
       create: (data) => db.verificationToken.create({ data: data as Prisma.VerificationTokenCreateInput }),
       delete: async (where) => { await db.verificationToken.delete({ where: where as Prisma.VerificationTokenWhereUniqueInput }); },
+    },
+
+    deleteAllForUser: async (userId: string) => {
+      await db.$transaction([
+        db.progress.deleteMany({ where: { userId } }),
+        db.quizResult.deleteMany({ where: { userId } }),
+        db.challengeProgress.deleteMany({ where: { userId } }),
+        db.itemProgress.deleteMany({ where: { userId } }),
+        db.note.deleteMany({ where: { userId } }),
+        db.studySession.deleteMany({ where: { userId } }),
+      ]);
     },
 
     disconnect: async () => {
@@ -276,6 +290,25 @@ function createMongooseAdapter(): DbAdapter {
         return doc.toObject() as VerificationToken;
       },
       delete: async (where) => { await VerificationTokenModel.deleteOne(where); },
+    },
+
+    deleteAllForUser: async (userId: string) => {
+      const session = await mongoose.startSession();
+      session.startTransaction();
+      try {
+        await ProgressModel.deleteMany({ userId }, { session });
+        await QuizResultModel.deleteMany({ userId }, { session });
+        await ChallengeProgressModel.deleteMany({ userId }, { session });
+        await ItemProgressModel.deleteMany({ userId }, { session });
+        await NoteModel.deleteMany({ userId }, { session });
+        await StudySessionModel.deleteMany({ userId }, { session });
+        await session.commitTransaction();
+      } catch (error) {
+        await session.abortTransaction();
+        throw error;
+      } finally {
+        session.endSession();
+      }
     },
 
     disconnect: async () => {

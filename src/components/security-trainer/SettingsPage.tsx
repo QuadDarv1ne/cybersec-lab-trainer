@@ -116,24 +116,30 @@ export default function SettingsPage() {
     if (!goals.notificationsEnabled || notificationPermission !== 'granted') return;
     if (!('Notification' in window)) return;
 
-    const [hours, minutes] = goals.reminderTime.split(':').map(Number);
-    const now = new Date();
-    const reminder = new Date();
-    reminder.setHours(hours, minutes, 0, 0);
+    const scheduleNext = () => {
+      const [hours, minutes] = goals.reminderTime.split(':').map(Number);
+      const now = new Date();
+      const reminder = new Date();
+      reminder.setHours(hours, minutes, 0, 0);
 
-    // If time already passed today, schedule for tomorrow
-    if (reminder <= now) {
-      reminder.setDate(reminder.getDate() + 1);
-    }
+      // If time already passed today, schedule for tomorrow
+      if (reminder <= now) {
+        reminder.setDate(reminder.getDate() + 1);
+      }
 
-    const msUntilReminder = reminder.getTime() - now.getTime();
-    if (reminderTimerRef.current) clearTimeout(reminderTimerRef.current);
-    reminderTimerRef.current = setTimeout(() => {
-      new Notification('CyberSec Lab', {
-        body: t('notificationBody'),
-        icon: '/favicon.ico',
-      });
-    }, msUntilReminder);
+      const msUntilReminder = reminder.getTime() - now.getTime();
+      if (reminderTimerRef.current) clearTimeout(reminderTimerRef.current);
+      reminderTimerRef.current = setTimeout(() => {
+        new Notification('CyberSec Lab', {
+          body: t('notificationBody'),
+          icon: '/favicon.ico',
+        });
+        // Schedule the next reminder after this one fires
+        scheduleNext();
+      }, msUntilReminder);
+    };
+
+    scheduleNext();
   };
 
   // Schedule reminder when goals change

@@ -208,7 +208,7 @@ const apiClient = {
       throw new Error(error.error || 'Failed to load progress');
     }
 
-    return response.json();
+    return response.json().catch(() => ({ error: 'Invalid server response' }));
   },
 
   async saveBatch(modules: { moduleId: string; completed: boolean; score?: number }[], quizzes: { quizId: string; score: number; total: number }[]) {
@@ -535,6 +535,11 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
     // Restore totalXP if available (computed server-side from study sessions)
     if (typeof data.totalXP === 'number') {
       set({ totalXP: data.totalXP });
+    }
+
+    // Restore quiz history if available
+    if (data.quizHistory && Array.isArray(data.quizHistory)) {
+      set({ quizHistory: data.quizHistory.slice(0, 50) });
     }
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') return;

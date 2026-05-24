@@ -130,8 +130,20 @@ export async function GET(request: Request) {
       // Calculate totalXP from study sessions
       const totalXP = studySessionRecords.reduce((sum, ss) => sum + (ss.xpEarned as number), 0);
 
+      // Build quiz history from quiz results
+      const quizHistory = quizResults.map((qr) => ({
+        id: qr.id as string,
+        categoryId: qr.quizId as string,
+        categoryName: qr.quizId as string,
+        score: qr.score as number,
+        correct: qr.score as number,
+        total: qr.total as number,
+        answers: [] as (boolean | null)[],
+        timestamp: toTime(qr.createdAt),
+      }));
+
       await setCsrfCookie();
-      const response = NextResponse.json({ completedModules, quizScores, challenges, itemProgress, csrfViewedChallenges, notes, studySessions, totalXP, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() });
+      const response = NextResponse.json({ completedModules, quizScores, quizHistory, challenges, itemProgress, csrfViewedChallenges, notes, studySessions, totalXP, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() });
       addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
       return response;
     }
@@ -368,8 +380,9 @@ export async function POST(request: Request) {
         let savedCount = 0;
         for (const note of notes) {
           try {
+            const noteId = note.id || `note-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
             await adapter.note.upsert(
-              { id: note.id || '' },
+              { id: noteId },
               { userId, itemId: note.itemId, moduleId: note.moduleId, moduleName: note.moduleName, content: note.content },
               { itemId: note.itemId, moduleId: note.moduleId, moduleName: note.moduleName, content: note.content }
             );
@@ -431,13 +444,7 @@ export async function POST(request: Request) {
 
       case 'reset-progress': {
         const adapter = getDbAdapter();
-        // Execute deletes sequentially - if one fails, remaining are skipped
-        await adapter.progress.deleteMany({ userId });
-        await adapter.quizResult.deleteMany({ userId });
-        await adapter.challengeProgress.deleteMany({ userId });
-        await adapter.itemProgress.deleteMany({ userId });
-        await adapter.note.deleteMany({ userId });
-        await adapter.studySession.deleteMany({ userId });
+        await adapter.deleteAllForUser(userId);
 
         result = { message: "Progress reset successfully" };
         break;

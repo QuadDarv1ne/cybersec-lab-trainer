@@ -1,5 +1,6 @@
-// CyberSec Lab Trainer — Prisma Schema
+// CyberSec Lab Trainer — Prisma Schema (SQLite)
 // Для учебной платформы по информационной безопасности
+// SQLite удобен для локальной разработки без Docker.
 
 generator client {
   provider = "prisma-client-js"
@@ -123,12 +124,11 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-// Детализированный прогресс по элементам модулей (уровни SQL, XSS, элементы OWASP и т.д.)
 model ItemProgress {
   id        String   @id @default(cuid())
   userId    String
-  moduleId  String   // sql-injection, xss, owasp
-  itemIds   String   // JSON string of array IDs изученных элементов (уровни, темы и т.д.)
+  moduleId  String
+  itemIds   String   // JSON string (SQLite stores Json as Text)
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -137,13 +137,12 @@ model ItemProgress {
   @@map("item_progress")
 }
 
-// Заметки пользователя к модулям
 model Note {
   id        String   @id @default(cuid())
   userId    String
-  itemId    String   // ID элемента, к которому привязана заметка
-  moduleId  String   // ID родительского модуля
-  moduleName String  // Человекочитаемое имя модуля
+  itemId    String
+  moduleId  String
+  moduleName String
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -155,13 +154,12 @@ model Note {
   @@map("notes")
 }
 
-// Учебные сессии пользователя
 model StudySession {
   id        String   @id @default(cuid())
   userId    String
   date      String   // ISO date string (YYYY-MM-DD)
   durationMs Int     // Длительность в миллисекундах
-  pageType  String   // тип страницы (module, quiz, challenge и т.д.)
+  pageType  String   // тип страницы
   xpEarned  Int      @default(0)
   createdAt DateTime @default(now())
 
