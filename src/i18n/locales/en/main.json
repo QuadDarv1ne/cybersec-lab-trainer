@@ -558,5 +558,14 @@
     "checkAnswer": "Check answer",
     "next": "Next",
     "finish": "Finish"
+  },
+  "sync": {
+    "idle": "Offline",
+    "syncing": "Syncing...",
+    "synced": "Synced",
+    "error": "Sync failed",
+    "justNow": "just now",
+    "secondsAgo": "{seconds}s ago",
+    "minutesAgo": "{minutes}m ago"
   }
 }

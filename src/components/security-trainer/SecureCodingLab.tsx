@@ -87,7 +87,8 @@ export default function SecureCodingLab() {
 
   const handleCheckAnswer = () => {
     if (selectedOption === null || isAnswered) return;
-    const isCorrect = challenge.options[selectedOption].correct;
+    const currentChallenge = secureCodingChallenges[activeChallenge];
+    const isCorrect = currentChallenge.options[selectedOption].correct;
     const newScores = {
       correct: secureCodingChallengeScores.correct + (isCorrect ? 1 : 0),
       answered: [...secureCodingChallengeScores.answered, activeChallenge],

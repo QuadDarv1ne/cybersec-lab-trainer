@@ -18,7 +18,7 @@ for (const mod of modules) {
 }
 
 export default function Notes() {
-  const { notes, setCurrentPage, deleteNote, updateNote: _updateNote } = useAppStore();
+  const { notes, setCurrentPage, deleteNote, updateNote } = useAppStore();
   const t = useTranslations('notes');
   const [search, setSearch] = useState('');
   const [moduleFilter, setModuleFilter] = useState<string>('all');
@@ -49,7 +49,6 @@ export default function Notes() {
 
   const handleSaveEdit = (noteId: string) => {
     if (!editContent.trim()) return;
-    const { updateNote } = useAppStore.getState();
     updateNote(noteId, editContent.trim());
     setEditingId(null);
     setEditContent('');

@@ -558,5 +558,14 @@
     "checkAnswer": "Проверить ответ",
     "next": "Далее",
     "finish": "Завершить"
+  },
+  "sync": {
+    "idle": "Оффлайн",
+    "syncing": "Синхронизация...",
+    "synced": "Синхронизировано",
+    "error": "Ошибка синхронизации",
+    "justNow": "только что",
+    "secondsAgo": "{seconds}с назад",
+    "minutesAgo": "{minutes}м назад"
   }
 }

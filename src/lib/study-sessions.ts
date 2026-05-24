@@ -119,6 +119,7 @@ export function getWeeklyStats(sessions: StudySession[], weeksBack = 1): WeeklyS
     const weekStart = new Date(weekEnd);
     weekStart.setDate(weekStart.getDate() - 6);
     weekStart.setHours(0, 0, 0, 0);
+    weekEnd.setHours(23, 59, 59, 999);
 
     const weekSessions = sessions.filter((s) => {
       const d = new Date(s.date);

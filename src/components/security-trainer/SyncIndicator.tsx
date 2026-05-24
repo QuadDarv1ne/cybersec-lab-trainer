@@ -3,10 +3,12 @@
 import { useAppStore } from '@/lib/store';
 import { useSession } from '@/hooks/use-session';
 import { Cloud, CloudOff, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useTranslations, type Translator } from '@/lib/intlStub';
 
 export default function SyncIndicator() {
   const { syncStatus, lastSyncedAt, userId } = useAppStore();
   const { isAuthenticated } = useSession();
+  const t = useTranslations('sync');
 
   if (!isAuthenticated || !userId) return null;
 
@@ -18,10 +20,10 @@ export default function SyncIndicator() {
   };
 
   const labels = {
-    idle: 'Offline',
-    syncing: 'Syncing...',
-    synced: lastSyncedAt ? `Synced ${formatTime(lastSyncedAt)}` : 'Synced',
-    error: 'Sync failed',
+    idle: t('idle'),
+    syncing: t('syncing'),
+    synced: lastSyncedAt ? `${t('synced')} ${formatTime(lastSyncedAt, t)}` : t('synced'),
+    error: t('error'),
   };
 
   return (
@@ -32,12 +34,12 @@ export default function SyncIndicator() {
   );
 }
 
-function formatTime(timestamp: number): string {
+function formatTime(timestamp: number, t: Translator): string {
   const now = Date.now();
   const diff = Math.floor((now - timestamp) / 1000);
 
-  if (diff < 5) return 'just now';
-  if (diff < 60) return `${diff}s ago`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 5) return t('justNow');
+  if (diff < 60) return t('secondsAgo', { seconds: diff });
+  if (diff < 3600) return t('minutesAgo', { minutes: Math.floor(diff / 60) });
   return new Date(timestamp).toLocaleTimeString();
 }

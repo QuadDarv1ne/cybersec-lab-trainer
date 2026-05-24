@@ -79,7 +79,9 @@ export default function SettingsPage() {
     studySessions.forEach((s) => {
       const sessionDate = new Date(s.date);
       if (sessionDate >= startOfWeek) {
-        weekDays.add(s.date.split('T')[0]);
+        // Convert to local date string to match startOfWeek comparison
+        const localDate = `${sessionDate.getFullYear()}-${String(sessionDate.getMonth() + 1).padStart(2, '0')}-${String(sessionDate.getDate()).padStart(2, '0')}`;
+        weekDays.add(localDate);
       }
     });
 

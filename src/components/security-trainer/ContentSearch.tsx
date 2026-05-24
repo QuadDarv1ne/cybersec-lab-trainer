@@ -278,13 +278,22 @@ interface ContentSearchProps {
   onClose: () => void;
 }
 
+// Build search index once and cache at module level
+let cachedSearchIndex: ReturnType<typeof buildSearchIndex> | null = null;
+function getCachedSearchIndex(): ReturnType<typeof buildSearchIndex> {
+  if (!cachedSearchIndex) {
+    cachedSearchIndex = buildSearchIndex();
+  }
+  return cachedSearchIndex;
+}
+
 export default function ContentSearch({ open, onClose }: ContentSearchProps) {
   const { setCurrentPage } = useAppStore();
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLButtonElement[]>([]);
-  const searchIndex = useMemo(() => buildSearchIndex(), []);
+  const searchIndex = useMemo(() => getCachedSearchIndex(), []);
 
   const results = useMemo(() => {
     if (!query.trim() || query.length < 2) return [];

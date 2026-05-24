@@ -33,20 +33,23 @@ function getNestedValue(obj: Record<string, unknown>, path: string): string {
   return typeof current === 'string' ? current : path;
 }
 
-// Per-namespace translator cache keyed by locale — cleared when locale changes.
-const translatorCache = new Map<string, (key: string, values?: Record<string, string | number>) => string>();
-let cachedLocale: string | null = null;
+type Translator = (key: string, values?: Record<string, string | number>) => string;
 
-function getTranslator(locale: string, namespace: string) {
-  // Clear entire cache if locale changed since last call
-  if (cachedLocale !== null && cachedLocale !== locale) {
-    translatorCache.clear();
-  }
-  cachedLocale = locale;
+// Per-namespace translator cache keyed by locale:namespace.
+// Each cache entry stores the locale it was created for so we can detect staleness.
+const translatorCache = new Map<string, { locale: string; translator: Translator }>();
 
+function getTranslator(locale: string, namespace: string): Translator {
   const cacheKey = `${locale}:${namespace}`;
   const cached = translatorCache.get(cacheKey);
-  if (cached) return cached;
+  if (cached && cached.locale === locale) return cached.translator;
+
+  // Clear any entries from a different locale to prevent stale data
+  for (const [key, entry] of translatorCache) {
+    if (entry.locale !== locale) {
+      translatorCache.delete(key);
+    }
+  }
 
   const translations = locales[locale] || locales.ru;
 
@@ -64,11 +67,11 @@ function getTranslator(locale: string, namespace: string) {
     return text;
   };
 
-  translatorCache.set(cacheKey, translator);
+  translatorCache.set(cacheKey, { locale, translator });
   return translator;
 }
 
-export function useTranslations(namespace: string) {
+export function useTranslations(namespace: string): Translator {
   const locale = getCurrentLocale();
   return getTranslator(locale, namespace);
 }

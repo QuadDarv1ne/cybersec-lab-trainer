@@ -226,10 +226,10 @@ export default function XSSLab() {
                   <div className="mt-3">
                     <Badge variant="secondary" className="text-[10px]">
                       {xss.id === 'reflected'
-                        ? 'Самый распространённый'
+                        ? t('badges.reflected')
                         : xss.id === 'stored'
-                          ? 'Самый опасный'
-                          : 'Невидимый для сервера'}
+                          ? t('badges.stored')
+                          : t('badges.domBased')}
                     </Badge>
                   </div>
                 </CardContent>
