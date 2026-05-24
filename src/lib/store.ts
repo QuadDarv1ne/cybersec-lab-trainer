@@ -414,11 +414,12 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
       savePromises.push(apiClient.saveChallengeProgress(challenges));
     }
 
-    // Sync item-level progress (SQL levels, XSS levels, OWASP items)
+    // Sync item-level progress (SQL levels, XSS levels, OWASP items, CSRF viewed challenges)
     const itemProgress = [
       { moduleId: 'sql-injection', itemIds: state.sqlCompletedLevels },
       { moduleId: 'xss', itemIds: state.xssCompletedLevels },
       { moduleId: 'owasp', itemIds: state.studiedOwaspItems },
+      { moduleId: 'csrf', itemIds: state.csrfViewedChallenges.map(String) },
     ].filter((ip) => ip.itemIds.length > 0);
 
     if (itemProgress.length > 0) {
@@ -502,6 +503,11 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
         sqlCompletedLevels: data.itemProgress['sql-injection'] ?? [],
         xssCompletedLevels: data.itemProgress.xss ?? [],
       });
+    }
+
+    // Restore CSRF viewed challenges if available
+    if (data.csrfViewedChallenges && Array.isArray(data.csrfViewedChallenges)) {
+      set({ csrfViewedChallenges: data.csrfViewedChallenges.map(Number) });
     }
 
     // Restore notes if available

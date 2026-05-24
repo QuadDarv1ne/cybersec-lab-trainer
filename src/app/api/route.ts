@@ -88,6 +88,9 @@ export async function GET(request: Request) {
         itemProgress[ip.moduleId as string] = ip.itemIds ? JSON.parse(ip.itemIds as string) : [];
       }
 
+      // Extract CSRF viewed challenges from item progress for backward compatibility
+      const csrfViewedChallenges = itemProgress['csrf'] ?? [];
+
       // Build notes map
       const notes: Record<string, { id: string; itemId: string; moduleId: string; moduleName: string; content: string; createdAt: number; updatedAt: number }> = {};
       for (const note of notesRecords) {
@@ -113,7 +116,7 @@ export async function GET(request: Request) {
       }));
 
       await setCsrfCookie();
-      const response = NextResponse.json({ completedModules, quizScores, challenges, itemProgress, notes, studySessions, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() });
+      const response = NextResponse.json({ completedModules, quizScores, challenges, itemProgress, csrfViewedChallenges, notes, studySessions, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() });
       addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
       return response;
     }
