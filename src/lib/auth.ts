@@ -1,4 +1,5 @@
 import type { NextAuthOptions } from "next-auth";
+import type { Adapter, AdapterUser, AdapterSession, AdapterAccount, VerificationToken as AdapterVerificationToken } from "next-auth/adapters";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -52,7 +53,7 @@ const hasOAuth = providers.some((p) => p.type === "oauth");
 const dbType = process.env.DATABASE_TYPE || 'sqlite';
 
 // Lazily create adapter config to avoid import errors when Prisma isn't generated
-let adapterConfig: { adapter: any } | Record<string, never> = {};
+let adapterConfig: { adapter: Adapter } | Record<string, never> = {};
 if (hasOAuth) {
   if (dbType === 'mongodb') {
     // MongoDB: use custom NextAuth adapter via mongoose
@@ -62,7 +63,7 @@ if (hasOAuth) {
     const { UserModel, AccountModel, SessionModel, VerificationTokenModel } = require('./mongoose-schema');
     adapterConfig = {
       adapter: {
-        createUser: async (data: any) => {
+        createUser: async (data: Record<string, unknown>) => {
           const user = await UserModel.create({ ...data, id: data.id || new mongoose.Types.ObjectId().toString() });
           return { ...user.toObject(), id: user._id.toString() };
         },
@@ -80,39 +81,39 @@ if (hasOAuth) {
           const user = await UserModel.findById(account.userId);
           return user ? { ...user.toObject(), id: user._id.toString() } : null;
         },
-        updateUser: async (data: any) => {
-          const user = await UserModel.findByIdAndUpdate(data.id, { $set: data }, { new: true });
+        updateUser: async (data: Record<string, unknown>) => {
+          const user = await UserModel.findByIdAndUpdate(data.id as string, { $set: data }, { new: true });
           return user ? { ...user.toObject(), id: user._id.toString() } : null;
         },
-        linkAccount: async (data: any) => {
+        linkAccount: async (data: AdapterAccount) => {
           return AccountModel.create(data);
         },
         getSessionAndUser: async (sessionToken: string) => {
           const session = await SessionModel.findOne({ sessionToken }).populate('userId');
           if (!session || !session.userId) return null;
-          const userDoc = session.userId as any;
+          const userDoc = session.userId as { toObject: () => Record<string, unknown>; _id: string };
           return {
-            user: { ...userDoc.toObject(), id: userDoc._id.toString() },
-            session: { ...session.toObject(), id: session._id.toString() },
+            user: { ...userDoc.toObject(), id: userDoc._id.toString() } as AdapterUser,
+            session: { ...session.toObject(), id: session._id.toString() } as AdapterSession,
           };
         },
-        createSession: async (data: any) => {
+        createSession: async (data: Record<string, unknown>) => {
           const session = await SessionModel.create(data);
           return { ...session.toObject(), id: session._id.toString() };
         },
-        updateSession: async (data: any) => {
-          const session = await SessionModel.findOneAndUpdate({ sessionToken: data.sessionToken }, { $set: data }, { new: true });
+        updateSession: async (data: Record<string, unknown>) => {
+          const session = await SessionModel.findOneAndUpdate({ sessionToken: data.sessionToken as string }, { $set: data }, { new: true });
           return session ? { ...session.toObject(), id: session._id.toString() } : null;
         },
         deleteSession: async (sessionToken: string) => {
           await SessionModel.deleteOne({ sessionToken });
         },
-        createVerificationToken: async (data: any) => {
+        createVerificationToken: async (data: AdapterVerificationToken) => {
           return VerificationTokenModel.create(data);
         },
-        useVerificationToken: async ({ identifier, token }: { identifier: string; token: string }) => {
+        useVerificationToken: async ({ identifier, token }) => {
           const result = await VerificationTokenModel.findOneAndDelete({ identifier, token });
-          return result ? result.toObject() : null;
+          return result ? (result.toObject() as AdapterVerificationToken) : null;
         },
       },
     };
