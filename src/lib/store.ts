@@ -598,24 +598,31 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   },
 
   resetProgress: async () => {
-    set({
-      completedModules: [],
-      quizScores: {},
-      quizHistory: [],
-      studiedOwaspItems: [],
-      sqlCompletedLevels: [],
-      xssCompletedLevels: [],
-      owaspChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
-      authChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
-      headersChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
-      secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
-      csrfViewedChallenges: [],
-      totalXP: 0,
-      notes: {},
-      syncStatus: 'syncing',
-    });
+    set({ syncStatus: 'syncing' });
     try {
+      // Call API first so local state is preserved if it fails
       await apiClient.resetProgress();
+      // Only clear local state after API succeeds
+      set({
+        completedModules: [],
+        quizScores: {},
+        quizHistory: [],
+        studiedOwaspItems: [],
+        sqlCompletedLevels: [],
+        xssCompletedLevels: [],
+        owaspChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
+        authChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
+        headersChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
+        secureCodingChallengeScores: { correct: 0, total: 0, answered: [], selectedOptions: {} },
+        csrfViewedChallenges: [],
+        totalXP: 0,
+        notes: {},
+      });
+      // Reload from database to ensure local state matches server's clean state
+      const userId = get().userId;
+      if (userId) {
+        await get().loadFromDatabase(userId);
+      }
       set({ syncStatus: 'synced', lastSyncedAt: Date.now() });
     } catch (error) {
       logger.error('Failed to reset progress:', error);
