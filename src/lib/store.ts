@@ -459,7 +459,12 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
       const results = await Promise.allSettled(savePromises);
       const failures = results.filter((r) => r.status === 'rejected');
       if (failures.length > 0) {
-        logger.error(`${failures.length} sync operation(s) failed:`, failures.map((f) => (f as PromiseRejectedResult).reason));
+        const reasons = failures.map((f) => (f as PromiseRejectedResult).reason);
+        logger.error(`${failures.length} sync operation(s) failed:`, reasons);
+        // Mark as error so the UI reflects that some data was not persisted.
+        // Local state is preserved by zustand, so the next sync retry will re-send it.
+        set({ syncStatus: 'error' });
+        return;
       }
     }
 
@@ -604,10 +609,10 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
 
   resetProgress: async () => {
     set({ syncStatus: 'syncing' });
+    // Snapshot current state before any mutations so we can restore on failure
+    const snapshot = get();
     try {
-      // Call API first so local state is preserved if it fails
       await apiClient.resetProgress();
-      // Only clear local state after API succeeds
       set({
         completedModules: [],
         quizScores: {},
@@ -624,7 +629,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         notes: {},
         studySessions: [],
       });
-      // Reload from database to ensure local state matches server's clean state
+      // Reload from database to confirm server's clean state
       const userId = get().userId;
       if (userId) {
         await get().loadFromDatabase(userId);
@@ -632,6 +637,23 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       set({ syncStatus: 'synced', lastSyncedAt: Date.now() });
     } catch (error) {
       logger.error('Failed to reset progress:', error);
+      // Restore snapshot on failure
+      set({
+        completedModules: snapshot.completedModules,
+        quizScores: snapshot.quizScores,
+        quizHistory: snapshot.quizHistory,
+        studiedOwaspItems: snapshot.studiedOwaspItems,
+        sqlCompletedLevels: snapshot.sqlCompletedLevels,
+        xssCompletedLevels: snapshot.xssCompletedLevels,
+        owaspChallengeScores: snapshot.owaspChallengeScores,
+        authChallengeScores: snapshot.authChallengeScores,
+        headersChallengeScores: snapshot.headersChallengeScores,
+        secureCodingChallengeScores: snapshot.secureCodingChallengeScores,
+        csrfViewedChallenges: snapshot.csrfViewedChallenges,
+        totalXP: snapshot.totalXP,
+        notes: snapshot.notes,
+        studySessions: snapshot.studySessions,
+      });
       set({ syncStatus: 'error' });
     }
     return Promise.resolve();

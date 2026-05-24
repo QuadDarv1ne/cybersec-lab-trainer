@@ -151,8 +151,9 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
     studySession: {
       findMany: (where) => db.studySession.findMany({ where }),
       createMany: async (data) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await db.studySession.createMany({ data: data as any });
+        await db.studySession.createMany({
+          data: data as Prisma.StudySessionCreateManyInput[],
+        });
       },
       deleteMany: async (where) => { await db.studySession.deleteMany({ where }); },
     },
