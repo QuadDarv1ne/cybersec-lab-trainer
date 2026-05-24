@@ -179,7 +179,12 @@ export function buildWeaknessReview(
 
 /**
  * Returns the total count of weakness items across all sources.
+ * Memoized to avoid expensive recalculation on every render.
  */
+const weaknessCountCache = new Map<string, number>();
+let lastCacheKey: string | null = null;
+let lastCacheResult = 0;
+
 export function getWeaknessCount(
   quizHistory: QuizAttempt[],
   owaspChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> },
@@ -187,6 +192,19 @@ export function getWeaknessCount(
   headersChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> },
   secureCodingChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> },
 ): number {
+  const cacheKey = JSON.stringify([
+    quizHistory.length,
+    quizHistory[quizHistory.length - 1]?.id,
+    owaspChallengeScores.total,
+    authChallengeScores.total,
+    headersChallengeScores.total,
+    secureCodingChallengeScores.total,
+  ]);
+
+  if (cacheKey === lastCacheKey) {
+    return lastCacheResult;
+  }
+
   const review = buildWeaknessReview(
     quizHistory,
     owaspChallengeScores,
@@ -194,5 +212,15 @@ export function getWeaknessCount(
     headersChallengeScores,
     secureCodingChallengeScores,
   );
+
+  lastCacheKey = cacheKey;
+  lastCacheResult = review.totalCount;
+
+  // Evict old entries if cache grows too large
+  if (weaknessCountCache.size > 10) {
+    weaknessCountCache.clear();
+  }
+  weaknessCountCache.set(cacheKey, review.totalCount);
+
   return review.totalCount;
 }

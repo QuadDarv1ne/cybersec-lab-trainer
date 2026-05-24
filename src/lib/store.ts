@@ -123,6 +123,9 @@ const SYNC_DELAY_MS = 500;
 // Abort controller for in-flight loadFromDatabase requests
 let loadAbortController: AbortController | null = null;
 
+// Flag to block loadFromDatabase during resetProgress
+let isResetting = false;
+
 // Active study session tracking (runtime only, not persisted)
 let activeSessionStart: number | null = null;
 let activeSessionPage: PageType | null = null;
@@ -611,6 +614,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     set({ syncStatus: 'syncing' });
     // Snapshot current state before any mutations so we can restore on failure
     const snapshot = get();
+    isResetting = true;
     try {
       await apiClient.resetProgress();
       set({
@@ -655,6 +659,8 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         studySessions: snapshot.studySessions,
       });
       set({ syncStatus: 'error' });
+    } finally {
+      isResetting = false;
     }
     return Promise.resolve();
   },
@@ -841,6 +847,8 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   },
 
   loadFromDatabase: async (userId: string, signal?: AbortSignal) => {
+    // Skip loading if reset is in progress to prevent stale DB data from overwriting reset state
+    if (isResetting) return;
     // Abort any prior in-flight load request that used an internally created controller
     if (loadAbortController && !loadAbortController.signal.aborted) {
       loadAbortController.abort();

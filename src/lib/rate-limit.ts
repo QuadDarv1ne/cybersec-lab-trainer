@@ -144,8 +144,9 @@ export function getClientIP(request: Request): string {
     if (last) return last;
   }
 
-  // Shared bucket for all anonymous requests — prevents rate limit bypass.
-  // Without this, each request gets a unique ID and rate limiting becomes useless.
+  // Fallback: use a shared bucket for all anonymous requests when no IP is available.
+  // This is a trade-off: without a real IP, we cannot distinguish users.
+  // In production, ensure the reverse proxy always sets X-Real-IP.
   return "anonymous";
 }
 

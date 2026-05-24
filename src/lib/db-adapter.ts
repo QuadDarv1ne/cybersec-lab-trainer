@@ -38,12 +38,6 @@ interface AdapterResult<T> {
   deleteMany: (where: WhereInput) => Promise<void>;
 }
 
-interface AdapterResultWithCreate<T> {
-  findMany: (where: WhereInput) => Promise<T[]>;
-  create: (data: CreateInput) => Promise<T>;
-  deleteMany: (where: WhereInput) => Promise<void>;
-}
-
 interface AdapterResultWithCreateMany<T> {
   findMany: (where: WhereInput) => Promise<T[]>;
   createMany: (data: CreateInput[]) => Promise<void>;

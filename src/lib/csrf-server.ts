@@ -5,12 +5,16 @@ import { generateCsrfToken, hashToken, getCsrfCookieName, getCsrfHeaderName } fr
 /**
  * Perform constant-time string comparison to prevent timing attacks.
  * Uses crypto.timingSafeEqual under the hood.
+ * Pads inputs to the same length to avoid timing leak from length mismatch.
  */
 function constantTimeCompare(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  const aBuf = Buffer.from(a, 'utf8');
-  const bBuf = Buffer.from(b, 'utf8');
-  return timingSafeEqual(aBuf, bBuf);
+  const maxLen = Math.max(a.length, b.length);
+  // Pad both strings to the same length with null bytes
+  const aPadded = a.padEnd(maxLen, '\0');
+  const bPadded = b.padEnd(maxLen, '\0');
+  const aBuf = Buffer.from(aPadded, 'utf8');
+  const bBuf = Buffer.from(bPadded, 'utf8');
+  return timingSafeEqual(aBuf, bBuf) && a.length === b.length;
 }
 
 /**
