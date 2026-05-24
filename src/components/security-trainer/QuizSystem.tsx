@@ -196,13 +196,11 @@ export default function QuizSystem() {
     setAnswers([]);
     setTimerActive(false);
     setQuizQuestionsOverride(null);
-    setWrongQuestions([]);
   };
 
   const retryWrong = () => {
     const wrongs = categoryQuestions.filter((_, i) => !answers[i]);
     if (wrongs.length === 0) return;
-    setWrongQuestions(wrongs);
     setQuizQuestionsOverride(wrongs);
     setActiveCategory(activeCategory);
     setCurrentQuestion(0);
