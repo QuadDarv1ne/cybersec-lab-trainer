@@ -58,8 +58,11 @@ export default function WeaknessReview() {
     [review.items, reviewedIds],
   );
 
+  // Store original total for accurate percentage calculation on completion
+  const originalTotal = review.items.length;
+
   const currentItem = remainingItems[currentIndex];
-  const progress = remainingItems.length > 0 ? Math.round((correctCount / remainingItems.length) * 100) : 0;
+  const progress = originalTotal > 0 ? Math.round((correctCount / originalTotal) * 100) : 0;
 
   const handleSelect = useCallback((index: number) => {
     if (showResult) return;
@@ -139,7 +142,7 @@ export default function WeaknessReview() {
 
   // Completion screen
   if (completed) {
-    const score = Math.round((correctCount / remainingItems.length) * 100);
+    const score = originalTotal > 0 ? Math.round((correctCount / originalTotal) * 100) : 0;
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3">
@@ -160,7 +163,7 @@ export default function WeaknessReview() {
             <h2 className="font-semibold text-lg">{t('completed')}</h2>
             <div className="text-4xl font-bold text-amber-600">{score}%</div>
             <p className="text-sm text-slate-600">
-              {t('correctCount', { correct: correctCount, total: remainingItems.length })}
+              {t('correctCount', { correct: correctCount, total: originalTotal })}
             </p>
             {score === 100 && (
               <Badge className="bg-emerald-600 text-white">{t('perfectScore')}</Badge>
@@ -208,7 +211,7 @@ export default function WeaknessReview() {
               {t('progress')} {currentIndex + 1}/{remainingItems.length}
             </span>
             <span className="text-emerald-600 font-semibold">
-              {t('correctCount', { correct: correctCount, total: remainingItems.length })}
+              {t('correctCount', { correct: correctCount, total: originalTotal })}
             </span>
           </div>
           <Progress value={progress} className="h-2" />
