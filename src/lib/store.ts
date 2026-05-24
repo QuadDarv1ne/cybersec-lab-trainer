@@ -439,8 +439,7 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
       savePromises.push(apiClient.saveNotes(notesArray));
     }
 
-    // Sync new study sessions (only those without an id that matches DB)
-    const newSessions = state.studySessions.filter((ss) => !ss.id || !ss.id.startsWith('session-'));
+    // Sync study sessions
     const sessionsToSync = state.studySessions
       .filter((ss) => ss.id?.startsWith('session-') || !ss.id)
       .map((ss) => ({
@@ -518,6 +517,11 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
     // Restore study sessions if available
     if (data.studySessions) {
       set({ studySessions: data.studySessions.slice(0, 100) });
+    }
+
+    // Restore totalXP if available (computed server-side from study sessions)
+    if (typeof data.totalXP === 'number') {
+      set({ totalXP: data.totalXP });
     }
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') return;

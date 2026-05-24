@@ -115,8 +115,11 @@ export async function GET(request: Request) {
         createdAt: toTime(ss.createdAt),
       }));
 
+      // Calculate totalXP from study sessions
+      const totalXP = studySessionRecords.reduce((sum, ss) => sum + (ss.xpEarned as number), 0);
+
       await setCsrfCookie();
-      const response = NextResponse.json({ completedModules, quizScores, challenges, itemProgress, csrfViewedChallenges, notes, studySessions, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() });
+      const response = NextResponse.json({ completedModules, quizScores, challenges, itemProgress, csrfViewedChallenges, notes, studySessions, totalXP, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() });
       addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
       return response;
     }
