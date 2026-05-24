@@ -74,18 +74,30 @@ export async function GET(request: Request) {
 
       const challenges: Record<string, { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> }> = {};
       for (const cp of challengeProgressRecords) {
+        let answered: number[] = [];
+        let selectedOptions: Record<string, number> = {};
+        try {
+          if (cp.answered) answered = JSON.parse(cp.answered as string);
+        } catch { /* corrupted data, default to empty */ }
+        try {
+          if (cp.selectedOptions) selectedOptions = JSON.parse(cp.selectedOptions as string);
+        } catch { /* corrupted data, default to empty */ }
         challenges[cp.challengeType as string] = {
           correct: cp.correct as number,
           total: cp.total as number,
-          answered: cp.answered ? JSON.parse(cp.answered as string) : [],
-          selectedOptions: cp.selectedOptions ? JSON.parse(cp.selectedOptions as string) : {},
+          answered,
+          selectedOptions,
         };
       }
 
       // Build item-level progress map
       const itemProgress: Record<string, string[]> = {};
       for (const ip of itemProgressRecords) {
-        itemProgress[ip.moduleId as string] = ip.itemIds ? JSON.parse(ip.itemIds as string) : [];
+        let itemIds: string[] = [];
+        try {
+          if (ip.itemIds) itemIds = JSON.parse(ip.itemIds as string);
+        } catch { /* corrupted data, default to empty */ }
+        itemProgress[ip.moduleId as string] = itemIds;
       }
 
       // Extract CSRF viewed challenges from item progress for backward compatibility
@@ -441,8 +453,15 @@ export async function POST(request: Request) {
     addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
     return response;
   } catch (error) {
-    // Handle malformed JSON body before rate limiting was applied
-    if (error instanceof SyntaxError) {
+    // Handle malformed JSON body — request.json() throws TypeError in Next.js,
+    // not SyntaxError. Also check error message for JSON-related patterns.
+    const errorMsg = error instanceof Error ? error.message : '';
+    const isJsonParseError =
+      error instanceof SyntaxError ||
+      (error instanceof TypeError && /JSON|Unexpected token|unexpected end|bad response/i.test(errorMsg)) ||
+      (typeof error === 'object' && error !== null && 'message' in error && /JSON|Unexpected token/i.test((error as Error).message));
+
+    if (isJsonParseError) {
       return NextResponse.json(
         { error: "Invalid JSON in request body" },
         { status: 400 }
