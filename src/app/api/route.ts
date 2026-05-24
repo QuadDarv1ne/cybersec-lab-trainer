@@ -156,6 +156,15 @@ export async function POST(request: Request) {
   let rateLimitResult: Awaited<ReturnType<typeof applyRateLimit>> | null = null;
 
   try {
+    // Reject oversized payloads before parsing to prevent memory exhaustion DoS
+    const contentLength = request.headers.get('content-length');
+    if (contentLength && parseInt(contentLength, 10) > 1_048_576) {
+      return NextResponse.json(
+        { error: 'Request body too large (max 1 MB)' },
+        { status: 413 }
+      );
+    }
+
     const body = await request.json();
     const { type, payload } = body;
 
