@@ -325,6 +325,7 @@ export default function QuizSystem() {
                 value={selectedAnswer}
                 onValueChange={setSelectedAnswer}
                 disabled={showAnswer}
+                aria-label={question.question}
                 className="space-y-2"
               >
                 {question.options.map((option, i) => {

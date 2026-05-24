@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import {
   caesarEncrypt,
@@ -47,17 +47,27 @@ import {
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   const [failed, setFailed] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const handleCopy = async () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setFailed(false);
-      setTimeout(() => setCopied(false), 1500);
+      timerRef.current = setTimeout(() => setCopied(false), 1500);
     } catch {
       setFailed(true);
-      setTimeout(() => setFailed(false), 2000);
+      timerRef.current = setTimeout(() => setFailed(false), 2000);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
   return (
     <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={handleCopy}>
       {failed ? <XCircle size={14} className="text-red-500" /> : copied ? <CheckCircle2 size={14} className="text-emerald-500" /> : <Copy size={14} />}

@@ -134,14 +134,17 @@ export function getClientIP(request: Request): string {
     return realIP.trim();
   }
 
-  // X-Forwarded-For may contain a client-spoofed chain.
-  // Nginx appends the real IP to the END via $proxy_add_x_forwarded_for,
-  // so take the last entry as the trusted client IP.
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    const entries = forwarded.split(",").map((e) => e.trim());
-    const last = entries[entries.length - 1];
-    if (last) return last;
+  // X-Forwarded-For is only trustworthy when we know we're behind a trusted proxy.
+  // Without a proxy, clients can spoof this header entirely.
+  // The TRUST_PROXY env var should be set to '1' when behind a reverse proxy.
+  const trustProxy = process.env.TRUST_PROXY === '1' || process.env.NODE_ENV === 'production';
+  if (trustProxy) {
+    const forwarded = request.headers.get("x-forwarded-for");
+    if (forwarded) {
+      const entries = forwarded.split(",").map((e) => e.trim());
+      const last = entries[entries.length - 1];
+      if (last) return last;
+    }
   }
 
   // Fallback: use a shared bucket for all anonymous requests when no IP is available.

@@ -40,9 +40,12 @@ export default function SecurityHeadersLab() {
     setAnsweredChallenges(new Set(headersChallengeScores.answered));
     if (headersChallengeScores.selectedOptions[activeChallenge] !== undefined) {
       setSelectedOption(headersChallengeScores.selectedOptions[activeChallenge]);
+      setShowResult(answeredChallenges.has(activeChallenge));
     } else {
       setSelectedOption(null);
+      setShowResult(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- including answeredChallenges would cause infinite re-render (effect creates new Set each run)
   }, [headersChallengeScores.correct, headersChallengeScores.answered, headersChallengeScores.selectedOptions, activeChallenge]);
 
   const challenge = headerChallenges[activeChallenge];

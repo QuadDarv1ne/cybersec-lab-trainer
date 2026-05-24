@@ -523,9 +523,13 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
       set({ notes: data.notes });
     }
 
-    // Restore study sessions if available
+    // Restore study sessions if available — merge with local unsaved sessions
     if (data.studySessions) {
-      set({ studySessions: data.studySessions.slice(0, 100) });
+      set((state) => {
+        const serverIds = new Set(data.studySessions.map((ss: { id: string }) => ss.id));
+        const localUnsaved = state.studySessions.filter((ss) => !serverIds.has(ss.id));
+        return { studySessions: [...data.studySessions, ...localUnsaved].slice(0, 100) };
+      });
     }
 
     // Restore totalXP if available (computed server-side from study sessions)
@@ -885,11 +889,12 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
 const useAppStore = create<AppStore>()(
   persist(createStore, {
     name: 'security-trainer-progress',
-    // Persist all fields except runtime-only ones that should not survive page reload.
-    // This approach is resilient to new state additions — no need to update partialize when adding new persistent fields.
+    // Persist progress data but exclude runtime-only and UI-only fields.
+    // currentPage and sidebarOpen are pure UI state — persisting them triggers
+    // unnecessary localStorage serialization on every navigation/toggle.
     partialize: (state) => {
-      const { syncStatus: _ss, lastSyncedAt: _lsa, ...rest } = state;
-      return rest as Omit<AppState, 'syncStatus' | 'lastSyncedAt'>;
+      const { syncStatus: _ss, lastSyncedAt: _lsa, currentPage: _cp, sidebarOpen: _so, ...rest } = state;
+      return rest as Omit<AppState, 'syncStatus' | 'lastSyncedAt' | 'currentPage' | 'sidebarOpen'>;
     },
   })
 );

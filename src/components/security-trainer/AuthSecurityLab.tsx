@@ -54,9 +54,12 @@ export default function AuthSecurityLab() {
     setAnsweredChallenges(new Set(authChallengeScores.answered));
     if (authChallengeScores.selectedOptions?.[activeChallenge] !== undefined) {
       setSelectedOption(authChallengeScores.selectedOptions[activeChallenge]);
+      setShowResult(answeredChallenges.has(activeChallenge));
     } else {
       setSelectedOption(null);
+      setShowResult(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- including answeredChallenges would cause infinite re-render (effect creates new Set each run)
   }, [authChallengeScores.correct, authChallengeScores.answered, authChallengeScores.selectedOptions, activeChallenge]);
 
   // Simulated hash using Web Crypto API (SHA-256)
