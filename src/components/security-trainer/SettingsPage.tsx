@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAppStore } from '@/lib/store';
 import { getTodayTotalMs } from '@/lib/study-sessions';
 import { Card, CardContent } from '@/components/ui/card';
@@ -44,6 +44,8 @@ export default function SettingsPage() {
   });
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   const [saved, setSaved] = useState(false);
+  const reminderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load goals from localStorage on mount
   useEffect(() => {
@@ -87,7 +89,8 @@ export default function SettingsPage() {
   const saveGoals = () => {
     localStorage.setItem('study-goals', JSON.stringify(goals));
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    savedTimerRef.current = setTimeout(() => setSaved(false), 2000);
 
     // Request notification permission if enabled
     if (goals.notificationsEnabled && 'Notification' in window) {
@@ -124,7 +127,8 @@ export default function SettingsPage() {
     }
 
     const msUntilReminder = reminder.getTime() - now.getTime();
-    setTimeout(() => {
+    if (reminderTimerRef.current) clearTimeout(reminderTimerRef.current);
+    reminderTimerRef.current = setTimeout(() => {
       new Notification('CyberSec Lab', {
         body: t('notificationBody'),
         icon: '/favicon.ico',
@@ -135,8 +139,18 @@ export default function SettingsPage() {
   // Schedule reminder when goals change
   useEffect(() => {
     scheduleReminder();
+    return () => {
+      if (reminderTimerRef.current) clearTimeout(reminderTimerRef.current);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goals.reminderTime, goals.notificationsEnabled]);
+
+  // Clean up saved timer on unmount
+  useEffect(() => {
+    return () => {
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    };
+  }, []);
 
   return (
     <div className="space-y-6">
