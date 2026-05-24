@@ -234,7 +234,7 @@ export default function SecurityHeadersLab() {
                   setSelectedOption(null);
                   setShowResult(false);
                 }}
-                aria-label={`Перейти к заданию ${i + 1}: ${challenge.question.substring(0, 50)}`}
+                aria-label={`Задание ${i + 1}${answeredChallenges.has(i) ? ' (выполнено)' : ''}`}
                 className={`flex-1 h-2 rounded-full transition-all ${
                   answeredChallenges.has(i)
                     ? 'bg-emerald-500'

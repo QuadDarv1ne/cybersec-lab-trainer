@@ -170,7 +170,8 @@ export async function POST(request: Request) {
   try {
     // Reject oversized payloads before parsing to prevent memory exhaustion DoS
     const contentLength = request.headers.get('content-length');
-    if (contentLength && parseInt(contentLength, 10) > 1_048_576) {
+    const contentLengthNum = contentLength ? Number(contentLength) : NaN;
+    if (!isNaN(contentLengthNum) && contentLengthNum > 1_048_576) {
       return NextResponse.json(
         { error: 'Request body too large (max 1 MB)' },
         { status: 413 }
@@ -401,12 +402,13 @@ export async function POST(request: Request) {
         const adapter = getDbAdapter();
         const { noteId } = data;
 
+        // Always return success to avoid leaking note existence information
         await adapter.note.deleteMany({
           id: noteId,
           userId,
         });
 
-        result = { deleted: { noteId }, message: "Note deleted successfully" };
+        result = { message: "Note deleted" };
         break;
       }
 

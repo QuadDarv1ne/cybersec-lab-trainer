@@ -347,9 +347,9 @@ export default function QuizSystem() {
                       className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${optionClass}`}
                       role="presentation"
                     >
-                      <RadioGroupItem value={String(i)} id={`opt-${option.substring(0, 20)}`} />
+                      <RadioGroupItem value={String(i)} id={`opt-${question.id}-${i}`} />
                       <Label
-                        htmlFor={`opt-${option.substring(0, 20)}`}
+                        htmlFor={`opt-${question.id}-${i}`}
                         className="flex-1 text-sm cursor-pointer leading-relaxed"
                       >
                         {option}

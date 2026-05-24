@@ -130,7 +130,23 @@ let isResetting = false;
 let activeSessionStart: number | null = null;
 let activeSessionPage: PageType | null = null;
 
+// Clear pending operations on page unload to prevent orphaned API calls
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
+    if (syncTimeout) {
+      clearTimeout(syncTimeout);
+      syncTimeout = null;
+    }
+    if (loadAbortController && !loadAbortController.signal.aborted) {
+      loadAbortController.abort();
+    }
+  });
+}
+
 const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>) => void) => {
+  // Block all syncs while reset is in progress to prevent stale data from overwriting reset state
+  if (isResetting) return;
+
   // If a sync is actively executing, schedule a follow-up so latest state isn't lost.
   if (isExecuting) {
     followUpScheduled = true;
@@ -195,6 +211,14 @@ const getCsrfToken = (): string | undefined => {
   return undefined;
 };
 
+// Build headers for API requests with CSRF token
+const createApiHeaders = (): Record<string, string> => {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const csrfToken = getCsrfToken();
+  if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
+  return headers;
+};
+
 // API client functions
 const apiClient = {
   async loadProgress(signal?: AbortSignal) {
@@ -212,13 +236,9 @@ const apiClient = {
   },
 
   async saveBatch(modules: { moduleId: string; completed: boolean; score?: number }[], quizzes: { quizId: string; score: number; total: number }[]) {
-    const csrfToken = getCsrfToken();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
-
     const response = await fetch('/api', {
       method: 'POST',
-      headers,
+      headers: createApiHeaders(),
       body: JSON.stringify({
         type: 'batch-sync',
         payload: { modules, quizzes },
@@ -234,13 +254,9 @@ const apiClient = {
   },
 
   async saveChallengeProgress(challenges: { challengeType: string; correct: number; total: number; answered?: number[]; selectedOptions?: Record<string, number> }[]) {
-    const csrfToken = getCsrfToken();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
-
     const response = await fetch('/api', {
       method: 'POST',
-      headers,
+      headers: createApiHeaders(),
       body: JSON.stringify({
         type: 'challenge-progress-sync',
         payload: { challenges },
@@ -256,13 +272,9 @@ const apiClient = {
   },
 
   async resetProgress() {
-    const csrfToken = getCsrfToken();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
-
     const response = await fetch('/api', {
       method: 'POST',
-      headers,
+      headers: createApiHeaders(),
       body: JSON.stringify({
         type: 'reset-progress',
         payload: {},
@@ -278,13 +290,9 @@ const apiClient = {
   },
 
   async saveItemProgress(items: { moduleId: string; itemIds: string[] }[]) {
-    const csrfToken = getCsrfToken();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
-
     const response = await fetch('/api', {
       method: 'POST',
-      headers,
+      headers: createApiHeaders(),
       body: JSON.stringify({
         type: 'item-progress-sync',
         payload: { items },
@@ -300,13 +308,9 @@ const apiClient = {
   },
 
   async saveNotes(notes: { id?: string; itemId: string; moduleId: string; moduleName: string; content: string }[]) {
-    const csrfToken = getCsrfToken();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
-
     const response = await fetch('/api', {
       method: 'POST',
-      headers,
+      headers: createApiHeaders(),
       body: JSON.stringify({
         type: 'notes-sync',
         payload: { notes },
@@ -322,13 +326,9 @@ const apiClient = {
   },
 
   async deleteNote(noteId: string) {
-    const csrfToken = getCsrfToken();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
-
     const response = await fetch('/api', {
       method: 'POST',
-      headers,
+      headers: createApiHeaders(),
       body: JSON.stringify({
         type: 'note-delete',
         payload: { noteId },
@@ -344,13 +344,9 @@ const apiClient = {
   },
 
   async saveStudySessions(sessions: { id?: string; date: string; durationMs: number; pageType: string; xpEarned: number }[]) {
-    const csrfToken = getCsrfToken();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (csrfToken) headers[getCsrfHeaderName()] = csrfToken;
-
     const response = await fetch('/api', {
       method: 'POST',
-      headers,
+      headers: createApiHeaders(),
       body: JSON.stringify({
         type: 'study-sessions-sync',
         payload: { sessions },
@@ -617,6 +613,11 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
 
   resetProgress: async () => {
     set({ syncStatus: 'syncing' });
+    // Cancel any pending debounced sync to prevent stale data from being pushed
+    if (syncTimeout) {
+      clearTimeout(syncTimeout);
+      syncTimeout = null;
+    }
     // Snapshot current state before any mutations so we can restore on failure
     const snapshot = get();
     isResetting = true;
@@ -772,14 +773,19 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     ensureSync(get, set).catch((err) => logger.error('Sync failed after updateNote:', err));
   },
 
-  deleteNote: (noteId: string) => {
+  deleteNote: async (noteId: string) => {
     set((state) => {
       const { [noteId]: _removed, ...rest } = state.notes;
       return { notes: rest };
     });
-    // Delete from DB immediately, then trigger full sync to reconcile
+    // Delete from DB first, then trigger full sync to reconcile state.
+    // Awaiting the delete prevents the full sync from re-inserting the note.
     if (get().userId) {
-      apiClient.deleteNote(noteId).catch((err) => logger.error('Failed to delete note from DB:', err));
+      try {
+        await apiClient.deleteNote(noteId);
+      } catch (err) {
+        logger.error('Failed to delete note from DB:', err);
+      }
     }
     ensureSync(get, set).catch((err) => logger.error('Sync failed after deleteNote:', err));
   },
