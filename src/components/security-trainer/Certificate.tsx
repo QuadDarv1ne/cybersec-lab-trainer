@@ -19,7 +19,6 @@ import {
   BookOpen,
   Award,
   Printer,
-  Download,
   Zap,
 } from 'lucide-react';
 
@@ -59,7 +58,7 @@ export function Certificate() {
   }, [quizScores]);
 
   const completionDate = useMemo(() => {
-    if (quizHistory.length === 0) return new Date().toLocaleDateString('ru-RU');
+    if (!quizHistory || quizHistory.length === 0) return new Date().toLocaleDateString('ru-RU');
     const lastAttempt = quizHistory[0];
     return new Date(lastAttempt.timestamp).toLocaleDateString('ru-RU', {
       year: 'numeric',

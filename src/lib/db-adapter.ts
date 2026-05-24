@@ -287,6 +287,7 @@ export function getDbAdapter(): DbAdapter {
     logger.info('[DB] Using MongoDB (Mongoose) adapter');
   } else {
     // Lazy import to avoid Prisma client not generated errors
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { db } = require('./db');
     adapter = createPrismaAdapter(db);
     logger.info(`[DB] Using ${dbType} (Prisma) adapter`);

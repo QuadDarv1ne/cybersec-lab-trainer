@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildWeaknessReview, getWeaknessCount, type WeaknessItem } from './weakness-review';
+import { buildWeaknessReview, getWeaknessCount } from './weakness-review';
 import type { QuizAttempt } from './store';
 
 describe('weakness-review', () => {

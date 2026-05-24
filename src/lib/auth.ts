@@ -52,11 +52,13 @@ const hasOAuth = providers.some((p) => p.type === "oauth");
 const dbType = process.env.DATABASE_TYPE || 'sqlite';
 
 // Lazily create adapter config to avoid import errors when Prisma isn't generated
-let adapterConfig: { adapter: any } | {} = {};
+let adapterConfig: { adapter: any } | Record<string, never> = {};
 if (hasOAuth) {
   if (dbType === 'mongodb') {
     // MongoDB: use custom NextAuth adapter via mongoose
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const mongoose = require('mongoose');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { UserModel, AccountModel, SessionModel, VerificationTokenModel } = require('./mongoose-schema');
     adapterConfig = {
       adapter: {
@@ -116,6 +118,7 @@ if (hasOAuth) {
     };
   } else {
     // SQL: use PrismaAdapter
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { PrismaAdapter } = require('@next-auth/prisma-adapter');
     adapterConfig = { adapter: PrismaAdapter(db) };
   }

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { useAppStore } from '@/lib/store';
-import { buildWeaknessReview, type WeaknessItem } from '@/lib/weakness-review';
+import { buildWeaknessReview } from '@/lib/weakness-review';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

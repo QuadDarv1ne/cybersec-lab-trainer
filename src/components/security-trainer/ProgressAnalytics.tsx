@@ -6,13 +6,11 @@ import { modules, quizCategories } from '@/lib/security-data';
 import { calculateLevel, levelProgress } from '@/lib/xp-system';
 import { getStreakInfo, formatDuration } from '@/lib/study-sessions';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useTranslations } from '@/lib/intlStub';
 import {
   ChevronLeft,
-  TrendingUp,
   Trophy,
   Zap,
   Clock,
@@ -83,7 +81,7 @@ export default function ProgressAnalytics() {
 
       return { categoryId: cat.id, name: cat.name, scores, average, trend };
     });
-  }, [quizCategories, quizHistory, quizScores]);
+  }, [quizHistory, quizScores]);
 
   // Challenge performance
   const challengePerformance = useMemo(() => {

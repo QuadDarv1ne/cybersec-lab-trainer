@@ -133,7 +133,7 @@ export default function XSSLab() {
   const t = useTranslations('xss');
   const [activeTab, setActiveTab] = useState(xssTypes.length > 0 ? xssTypes[0].id : '');
   const [showAttacks, setShowAttacks] = useState<Record<string, boolean>>({});
-  const [attackTriggered, setAttackTriggered] = useState<Record<string, boolean>>({});
+  const [_attackTriggered, setAttackTriggered] = useState<Record<string, boolean>>({});
 
   const allCompleted = xssCompletedLevels.length === xssTypes.length;
   const isCompleted = completedModules.includes('xss');

@@ -60,7 +60,7 @@ describe('Certificate data calculations', () => {
   it('should count unlocked achievements correctly', () => {
     const completedModules = modules.map((m) => m.id);
     const quizScores: Record<string, number> = { owasp: 100, sql: 100, xss: 100 };
-    const challengeStats = {
+    const _challengeStats = {
       owaspCorrect: 5, authCorrect: 3, owaspTotal: 5, authTotal: 3,
       headersCorrect: 0, headersTotal: 0, secureCodingCorrect: 0, secureCodingTotal: 0,
     };

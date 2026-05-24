@@ -27,6 +27,8 @@ function extractWrongQuizQuestions(quizHistory: QuizAttempt[]): WeaknessItem[] {
   const items: WeaknessItem[] = [];
   const seenIds = new Set<string>();
 
+  if (!quizHistory || !Array.isArray(quizHistory)) return items;
+
   for (const attempt of quizHistory) {
     const questions = quizQuestions.filter((q) => q.category === attempt.categoryName);
     for (let i = 0; i < attempt.answers.length; i++) {

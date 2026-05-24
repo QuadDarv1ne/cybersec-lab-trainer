@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { modules, quizCategories } from '@/lib/security-data';
+import { modules } from '@/lib/security-data';
 
 interface QuizHistoryEntry {
   categoryId: string;

@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Flame, Trophy, Clock } from 'lucide-react';
-import { getStreakInfo, formatDuration } from '@/lib/study-sessions';
+import { getStreakInfo } from '@/lib/study-sessions';
 import { useAppStore } from '@/lib/store';
 
 export function StreakWidget() {
