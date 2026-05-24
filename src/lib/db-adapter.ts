@@ -89,9 +89,6 @@ export interface DbAdapter {
   session: SessionAdapter;
   verificationToken: VerificationTokenAdapter;
 
-  // Transaction support
-  transaction: (operations: (() => Promise<unknown>)[]) => Promise<unknown[]>;
-
   // Disconnect
   disconnect: () => Promise<void>;
 }
@@ -180,11 +177,6 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
     verificationToken: {
       create: (data) => db.verificationToken.create({ data: data as Prisma.VerificationTokenCreateInput }),
       delete: async (where) => { await db.verificationToken.delete({ where: where as Prisma.VerificationTokenWhereUniqueInput }); },
-    },
-
-    transaction: async (operations) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return db.$transaction(operations.map(op => op()) as any);
     },
 
     disconnect: async () => {
@@ -289,21 +281,6 @@ function createMongooseAdapter(): DbAdapter {
         return doc.toObject() as VerificationToken;
       },
       delete: async (where) => { await VerificationTokenModel.deleteOne(where); },
-    },
-
-    transaction: async (operations) => {
-      const session = await mongoose.startSession();
-      session.startTransaction();
-      try {
-        const results = await Promise.all(operations.map(op => op()));
-        await session.commitTransaction();
-        return results;
-      } catch (error) {
-        await session.abortTransaction();
-        throw error;
-      } finally {
-        session.endSession();
-      }
     },
 
     disconnect: async () => {

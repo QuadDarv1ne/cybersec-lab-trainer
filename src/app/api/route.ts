@@ -343,18 +343,22 @@ export async function POST(request: Request) {
           break;
         }
 
-        // Use transaction for batch upsert
-        const noteResults = await adapter.transaction(
-          notes.map((note) => () =>
-            adapter.note.upsert(
+        // Execute note upserts sequentially with error handling
+        let savedCount = 0;
+        for (const note of notes) {
+          try {
+            await adapter.note.upsert(
               { id: note.id || '' },
               { userId, itemId: note.itemId, moduleId: note.moduleId, moduleName: note.moduleName, content: note.content },
               { itemId: note.itemId, moduleId: note.moduleId, moduleName: note.moduleName, content: note.content }
-            )
-          )
-        );
+            );
+            savedCount++;
+          } catch (error) {
+            logger.error(`[API] Note upsert failed for ${note.itemId}:`, error);
+          }
+        }
 
-        result = { saved: { notes: noteResults.length }, message: "Notes sync completed" };
+        result = { saved: { notes: savedCount }, message: "Notes sync completed" };
         break;
       }
 
@@ -382,34 +386,37 @@ export async function POST(request: Request) {
           break;
         }
 
-        // Use transaction for batch insert
-        const sessionResults = await adapter.transaction(
-          sessions.map((session) => () =>
-            adapter.studySession.createMany([{
+        // Execute session inserts sequentially with error handling
+        let savedCount = 0;
+        for (const session of sessions) {
+          try {
+            await adapter.studySession.createMany([{
               userId,
               id: session.id || undefined,
               date: session.date,
               durationMs: session.durationMs,
               pageType: session.pageType,
               xpEarned: session.xpEarned ?? 0,
-            }])
-          )
-        );
+            }]);
+            savedCount++;
+          } catch (error) {
+            logger.error('[API] Study session insert failed:', error);
+          }
+        }
 
-        result = { saved: { sessions: sessionResults.length }, message: "Study sessions sync completed" };
+        result = { saved: { sessions: savedCount }, message: "Study sessions sync completed" };
         break;
       }
 
       case 'reset-progress': {
         const adapter = getDbAdapter();
-        await adapter.transaction([
-          () => adapter.progress.deleteMany({ userId }),
-          () => adapter.quizResult.deleteMany({ userId }),
-          () => adapter.challengeProgress.deleteMany({ userId }),
-          () => adapter.itemProgress.deleteMany({ userId }),
-          () => adapter.note.deleteMany({ userId }),
-          () => adapter.studySession.deleteMany({ userId }),
-        ]);
+        // Execute deletes sequentially - if one fails, remaining are skipped
+        await adapter.progress.deleteMany({ userId });
+        await adapter.quizResult.deleteMany({ userId });
+        await adapter.challengeProgress.deleteMany({ userId });
+        await adapter.itemProgress.deleteMany({ userId });
+        await adapter.note.deleteMany({ userId });
+        await adapter.studySession.deleteMany({ userId });
 
         result = { message: "Progress reset successfully" };
         break;
