@@ -456,7 +456,11 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
     }
 
     if (savePromises.length > 0) {
-      await Promise.all(savePromises);
+      const results = await Promise.allSettled(savePromises);
+      const failures = results.filter((r) => r.status === 'rejected');
+      if (failures.length > 0) {
+        logger.error(`${failures.length} sync operation(s) failed:`, failures.map((f) => (f as PromiseRejectedResult).reason));
+      }
     }
 
     set({ syncStatus: 'synced', lastSyncedAt: Date.now() });
@@ -618,6 +622,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         csrfViewedChallenges: [],
         totalXP: 0,
         notes: {},
+        studySessions: [],
       });
       // Reload from database to ensure local state matches server's clean state
       const userId = get().userId;
