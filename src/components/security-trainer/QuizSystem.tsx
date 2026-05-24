@@ -53,7 +53,6 @@ export default function QuizSystem() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [answers, setAnswers] = useState<(boolean | null)[]>([]);
   const [timerActive, setTimerActive] = useState(false);
-  const [wrongQuestions, setWrongQuestions] = useState<typeof quizQuestions>([]);
   const [quizQuestionsOverride, setQuizQuestionsOverride] = useState<typeof quizQuestions | null>(null);
   const timeUpRef = useRef(false);
   const currentQuestionRef = useRef(0);
@@ -348,13 +347,6 @@ export default function QuizSystem() {
                     <div
                       key={`${question.id}-${i}`}
                       className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${optionClass}`}
-                      onClick={(e) => {
-                        if (showAnswer) return;
-                        // Only handle clicks directly on the div, not on the RadioGroupItem/Label
-                        const target = e.target as HTMLElement;
-                        if (target.tagName === 'INPUT' || target.tagName === 'LABEL') return;
-                        setSelectedAnswer(String(i));
-                      }}
                       role="presentation"
                     >
                       <RadioGroupItem value={String(i)} id={`opt-${option.substring(0, 20)}`} />
