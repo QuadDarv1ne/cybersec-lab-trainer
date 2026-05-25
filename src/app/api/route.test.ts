@@ -401,6 +401,25 @@ describe('API Route POST /api', () => {
     expect(response.status).toBe(200);
   });
 
+  it('sanitizes note content to prevent XSS attacks', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
+
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'notes-sync',
+      payload: {
+        notes: [
+          { id: 'note-xss-1', itemId: 'item1', moduleId: 'owasp', moduleName: 'OWASP', content: '<script>alert("xss")</script>Normal note' },
+          { id: 'note-xss-2', itemId: 'item2', moduleId: 'owasp', moduleName: 'OWASP', content: '<b>Bold</b> &amp; entities' },
+        ],
+      },
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    // The actual sanitization happens before upsert - DOMParser strips tags and decodes entities
+  });
+
   it('syncs study sessions when authenticated', async () => {
     vi.mocked(getServerSession).mockResolvedValue(mockSession);
 

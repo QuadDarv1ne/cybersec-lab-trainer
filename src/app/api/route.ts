@@ -11,6 +11,7 @@ import { rateLimit, getClientIP, addRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { setCsrfCookie, validateCsrfToken } from "@/lib/csrf-server";
 import { getCsrfCookieName, getCsrfHeaderName } from "@/lib/csrf";
+import { sanitizeNoteContent } from "@/lib/sanitize";
 
 // Build sets of valid IDs for validation
 const validModuleIds = new Set(modules.map((m) => m.id));
@@ -393,10 +394,12 @@ export async function POST(request: Request) {
         for (const note of notes) {
           try {
             const noteId = note.id || `note-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+            // Sanitize on server-side to prevent XSS if client-side sanitization is bypassed
+            const sanitizedContent = sanitizeNoteContent(note.content);
             await adapter.note.upsert(
               { id: noteId },
-              { userId, itemId: note.itemId, moduleId: note.moduleId, moduleName: note.moduleName, content: note.content },
-              { itemId: note.itemId, moduleId: note.moduleId, moduleName: note.moduleName, content: note.content }
+              { userId, itemId: note.itemId, moduleId: note.moduleId, moduleName: note.moduleName, content: sanitizedContent },
+              { itemId: note.itemId, moduleId: note.moduleId, moduleName: note.moduleName, content: sanitizedContent }
             );
             savedCount++;
           } catch (error) {
