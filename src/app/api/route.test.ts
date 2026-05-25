@@ -383,4 +383,142 @@ describe('API Route POST /api', () => {
     const body = await response.json();
     expect(body.saved.modules).toBe(1); // Only valid module saved
   });
+
+  it('syncs notes when authenticated', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
+
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'notes-sync',
+      payload: {
+        notes: [
+          { id: 'note-1', itemId: 'item1', moduleId: 'owasp', moduleName: 'OWASP', content: 'Test note' },
+        ],
+      },
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+  });
+
+  it('syncs study sessions when authenticated', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
+
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'study-sessions-sync',
+      payload: {
+        sessions: [
+          { id: 'session-1', date: new Date().toISOString(), durationMs: 60000, pageType: 'owasp', xpEarned: 5 },
+        ],
+      },
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+  });
+
+  it('deletes a note when authenticated', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
+
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'note-delete',
+      payload: { noteId: 'note-1' },
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+  });
+
+  it('handles empty batch-sync gracefully', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
+
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'batch-sync',
+      payload: { modules: [], quizzes: [] },
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.saved.modules).toBe(0);
+    expect(body.saved.quizzes).toBe(0);
+  });
+
+  it('filters invalid quiz IDs in batch-sync', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
+
+    (mockQuizResult.upsert as any).mockResolvedValue({ quizId: 'owasp', score: 9, total: 10 });
+
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'batch-sync',
+      payload: {
+        modules: [],
+        quizzes: [
+          { quizId: 'owasp', score: 9, total: 10 },
+          { quizId: 'non-existent-quiz', score: 5, total: 10 },
+        ],
+      },
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.saved.quizzes).toBe(1);
+  });
+
+  it('returns 400 for malformed JSON body', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
+
+    const request = new NextRequest('http://localhost:3000/api', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrf-token': 'test-csrf-token',
+      },
+      body: 'not valid json',
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(400);
+  });
+
+  it('handles empty challenge array in challenge-progress-sync', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
+
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'challenge-progress-sync',
+      payload: { challenges: [] },
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.saved.challenges).toBe(0);
+  });
+
+  it('handles item progress with empty itemIds arrays', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
+
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'item-progress-sync',
+      payload: {
+        items: [
+          { moduleId: 'sql-injection', itemIds: ['level-1'] },
+          { moduleId: 'xss', itemIds: [] }, // empty should be filtered
+        ],
+      },
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.saved.items).toBe(1); // Only sql-injection saved
+  });
 });

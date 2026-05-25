@@ -4,12 +4,14 @@
 
 ---
 
-## ✅ Выполнено (последний коммит)
+## ✅ Выполнено (сессии 1–3)
 
 - **i18n система** — `useTranslations` реактивный, locale switcher в Sidebar, LandingPage полностью переведён, динамический `<html lang>`
-- **Race condition в resetProgress** — убран вызов `loadFromDatabase` после сброса
-- **beforeunload listener leak** — добавлен `{ once: true }`
-- **Sanitization заметок** — XSS защита через `sanitizeNoteContent`
+- **Race condition в resetProgress** — убран вызов `loadFromDatabase` после сброса + очистка in-flight sync
+- **beforeunload listener leak** — `{ once: true }` + self-re-registration для SPA навигации
+- **deleteNote data loss** — optimistic delete с rollback при ошибке DB
+- **Runtime validation в loadFromDatabase** — проверка типов для всех полей API ответа (Array.isArray, typeof object)
+- **Sanitization заметок** — XSS защита через `sanitizeNoteContent` + тесты
 - **prefers-reduced-motion** — хук `useReducedMotion`, Dashboard + FlashcardMode
 - **Unhandled promise rejection** — `.catch()` в SettingsPage
 - **Мемоизация в ToolsLab** — крипто-вычисления в `useMemo`
@@ -18,6 +20,8 @@
 - **`.dockerignore`** — создан
 - **Доступность FlashcardMode** — `onKeyDown` для Enter/Space
 - **Batch-sync улучшен** — `Promise.allSettled` с обработкой ошибок
+- **FIFO eviction в rate-limit** — корректное удаление oldest entry по resetTime вместо `entries().next()`
+- **Тесты** — sanitize.ts (13 тестов), store actions (19 тестов), API route edge cases (8 новых)
 
 ---
 

@@ -142,6 +142,8 @@ const registerBeforeUnload = () => {
     if (loadAbortController && !loadAbortController.signal.aborted) {
       loadAbortController.abort();
     }
+    // Re-register for subsequent unloads (SPA navigation)
+    registerBeforeUnload();
   };
   window.addEventListener('beforeunload', handler, { once: true });
 };
@@ -487,10 +489,14 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
     // Check if request was aborted
     if (signal?.aborted) return;
 
-    if (data.completedModules.length > 0 || Object.keys(data.quizScores).length > 0) {
+    // Runtime validation: normalize top-level fields
+    const completedModules = Array.isArray(data.completedModules) ? data.completedModules : [];
+    const quizScores = data.quizScores && typeof data.quizScores === 'object' && !Array.isArray(data.quizScores) ? data.quizScores : {};
+
+    if (completedModules.length > 0 || Object.keys(quizScores).length > 0) {
       set({
-        completedModules: data.completedModules,
-        quizScores: data.quizScores,
+        completedModules,
+        quizScores,
         userId,
         syncStatus: 'synced',
       });
@@ -499,38 +505,41 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
     }
 
     // Restore challenge progress if available
-    if (data.challenges) {
+    if (data.challenges && typeof data.challenges === 'object') {
+      const challenges = data.challenges;
+      const defaultChallenge = { correct: 0, total: 0, answered: [], selectedOptions: {} };
       set({
-        owaspChallengeScores: data.challenges.owasp ?? { correct: 0, total: 0, answered: [], selectedOptions: {} },
-        authChallengeScores: data.challenges.auth ?? { correct: 0, total: 0, answered: [], selectedOptions: {} },
-        headersChallengeScores: data.challenges.headers ?? { correct: 0, total: 0, answered: [], selectedOptions: {} },
-        secureCodingChallengeScores: data.challenges['secure-coding'] ?? { correct: 0, total: 0, answered: [], selectedOptions: {} },
+        owaspChallengeScores: (challenges.owasp && typeof challenges.owasp === 'object') ? challenges.owasp : defaultChallenge,
+        authChallengeScores: (challenges.auth && typeof challenges.auth === 'object') ? challenges.auth : defaultChallenge,
+        headersChallengeScores: (challenges.headers && typeof challenges.headers === 'object') ? challenges.headers : defaultChallenge,
+        secureCodingChallengeScores: (challenges['secure-coding'] && typeof challenges['secure-coding'] === 'object') ? challenges['secure-coding'] : defaultChallenge,
       });
     }
 
     // Restore item-level progress if available
-    if (data.itemProgress) {
+    if (data.itemProgress && typeof data.itemProgress === 'object') {
+      const itemProgress = data.itemProgress;
       set({
-        studiedOwaspItems: data.itemProgress.owasp ?? [],
-        sqlCompletedLevels: data.itemProgress['sql-injection'] ?? [],
-        xssCompletedLevels: data.itemProgress.xss ?? [],
+        studiedOwaspItems: Array.isArray(itemProgress.owasp) ? itemProgress.owasp : [],
+        sqlCompletedLevels: Array.isArray(itemProgress['sql-injection']) ? itemProgress['sql-injection'] : [],
+        xssCompletedLevels: Array.isArray(itemProgress.xss) ? itemProgress.xss : [],
       });
     }
 
     // Restore CSRF viewed challenges if available
-    if (data.csrfViewedChallenges && Array.isArray(data.csrfViewedChallenges)) {
+    if (Array.isArray(data.csrfViewedChallenges)) {
       set({ csrfViewedChallenges: data.csrfViewedChallenges.map(Number) });
     }
 
     // Restore notes if available
-    if (data.notes) {
+    if (data.notes && typeof data.notes === 'object' && !Array.isArray(data.notes)) {
       set({ notes: data.notes });
     }
 
     // Restore study sessions if available — merge with local unsaved sessions
-    if (data.studySessions) {
+    if (Array.isArray(data.studySessions)) {
       set((state) => {
-        const serverIds = new Set(data.studySessions.map((ss: { id: string }) => ss.id));
+        const serverIds = new Set(data.studySessions.filter((ss: unknown) => ss && typeof ss === 'object' && 'id' in ss).map((ss: { id: string }) => ss.id));
         const localUnsaved = state.studySessions.filter((ss) => !serverIds.has(ss.id));
         return { studySessions: [...data.studySessions, ...localUnsaved].slice(0, 100) };
       });
@@ -542,7 +551,7 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
     }
 
     // Restore quiz history if available
-    if (data.quizHistory && Array.isArray(data.quizHistory)) {
+    if (Array.isArray(data.quizHistory)) {
       set({ quizHistory: data.quizHistory.slice(0, 50) });
     }
   } catch (error) {
@@ -626,6 +635,14 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       clearTimeout(syncTimeout);
       syncTimeout = null;
     }
+    // Clear any in-flight sync to prevent it from overwriting reset state
+    if (pendingResolve) {
+      pendingResolve();
+      pendingResolve = null;
+      pendingPromise = null;
+    }
+    isExecuting = false;
+    followUpScheduled = false;
     // Snapshot current state before any mutations so we can restore on failure
     const snapshot = get();
     isResetting = true;
@@ -779,6 +796,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   },
 
   deleteNote: async (noteId: string) => {
+    const removedNote = get().notes[noteId];
     set((state) => {
       const { [noteId]: _removed, ...rest } = state.notes;
       return { notes: rest };
@@ -790,6 +808,12 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         await apiClient.deleteNote(noteId);
       } catch (err) {
         logger.error('Failed to delete note from DB:', err);
+        // Restore the note locally if DB delete failed to prevent data loss
+        if (removedNote && !get().notes[noteId]) {
+          set((state) => ({
+            notes: { ...state.notes, [noteId]: removedNote },
+          }));
+        }
       }
     }
     ensureSync(get, set).catch((err) => logger.error('Sync failed after deleteNote:', err));

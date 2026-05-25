@@ -128,4 +128,98 @@ describe('App Store', () => {
     useAppStore.getState().clearQuizHistory();
     expect(useAppStore.getState().quizHistory).toEqual([]);
   });
+
+  it('addNote creates note with sanitized content', () => {
+    useAppStore.getState().addNote('item1', 'owasp', 'OWASP Top 10', '<script>alert(1)</script>hello');
+    const notes = useAppStore.getState().notes;
+    const noteValues = Object.values(notes);
+    expect(noteValues.length).toBe(1);
+    expect(noteValues[0].content).toBe('alert(1)hello');
+    expect(noteValues[0].itemId).toBe('item1');
+    expect(noteValues[0].moduleId).toBe('owasp');
+  });
+
+  it('updateNote sanitizes and updates existing note', () => {
+    useAppStore.getState().addNote('item2', 'sql-injection', 'SQL Injection', 'original');
+    vi.advanceTimersByTime(1000);
+    const noteId = Object.keys(useAppStore.getState().notes)[0];
+    useAppStore.getState().updateNote(noteId, '<b>updated</b>');
+    const updated = useAppStore.getState().notes[noteId];
+    expect(updated.content).toBe('updated');
+    expect(updated.updatedAt).toBeGreaterThan(updated.createdAt);
+  });
+
+  it('updateNote does nothing for non-existent note', () => {
+    const stateBefore = useAppStore.getState();
+    useAppStore.getState().updateNote('nonexistent', 'content');
+    expect(useAppStore.getState().notes).toEqual(stateBefore.notes);
+  });
+
+  it('getNotesForItem returns notes filtered by itemId sorted by updatedAt', () => {
+    useAppStore.getState().addNote('itemA', 'owasp', 'OWASP', 'first');
+    vi.advanceTimersByTime(1000);
+    useAppStore.getState().addNote('itemA', 'owasp', 'OWASP', 'second');
+    vi.advanceTimersByTime(1000);
+    useAppStore.getState().addNote('itemB', 'owasp', 'OWASP', 'other');
+
+    const notesForA = useAppStore.getState().getNotesForItem('itemA');
+    expect(notesForA.length).toBe(2);
+    expect(notesForA[0].content).toBe('second');
+    expect(notesForA[1].content).toBe('first');
+  });
+
+  it('startStudySession and endStudySession create study session with XP', () => {
+    useAppStore.getState().startStudySession('owasp');
+    vi.advanceTimersByTime(5 * 60_000); // 5 minutes = minimum for 1 XP
+    useAppStore.getState().endStudySession();
+    const sessions = useAppStore.getState().studySessions;
+    expect(sessions.length).toBe(1);
+    expect(sessions[0].pageType).toBe('owasp');
+    expect(sessions[0].durationMs).toBe(5 * 60_000);
+    expect(sessions[0].xpEarned).toBe(1);
+  });
+
+  it('endStudySession does nothing without active session', () => {
+    const beforeCount = useAppStore.getState().studySessions.length;
+    useAppStore.getState().endStudySession();
+    expect(useAppStore.getState().studySessions.length).toBe(beforeCount);
+  });
+
+  it('awardXP only accepts positive amounts', () => {
+    useAppStore.getState().awardXP(50);
+    expect(useAppStore.getState().totalXP).toBe(50);
+
+    useAppStore.getState().awardXP(-10);
+    expect(useAppStore.getState().totalXP).toBe(50); // unchanged
+  });
+
+  it('setOwaspChallengeScore updates challenge scores', () => {
+    useAppStore.getState().setOwaspChallengeScore(5, [1, 2, 3, 4, 5], { '1': 0, '2': 1 });
+    const scores = useAppStore.getState().owaspChallengeScores;
+    expect(scores.correct).toBe(5);
+    expect(scores.total).toBe(5);
+    expect(scores.answered).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it('markCsrfChallengeViewed adds unique indices', () => {
+    useAppStore.getState().markCsrfChallengeViewed(0);
+    useAppStore.getState().markCsrfChallengeViewed(1);
+    useAppStore.getState().markCsrfChallengeViewed(0); // duplicate
+    expect(useAppStore.getState().csrfViewedChallenges).toEqual([0, 1]);
+  });
+
+  it('addStudiedOwasp adds unique items', () => {
+    useAppStore.getState().addStudiedOwasp('a1');
+    useAppStore.getState().addStudiedOwasp('a2');
+    useAppStore.getState().addStudiedOwasp('a1'); // duplicate
+    expect(useAppStore.getState().studiedOwaspItems).toEqual(['a1', 'a2']);
+  });
+
+  it('addSqlLevel and addXssLevel add unique levels', () => {
+    useAppStore.getState().addSqlLevel('basic');
+    useAppStore.getState().addSqlLevel('basic');
+    useAppStore.getState().addXssLevel('reflected');
+    expect(useAppStore.getState().sqlCompletedLevels).toEqual(['basic']);
+    expect(useAppStore.getState().xssCompletedLevels).toEqual(['reflected']);
+  });
 });
