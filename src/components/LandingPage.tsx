@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { modules } from '@/lib/security-data';
 import { quizCategories } from '@/lib/data/quiz-data';
+import { useTranslations, getCurrentLocale, setLocale } from '@/lib/intlStub';
 
 const iconMap: Record<string, React.ReactNode> = {
   Shield: <Shield size={24} />,
@@ -28,31 +29,31 @@ const iconMap: Record<string, React.ReactNode> = {
 const features = [
   {
     icon: Database,
-    title: 'Интерактивные лаборатории',
-    description: 'SQL-инъекции, XSS, CSRF и другие уязвимости с пошаговыми симуляциями',
+    titleKey: 'interactiveLabs',
+    descKey: 'interactiveLabsDesc',
   },
   {
     icon: Shield,
-    title: 'OWASP Top 10',
-    description: 'Полное покрытие 10 критических угроз с примерами кода и защитами',
+    titleKey: 'owaspTop10',
+    descKey: 'owaspTop10Desc',
   },
   {
     icon: Trophy,
-    title: 'Система достижений',
-    description: 'XP, уровни, достижения — отслеживайте прогресс и мотивируйте себя',
+    titleKey: 'achievementSystem',
+    descKey: 'achievementSystemDesc',
   },
   {
     icon: BookOpen,
-    title: 'Квизы и тестирование',
-    description: `${quizCategories.length} категорий квизов для проверки знаний по каждой теме`,
+    titleKey: 'quizzesTitle',
+    descKey: 'quizzesDesc',
   },
 ];
 
 const stats = [
-  { label: 'Модулей', value: modules.length.toString() },
-  { label: 'Квизов', value: quizCategories.length.toString() },
-  { label: 'Уровней', value: '15+' },
-  { label: 'Достижений', value: '15+' },
+  { labelKey: 'statsModules', value: modules.length.toString() },
+  { labelKey: 'statsQuizzes', value: quizCategories.length.toString() },
+  { labelKey: 'statsLevels', value: '15+' },
+  { labelKey: 'statsAchievements', value: '15+' },
 ];
 
 const containerVariants = {
@@ -74,22 +75,19 @@ const THEME_ICONS: Record<ThemeCycle, typeof Sun> = { light: Sun, dark: Moon, sy
 
 const LOCALE_STORAGE_KEY = 'app-locale';
 
-function getStoredLocale(): string {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem(LOCALE_STORAGE_KEY) || '';
-  }
-  return '';
-}
-
 export default function LandingPage() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [locale, setLocale] = useState(() => getStoredLocale() || 'ru');
+  const [locale, setLocaleState] = useState(() => getCurrentLocale());
+  const t = useTranslations('landing');
 
   useEffect(() => {
     setMounted(true);
+    const handleLocaleChange = () => setLocaleState(getCurrentLocale());
+    window.addEventListener('localechange', handleLocaleChange);
+    return () => window.removeEventListener('localechange', handleLocaleChange);
   }, []);
 
   const currentTheme: ThemeCycle = (theme as ThemeCycle) || 'system';
@@ -100,10 +98,7 @@ export default function LandingPage() {
   const toggleLocale = () => {
     const next = locale === 'ru' ? 'en' : 'ru';
     setLocale(next);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(LOCALE_STORAGE_KEY, next);
-      window.location.reload();
-    }
+    window.dispatchEvent(new Event('localechange'));
   };
 
   const scrollTo = (id: string) => {
@@ -124,10 +119,10 @@ export default function LandingPage() {
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-4">
             <button onClick={() => scrollTo('features')} className="text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
-              Возможности
+              {t('features')}
             </button>
             <button onClick={() => scrollTo('modules')} className="text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
-              Модули
+              {t('modules')}
             </button>
             {mounted && (
               <Button
@@ -153,7 +148,7 @@ export default function LandingPage() {
               )}
             </Button>
             <Button variant="outline" className="border-emerald-600/50 dark:border-emerald-500/50 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10" onClick={() => router.push('/auth/signin')}>
-              Войти
+              {t('signIn')}
             </Button>
           </nav>
 
@@ -167,10 +162,10 @@ export default function LandingPage() {
         {mobileMenuOpen && (
           <div className="md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-4 py-4 space-y-3">
             <button onClick={() => scrollTo('features')} className="block w-full text-left text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white py-2">
-              Возможности
+              {t('features')}
             </button>
             <button onClick={() => scrollTo('modules')} className="block w-full text-left text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white py-2">
-              Модули
+              {t('modules')}
             </button>
             <div className="flex items-center gap-2 py-2">
               {mounted && (
@@ -193,7 +188,7 @@ export default function LandingPage() {
               </Button>
             </div>
             <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => router.push('/auth/signin')}>
-              Войти
+              {t('signIn')}
             </Button>
           </div>
         )}
@@ -204,7 +199,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <Badge variant="secondary" className="mb-6 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20 text-sm px-4 py-1.5">
-              09.03.04 Программная инженерия
+              {t('majorBadge')}
             </Badge>
           </motion.div>
 
@@ -214,7 +209,7 @@ export default function LandingPage() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent"
           >
-            Тренажёр по информационной безопасности
+            {t('heroTitle')}
           </motion.h1>
 
           <motion.p
@@ -223,7 +218,7 @@ export default function LandingPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto"
           >
-            Изучайте уязвимости на практике: SQL-инъекции, XSS, CSRF, OWASP Top 10 и безопасное кодирование в интерактивных лабораториях
+            {t('heroDesc')}
           </motion.p>
 
           <motion.div
@@ -233,10 +228,10 @@ export default function LandingPage() {
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-lg px-8" onClick={() => router.push('/auth/signin')}>
-              Начать обучение <ChevronRight size={20} className="ml-1" />
+              {t('startLearning')} <ChevronRight size={20} className="ml-1" />
             </Button>
             <Button size="lg" variant="outline" className="border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => scrollTo('modules')}>
-              Смотреть модули
+              {t('viewModules')}
             </Button>
           </motion.div>
 
@@ -248,9 +243,9 @@ export default function LandingPage() {
             className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto"
           >
             {stats.map((stat) => (
-              <div key={stat.label} className="text-center">
+              <div key={stat.labelKey} className="text-center">
                 <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{stat.value}</div>
-                <div className="text-sm text-slate-500 dark:text-slate-500 mt-1">{stat.label}</div>
+                <div className="text-sm text-slate-500 dark:text-slate-500 mt-1">{t(stat.labelKey)}</div>
               </div>
             ))}
           </motion.div>
@@ -266,9 +261,9 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-900 dark:text-white">Возможности платформы</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-900 dark:text-white">{t('featuresTitle')}</h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-              Всё необходимое для изучения основ информационной безопасности веб-приложений
+              {t('featuresDesc')}
             </p>
           </motion.div>
 
@@ -282,14 +277,18 @@ export default function LandingPage() {
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <motion.div key={feature.title} variants={itemVariants}>
+                <motion.div key={feature.titleKey} variants={itemVariants}>
                   <Card className="bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/50 h-full hover:border-emerald-500/30 transition-colors">
                     <CardContent className="pt-6">
                       <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
                         <Icon size={24} />
                       </div>
-                      <h3 className="text-lg font-semibold mb-2 text-slate-900 dark:text-white">{feature.title}</h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
+                      <h3 className="text-lg font-semibold mb-2 text-slate-900 dark:text-white">{t(feature.titleKey)}</h3>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        {feature.descKey === 'quizzesDesc'
+                          ? t(feature.descKey, { count: quizCategories.length })
+                          : t(feature.descKey)}
+                      </p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -308,9 +307,9 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-900 dark:text-white">Учебные модули</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-900 dark:text-white">{t('modulesTitle')}</h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-              {modules.length} интерактивных модулей — от основ OWASP до продвинутых техник безопасного кодирования
+              {t('modulesDesc', { count: modules.length })}
             </p>
           </motion.div>
 
@@ -335,10 +334,10 @@ export default function LandingPage() {
                     <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">{mod.description}</p>
                     <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-500">
                       <span className="flex items-center gap-1">
-                        <BookOpen size={14} /> {mod.lessons} уроков
+                        <BookOpen size={14} /> {t('lessonsCount', { count: mod.lessons })}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Target size={14} /> {mod.totalSteps} шагов
+                        <Target size={14} /> {t('stepsCount', { count: mod.totalSteps })}
                       </span>
                     </div>
                   </CardContent>
@@ -363,12 +362,12 @@ export default function LandingPage() {
               <Star size={32} className="text-yellow-500 dark:text-yellow-400" />
               <Zap size={32} className="text-orange-500 dark:text-orange-400" />
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-4 text-slate-900 dark:text-white">Система прогресса и достижений</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 text-slate-900 dark:text-white">{t('progressTitle')}</h2>
             <p className="text-slate-700 dark:text-slate-300 mb-8 max-w-lg mx-auto">
-              Получайте XP за прохождение модулей, квизов и задач. Открывайте достижения и отслеживайте свой уровень.
+              {t('progressDesc')}
             </p>
             <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700" onClick={() => router.push('/auth/signin')}>
-              Начать зарабатывать XP <ChevronRight size={20} className="ml-1" />
+              {t('startEarningXP')} <ChevronRight size={20} className="ml-1" />
             </Button>
           </motion.div>
         </div>
@@ -377,12 +376,12 @@ export default function LandingPage() {
       {/* CTA Footer */}
       <section className="py-20 px-4 border-t border-slate-200 dark:border-slate-800">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-900 dark:text-white">Готовы начать?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-900 dark:text-white">{t('ctaTitle')}</h2>
           <p className="text-slate-600 dark:text-slate-400 mb-8">
-            Войдите в систему, чтобы получить доступ ко всем модулям, квизам и инструментам
+            {t('ctaDesc')}
           </p>
           <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-lg px-10" onClick={() => router.push('/auth/signin')}>
-            Войти в систему <ChevronRight size={20} className="ml-1" />
+            {t('ctaButton')} <ChevronRight size={20} className="ml-1" />
           </Button>
         </div>
       </section>
@@ -392,9 +391,9 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
           <div className="flex items-center gap-2">
             <Shield className="text-emerald-600 dark:text-emerald-500" size={16} />
-            <span>CyberSec Lab — Тренажёр по ИБ</span>
+            <span>{t('footerName')}</span>
           </div>
-          <span>09.03.04 Программная инженерия</span>
+          <span>{t('footerMajor')}</span>
         </div>
       </footer>
     </div>

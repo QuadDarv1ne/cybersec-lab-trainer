@@ -2,6 +2,37 @@ import { describe, it, expect } from 'vitest';
 import ru from '../i18n/locales/ru/main.json';
 import en from '../i18n/locales/en/main.json';
 
+// Recursively collect all dot-separated keys from a nested object
+function collectKeys(obj: Record<string, unknown>, prefix = ''): string[] {
+  const keys: string[] = [];
+  for (const [k, v] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${k}` : k;
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      keys.push(...collectKeys(v as Record<string, unknown>, fullKey));
+    } else {
+      keys.push(fullKey);
+    }
+  }
+  return keys;
+}
+
+describe('i18n key parity', () => {
+  it('ru and en have the same top-level namespaces', () => {
+    const ruKeys = Object.keys(ru).sort();
+    const enKeys = Object.keys(en).sort();
+    expect(ruKeys).toEqual(enKeys);
+  });
+
+  it('ru and en have all nested keys in sync', () => {
+    const ruAllKeys = collectKeys(ru).sort();
+    const enAllKeys = collectKeys(en).sort();
+    const missingInEn = ruAllKeys.filter((k) => !enAllKeys.includes(k));
+    const missingInRu = enAllKeys.filter((k) => !ruAllKeys.includes(k));
+    expect(missingInEn).toEqual([]);
+    expect(missingInRu).toEqual([]);
+  });
+});
+
 describe('i18n completeness', () => {
   it('has notes translations in ru', () => {
     expect(ru.notes.title).toBeDefined();

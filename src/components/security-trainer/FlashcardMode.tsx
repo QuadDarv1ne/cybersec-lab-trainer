@@ -200,6 +200,7 @@ export function FlashcardMode() {
               variant={studyMode === 'all' ? 'default' : 'outline'}
               className="text-[10px] cursor-pointer"
               onClick={() => setStudyMode('all')}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setStudyMode('all'); } }}
               role="button"
               tabIndex={0}
             >
@@ -210,6 +211,7 @@ export function FlashcardMode() {
                 variant={studyMode === 'hard' ? 'default' : 'outline'}
                 className="text-[10px] cursor-pointer bg-red-50 text-red-700 border-red-200"
                 onClick={() => setStudyMode('hard')}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setStudyMode('hard'); } }}
                 role="button"
                 tabIndex={0}
               >
@@ -223,6 +225,7 @@ export function FlashcardMode() {
               variant={!selectedCategory ? 'default' : 'outline'}
               className="text-[10px] cursor-pointer"
               onClick={() => setSelectedCategory(null)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedCategory(null); } }}
               role="button"
               tabIndex={0}
             >
@@ -234,6 +237,7 @@ export function FlashcardMode() {
                 variant={selectedCategory === cat ? 'default' : 'outline'}
                 className="text-[10px] cursor-pointer"
                 onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedCategory(selectedCategory === cat ? null : cat); } }}
                 role="button"
                 tabIndex={0}
               >

@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from 'react';
 import ru from '../i18n/locales/ru/main.json';
 import en from '../i18n/locales/en/main.json';
 
@@ -7,7 +8,7 @@ const locales: Record<string, typeof ru> = {
 };
 
 // Read current locale: check localStorage first, then browser language
-function getCurrentLocale(): string {
+export function getCurrentLocale(): string {
   if (typeof window !== 'undefined') {
     const stored = localStorage.getItem('app-locale');
     if (stored === 'en' || stored === 'ru') return stored;
@@ -16,6 +17,17 @@ function getCurrentLocale(): string {
     if (browserLang.startsWith('ru')) return 'ru';
   }
   return 'ru'; // default fallback
+}
+
+// Set locale and emit storage event for cross-component reactivity
+export function setLocale(locale: string): void {
+  if (typeof window === 'undefined') return;
+  if (locale !== 'ru' && locale !== 'en') return;
+  localStorage.setItem('app-locale', locale);
+  // Notify other components via storage event
+  window.dispatchEvent(new StorageEvent('storage', { key: 'app-locale', newValue: locale }));
+  // Also update document lang attribute for accessibility
+  document.documentElement.lang = locale;
 }
 
 function getNestedValue(obj: Record<string, unknown>, path: string): string {
@@ -71,7 +83,32 @@ function getTranslator(locale: string, namespace: string): Translator {
   return translator;
 }
 
+/**
+ * React to locale changes by subscribing to storage events and current locale state.
+ */
+function useLocale(): string {
+  const [locale, setLocaleState] = useState(() => getCurrentLocale());
+
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent | Event) => {
+      const current = getCurrentLocale();
+      setLocaleState(current);
+    };
+
+    window.addEventListener('storage', handleStorage);
+    // Also listen to a custom event for same-window locale changes
+    window.addEventListener('localechange', handleStorage);
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('localechange', handleStorage);
+    };
+  }, []);
+
+  return locale;
+}
+
 export function useTranslations(namespace: string): Translator {
-  const locale = getCurrentLocale();
+  const locale = useLocale();
   return getTranslator(locale, namespace);
 }

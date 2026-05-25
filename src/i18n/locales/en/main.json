@@ -1,4 +1,40 @@
 {
+  "landing": {
+    "features": "Features",
+    "modules": "Modules",
+    "signIn": "Sign In",
+    "majorBadge": "09.03.04 Software Engineering",
+    "heroTitle": "Cybersecurity Training Platform",
+    "heroDesc": "Learn vulnerabilities hands-on: SQL injections, XSS, CSRF, OWASP Top 10 and secure coding in interactive labs",
+    "startLearning": "Start Learning",
+    "viewModules": "View Modules",
+    "featuresTitle": "Platform Features",
+    "featuresDesc": "Everything you need to learn web application security fundamentals",
+    "interactiveLabs": "Interactive Labs",
+    "interactiveLabsDesc": "SQL injections, XSS, CSRF and other vulnerabilities with step-by-step simulations",
+    "owaspTop10": "OWASP Top 10",
+    "owaspTop10Desc": "Full coverage of 10 critical threats with code examples and defenses",
+    "achievementSystem": "Achievement System",
+    "achievementSystemDesc": "XP, levels, achievements — track progress and stay motivated",
+    "quizzesTitle": "Quizzes & Testing",
+    "quizzesDesc": "{count} quiz categories to test knowledge on each topic",
+    "statsModules": "Modules",
+    "statsQuizzes": "Quizzes",
+    "statsLevels": "15+",
+    "statsAchievements": "15+",
+    "modulesTitle": "Training Modules",
+    "modulesDesc": "{count} interactive modules — from OWASP basics to advanced secure coding techniques",
+    "lessonsCount": "{count} lessons",
+    "stepsCount": "{count} steps",
+    "progressTitle": "Progress & Achievement System",
+    "progressDesc": "Earn XP for completing modules, quizzes and challenges. Unlock achievements and track your level.",
+    "startEarningXP": "Start Earning XP",
+    "ctaTitle": "Ready to Start?",
+    "ctaDesc": "Sign in to access all modules, quizzes and tools",
+    "ctaButton": "Sign In",
+    "footerName": "CyberSec Lab — Security Training",
+    "footerMajor": "09.03.04 Software Engineering"
+  },
   "dashboard": {
     "hero": {
       "title": "Cybersecurity Laboratory",
@@ -120,7 +156,8 @@
     "signOut": "Sign Out",
     "analytics": "Analytics",
     "settings": "Settings",
-    "weaknessReview": "Weakness Review"
+    "weaknessReview": "Weakness Review",
+    "notes": "Notes"
   },
   "owasp": {
     "title": "OWASP Top 10",

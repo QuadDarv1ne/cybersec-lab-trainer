@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SessionProvider } from "@/components/SessionProvider";
 import ThemeProvider from "@/components/ThemeProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { LocaleLang } from "@/components/LocaleLang";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import "./globals.css";
@@ -75,6 +76,7 @@ export default async function RootLayout({
   return (
     <html lang="ru" suppressHydrationWarning>
       <body className="antialiased font-sans">
+        <LocaleLang />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-emerald-600 focus:text-white focus:rounded-lg focus:shadow-lg"

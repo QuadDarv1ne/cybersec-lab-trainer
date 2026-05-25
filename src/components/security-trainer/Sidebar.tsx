@@ -32,6 +32,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { useSession } from '@/hooks/use-session';
 import { signIn, signOut } from 'next-auth/react';
+import { getCurrentLocale, setLocale } from '@/lib/intlStub';
+import { useState, useEffect } from 'react';
 import SyncIndicator from './SyncIndicator';
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -63,6 +65,24 @@ export default function Sidebar() {
   } = useAppStore();
 
   const { session, isAuthenticated, isLoading } = useSession();
+  const [currentLocale, setCurrentLocale] = useState(() => getCurrentLocale());
+
+  useEffect(() => {
+    const handleLocaleChange = () => setCurrentLocale(getCurrentLocale());
+    window.addEventListener('localechange', handleLocaleChange);
+    window.addEventListener('storage', handleLocaleChange);
+    return () => {
+      window.removeEventListener('localechange', handleLocaleChange);
+      window.removeEventListener('storage', handleLocaleChange);
+    };
+  }, []);
+
+  const toggleLocale = () => {
+    setLocale(currentLocale === 'ru' ? 'en' : 'ru');
+    // Dispatch custom event for same-window reactivity
+    window.dispatchEvent(new Event('localechange'));
+  };
+
 
   const navItems: { id: PageType; label: string; iconKey: string }[] = [
     { id: 'dashboard', label: t('dashboard'), iconKey: 'LayoutDashboard' },
@@ -76,7 +96,7 @@ export default function Sidebar() {
     { id: 'security-headers', label: t('securityHeaders'), iconKey: 'ShieldAlert' },
     { id: 'quiz', label: t('quiz'), iconKey: 'HelpCircle' },
     { id: 'achievements', label: t('achievements'), iconKey: 'Trophy' },
-    { id: 'notes', label: 'Заметки', iconKey: 'StickyNote' },
+    { id: 'notes', label: t('notes'), iconKey: 'StickyNote' },
     { id: 'analytics', label: t('analytics'), iconKey: 'BarChart3' },
     { id: 'settings', label: t('settings'), iconKey: 'Settings' },
     { id: 'weakness-review', label: t('weaknessReview'), iconKey: 'AlertTriangle' },
@@ -101,6 +121,14 @@ export default function Sidebar() {
           </div>
         </div>
         <div className="flex items-center gap-1">
+          <button
+            onClick={toggleLocale}
+            className="h-8 w-8 rounded-md text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            aria-label={currentLocale === 'ru' ? 'Switch to English' : 'Переключить на русский'}
+            title={currentLocale === 'ru' ? 'Switch to English' : 'Переключить на русский'}
+          >
+            {currentLocale === 'ru' ? 'EN' : 'RU'}
+          </button>
           <ThemeToggle />
           <Button
             variant="ghost"

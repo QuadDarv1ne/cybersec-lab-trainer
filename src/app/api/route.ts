@@ -292,28 +292,39 @@ export async function POST(request: Request) {
         }
 
         const now = new Date().toISOString();
-        const [moduleResults, quizResults] = await Promise.all([
-          modules.length > 0
-            ? Promise.all(modules.map((m) =>
-                adapter.progress.upsert(
-                  { userId, moduleId: m.moduleId },
-                  { userId, moduleId: m.moduleId, completed: m.completed, score: m.score ?? 0, lastAccessed: now },
-                  { completed: m.completed, score: m.score ?? 0, lastAccessed: now }
-                )
-              ))
-            : Promise.resolve([]),
-          quizzes.length > 0
-            ? Promise.all(quizzes.map((q) => {
-                const pct = q.total > 0 ? (q.score / q.total) * 100 : 0;
-                return adapter.quizResult.upsert(
-                  { userId, quizId: q.quizId },
-                  { userId, quizId: q.quizId, score: q.score, total: q.total, percentage: pct, createdAt: now },
-                  { score: q.score, total: q.total, percentage: pct }
-                );
-              }))
-            : Promise.resolve([]),
-        ]);
+        const savePromises: Promise<unknown>[] = [];
+        if (modules.length > 0) {
+          for (const m of modules) {
+            savePromises.push(
+              adapter.progress.upsert(
+                { userId, moduleId: m.moduleId },
+                { userId, moduleId: m.moduleId, completed: m.completed, score: m.score ?? 0, lastAccessed: now },
+                { completed: m.completed, score: m.score ?? 0, lastAccessed: now }
+              )
+            );
+          }
+        }
+        if (quizzes.length > 0) {
+          for (const q of quizzes) {
+            const pct = q.total > 0 ? (q.score / q.total) * 100 : 0;
+            savePromises.push(
+              adapter.quizResult.upsert(
+                { userId, quizId: q.quizId },
+                { userId, quizId: q.quizId, score: q.score, total: q.total, percentage: pct, createdAt: now },
+                { score: q.score, total: q.total, percentage: pct }
+              )
+            );
+          }
+        }
 
+        const results = await Promise.allSettled(savePromises);
+        const failures = results.filter((r) => r.status === 'rejected');
+        if (failures.length > 0) {
+          throw new Error(`${failures.length} upsert(s) failed`);
+        }
+
+        const moduleResults = results.slice(0, modules.length);
+        const quizResults = results.slice(modules.length);
         result = { saved: { modules: moduleResults.length, quizzes: quizResults.length }, message: "Batch sync completed" };
         break;
       }
