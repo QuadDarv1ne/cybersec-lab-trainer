@@ -1,7 +1,12 @@
 /**
  * Sanitize user-provided note content to prevent XSS.
- * Strips all HTML tags, leaving plain text.
+ * Uses DOMParser to safely strip all HTML tags and decode entities.
  */
 export function sanitizeNoteContent(raw: string): string {
-  return raw.replace(/<[^>]*>/g, '');
+  if (!raw) return '';
+
+  // Use DOMParser to parse HTML and extract text content
+  // This handles nested tags, malformed HTML, and entity decoding safely
+  const doc = new DOMParser().parseFromString(raw, 'text/html');
+  return doc.body.textContent || '';
 }

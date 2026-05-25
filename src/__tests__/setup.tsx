@@ -2,6 +2,29 @@ import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 import React from 'react';
 
+// Ensure DOMParser is available (happy-dom provides this, but just in case)
+if (typeof globalThis.DOMParser === 'undefined') {
+  // @ts-ignore - happy-dom provides DOMParser
+  globalThis.DOMParser = class DOMParser {
+    parseFromString(str: string) {
+      // Simple HTML parser for tests - strip tags and decode entities
+      const text = str
+        .replace(/<[^>]*>/g, '')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#x27;/g, "'")
+        .replace(/&#39;/g, "'")
+        .replace(/&#[0-9]+;/g, (match) => String.fromCharCode(parseInt(match.replace(/&#|;/g, ''), 10)));
+      
+      return {
+        body: { textContent: text }
+      };
+    }
+  };
+}
+
 // Mock next-auth
 vi.mock('next-auth/react', () => ({
   useSession: () => ({ data: null, status: 'unauthenticated' }),
