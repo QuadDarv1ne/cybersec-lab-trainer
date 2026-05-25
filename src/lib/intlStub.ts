@@ -9,13 +9,16 @@ const locales: Record<string, typeof ru> = {
 
 // Read current locale: check localStorage first, then browser language
 export function getCurrentLocale(): string {
-  if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem('app-locale');
-    if (stored === 'en' || stored === 'ru') return stored;
-    const browserLang = navigator.language.toLowerCase();
-    if (browserLang.startsWith('en')) return 'en';
-    if (browserLang.startsWith('ru')) return 'ru';
+  // On server (SSR), always return 'ru' to ensure consistent hydration
+  // Client will use this default until it reads localStorage/browser language
+  if (typeof window === 'undefined') {
+    return 'ru';
   }
+  const stored = localStorage.getItem('app-locale');
+  if (stored === 'en' || stored === 'ru') return stored;
+  const browserLang = navigator.language.toLowerCase();
+  if (browserLang.startsWith('en')) return 'en';
+  if (browserLang.startsWith('ru')) return 'ru';
   return 'ru'; // default fallback
 }
 
@@ -85,18 +88,23 @@ function getTranslator(locale: string, namespace: string): Translator {
 
 /**
  * React to locale changes by subscribing to storage events and current locale state.
+ * Always starts with 'ru' to match SSR, then syncs to actual locale after mount.
  */
 function useLocale(): string {
-  const [locale, setLocaleState] = useState(() => getCurrentLocale());
+  // Start with 'ru' to match SSR - this prevents hydration mismatch
+  const [locale, setLocaleState] = useState('ru');
 
   useEffect(() => {
+    // After mount, read the actual locale from localStorage/browser
+    const actual = getCurrentLocale();
+    setLocaleState(actual);
+
     const handleStorage = (e: StorageEvent | Event) => {
       const current = getCurrentLocale();
       setLocaleState(current);
     };
 
     window.addEventListener('storage', handleStorage);
-    // Also listen to a custom event for same-window locale changes
     window.addEventListener('localechange', handleStorage);
 
     return () => {

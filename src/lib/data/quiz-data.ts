@@ -1133,5 +1133,5 @@ export const quizCategories = [
   { id: 'general', name: 'Общая безопасность', icon: 'Shield', count: 12 },
   { id: 'owasp', name: 'OWASP Top 10', icon: 'ShieldAlert', count: 10 },
   { id: 'headers', name: 'Заголовки безопасности', icon: 'ShieldCheck', count: 8 },
-  { id: 'coding', name: 'Безопасное кодирование', icon: 'Code', count: 5 },
+  { id: 'coding', name: 'Безопасное кодирование', icon: 'Code', count: 10 },
 ];

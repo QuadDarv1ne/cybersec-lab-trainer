@@ -195,10 +195,9 @@ const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>)
     } finally {
       isExecuting = false;
       followUpScheduled = false;
+      resolve?.();
       pendingPromise = null;
     }
-
-    resolve?.();
   }, SYNC_DELAY_MS);
 
   return pendingPromise;

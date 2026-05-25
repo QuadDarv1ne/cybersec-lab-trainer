@@ -71,7 +71,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession(authOptions);
+  let session = null;
+  try {
+    session = await getServerSession(authOptions);
+  } catch {
+    // Session is invalid (e.g., JWT was encrypted with a different secret)
+    // This can happen when NEXTAUTH_SECRET changes or cookies are stale
+    session = null;
+  }
 
   return (
     <html lang="ru" suppressHydrationWarning>

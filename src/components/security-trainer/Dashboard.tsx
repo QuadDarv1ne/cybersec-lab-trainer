@@ -12,6 +12,7 @@ import { StreakWidget } from './StreakWidget';
 import { HeatmapCalendar } from './HeatmapCalendar';
 import { LearningPath } from './LearningPath';
 import { Certificate } from './Certificate';
+import ScrollToTop from './ScrollToTop';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -582,6 +583,9 @@ export default function Dashboard() {
 
       {/* Completion Certificate - visible when all modules completed */}
       <Certificate />
+
+      {/* Scroll to top button */}
+      <ScrollToTop />
 
       {/* Data management */}
       <Card className="border-slate-200">

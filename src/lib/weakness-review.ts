@@ -134,7 +134,7 @@ export function buildWeaknessReview(
       authChallenges,
       authChallengeScores,
       (ch) => ch.options,
-      (ch) => ch.scenario,
+      (ch) => ch.question,
       'Аутентификация',
       'auth',
     ),

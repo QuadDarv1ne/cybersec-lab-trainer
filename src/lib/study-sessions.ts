@@ -240,7 +240,7 @@ export function getStreakInfo(sessions: StudySession[]): StreakInfo {
   let tempStreak = 0;
   let prevDate: Date | null = null;
 
-  for (const dateStr of studyDates.toReversed()) {
+  for (const dateStr of [...studyDates].reverse()) {
     const currentDate = fromDateString(dateStr);
     if (prevDate === null) {
       tempStreak = 1;
