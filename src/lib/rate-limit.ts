@@ -142,10 +142,10 @@ export function getClientIP(request: Request): string {
     return realIP.trim();
   }
 
-  // X-Forwarded-For is only trustworthy when we know we're behind a trusted proxy.
-  // Without a proxy, clients can spoof this header entirely.
-  // The TRUST_PROXY env var should be set to '1' when behind a reverse proxy.
-  const trustProxy = process.env.TRUST_PROXY === '1' || process.env.NODE_ENV === 'production';
+  // X-Forwarded-For is only trustworthy when behind a known reverse proxy.
+  // Never auto-trust based on NODE_ENV — clients can spoof this header.
+  // Set TRUST_PROXY=1 explicitly when deploying behind a trusted proxy.
+  const trustProxy = process.env.TRUST_PROXY === '1';
   if (trustProxy) {
     const forwarded = request.headers.get("x-forwarded-for");
     if (forwarded) {

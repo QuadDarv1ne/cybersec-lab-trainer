@@ -625,6 +625,15 @@ export default function Dashboard() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
+                const isJsonType = file.type === 'application/json' || file.type === 'text/plain' || file.type === '';
+                const isJsonExt = file.name.toLowerCase().endsWith('.json');
+                if (!isJsonExt && !isJsonType) {
+                  toast.error(t('exportImport.importError'), {
+                    icon: <AlertTriangle size={16} />,
+                  });
+                  e.target.value = '';
+                  return;
+                }
                 const reader = new FileReader();
                 reader.onload = (ev) => {
                   const content = ev.target?.result as string;

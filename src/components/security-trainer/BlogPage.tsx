@@ -128,83 +128,43 @@ function ArticleReader({ article, onBack }: { article: BlogArticle; onBack: () =
       {/* Content */}
       <Card className="border-slate-200 dark:border-slate-700 mb-6">
         <CardContent className="p-6 prose prose-slate dark:prose-invert max-w-none">
-          {paragraphs.map((p, i) => {
-            // Handle code blocks
-            if (p.startsWith('```')) {
-              const lines = p.split('\n');
-              const code = lines.slice(1, -1).join('\n');
-              return (
-                <pre key={i} className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-sm my-4">
-                  <code>{code}</code>
-                </pre>
-              );
-            }
-
-            // Handle headers
-            if (p.startsWith('**') && p.endsWith('**')) {
-              return (
-                <h3 key={i} className="text-lg font-semibold mt-4 mb-2">
-                  {p.replace(/\*\*/g, '')}
-                </h3>
-              );
-            }
-
-            // Handle bullet points
-            if (p.includes('\n•') || p.startsWith('•')) {
-              const items = p.split('\n').filter(Boolean);
-              return (
-                <ul key={i} className="list-disc pl-6 space-y-1 my-3">
-                  {items.map((item, j) => {
-                    const cleanItem = item.replace(/^•\s*/, '');
-                    if (cleanItem.startsWith('**')) {
-                      const [bold, ...rest] = cleanItem.split('**');
-                      return (
-                        <li key={j} className="text-sm">
-                          <strong>{bold.replace(/\*\*/g, '')}</strong>{rest.join('**')}
-                        </li>
-                      );
-                    }
-                    return <li key={j} className="text-sm">{cleanItem}</li>;
-                  })}
-                </ul>
-              );
-            }
-
-            // Handle checkmarks / cross marks
-            if (p.startsWith('✅') || p.startsWith('❌')) {
-              const emoji = p.charAt(0) + (p.charAt(1) === '\uFE0F' ? '\uFE0F' : '');
-              const text = p.slice(emoji.length).trim();
-              return (
-                <p key={i} className="text-sm my-1">
-                  <span className="mr-2">{emoji}</span>
-                  {text.startsWith('**') ? (
-                    <>
-                      <strong>{text.split('**')[1]}</strong>
-                      {text.split('**').slice(2).join('**')}
-                    </>
-                  ) : (
-                    text
-                  )}
+          {paragraphs.map((section) => (
+            <div key={section.id} id={section.id} className="mb-6">
+              <h2 className="text-xl font-semibold mb-3">{section.heading}</h2>
+              {section.content && (
+                <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 mb-3">
+                  {section.content}
                 </p>
-              );
-            }
-
-            // Regular paragraph
-            if (p.trim()) {
-              const parts = p.split(/(\*\*[^*]+\*\*)/g);
-              return (
-                <p key={i} className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 mb-3">
-                  {parts.map((part, j) =>
-                    part.startsWith('**') && part.endsWith('**')
-                      ? <strong key={j}>{part.slice(2, -2)}</strong>
-                      : part
+              )}
+              {section.codeExample && (
+                <div className="my-4">
+                  <div className="bg-slate-800 text-slate-300 px-4 py-2 rounded-t-lg text-sm font-mono">
+                    {section.codeExample.title}
+                  </div>
+                  <pre className="bg-slate-900 text-slate-100 p-4 rounded-b-lg overflow-x-auto text-sm">
+                    <code>{section.codeExample.code}</code>
+                  </pre>
+                  {section.codeExample.caption && (
+                    <p className="text-xs text-slate-500 mt-1 italic">{section.codeExample.caption}</p>
                   )}
-                </p>
-              );
-            }
-
-            return null;
-          })}
+                </div>
+              )}
+              {section.warning && (
+                <div className="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-400 p-3 my-3">
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                    <strong>Важно:</strong> {section.warning}
+                  </p>
+                </div>
+              )}
+              {section.tip && (
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-emerald-400 p-3 my-3">
+                  <p className="text-sm text-emerald-800 dark:text-emerald-200">
+                    <strong>Совет:</strong> {section.tip}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
         </CardContent>
       </Card>
 
@@ -213,10 +173,10 @@ function ArticleReader({ article, onBack }: { article: BlogArticle; onBack: () =
         <h2 className="text-xl font-bold mb-4">Другие статьи</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {blogArticles
-            .filter((a) => a.id !== article.id)
+            .filter((a) => a.slug !== article.slug)
             .slice(0, 2)
             .map((related) => (
-              <ArticleCard key={related.id} article={related} onClick={() => {}} />
+              <ArticleCard key={related.slug} article={related} onClick={() => {}} />
             ))}
         </div>
       </div>
@@ -321,7 +281,7 @@ export default function BlogPage({ onBack }: { onBack: () => void }) {
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {filteredArticles.map((article) => (
                     <ArticleCard
-                      key={article.id}
+                      key={article.slug}
                       article={article}
                       onClick={() => setSelectedArticle(article)}
                     />

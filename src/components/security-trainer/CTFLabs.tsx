@@ -45,6 +45,8 @@ interface LabData {
   difficulty: string;
   category: string;
   flags: LabFlag[];
+  flagCount?: number;
+  totalPoints?: number;
 }
 
 // ============================================================

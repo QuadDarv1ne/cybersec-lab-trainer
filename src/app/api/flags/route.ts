@@ -45,21 +45,24 @@ export async function GET(request: Request) {
       const labs = await adapter.lab.findMany({}, { flags: true });
 
       // Never send flagValue to the client!
-      const sanitizedLabs = labs.map((lab: Record<string, unknown>) => ({
-        id: lab.id,
-        number: lab.number,
-        title: lab.title,
-        description: lab.description,
-        goal: lab.goal,
-        tools: lab.tools,
-        difficulty: lab.difficulty,
-        category: lab.category,
-        flags: ((lab.flags as unknown[]) ?? []).map((flag: Record<string, unknown>) => ({
-          flagKey: flag.flagKey,
-          points: flag.points,
-          hint: flag.hint,
-        })),
-      }));
+      const sanitizedLabs = labs.map((lab) => {
+        const l = lab as Record<string, unknown> & { flags?: Array<Record<string, unknown>> };
+        return {
+          id: l.id,
+          number: l.number,
+          title: l.title,
+          description: l.description,
+          goal: l.goal,
+          tools: l.tools,
+          difficulty: l.difficulty,
+          category: l.category,
+          flags: (l.flags ?? []).map((flag) => ({
+            flagKey: flag.flagKey,
+            points: flag.points,
+            hint: flag.hint,
+          })),
+        };
+      });
 
       await setCsrfCookie();
       const response = NextResponse.json({ labs: sanitizedLabs });

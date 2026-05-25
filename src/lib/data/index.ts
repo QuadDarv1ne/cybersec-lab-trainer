@@ -30,5 +30,5 @@ export type { AuthChallenge } from './auth-challenges-data';
 export { ctfLabs, DIFFICULTY_META, CATEGORY_META } from './ctf-labs-data';
 export type { CTFLab } from './ctf-labs-data';
 
-export { blogArticles, articleCategories, getArticlesByCategory, getFeaturedArticles, searchArticles } from './blog-data';
+export { blogArticles, articleCategories, searchArticles } from './blog-data';
 export type { BlogArticle } from './blog-data';

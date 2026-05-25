@@ -132,10 +132,11 @@ let isResetting = false;
 let activeSessionStart: number | null = null;
 let activeSessionPage: PageType | null = null;
 
-// Clear pending operations on page unload to prevent orphaned API calls
-const registerBeforeUnload = () => {
-  if (typeof window === 'undefined') return;
-  const handler = () => {
+// Clear pending operations on page unload / tab hide to prevent orphaned API calls.
+// Registered once at module load — beforeunload fires on tab close,
+// visibilitychange covers SPA navigation where the tab is hidden but not closed.
+if (typeof window !== 'undefined') {
+  const cleanup = () => {
     if (syncTimeout) {
       clearTimeout(syncTimeout);
       syncTimeout = null;
@@ -143,12 +144,12 @@ const registerBeforeUnload = () => {
     if (loadAbortController && !loadAbortController.signal.aborted) {
       loadAbortController.abort();
     }
-    // Re-register for subsequent unloads (SPA navigation)
-    registerBeforeUnload();
   };
-  window.addEventListener('beforeunload', handler, { once: true });
-};
-registerBeforeUnload();
+  window.addEventListener('beforeunload', cleanup);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') cleanup();
+  });
+}
 
 const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>) => void) => {
   // Block all syncs while reset is in progress to prevent stale data from overwriting reset state
@@ -239,7 +240,7 @@ const apiClient = {
       throw new Error(error.error || 'Failed to load progress');
     }
 
-    return response.json().catch(() => ({ error: 'Invalid server response' }));
+    return response.json().catch(() => { throw new Error('Invalid server response'); });
   },
 
   async saveBatch(modules: { moduleId: string; completed: boolean; score?: number }[], quizzes: { quizId: string; score: number; total: number }[]) {

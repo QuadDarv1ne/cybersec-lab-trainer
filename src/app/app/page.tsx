@@ -29,7 +29,8 @@ const ProgressAnalytics = dynamic(() => import('@/components/security-trainer/Pr
 const WeaknessReviewPage = dynamic(() => import('@/components/security-trainer/WeaknessReview'), { ssr: false, loading: () => <PageSkeleton /> });
 const BlogPage = dynamic(() => import('@/components/security-trainer/BlogPage'), { ssr: false, loading: () => <PageSkeleton /> });
 
-const pages: Record<string, React.ComponentType> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const pages: Record<string, React.ComponentType<any>> = {
   dashboard: Dashboard,
   'sql-injection': SQLInjectionLab,
   xss: XSSLab,

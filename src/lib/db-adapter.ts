@@ -190,7 +190,7 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
     // CTF lab models
     lab: {
       findMany: (where, include) => db.lab.findMany({ where, include: include as { flags: boolean } }),
-      findUnique: (where, include) => db.lab.findUnique({ where, include: include as { flags: boolean } }),
+      findUnique: (where, include) => db.lab.findFirst({ where, include: include as { flags: boolean } }),
     },
 
     labFlag: {
@@ -198,7 +198,7 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
     },
 
     labProgress: {
-      findUnique: (where) => db.labProgress.findUnique({ where }),
+      findUnique: (where) => db.labProgress.findFirst({ where }),
       upsert: (where, create, update) => db.labProgress.upsert({
         where: where as Prisma.LabProgressWhereUniqueInput,
         create: create as Prisma.LabProgressCreateInput,

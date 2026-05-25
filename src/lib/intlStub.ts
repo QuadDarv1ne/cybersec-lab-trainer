@@ -45,7 +45,7 @@ function getNestedValue(obj: Record<string, unknown>, path: string): string {
   return typeof current === 'string' ? current : path;
 }
 
-type Translator = (key: string, values?: Record<string, string | number>) => string;
+export type Translator = (key: string, values?: Record<string, string | number>) => string;
 
 // Per-namespace translator cache keyed by locale:namespace.
 // Each cache entry stores the locale it was created for so we can detect staleness.

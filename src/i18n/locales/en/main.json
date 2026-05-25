@@ -474,7 +474,8 @@
     "title": "Streak Tracker",
     "active": "Active",
     "dayCount_one": "{count} day",
-    "dayCount_other": "{count} days",
+    "dayCount_few": "{count} days",
+    "dayCount_many": "{count} days",
     "record": "Record",
     "today": "Today",
     "startPrompt": "Start studying today to begin a streak!"

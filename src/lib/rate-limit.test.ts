@@ -21,17 +21,33 @@ describe('getClientIP', () => {
   });
 
   it('takes the last entry from X-Forwarded-For (Nginx appends real IP at end)', () => {
+    const prev = process.env.TRUST_PROXY;
+    process.env.TRUST_PROXY = '1';
     const req = makeRequest({
       'x-forwarded-for': 'spoofed-ip, proxy1, 10.0.0.5',
     });
     expect(getClientIP(req)).toBe('10.0.0.5');
+    process.env.TRUST_PROXY = prev;
   });
 
   it('handles single-entry X-Forwarded-For', () => {
+    const prev = process.env.TRUST_PROXY;
+    process.env.TRUST_PROXY = '1';
     const req = makeRequest({
       'x-forwarded-for': '192.168.1.1',
     });
     expect(getClientIP(req)).toBe('192.168.1.1');
+    process.env.TRUST_PROXY = prev;
+  });
+
+  it('ignores X-Forwarded-For when TRUST_PROXY is not set', () => {
+    const prev = process.env.TRUST_PROXY;
+    delete process.env.TRUST_PROXY;
+    const req = makeRequest({
+      'x-forwarded-for': '192.168.1.1',
+    });
+    expect(getClientIP(req)).toBe('anonymous');
+    process.env.TRUST_PROXY = prev;
   });
 
   it('returns "anonymous" when no IP headers are present', () => {
