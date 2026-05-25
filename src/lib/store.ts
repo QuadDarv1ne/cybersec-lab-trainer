@@ -9,6 +9,7 @@ import { XP_REWARDS, calculateLevel, xpToNextLevel, calculateXPBreakdown, levelP
 import { type NotesMap, type Note, generateNoteId } from './notes-system';
 import { type StudySession, calculateSessionXP, generateSessionId, getTodayTotalMs, getTotalStudyTimeMs } from './study-sessions';
 import { getCsrfCookieName, getCsrfHeaderName } from './csrf';
+import { sanitizeNoteContent } from './sanitize';
 
 export type PageType =
   | 'dashboard'
@@ -131,8 +132,9 @@ let activeSessionStart: number | null = null;
 let activeSessionPage: PageType | null = null;
 
 // Clear pending operations on page unload to prevent orphaned API calls
-if (typeof window !== 'undefined') {
-  window.addEventListener('beforeunload', () => {
+const registerBeforeUnload = () => {
+  if (typeof window === 'undefined') return;
+  const handler = () => {
     if (syncTimeout) {
       clearTimeout(syncTimeout);
       syncTimeout = null;
@@ -140,8 +142,10 @@ if (typeof window !== 'undefined') {
     if (loadAbortController && !loadAbortController.signal.aborted) {
       loadAbortController.abort();
     }
-  });
-}
+  };
+  window.addEventListener('beforeunload', handler, { once: true });
+};
+registerBeforeUnload();
 
 const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>) => void) => {
   // Block all syncs while reset is in progress to prevent stale data from overwriting reset state
@@ -643,11 +647,6 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         notes: {},
         studySessions: [],
       });
-      // Reload from database to confirm server's clean state
-      const userId = get().userId;
-      if (userId) {
-        await get().loadFromDatabase(userId);
-      }
       set({ syncStatus: 'synced', lastSyncedAt: Date.now() });
     } catch (error) {
       logger.error('Failed to reset progress:', error);
@@ -754,23 +753,25 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   addNote: (itemId: string, moduleId: string, moduleName: string, content: string) => {
     const now = Date.now();
     const noteId = generateNoteId();
+    const sanitized = sanitizeNoteContent(content);
     set((state) => ({
       notes: {
         ...state.notes,
-        [noteId]: { id: noteId, itemId, moduleId, moduleName, content, createdAt: now, updatedAt: now },
+        [noteId]: { id: noteId, itemId, moduleId, moduleName, content: sanitized, createdAt: now, updatedAt: now },
       },
     }));
     ensureSync(get, set).catch((err) => logger.error('Sync failed after addNote:', err));
   },
 
   updateNote: (noteId: string, content: string) => {
+    const sanitized = sanitizeNoteContent(content);
     set((state) => {
       const existing = state.notes[noteId];
       if (!existing) return state;
       return {
         notes: {
           ...state.notes,
-          [noteId]: { ...existing, content, updatedAt: Date.now() },
+          [noteId]: { ...existing, content: sanitized, updatedAt: Date.now() },
         },
       };
     });

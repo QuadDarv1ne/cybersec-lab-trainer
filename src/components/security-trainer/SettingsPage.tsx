@@ -99,6 +99,9 @@ export default function SettingsPage() {
       Notification.requestPermission().then((perm) => {
         setNotificationPermission(perm);
         setGoals((prev) => ({ ...prev, notificationsEnabled: perm === 'granted' }));
+      }).catch(() => {
+        setNotificationPermission('denied');
+        setGoals((prev) => ({ ...prev, notificationsEnabled: false }));
       });
     }
   };
@@ -110,6 +113,8 @@ export default function SettingsPage() {
         if (perm === 'granted') {
           setGoals((prev) => ({ ...prev, notificationsEnabled: true }));
         }
+      }).catch(() => {
+        setNotificationPermission('denied');
       });
     }
   };

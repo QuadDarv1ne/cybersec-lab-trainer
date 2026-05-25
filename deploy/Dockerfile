@@ -20,6 +20,8 @@ COPY . .
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+RUN bunx prisma generate
+
 RUN bun build
 
 # Stage 3: Production runner

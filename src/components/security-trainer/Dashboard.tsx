@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useEffect, useMemo, useRef } from 'react';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import {
   Shield,
   Database,
@@ -52,10 +53,15 @@ function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: strin
   const rounded = useTransform(count, (v) => Math.round(v));
   const text = useTransform(rounded, (v) => `${v}${suffix}`);
   const prevValueRef = useRef(value);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     if (prevValueRef.current === value) return;
     prevValueRef.current = value;
+    if (prefersReducedMotion) {
+      count.set(value);
+      return;
+    }
     const controls = animate(count, value, { duration: 1, ease: 'easeOut' });
     return controls.stop;
   // eslint-disable-next-line react-hooks/exhaustive-deps

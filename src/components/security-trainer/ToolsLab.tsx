@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import {
   caesarEncrypt,
@@ -155,21 +155,21 @@ export default function ToolsLab() {
     setGeneratedPassword(password.join(''));
   };
 
-  const caesarResult = caesarMode === 'encrypt'
+  const caesarResult = useMemo(() => caesarMode === 'encrypt'
     ? caesarEncrypt(caesarText, caesarShift)
-    : caesarDecrypt(caesarText, caesarShift);
+    : caesarDecrypt(caesarText, caesarShift), [caesarMode, caesarText, caesarShift]);
 
-  const vigenereResult = vigenereMode === 'encrypt'
+  const vigenereResult = useMemo(() => vigenereMode === 'encrypt'
     ? vigenereEncrypt(vigenereText, vigenereKey)
-    : vigenereDecrypt(vigenereText, vigenereKey);
+    : vigenereDecrypt(vigenereText, vigenereKey), [vigenereMode, vigenereText, vigenereKey]);
 
-  const xorResult = xorMode === 'encrypt'
+  const xorResult = useMemo(() => xorMode === 'encrypt'
     ? xorEncrypt(xorText, xorKey)
-    : xorDecrypt(xorText, xorKey);
+    : xorDecrypt(xorText, xorKey), [xorMode, xorText, xorKey]);
 
-  const b64Result = b64Mode === 'encode' ? base64Encode(b64Text) : base64Decode(b64Text);
-  const urlResult = urlMode === 'encode' ? urlEncode(urlText) : urlDecode(urlText);
-  const hashResult = simpleHash(hashText);
+  const b64Result = useMemo(() => b64Mode === 'encode' ? base64Encode(b64Text) : base64Decode(b64Text), [b64Mode, b64Text]);
+  const urlResult = useMemo(() => urlMode === 'encode' ? urlEncode(urlText) : urlDecode(urlText), [urlMode, urlText]);
+  const hashResult = useMemo(() => simpleHash(hashText), [hashText]);
 
   return (
     <div className="space-y-6">

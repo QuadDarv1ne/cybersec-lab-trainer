@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from '@/lib/intlStub';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import {
   RotateCcw,
   SkipForward,
@@ -43,6 +44,7 @@ export function FlashcardMode() {
   const [isShuffled, setIsShuffled] = useState(false);
   const [cardOrder, setCardOrder] = useState<number[]>([]);
   const [studyMode, setStudyMode] = useState<'all' | 'hard'>('all');
+  const reducedMotion = useReducedMotion();
 
   const categories = useMemo(() => {
     const cats = new Set(glossaryTerms.map((term) => term.category));
@@ -246,7 +248,7 @@ export function FlashcardMode() {
 
       {/* Stats panel */}
       {showStats && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+        <motion.div initial={reducedMotion ? {} : { opacity: 0, y: -10 }} animate={reducedMotion ? {} : { opacity: 1, y: 0 }}>
           <Card className="border-amber-200 bg-amber-50/50">
             <CardContent className="p-4">
               <div className="grid grid-cols-5 gap-3 text-center">
@@ -283,10 +285,10 @@ export function FlashcardMode() {
       <AnimatePresence mode="wait">
         <motion.div
           key={`${currentTerm?.id}-${currentIndex}`}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.2 }}
+          initial={reducedMotion ? {} : { opacity: 0, x: 20 }}
+          animate={reducedMotion ? {} : { opacity: 1, x: 0 }}
+          exit={reducedMotion ? {} : { opacity: 0, x: -20 }}
+          transition={reducedMotion ? {} : { duration: 0.2 }}
         >
           <Card
             className="border-violet-200 cursor-pointer select-none min-h-[200px] flex items-center justify-center"
@@ -310,10 +312,10 @@ export function FlashcardMode() {
                 {!isFlipped ? (
                   <motion.div
                     key="term"
-                    initial={{ rotateY: 90 }}
-                    animate={{ rotateY: 0 }}
-                    exit={{ rotateY: -90 }}
-                    transition={{ duration: 0.2 }}
+                    initial={reducedMotion ? {} : { rotateY: 90 }}
+                    animate={reducedMotion ? {} : { rotateY: 0 }}
+                    exit={reducedMotion ? {} : { rotateY: -90 }}
+                    transition={reducedMotion ? {} : { duration: 0.2 }}
                   >
                     <h3 className="text-xl font-bold text-slate-900 font-mono">
                       {currentTerm?.term}
@@ -323,10 +325,10 @@ export function FlashcardMode() {
                 ) : (
                   <motion.div
                     key="definition"
-                    initial={{ rotateY: 90 }}
-                    animate={{ rotateY: 0 }}
-                    exit={{ rotateY: -90 }}
-                    transition={{ duration: 0.2 }}
+                    initial={reducedMotion ? {} : { rotateY: 90 }}
+                    animate={reducedMotion ? {} : { rotateY: 0 }}
+                    exit={reducedMotion ? {} : { rotateY: -90 }}
+                    transition={reducedMotion ? {} : { duration: 0.2 }}
                   >
                     <p className="text-sm text-slate-700 leading-relaxed max-w-lg mx-auto">
                       {currentTerm?.definition}
@@ -342,7 +344,7 @@ export function FlashcardMode() {
 
       {/* Difficulty buttons */}
       {isFlipped && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <motion.div initial={reducedMotion ? {} : { opacity: 0, y: 10 }} animate={reducedMotion ? {} : { opacity: 1, y: 0 }}>
           <Card className="border-slate-200">
             <CardContent className="p-3">
               <p className="text-center text-xs text-slate-500 mb-2">{t('rateDifficulty')}</p>
