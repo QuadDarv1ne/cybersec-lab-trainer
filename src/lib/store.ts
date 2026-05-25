@@ -136,6 +136,10 @@ let activeSessionPage: PageType | null = null;
 // Clear pending operations on page unload / tab hide to prevent orphaned API calls.
 // Registered once at module load — beforeunload fires on tab close,
 // visibilitychange covers SPA navigation where the tab is hidden but not closed.
+// Handlers are stored as references so they can be removed (e.g., during HMR cleanup).
+let beforeUnloadHandler: (() => void) | null = null;
+let visibilityChangeHandler: (() => void) | null = null;
+
 if (typeof window !== 'undefined') {
   const cleanup = () => {
     if (syncTimeout) {
@@ -146,9 +150,37 @@ if (typeof window !== 'undefined') {
       loadAbortController.abort();
     }
   };
-  window.addEventListener('beforeunload', cleanup);
-  document.addEventListener('visibilitychange', () => {
+
+  beforeUnloadHandler = cleanup;
+  visibilityChangeHandler = () => {
     if (document.visibilityState === 'hidden') cleanup();
+  };
+
+  window.addEventListener('beforeunload', beforeUnloadHandler);
+  document.addEventListener('visibilitychange', visibilityChangeHandler);
+}
+
+/**
+ * Cleanup function to remove event listeners registered at module load.
+ * Called during HMR to prevent accumulating duplicate listeners.
+ */
+export function cleanupEventListeners(): void {
+  if (typeof window === 'undefined') return;
+
+  if (beforeUnloadHandler) {
+    window.removeEventListener('beforeunload', beforeUnloadHandler);
+    beforeUnloadHandler = null;
+  }
+  if (visibilityChangeHandler) {
+    document.removeEventListener('visibilitychange', visibilityChangeHandler);
+    visibilityChangeHandler = null;
+  }
+}
+
+// During HMR, clean up listeners when the module is re-evaluated
+if (typeof window !== 'undefined' && import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    cleanupEventListeners();
   });
 }
 
