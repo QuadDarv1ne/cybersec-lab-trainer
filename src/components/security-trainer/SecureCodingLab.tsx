@@ -299,7 +299,7 @@ export default function SecureCodingLab() {
       </motion.div>
 
       {/* Notes */}
-      {challenge && <InlineNotes itemId={challenge.id} moduleId="secure-coding" moduleName="Безопасное кодирование" />}
+      {challenge && <InlineNotes itemId={challenge.id} moduleId="secure-coding" moduleName={t('title')} />}
     </div>
   );
 }

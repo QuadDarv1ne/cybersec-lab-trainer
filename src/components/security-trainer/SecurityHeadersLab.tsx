@@ -378,7 +378,7 @@ export default function SecurityHeadersLab() {
       </motion.div>
 
       {/* Notes */}
-      {challenge && <InlineNotes itemId={challenge.id} moduleId="security-headers" moduleName="Заголовки безопасности" />}
+      {challenge && <InlineNotes itemId={challenge.id} moduleId="security-headers" moduleName={t('title')} />}
     </div>
   );
 }

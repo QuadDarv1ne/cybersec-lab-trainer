@@ -122,7 +122,7 @@ export function Certificate() {
                   <span className="text-xs text-slate-600">{t('level')}</span>
                 </div>
                 <div className="text-xl font-bold text-amber-900">{level}</div>
-                <div className="text-[10px] text-slate-500">{progress}% до следующего</div>
+                <div className="text-[10px] text-slate-500">{t('xpToNext')}</div>
               </div>
 
               <div className="bg-white/70 rounded-lg p-3 text-center">
@@ -131,7 +131,7 @@ export function Certificate() {
                   <span className="text-xs text-slate-600">{t('totalXP')}</span>
                 </div>
                 <div className="text-xl font-bold text-violet-900">{totalXP}</div>
-                <div className="text-[10px] text-slate-500">очков опыта</div>
+                <div className="text-[10px] text-slate-500">{t('xpPoints')}</div>
               </div>
 
               <div className="bg-white/70 rounded-lg p-3 text-center">
@@ -140,7 +140,7 @@ export function Certificate() {
                   <span className="text-xs text-slate-600">{t('avgScore')}</span>
                 </div>
                 <div className="text-xl font-bold text-emerald-900">{totalQuizzes}%</div>
-                <div className="text-[10px] text-slate-500">средний балл</div>
+                <div className="text-[10px] text-slate-500">{t('avgScoreLabel')}</div>
               </div>
 
               <div className="bg-white/70 rounded-lg p-3 text-center">
@@ -149,7 +149,7 @@ export function Certificate() {
                   <span className="text-xs text-slate-600">{t('bestStreak')}</span>
                 </div>
                 <div className="text-xl font-bold text-orange-900">{streak.bestStreak}</div>
-                <div className="text-[10px] text-slate-500">дней подряд</div>
+                <div className="text-[10px] text-slate-500">{t('daysStreak')}</div>
               </div>
             </div>
 

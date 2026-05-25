@@ -4,10 +4,21 @@ import { motion } from 'framer-motion';
 import { Flame, Trophy, Clock } from 'lucide-react';
 import { getStreakInfo } from '@/lib/study-sessions';
 import { useAppStore } from '@/lib/store';
+import { useTranslations } from '@/lib/intlStub';
+
+function formatDayCount(n: number, t: ReturnType<typeof useTranslations>): string {
+  const lastDigit = n % 10;
+  const lastTwo = n % 100;
+  if (lastTwo >= 11 && lastTwo <= 14) return t('dayCount_many', { count: n });
+  if (lastDigit === 1) return t('dayCount_one', { count: n });
+  if (lastDigit >= 2 && lastDigit <= 4) return t('dayCount_few', { count: n });
+  return t('dayCount_many', { count: n });
+}
 
 export function StreakWidget() {
   const studySessions = useAppStore((state) => state.studySessions);
   const streak = getStreakInfo(studySessions);
+  const t = useTranslations('streak');
 
   const streakFireColor = streak.currentStreak >= 7 ? 'text-orange-500' : streak.currentStreak >= 3 ? 'text-amber-500' : 'text-emerald-500';
   const streakBgColor = streak.currentStreak >= 7 ? 'from-orange-500/10 to-amber-500/10' : streak.currentStreak >= 3 ? 'from-amber-500/10 to-yellow-500/10' : 'from-emerald-500/10 to-teal-500/10';
@@ -28,12 +39,12 @@ export function StreakWidget() {
           <Flame className="w-5 h-5" />
         </motion.div>
         <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-          Трекер серий
+          {t('title')}
         </h3>
         {streak.isActive && (
           <span className="ml-auto flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Активна
+            {t('active')}
           </span>
         )}
       </div>
@@ -44,15 +55,7 @@ export function StreakWidget() {
             {streak.currentStreak}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400">
-            {(() => {
-              const n = streak.currentStreak;
-              const lastDigit = n % 10;
-              const lastTwo = n % 100;
-              if (lastTwo >= 11 && lastTwo <= 14) return 'дней';
-              if (lastDigit === 1) return 'день';
-              if (lastDigit >= 2 && lastDigit <= 4) return 'дня';
-              return 'дней';
-            })()}
+            {formatDayCount(streak.currentStreak, t)}
           </div>
         </div>
 
@@ -64,7 +67,7 @@ export function StreakWidget() {
             {streak.bestStreak}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400">
-            Рекорд
+            {t('record')}
           </div>
         </div>
 
@@ -76,7 +79,7 @@ export function StreakWidget() {
             {streak.todayMinutes}м
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400">
-            Сегодня
+            {t('today')}
           </div>
         </div>
       </div>
@@ -87,7 +90,7 @@ export function StreakWidget() {
           animate={{ opacity: 1 }}
           className="mt-3 text-xs text-center text-slate-500 dark:text-slate-400"
         >
-          Начни учиться сегодня, чтобы запустить серию!
+          {t('startPrompt')}
         </motion.p>
       )}
     </motion.div>

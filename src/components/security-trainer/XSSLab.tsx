@@ -423,7 +423,7 @@ export default function XSSLab() {
               )}
 
               {/* Notes */}
-              <InlineNotes itemId={xss.id} moduleId="xss" moduleName="XSS-атаки" />
+              <InlineNotes itemId={xss.id} moduleId="xss" moduleName={t('title')} />
             </motion.div>
           </TabsContent>
         ))}

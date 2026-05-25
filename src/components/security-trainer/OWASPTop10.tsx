@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, ChevronLeft, CheckCircle2, AlertTriangle, Shield, Target, XCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, ChevronLeft, CheckCircle2, AlertTriangle, Shield, Target, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import InlineNotes from './InlineNotes';
 
@@ -287,7 +287,7 @@ export default function OWASPTop10() {
                       </div>
 
                       {/* Notes */}
-                      <InlineNotes itemId={item.id} moduleId="owasp" moduleName="OWASP Top 10" />
+                      <InlineNotes itemId={item.id} moduleId="owasp" moduleName={t('title')} />
                     </div>
                   </AccordionContent>
                 </AccordionItem>
@@ -319,11 +319,11 @@ export default function OWASPTop10() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium">
-                  Задание {activeChallenge + 1} из {owaspChallenges.length}
+                  {t('taskLabel', { current: activeChallenge + 1, total: owaspChallenges.length })}
                 </span>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-[10px]">
-                    ✅ {correctCount} верно
+                    {t('correctCount', { count: correctCount })}
                   </Badge>
                 </div>
               </div>
@@ -397,7 +397,7 @@ export default function OWASPTop10() {
                     onClick={handleCheckAnswer}
                     disabled={selectedOption === null}
                   >
-                    Проверить ответ
+                    {t('checkAnswerBtn')}
                   </Button>
                 )}
 
@@ -410,21 +410,21 @@ export default function OWASPTop10() {
                         <h4 className={`text-xs font-semibold mb-1 ${
                           currentChallenge.options[selectedOption].correct ? 'text-emerald-700' : 'text-red-700'
                         }`}>
-                          {currentChallenge.options[selectedOption].correct ? '✅ Верно!' : '❌ Неверно'}
+                          {currentChallenge.options[selectedOption].correct ? t('correctAnswer') : t('incorrectAnswer')}
                         </h4>
                         <p className="text-xs text-slate-600 leading-relaxed">{currentChallenge.explanation}</p>
                       </div>
 
                       <div className="flex justify-between mt-4">
                         <Button variant="outline" size="sm" onClick={prevChallenge} disabled={activeChallenge === 0}>
-                          <ArrowLeft size={14} className="mr-1" /> Назад
+                          {t('backBtn')}
                         </Button>
                         {activeChallenge < owaspChallenges.length - 1 ? (
                           <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={nextChallenge}>
-                            Далее <ArrowRight size={14} className="ml-1" />
+                            {t('nextBtn')}
                           </Button>
                         ) : (
-                          <Badge className="bg-emerald-600 text-white py-1.5">Все задания пройдены!</Badge>
+                          <Badge className="bg-emerald-600 text-white py-1.5">{t('allTasksPassed')}</Badge>
                         )}
                       </div>
                     </motion.div>

@@ -285,7 +285,7 @@ export default function CSRFLab() {
         )}
 
         {/* Notes */}
-        {challenge && <InlineNotes itemId={`csrf-${activeChallenge + 1}`} moduleId="csrf" moduleName="CSRF-атаки" />}
+        {challenge && <InlineNotes itemId={`csrf-${activeChallenge + 1}`} moduleId="csrf" moduleName={t('title')} />}
       </div>
     </div>
   );

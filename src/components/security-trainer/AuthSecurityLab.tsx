@@ -700,7 +700,7 @@ function authenticate(req, res, next) {
       )}
 
       {/* Notes for current challenge */}
-      {currentChallenge && <InlineNotes itemId={currentChallenge.id} moduleId="auth" moduleName="Аутентификация" />}
+      {currentChallenge && <InlineNotes itemId={currentChallenge.id} moduleId="auth" moduleName={t('title')} />}
     </div>
   );
 }

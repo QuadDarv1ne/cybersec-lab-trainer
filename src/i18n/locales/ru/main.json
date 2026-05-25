@@ -193,7 +193,15 @@
     },
     "noChallenges": "Нет доступных заданий",
     "studyTab": "Обучение",
-    "challengesTab": "Задания ({count})"
+    "challengesTab": "Задания ({count})",
+    "taskLabel": "Задание {current} из {total}",
+    "correctCount": "{count} верно",
+    "checkAnswerBtn": "Проверить ответ",
+    "correctAnswer": "Верно!",
+    "incorrectAnswer": "Неверно",
+    "backBtn": "Назад",
+    "nextBtn": "Далее",
+    "allTasksPassed": "Все задания пройдены!"
   },
   "sqlInjection": {
     "title": "SQL-инъекции",
@@ -461,6 +469,16 @@
     "listView": "Список",
     "flashcardView": "Карточки"
   },
+  "streak": {
+    "title": "Трекер серий",
+    "active": "Активна",
+    "dayCount_one": "{count} день",
+    "dayCount_few": "{count} дня",
+    "dayCount_many": "{count} дней",
+    "record": "Рекорд",
+    "today": "Сегодня",
+    "startPrompt": "Начни учиться сегодня, чтобы запустить серию!"
+  },
   "quiz": {
     "title": "Квиз по безопасности",
     "description": "Проверьте свои знания",
@@ -527,7 +545,11 @@
     "quizResults": "Результаты квизов",
     "achievements": "Достижения ({count})",
     "completedOn": "Завершено",
-    "platform": "платформа обучения кибербезопасности"
+    "platform": "платформа обучения кибербезопасности",
+    "xpToNext": "% до следующего",
+    "xpPoints": "очков опыта",
+    "avgScoreLabel": "средний балл",
+    "daysStreak": "дней подряд"
   },
   "flashcards": {
     "title": "Карточки для запоминания",
@@ -573,7 +595,11 @@
     "strongest": "Сильная сторона",
     "weakest": "Нужно повторить",
     "challengePerformance": "Результаты заданий",
-    "moduleProgress": "Прогресс модулей"
+    "moduleProgress": "Прогресс модулей",
+    "xpPoints": "очков опыта",
+    "daysStreak": "дней подряд",
+    "bestStreak": "лучшая",
+    "avgScoreSuffix": "средний балл"
   },
   "settings": {
     "title": "Настройки обучения",

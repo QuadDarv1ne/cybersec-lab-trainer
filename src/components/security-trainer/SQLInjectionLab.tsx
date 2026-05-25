@@ -304,7 +304,7 @@ const challenge = sqlChallenges[activeChallenge];
                 </AnimatePresence>
 
                 {/* Notes */}
-                {challenge && <InlineNotes itemId={challenge.id} moduleId="sql-injection" moduleName="SQL-инъекции" />}
+                {challenge && <InlineNotes itemId={challenge.id} moduleId="sql-injection" moduleName={t('title')} />}
 
                 {/* Navigation */}
                 <div className="flex justify-between pt-2">

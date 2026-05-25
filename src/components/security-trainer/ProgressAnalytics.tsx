@@ -187,7 +187,7 @@ export default function ProgressAnalytics() {
               <span className="text-xs text-slate-600">{t('totalXP')}</span>
             </div>
             <div className="text-2xl font-bold text-violet-900">{totalXP}</div>
-            <span className="text-[10px] text-slate-500">очков опыта</span>
+            <span className="text-[10px] text-slate-500">{t('xpPoints')}</span>
           </CardContent>
         </Card>
 
@@ -198,7 +198,7 @@ export default function ProgressAnalytics() {
               <span className="text-xs text-slate-600">{t('streak')}</span>
             </div>
             <div className="text-2xl font-bold text-orange-900">{streak.currentStreak}</div>
-            <span className="text-[10px] text-slate-500">дней подряд (лучшая: {streak.bestStreak})</span>
+            <span className="text-[10px] text-slate-500">{t('daysStreak')} ({t('bestStreak')}: {streak.bestStreak})</span>
           </CardContent>
         </Card>
       </div>
@@ -280,7 +280,7 @@ export default function ProgressAnalytics() {
                 <span className="text-xs text-emerald-700 font-semibold">{t('strongest')}</span>
               </div>
               <div className="text-lg font-bold text-emerald-900">{strongestCategory.name}</div>
-              <div className="text-xs text-emerald-600">{strongestCategory.average}% средний балл</div>
+              <div className="text-xs text-emerald-600">{strongestCategory.average}% {t('avgScoreSuffix')}</div>
             </CardContent>
           </Card>
         )}
@@ -293,7 +293,7 @@ export default function ProgressAnalytics() {
                 <span className="text-xs text-amber-700 font-semibold">{t('weakest')}</span>
               </div>
               <div className="text-lg font-bold text-amber-900">{weakestCategory.name}</div>
-              <div className="text-xs text-amber-600">{weakestCategory.average}% средний балл</div>
+              <div className="text-xs text-amber-600">{weakestCategory.average}% {t('avgScoreSuffix')}</div>
             </CardContent>
           </Card>
         )}

@@ -193,7 +193,15 @@
     },
     "noChallenges": "No challenges available",
     "studyTab": "Study",
-    "challengesTab": "Challenges ({count})"
+    "challengesTab": "Challenges ({count})",
+    "taskLabel": "Task {current} of {total}",
+    "correctCount": "{count} correct",
+    "checkAnswerBtn": "Check answer",
+    "correctAnswer": "Correct!",
+    "incorrectAnswer": "Incorrect",
+    "backBtn": "Back",
+    "nextBtn": "Next",
+    "allTasksPassed": "All tasks completed!"
   },
   "sqlInjection": {
     "title": "SQL Injections",
@@ -461,6 +469,15 @@
     "listView": "List",
     "flashcardView": "Flashcards"
   },
+  "streak": {
+    "title": "Streak Tracker",
+    "active": "Active",
+    "dayCount_one": "{count} day",
+    "dayCount_other": "{count} days",
+    "record": "Record",
+    "today": "Today",
+    "startPrompt": "Start studying today to begin a streak!"
+  },
   "quiz": {
     "title": "Security Quiz",
     "description": "Test your knowledge",
@@ -527,7 +544,11 @@
     "quizResults": "Quiz Results",
     "achievements": "Achievements ({count})",
     "completedOn": "Completed on",
-    "platform": "cybersecurity training platform"
+    "platform": "cybersecurity training platform",
+    "xpToNext": "% to next",
+    "xpPoints": "XP",
+    "avgScoreLabel": "average score",
+    "daysStreak": "day streak"
   },
   "flashcards": {
     "title": "Flashcard Study Mode",
@@ -573,7 +594,11 @@
     "strongest": "Strongest Area",
     "weakest": "Needs Review",
     "challengePerformance": "Challenge Performance",
-    "moduleProgress": "Module Progress"
+    "moduleProgress": "Module Progress",
+    "xpPoints": "XP",
+    "daysStreak": "day streak",
+    "bestStreak": "best",
+    "avgScoreSuffix": "average score"
   },
   "settings": {
     "title": "Study Settings",
