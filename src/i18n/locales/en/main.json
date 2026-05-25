@@ -604,5 +604,132 @@
     "justNow": "just now",
     "secondsAgo": "{seconds}s ago",
     "minutesAgo": "{minutes}m ago"
+  },
+  "search": {
+    "ariaLabel": "Search content",
+    "placeholder": "Search modules, glossary, challenges...",
+    "noResults": "No results found for \"{query}\"",
+    "minChars": "Enter at least 2 characters to search",
+    "escClose": "Esc to close",
+    "resultsCount": "{count} results",
+    "typeLabels": {
+      "module": "Module",
+      "glossary": "Glossary",
+      "quiz": "Quiz",
+      "challenge": "Challenge",
+      "achievement": "Achievement",
+      "owasp": "OWASP"
+    }
+  },
+  "dashboard": {
+    "hero": {
+      "title": "Cybersecurity Laboratory",
+      "description": "Interactive platform for learning web application vulnerabilities: OWASP Top 10, SQL injections, XSS, CSRF and secure coding.",
+      "modules": "8 modules",
+      "progress": "Progress: {percent}%",
+      "quizScore": "Average score: {score}%",
+      "takeQuiz": "Take a quiz",
+      "achievements": "{count} achievements"
+    },
+    "stats": {
+      "modulesCompleted": "Modules",
+      "quizzesCompleted": "Quizzes",
+      "averageScore": "Average score",
+      "achievements": "Achievements"
+    },
+    "recommendationBanner": {
+      "title": "Recommendation"
+    },
+    "recommendations": {
+      "owaspStart": "Start with OWASP Top 10",
+      "sqlTry": "Try SQL injections",
+      "xssLearn": "Learn XSS attacks",
+      "csrfLearn": "Learn CSRF attacks",
+      "authLearn": "Learn authentication",
+      "secureCodingLearn": "Learn secure coding",
+      "toolsTry": "Try security tools",
+      "headersLearn": "Learn security headers",
+      "quizCheck": "Check your knowledge in quiz",
+      "completeRemaining": "Complete remaining modules",
+      "wellDone": "Great job! All modules completed."
+    },
+    "nextAchievement": "Next achievement",
+    "modulesTitle": "Learning Modules",
+    "modulesLessons": "{count} lessons",
+    "quizCard": {
+      "title": "Security Quiz",
+      "description": "Test your knowledge on all information security topics",
+      "categories": "{count} categories",
+      "questions": "{count} questions"
+    },
+    "achievementsCard": {
+      "title": "Achievements",
+      "description": "Earn achievements for learning progress",
+      "unlocked": "{unlocked}/{total}",
+      "terms": "{count} conditions"
+    },
+    "overallProgress": {
+      "title": "Overall Progress",
+      "completed": "All modules completed!",
+      "notStarted": "Start learning the first module",
+      "inProgress": "Modules remaining: {remaining}"
+    },
+    "learningPath": {
+      "title": "Learning Path",
+      "subtitle": "{completed} of {total} completed",
+      "complete": "Complete!",
+      "done": "Done",
+      "continue": "Continue: {module}"
+    },
+    "weaknessReview": {
+      "ariaLabel": "Weakness review",
+      "title": "Weakness Review",
+      "hasWeaknesses": "Found {count} mistakes to review. Strengthen your weak spots!",
+      "noWeaknesses": "No mistakes to review. Great job!",
+      "xpBonus": "+5 XP for each corrected answer"
+    },
+    "exportImport": {
+      "title": "Export / Import Data",
+      "description": "Save a backup of your progress or restore from a file",
+      "export": "Export",
+      "import": "Import",
+      "exportSuccess": "Progress exported ({date})",
+      "importSuccess": "Progress successfully restored",
+      "importError": "Invalid file format",
+      "readError": "File read error"
+    }
+  },
+  "heatmap": {
+    "title": "Study Heatmap",
+    "duration": "{days} days · {duration}",
+    "hoursMinutes": "{hours}h {minutes}m",
+    "minutesShort": "{minutes}m",
+    "noActivity": "No activity",
+    "levelLabels": {
+      "0": "No activity",
+      "1": "Under 30 min",
+      "2": "30+ min",
+      "3": "60+ min",
+      "4": "120+ min"
+    },
+    "less": "Less",
+    "more": "More",
+    "days": {
+      "mon": "Mon",
+      "wed": "Wed",
+      "fri": "Fri"
+    },
+    "tooltip": {
+      "withActivity": "{minutes} min",
+      "noActivity": "No activity"
+    }
+  },
+  "error": {
+    "title": "Application Error",
+    "description": "An unexpected error occurred. Try refreshing the page.",
+    "showDetails": "Show error details",
+    "hideDetails": "Hide details",
+    "reload": "Refresh page",
+    "home": "Go home"
   }
 }

@@ -532,7 +532,7 @@ export default function Dashboard() {
           onKeyDown={(e) => handleCardKeyDown(e, () => setCurrentPage('weakness-review'))}
           role="button"
           tabIndex={0}
-          aria-label="Повторение ошибок"
+          aria-label={t('weaknessReview.ariaLabel')}
         >
           <CardContent className="p-5">
             <div className="flex items-start gap-4">
@@ -542,11 +542,11 @@ export default function Dashboard() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h3 className="font-semibold text-sm group-hover:text-orange-700 transition-colors">Повторение ошибок</h3>
+                    <h3 className="font-semibold text-sm group-hover:text-orange-700 transition-colors">{t('weaknessReview.title')}</h3>
                     <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
                       {weaknessCount > 0
-                        ? `Найдено ${weaknessCount} ошибок для повторения. Закрепите слабые места!`
-                        : 'Нет ошибок для повторения. Отличная работа!'}
+                        ? t('weaknessReview.hasWeaknesses', { count: weaknessCount })
+                        : t('weaknessReview.noWeaknesses')}
                     </p>
                   </div>
                   <ChevronRight size={16} className="text-slate-300 group-hover:text-orange-500 transition-colors mt-1 shrink-0" />
@@ -556,7 +556,7 @@ export default function Dashboard() {
                     <Badge className="bg-orange-200 text-orange-800 border-0 text-[10px]">
                       {weaknessCount} {weaknessCount === 1 ? 'ошибка' : weaknessCount < 5 ? 'ошибки' : 'ошибок'}
                     </Badge>
-                    <span className="text-[11px] text-slate-400">+5 XP за каждый исправленный ответ</span>
+                    <span className="text-[11px] text-slate-400">{t('weaknessReview.xpBonus')}</span>
                   </div>
                 )}
               </div>
@@ -588,10 +588,10 @@ export default function Dashboard() {
         <CardContent className="p-5">
           <div className="flex items-center gap-2 mb-3">
             <Upload size={16} className="text-slate-500" />
-            <h3 className="font-semibold text-sm">Экспорт / Импорт данных</h3>
+            <h3 className="font-semibold text-sm">{t('exportImport.title')}</h3>
           </div>
           <p className="text-xs text-slate-500 mb-4">
-            Сохраните резервную копию прогресса или восстановите из файла
+            {t('exportImport.description')}
           </p>
           <div className="flex gap-2">
             <Button
@@ -605,17 +605,17 @@ export default function Dashboard() {
                   quizHistory, totalXP, notes,
                 };
                 const exportedAt = exportProgress(state);
-                toast.success(`Прогресс экспортирован (${new Date(exportedAt).toLocaleString('ru-RU')})`);
+                toast.success(t('exportImport.exportSuccess', { date: new Date(exportedAt).toLocaleString() }));
               }}
             >
-              <Download size={14} className="mr-1.5" /> Экспорт
+              <Download size={14} className="mr-1.5" /> {t('exportImport.export')}
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => fileInputRef.current?.click()}
             >
-              <Upload size={14} className="mr-1.5" /> Импорт
+              <Upload size={14} className="mr-1.5" /> {t('exportImport.import')}
             </Button>
             <input
               ref={fileInputRef}
@@ -631,15 +631,15 @@ export default function Dashboard() {
                   const data = importProgress(content);
                   if (data) {
                     importProgressData(data);
-                    toast.success('Прогресс успешно восстановлен');
+                    toast.success(t('exportImport.importSuccess'));
                   } else {
-                    toast.error('Неверный формат файла', {
+                    toast.error(t('exportImport.importError'), {
                       icon: <AlertTriangle size={16} />,
                     });
                   }
                 };
                 reader.onerror = () => {
-                  toast.error('Ошибка чтения файла', {
+                  toast.error(t('exportImport.readError'), {
                     icon: <AlertTriangle size={16} />,
                   });
                   if (fileInputRef.current) fileInputRef.current.value = '';

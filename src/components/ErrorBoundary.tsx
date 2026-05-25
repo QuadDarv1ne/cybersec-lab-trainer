@@ -4,6 +4,7 @@ import React, { Component, ErrorInfo, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import { logger } from "@/lib/logger";
+import { useTranslations } from "@/lib/intlStub";
 
 interface Props {
   children: ReactNode;
@@ -17,13 +18,15 @@ interface State {
   showDetails: boolean;
 }
 
-/**
- * Error Boundary компонент для перехвата ошибок в React-дереве
- * Отображает пользовательскую страницу ошибки вместо "белого экрана"
- * 
- * @see https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary
- */
-export class ErrorBoundary extends Component<Props, State> {
+// Hook-based wrapper to provide translations to class component
+function withTranslations<T extends React.ComponentType<Props>>(WrappedComponent: T) {
+  return function WithTranslationsWrapper(props: Props) {
+    const t = useTranslations('error');
+    return <WrappedComponent {...props} t={t} />;
+  };
+}
+
+class ErrorBoundaryInner extends Component<Props & { t: ReturnType<typeof useTranslations> }, State> {
   public state: State = {
     hasError: false,
     error: null,
@@ -36,10 +39,8 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Отправка ошибки в лог (в production можно отправить в Sentry)
     logger.error(`Uncaught error: ${error.toString()}`);
     logger.error(`Component stack: ${errorInfo.componentStack}`);
-
     this.setState({ errorInfo });
   }
 
@@ -57,16 +58,18 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
+      const { t } = this.props;
+
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
           <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 space-y-4">
             <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
               <AlertCircle className="w-8 h-8" />
-              <h1 className="text-xl font-bold">Ошибка приложения</h1>
+              <h1 className="text-xl font-bold">{t('title')}</h1>
             </div>
-            
+
             <p className="text-gray-600 dark:text-gray-300">
-              Произошла непредвиденная ошибка. Попробуйте обновить страницу.
+              {t('description')}
             </p>
 
             {this.state.error && process.env.NODE_ENV === 'development' && (
@@ -76,7 +79,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   onClick={this.handleErrorDetails}
                   className="cursor-pointer font-medium text-gray-700 dark:text-gray-200 text-left w-full"
                 >
-                  {this.state.showDetails ? "Скрыть детали" : "Показать детали ошибки"}
+                  {this.state.showDetails ? t('hideDetails') : t('showDetails')}
                 </button>
                 {this.state.showDetails && (
                   <>
@@ -95,14 +98,14 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <div className="flex gap-2">
               <Button onClick={this.handleReload} className="flex-1">
-                Обновить страницу
+                {t('reload')}
               </Button>
               <Button
                 onClick={() => window.location.href = "/"}
                 variant="outline"
                 className="flex-1"
               >
-                На главную
+                {t('home')}
               </Button>
             </div>
           </div>
@@ -114,4 +117,6 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
+const ErrorBoundary = withTranslations(ErrorBoundaryInner);
+export { ErrorBoundary };
 export default ErrorBoundary;

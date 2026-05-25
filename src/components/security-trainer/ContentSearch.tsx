@@ -5,6 +5,7 @@ import { useAppStore, type PageType } from '@/lib/store';
 import { modules, achievements, glossaryTerms } from '@/lib/security-data';
 import { quizCategories, quizQuestions } from '@/lib/data/quiz-data';
 import { owaspTopics, owaspChallenges, sqlChallenges, csrfChallenges, authChallenges, secureCodingChallenges, securityHeaders, headerChallenges } from '@/lib/data';
+import { useTranslations } from '@/lib/intlStub';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,15 +38,6 @@ const iconMap: Record<string, React.ReactNode> = {
   Trophy: <Trophy size={16} />,
 };
 
-const typeLabels: Record<SearchResult['type'], string> = {
-  module: 'Модуль',
-  glossary: 'Глоссарий',
-  quiz: 'Квиз',
-  challenge: 'Задание',
-  achievement: 'Достижение',
-  owasp: 'OWASP',
-};
-
 const typeColors: Record<SearchResult['type'], string> = {
   module: 'bg-emerald-100 text-emerald-700',
   glossary: 'bg-sky-100 text-sky-700',
@@ -61,21 +53,19 @@ const typeColors: Record<SearchResult['type'], string> = {
 function buildSearchIndex(): SearchResult[] {
   const index: SearchResult[] = [];
 
-  // Modules
   for (const mod of modules) {
     index.push({
       id: `module-${mod.id}`,
       type: 'module',
       title: mod.title,
       description: mod.description,
-      category: 'Модули',
+      category: 'module',
       page: mod.id as PageType,
       icon: mod.icon,
       score: 0,
     });
   }
 
-  // Glossary
   for (const term of glossaryTerms) {
     index.push({
       id: `glossary-${term.id}`,
@@ -89,14 +79,13 @@ function buildSearchIndex(): SearchResult[] {
     });
   }
 
-  // Quiz categories and questions
   for (const cat of quizCategories) {
     index.push({
       id: `quiz-${cat.id}`,
       type: 'quiz',
       title: cat.name,
-      description: `${cat.count} вопросов по теме`,
-      category: 'Квизы',
+      description: `${cat.count} questions`,
+      category: 'quiz',
       page: 'quiz',
       icon: cat.icon,
       score: 0,
@@ -116,21 +105,19 @@ function buildSearchIndex(): SearchResult[] {
     });
   }
 
-  // Achievements
   for (const a of achievements) {
     index.push({
       id: `achievement-${a.id}`,
       type: 'achievement',
       title: a.title,
       description: a.description,
-      category: 'Достижения',
+      category: 'achievement',
       page: 'achievements',
       icon: 'Trophy',
       score: 0,
     });
   }
 
-  // OWASP topics
   for (const topic of owaspTopics) {
     index.push({
       id: `owasp-${topic.id}`,
@@ -144,21 +131,19 @@ function buildSearchIndex(): SearchResult[] {
     });
   }
 
-  // OWASP challenges
   for (const ch of owaspChallenges) {
     index.push({
       id: `owasp-ch-${ch.id}`,
       type: 'challenge',
       title: ch.title,
       description: ch.question,
-      category: 'OWASP Задания',
+      category: 'OWASP',
       page: 'owasp',
       icon: 'Shield',
       score: 0,
     });
   }
 
-  // SQL challenges
   for (const ch of sqlChallenges) {
     index.push({
       id: `sql-${ch.id}`,
@@ -172,7 +157,6 @@ function buildSearchIndex(): SearchResult[] {
     });
   }
 
-  // CSRF challenges
   for (const ch of csrfChallenges) {
     index.push({
       id: `csrf-${ch.id}`,
@@ -186,7 +170,6 @@ function buildSearchIndex(): SearchResult[] {
     });
   }
 
-  // Auth challenges
   for (const ch of authChallenges) {
     index.push({
       id: `auth-${ch.id}`,
@@ -200,13 +183,12 @@ function buildSearchIndex(): SearchResult[] {
     });
   }
 
-  // Secure coding challenges
   for (const ch of secureCodingChallenges) {
     index.push({
       id: `secure-coding-${ch.id}`,
       type: 'challenge',
       title: ch.title,
-      description: `Задание: ${ch.category}`,
+      description: `Challenge: ${ch.category}`,
       category: 'Secure Coding',
       page: 'secure-coding',
       icon: 'Code',
@@ -214,7 +196,6 @@ function buildSearchIndex(): SearchResult[] {
     });
   }
 
-  // Security headers
   for (const h of securityHeaders) {
     index.push({
       id: `header-${h.id}`,
@@ -228,7 +209,6 @@ function buildSearchIndex(): SearchResult[] {
     });
   }
 
-  // Header challenges
   for (const ch of headerChallenges) {
     index.push({
       id: `header-ch-${ch.id}`,
@@ -245,25 +225,17 @@ function buildSearchIndex(): SearchResult[] {
   return index;
 }
 
-/**
- * Simple fuzzy search scoring.
- */
 function scoreResult(query: string, result: SearchResult): number {
   const q = query.toLowerCase();
   const title = result.title.toLowerCase();
   const desc = result.description.toLowerCase();
 
   let score = 0;
-
-  // Exact title match (highest priority)
   if (title === q) score += 100;
   else if (title.startsWith(q)) score += 80;
   else if (title.includes(q)) score += 60;
-
-  // Description match
   if (desc.includes(q)) score += 20;
 
-  // Word-level matching for multi-word queries
   const words = q.split(/\s+/).filter(Boolean);
   for (const word of words) {
     if (title.includes(word)) score += 10;
@@ -278,7 +250,6 @@ interface ContentSearchProps {
   onClose: () => void;
 }
 
-// Build search index once and cache at module level
 let cachedSearchIndex: ReturnType<typeof buildSearchIndex> | null = null;
 function getCachedSearchIndex(): ReturnType<typeof buildSearchIndex> {
   if (!cachedSearchIndex) {
@@ -289,21 +260,32 @@ function getCachedSearchIndex(): ReturnType<typeof buildSearchIndex> {
 
 export default function ContentSearch({ open, onClose }: ContentSearchProps) {
   const { setCurrentPage } = useAppStore();
+  const t = useTranslations('search');
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLButtonElement[]>([]);
   const searchIndex = useMemo(() => getCachedSearchIndex(), []);
 
+  const typeLabels = useMemo(
+    () => ({
+      module: t('typeLabels.module'),
+      glossary: t('typeLabels.glossary'),
+      quiz: t('typeLabels.quiz'),
+      challenge: t('typeLabels.challenge'),
+      achievement: t('typeLabels.achievement'),
+      owasp: t('typeLabels.owasp'),
+    }),
+    [t],
+  );
+
   const results = useMemo(() => {
     if (!query.trim() || query.length < 2) return [];
-
     const scored = searchIndex
       .map((item) => ({ ...item, score: scoreResult(query, item) }))
       .filter((item) => item.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, 20);
-
     return scored;
   }, [query, searchIndex]);
 
@@ -316,18 +298,14 @@ export default function ContentSearch({ open, onClose }: ContentSearchProps) {
   }, [open]);
 
   const handleSelect = useCallback((result: SearchResult) => {
-    if (result.page) {
-      setCurrentPage(result.page);
-    }
+    if (result.page) setCurrentPage(result.page);
     onClose();
   }, [setCurrentPage, onClose]);
 
-  // Reset active index when query changes
   useEffect(() => {
     setActiveIndex(-1);
   }, [query]);
 
-  // Keyboard handler: Escape to close, arrows to navigate, Enter to select
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       onClose();
@@ -347,7 +325,6 @@ export default function ContentSearch({ open, onClose }: ContentSearchProps) {
     <AnimatePresence>
       {open && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -355,8 +332,6 @@ export default function ContentSearch({ open, onClose }: ContentSearchProps) {
             className="fixed inset-0 bg-black/50 z-[60]"
             onClick={onClose}
           />
-
-          {/* Search modal */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: -20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -365,46 +340,37 @@ export default function ContentSearch({ open, onClose }: ContentSearchProps) {
             className="fixed top-[15%] left-1/2 -translate-x-1/2 w-full max-w-2xl z-[60]"
             role="dialog"
             aria-modal="true"
-            aria-label="Поиск по контенту"
+            aria-label={t('ariaLabel')}
             onKeyDown={handleKeyDown}
           >
             <Card className="border-slate-200 shadow-2xl overflow-hidden">
               <CardContent className="p-0">
-                {/* Search input */}
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
                   <Search size={18} className="text-slate-400 shrink-0" />
                   <Input
                     ref={inputRef}
                     type="text"
-                    placeholder="Поиск по модулям, глоссарию, челленджам..."
+                    placeholder={t('placeholder')}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0 text-base"
                   />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onClose}
-                    className="shrink-0 h-8 w-8"
-                  >
+                  <Button variant="ghost" size="icon" onClick={onClose} className="shrink-0 h-8 w-8">
                     <X size={16} />
                   </Button>
                 </div>
 
-                {/* Results */}
                 <div className="max-h-[60vh] overflow-y-auto">
                   {query.length >= 2 && results.length === 0 && (
                     <div className="p-8 text-center text-slate-400 text-sm">
-                      Ничего не найдено по запросу «{query}»
+                      {t('noResults', { query })}
                     </div>
                   )}
-
                   {query.length < 2 && (
                     <div className="p-8 text-center text-slate-400 text-sm">
-                      Введите минимум 2 символа для поиска
+                      {t('minChars')}
                     </div>
                   )}
-
                   {results.map((result, idx) => (
                     <button
                       key={result.id}
@@ -432,10 +398,9 @@ export default function ContentSearch({ open, onClose }: ContentSearchProps) {
                   ))}
                 </div>
 
-                {/* Footer */}
                 <div className="px-4 py-2 bg-slate-50 text-[11px] text-slate-400 flex items-center justify-between">
-                  <span>Esc для закрытия</span>
-                  <span>{results.length} результатов</span>
+                  <span>{t('escClose')}</span>
+                  <span>{t('resultsCount', { count: results.length })}</span>
                 </div>
               </CardContent>
             </Card>

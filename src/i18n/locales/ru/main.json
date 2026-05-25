@@ -604,5 +604,132 @@
     "justNow": "только что",
     "secondsAgo": "{seconds}с назад",
     "minutesAgo": "{minutes}м назад"
+  },
+  "search": {
+    "ariaLabel": "Поиск по контенту",
+    "placeholder": "Поиск по модулям, глоссарию, челленджам...",
+    "noResults": "Ничего не найдено по запросу «{query}»",
+    "minChars": "Введите минимум 2 символа для поиска",
+    "escClose": "Esc для закрытия",
+    "resultsCount": "{count} результатов",
+    "typeLabels": {
+      "module": "Модуль",
+      "glossary": "Глоссарий",
+      "quiz": "Квиз",
+      "challenge": "Задание",
+      "achievement": "Достижение",
+      "owasp": "OWASP"
+    }
+  },
+  "dashboard": {
+    "hero": {
+      "title": "Лаборатория кибербезопасности",
+      "description": "Интерактивная платформа для изучения уязвимостей веб-приложений: OWASP Top 10, SQL-инъекции, XSS, CSRF и безопасное кодирование.",
+      "modules": "8 модулей",
+      "progress": "Прогресс: {percent}%",
+      "quizScore": "Средний балл: {score}%",
+      "takeQuiz": "Пройдите квиз",
+      "achievements": "{count} достижений"
+    },
+    "stats": {
+      "modulesCompleted": "Модули",
+      "quizzesCompleted": "Квизы",
+      "averageScore": "Средний балл",
+      "achievements": "Достижения"
+    },
+    "recommendationBanner": {
+      "title": "Рекомендация"
+    },
+    "recommendations": {
+      "owaspStart": "Начните с изучения OWASP Top 10",
+      "sqlTry": "Попробуйте SQL-инъекции",
+      "xssLearn": "Изучите XSS-атаки",
+      "csrfLearn": "Изучите CSRF-атаки",
+      "authLearn": "Изучите аутентификацию",
+      "secureCodingLearn": "Изучите безопасное кодирование",
+      "toolsTry": "Попробуйте инструменты",
+      "headersLearn": "Изучите заголовки безопасности",
+      "quizCheck": "Проверьте знания в квизе",
+      "completeRemaining": "Завершите оставшиеся модули",
+      "wellDone": "Отличная работа! Все модули пройдены."
+    },
+    "nextAchievement": "Следующее достижение",
+    "modulesTitle": "Модули обучения",
+    "modulesLessons": "{count} уроков",
+    "quizCard": {
+      "title": "Квиз по безопасности",
+      "description": "Проверьте свои знания по всем темам информационной безопасности",
+      "categories": "{count} категорий",
+      "questions": "{count} вопросов"
+    },
+    "achievementsCard": {
+      "title": "Достижения",
+      "description": "Получайте достижения за прогресс в обучении",
+      "unlocked": "{unlocked}/{total}",
+      "terms": "{count} условий"
+    },
+    "overallProgress": {
+      "title": "Общий прогресс",
+      "completed": "Все модули пройдены!",
+      "notStarted": "Начните изучение первого модуля",
+      "inProgress": "Осталось модулей: {remaining}"
+    },
+    "learningPath": {
+      "title": "Учебный путь",
+      "subtitle": "Пройдено {completed} из {total}",
+      "complete": "Завершён!",
+      "done": "Пройден",
+      "continue": "Продолжить: {module}"
+    },
+    "weaknessReview": {
+      "ariaLabel": "Повторение ошибок",
+      "title": "Повторение ошибок",
+      "hasWeaknesses": "Найдено {count} ошибок для повторения. Закрепите слабые места!",
+      "noWeaknesses": "Нет ошибок для повторения. Отличная работа!",
+      "xpBonus": "+5 XP за каждый исправленный ответ"
+    },
+    "exportImport": {
+      "title": "Экспорт / Импорт данных",
+      "description": "Сохраните резервную копию прогресса или восстановите из файла",
+      "export": "Экспорт",
+      "import": "Импорт",
+      "exportSuccess": "Прогресс экспортирован ({date})",
+      "importSuccess": "Прогресс успешно восстановлен",
+      "importError": "Неверный формат файла",
+      "readError": "Ошибка чтения файла"
+    }
+  },
+  "heatmap": {
+    "title": "Тепловая карта занятий",
+    "duration": "{days} дней · {duration}",
+    "hoursMinutes": "{hours}ч {minutes}м",
+    "minutesShort": "{minutes}м",
+    "noActivity": "Нет занятий",
+    "levelLabels": {
+      "0": "Нет занятий",
+      "1": "Менее 30 мин",
+      "2": "30+ мин",
+      "3": "60+ мин",
+      "4": "120+ мин"
+    },
+    "less": "Меньше",
+    "more": "Больше",
+    "days": {
+      "mon": "Пн",
+      "wed": "Ср",
+      "fri": "Пт"
+    },
+    "tooltip": {
+      "withActivity": "{minutes} мин",
+      "noActivity": "Нет занятий"
+    }
+  },
+  "error": {
+    "title": "Ошибка приложения",
+    "description": "Произошла непредвиденная ошибка. Попробуйте обновить страницу.",
+    "showDetails": "Показать детали ошибки",
+    "hideDetails": "Скрыть детали",
+    "reload": "Обновить страницу",
+    "home": "На главную"
   }
 }

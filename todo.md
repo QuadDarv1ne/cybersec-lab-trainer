@@ -4,8 +4,9 @@
 
 ---
 
-## ✅ Выполнено (сессии 1–3)
+## ✅ Выполнено (сессии 1–4)
 
+- **Полное завершение i18n** — ContentSearch, Dashboard (weakness review, export/import), HeatmapCalendar, ErrorBoundary полностью переведены. Английская локаль больше не показывает русский текст
 - **i18n система** — `useTranslations` реактивный, locale switcher в Sidebar, LandingPage полностью переведён, динамический `<html lang>`
 - **Race condition в resetProgress** — убран вызов `loadFromDatabase` после сброса + очистка in-flight sync
 - **beforeunload listener leak** — `{ once: true }` + self-re-registration для SPA навигации
@@ -21,7 +22,7 @@
 - **Доступность FlashcardMode** — `onKeyDown` для Enter/Space
 - **Batch-sync улучшен** — `Promise.allSettled` с обработкой ошибок
 - **FIFO eviction в rate-limit** — корректное удаление oldest entry по resetTime вместо `entries().next()`
-- **Тесты** — sanitize.ts (13 тестов), store actions (19 тестов), API route edge cases (8 новых)
+- **Тесты** — sanitize.ts (13 тестов), store actions (19 тестов), API route edge cases (8 новых), i18n completeness (12 новых)
 
 ---
 
