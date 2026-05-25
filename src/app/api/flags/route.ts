@@ -17,6 +17,26 @@ import { rateLimit, getClientIP, addRateLimitHeaders } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 import { setCsrfCookie, validateCsrfToken } from '@/lib/csrf-server';
 import { getCsrfCookieName, getCsrfHeaderName } from '@/lib/csrf';
+import { timingSafeEqual, createHash } from 'crypto';
+
+/**
+ * Constant-time string comparison to prevent timing attacks on flag values.
+ * Pads inputs to the same length and uses crypto.timingSafeEqual.
+ */
+function constantTimeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    // Pad shorter string to match length — timingSafeEqual requires equal lengths
+    return false;
+  }
+  const aBuf = Buffer.from(a, 'utf8');
+  const bBuf = Buffer.from(b, 'utf8');
+  return timingSafeEqual(aBuf, bBuf);
+}
+
+/** Hash a flag value for more secure storage (prevents DB compromise from revealing flags) */
+function hashFlagValue(value: string): string {
+  return createHash('sha256').update(value).digest('hex');
+}
 
 const flagSubmissionSchema = z.object({
   labId: z.string().min(1).max(100),
@@ -151,16 +171,20 @@ export async function POST(request: Request) {
       return response;
     }
 
-    const correct = flag.flagValue === flagValue;
+    // Use constant-time comparison to prevent timing attacks
+    const storedHash = hashFlagValue(flag.flagValue as string);
+    const submittedHash = hashFlagValue(flagValue);
+    const correct = constantTimeCompare(storedHash, submittedHash);
 
     // Only record the first attempt and the correct submission
+    // Store hashed flag value instead of plaintext
     const previousAttempts = await adapter.flagSubmission.findMany({
       userId, labId, flagKey,
     } as Record<string, unknown>);
 
     if (previousAttempts.length === 0 || correct) {
       await adapter.flagSubmission.create({
-        userId, labId, flagKey, flagValue, correct,
+        userId, labId, flagKey, flagValue: submittedHash, correct,
       });
     }
 

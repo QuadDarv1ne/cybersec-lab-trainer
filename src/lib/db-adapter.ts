@@ -246,6 +246,9 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
         db.studySession.deleteMany({ where: { userId } }),
         db.labProgress.deleteMany({ where: { userId } }),
         db.flagSubmission.deleteMany({ where: { userId } }),
+        // Also delete auth-related records to prevent orphaned data
+        db.account.deleteMany({ where: { userId } }),
+        db.session.deleteMany({ where: { userId } }),
       ]);
     },
 
@@ -386,6 +389,9 @@ function createMongooseAdapter(): DbAdapter {
         await ItemProgressModel.deleteMany({ userId }, { session });
         await NoteModel.deleteMany({ userId }, { session });
         await StudySessionModel.deleteMany({ userId }, { session });
+        // Also delete auth-related records to prevent orphaned data
+        await AccountModel.deleteMany({ userId }, { session });
+        await SessionModel.deleteMany({ userId }, { session });
         // Lab models use Prisma even on MongoDB — handled server-side
         await session.commitTransaction();
       } catch (error) {
