@@ -4,9 +4,25 @@ import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Github, Loader2, LogIn, Shield, Mail, User } from 'lucide-react';
+import { Github, Loader2, Shield, Mail, User, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast, Toaster } from 'sonner';
+import { isValidEmail, getEmailValidationError } from '@/lib/email-validation';
+
+const pageVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.15 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
+};
 
 export default function SignInPage() {
   const router = useRouter();
@@ -23,7 +39,11 @@ export default function SignInPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [emailTouched, setEmailTouched] = useState(false);
+
+  const emailValid = email.length > 0 && isValidEmail(email);
+  const emailError = emailTouched && email.length > 0 ? getEmailValidationError(email) : null;
+  const showEmailValidation = emailTouched && email.length > 0;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -55,10 +75,9 @@ export default function SignInPage() {
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
     if (!email.trim()) {
-      setError('Введите email');
+      toast.error('Введите email');
       return;
     }
 
@@ -72,13 +91,13 @@ export default function SignInPage() {
       });
 
       if (result?.error) {
-        setError('Ошибка авторизации. Попробуйте ещё раз.');
+        toast.error('Ошибка авторизации. Попробуйте ещё раз.');
         setLoadingProvider(null);
       } else if (result?.url) {
         router.push(result.url);
       }
     } catch {
-      setError('Произошла ошибка. Попробуйте ещё раз.');
+      toast.error('Произошла ошибка. Попробуйте ещё раз.');
       setLoadingProvider(null);
     }
   };
@@ -88,6 +107,7 @@ export default function SignInPage() {
     try {
       await signIn(provider, { callbackUrl });
     } catch {
+      toast.error('Ошибка авторизации через ' + provider);
       setLoadingProvider(null);
     }
   };
@@ -97,6 +117,7 @@ export default function SignInPage() {
     try {
       await signIn('credentials', { callbackUrl });
     } catch {
+      toast.error('Ошибка при входе');
       setLoadingProvider(null);
     }
   };
@@ -104,7 +125,14 @@ export default function SignInPage() {
   if (providersLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <Shield className="h-12 w-12 text-emerald-600 dark:text-emerald-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-600 dark:text-emerald-500" />
+        </motion.div>
       </div>
     );
   }
@@ -112,217 +140,250 @@ export default function SignInPage() {
   const hasOAuth = availableProviders.length > 0;
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
-      {/* Left panel — branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-600 to-teal-700 items-center justify-center p-12">
-        <div className="max-w-md text-white">
-          <div className="flex items-center gap-3 mb-8">
-            <Shield size={40} />
-            <h2 className="text-2xl font-bold">CyberSec Lab</h2>
-          </div>
-          <h1 className="text-4xl font-bold mb-6">
-            {isSignUp ? 'Создайте аккаунт' : 'С возвращением!'}
-          </h1>
-          <p className="text-emerald-100 text-lg">
-            {isSignUp
-              ? 'Зарегистрируйтесь, чтобы начать изучение информационной безопасности'
-              : 'Войдите, чтобы продолжить обучение и отслеживать свой прогресс'}
-          </p>
-          <div className="mt-12 space-y-4 text-emerald-100">
-            <div className="flex items-center gap-3">
-              <Shield size={20} />
-              <span>8 интерактивных модулей</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Shield size={20} />
-              <span>Система XP и достижений</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Shield size={20} />
-              <span>Квизы для проверки знаний</span>
-            </div>
-          </div>
-        </div>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-950">
+      {/* Animated background */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -left-40 h-80 w-80 rounded-full bg-emerald-400/20 blur-3xl animate-float" />
+        <div className="absolute top-1/3 -right-20 h-96 w-96 rounded-full bg-teal-400/15 blur-3xl animate-float-delay-1" />
+        <div className="absolute -bottom-40 left-1/4 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl animate-float-delay-2" />
       </div>
 
-      {/* Right panel — form */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md space-y-6">
-          {/* Logo for mobile */}
-          <div className="lg:hidden flex items-center gap-2 mb-4">
-            <Shield className="text-emerald-600" size={28} />
-            <span className="font-bold text-xl text-slate-900 dark:text-white">CyberSec Lab</span>
-          </div>
+      {/* Subtle grid pattern */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:40px_40px] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)]" />
 
-          {/* Tabs */}
-          <div className="flex border-b border-slate-200 dark:border-slate-700">
-            <button
-              className={`flex-1 pb-3 text-sm font-medium transition-colors relative ${
-                !isSignUp
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}
-              onClick={() => { setIsSignUp(false); setError(null); }}
-            >
-              Вход
-              {!isSignUp && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600 dark:bg-emerald-400" />
-              )}
-            </button>
-            <button
-              className={`flex-1 pb-3 text-sm font-medium transition-colors relative ${
-                isSignUp
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}
-              onClick={() => { setIsSignUp(true); setError(null); }}
-            >
-              Регистрация
-              {isSignUp && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600 dark:bg-emerald-400" />
-              )}
-            </button>
+      {/* Main content */}
+      <motion.div
+        className="relative z-10 w-full max-w-md px-4"
+        variants={pageVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Logo */}
+        <motion.div variants={itemVariants} className="flex items-center justify-center gap-3 mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-600 rounded-2xl shadow-lg shadow-emerald-600/20">
+            <Shield className="w-8 h-8 text-white" />
           </div>
+          <div className="text-center">
+            <h1 className="font-bold text-2xl text-slate-900 dark:text-white">CyberSec Lab</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Тренажёр по информационной безопасности</p>
+          </div>
+        </motion.div>
 
-          {/* Error message */}
-          {error && (
-            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm">
-              {error}
+        {/* Card */}
+        <div className="rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl p-6 sm:p-8">
+          {/* Dynamic title */}
+          <motion.div variants={itemVariants} className="mb-6">
+            <h2 className="font-bold text-2xl text-slate-900 dark:text-white">
+              {isSignUp ? 'Создайте аккаунт' : 'Вход в аккаунт'}
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+              {isSignUp
+                ? 'Зарегистрируйтесь, чтобы начать изучение'
+                : 'Введите email или войдите через соцсети'}
+            </p>
+          </motion.div>
+
+          {/* Tabs - segmented control */}
+          <motion.div variants={itemVariants} className="mb-6">
+            <div className="relative flex rounded-lg bg-slate-100 dark:bg-slate-800 p-1">
+              <motion.div
+                className="absolute top-1 bottom-1 left-1 rounded-md bg-white dark:bg-slate-700 shadow-sm"
+                animate={{ x: isSignUp ? '100%' : '0%' }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                style={{ width: 'calc(50% - 8px)' }}
+              />
+              <button
+                className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors ${
+                  !isSignUp ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
+                }`}
+                onClick={() => setIsSignUp(false)}
+              >
+                Вход
+              </button>
+              <button
+                className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors ${
+                  isSignUp ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
+                }`}
+                onClick={() => setIsSignUp(true)}
+              >
+                Регистрация
+              </button>
             </div>
-          )}
+          </motion.div>
 
           {/* Email form */}
-          <form onSubmit={handleEmailAuth} className="space-y-4">
+          <motion.form variants={itemVariants} onSubmit={handleEmailAuth} className="space-y-4">
             {isSignUp && (
               <div className="space-y-2">
-                <Label htmlFor="name">Имя</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Label htmlFor="name" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Имя
+                </Label>
+                <div className="relative group">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                   <Input
                     id="name"
                     type="text"
                     placeholder="Ваше имя"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 h-11 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:border-emerald-500 dark:focus:border-emerald-500"
                   />
                 </div>
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Email
+              </Label>
+              <div className="relative group">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
+                  onBlur={() => setEmailTouched(true)}
+                  className={`pl-10 pr-10 h-11 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 transition-colors ${
+                    emailError
+                      ? 'border-red-500 dark:border-red-500 focus:border-red-500 dark:focus:border-red-500'
+                      : emailValid
+                        ? 'border-emerald-500 dark:border-emerald-500 focus:border-emerald-500 dark:focus:border-emerald-500'
+                        : 'focus:border-emerald-500 dark:focus:border-emerald-500'
+                  }`}
                   required
                 />
+                <AnimatePresence>
+                  {showEmailValidation && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                      {emailValid ? (
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                      ) : emailError ? (
+                        <AlertCircle className="h-4 w-4 text-red-500" />
+                      ) : null}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
+              <AnimatePresence>
+                {emailError && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    className="text-xs text-red-500 dark:text-red-400"
+                  >
+                    {emailError}
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </div>
             <Button
               type="submit"
-              className="w-full bg-emerald-600 hover:bg-emerald-700"
+              className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 font-medium shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all"
               disabled={loadingProvider === 'credentials'}
             >
               {loadingProvider === 'credentials' ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
+              ) : (
+                <Shield className="mr-2 h-4 w-4" />
+              )}
               {isSignUp ? 'Зарегистрироваться' : 'Войти'}
             </Button>
-          </form>
+          </motion.form>
 
           {/* Divider */}
           {hasOAuth && (
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200 dark:border-slate-700" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-slate-50 dark:bg-slate-950 px-2 text-slate-500">или через</span>
-              </div>
-            </div>
+            <motion.div variants={itemVariants} className="relative flex items-center gap-3 py-4">
+              <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+              <span className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">или через</span>
+              <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+            </motion.div>
           )}
 
           {/* OAuth buttons */}
-          {availableProviders.includes('github') && (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => handleOAuth('github')}
-              disabled={loadingProvider === 'github'}
-            >
-              {loadingProvider === 'github' ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Github className="mr-2 h-4 w-4" />
-              )}
-              GitHub
-            </Button>
-          )}
+          <motion.div variants={itemVariants} className="space-y-3">
+            {availableProviders.includes('github') && (
+              <Button
+                variant="outline"
+                className="w-full h-11 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+                onClick={() => handleOAuth('github')}
+                disabled={loadingProvider === 'github'}
+              >
+                {loadingProvider === 'github' ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Github className="mr-2 h-4 w-4" />
+                )}
+                GitHub
+              </Button>
+            )}
 
-          {availableProviders.includes('google') && (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => handleOAuth('google')}
-              disabled={loadingProvider === 'google'}
-            >
-              {loadingProvider === 'google' ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                </svg>
-              )}
-              Google
-            </Button>
-          )}
+            {availableProviders.includes('google') && (
+              <Button
+                variant="outline"
+                className="w-full h-11 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+                onClick={() => handleOAuth('google')}
+                disabled={loadingProvider === 'google'}
+              >
+                {loadingProvider === 'google' ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                  </svg>
+                )}
+                Google
+              </Button>
+            )}
+          </motion.div>
 
           {/* Demo mode */}
           {demoMode && (
             <>
               {!hasOAuth && (
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-200 dark:border-slate-700" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-slate-50 dark:bg-slate-950 px-2 text-slate-500">или</span>
-                  </div>
-                </div>
+                <motion.div variants={itemVariants} className="relative flex items-center gap-3 py-4">
+                  <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+                  <span className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">или</span>
+                  <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+                </motion.div>
               )}
-              <Button
-                variant="ghost"
-                className="w-full text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400"
-                onClick={handleDemo}
-                disabled={loadingProvider === 'demo'}
-              >
-                {loadingProvider === 'demo' ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <LogIn className="mr-2 h-4 w-4" />
-                )}
-                Войти как демо-пользователь
-              </Button>
+              <motion.div variants={itemVariants}>
+                <Button
+                  variant="ghost"
+                  className="w-full h-11 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                  onClick={handleDemo}
+                  disabled={loadingProvider === 'demo'}
+                >
+                  {loadingProvider === 'demo' ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Shield className="mr-2 h-4 w-4" />
+                  )}
+                  Войти как демо-пользователь
+                </Button>
+              </motion.div>
             </>
           )}
-
-          {/* Back to landing */}
-          <p className="text-center text-sm text-slate-500">
-            <a href="/" className="text-emerald-600 dark:text-emerald-400 hover:underline">
-              ← Вернуться на главную
-            </a>
-          </p>
         </div>
-      </div>
+
+        {/* Back to landing */}
+        <motion.p variants={itemVariants} className="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
+          <a href="/" className="text-emerald-600 dark:text-emerald-400 hover:underline">
+            ← Вернуться на главную
+          </a>
+        </motion.p>
+      </motion.div>
+
+      <Toaster position="top-center" richColors />
     </div>
   );
 }

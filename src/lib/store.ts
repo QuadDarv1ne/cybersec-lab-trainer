@@ -27,7 +27,8 @@ export type PageType =
   | 'analytics'
   | 'settings'
   | 'weakness-review'
-  | 'blog';
+  | 'blog'
+  | 'ctf-labs';
 
 export interface QuizAttempt {
   id: string;
@@ -99,7 +100,7 @@ interface AppActions {
   getXPBreakdown: () => XPBreakdown;
   addNote: (itemId: string, moduleId: string, moduleName: string, content: string) => void;
   updateNote: (noteId: string, content: string) => void;
-  deleteNote: (noteId: string) => void;
+  deleteNote: (noteId: string) => Promise<void>;
   getNotesForItem: (itemId: string) => Note[];
   startStudySession: (pageType: PageType) => void;
   endStudySession: () => void;
