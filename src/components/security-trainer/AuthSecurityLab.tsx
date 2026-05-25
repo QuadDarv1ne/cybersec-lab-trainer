@@ -167,15 +167,15 @@ export default function AuthSecurityLab() {
   };
 
   const formatTime = (seconds: number) => {
-    if (seconds < 1) return 'Мгновенно';
-    if (seconds < 60) return `${Math.round(seconds)} сек`;
-    if (seconds < 3600) return `${Math.round(seconds / 60)} мин`;
-    if (seconds < 86400) return `${Math.round(seconds / 3600)} ч`;
-    if (seconds < 31536000) return `${Math.round(seconds / 86400)} дн`;
-    if (seconds < 31536000 * 100) return `${Math.round(seconds / 31536000)} лет`;
-    if (seconds < 31536000 * 1e6) return `${Math.round(seconds / 31536000 / 1000)} тыс. лет`;
-    if (seconds < 31536000 * 1e9) return `${Math.round(seconds / 31536000 / 1e6)} млн лет`;
-    return 'Бесконечно';
+    if (seconds < 1) return { seconds, label: t('timeLabels.instant') };
+    if (seconds < 60) return { seconds, label: `${Math.round(seconds)} ${t('timeLabels.seconds')}` };
+    if (seconds < 3600) return { seconds, label: `${Math.round(seconds / 60)} ${t('timeLabels.minutes')}` };
+    if (seconds < 86400) return { seconds, label: `${Math.round(seconds / 3600)} ${t('timeLabels.hours')}` };
+    if (seconds < 31536000) return { seconds, label: `${Math.round(seconds / 86400)} ${t('timeLabels.days')}` };
+    if (seconds < 31536000 * 100) return { seconds, label: `${Math.round(seconds / 31536000)} ${t('timeLabels.years')}` };
+    if (seconds < 31536000 * 1e6) return { seconds, label: `${Math.round(seconds / 31536000 / 1000)} ${t('timeLabels.thousandYears')}` };
+    if (seconds < 31536000 * 1e9) return { seconds, label: `${Math.round(seconds / 31536000 / 1e6)} ${t('timeLabels.millionYears')}` };
+    return { seconds, label: t('timeLabels.forever') };
   };
 
   // Brute force time estimation
@@ -199,7 +199,7 @@ export default function AuthSecurityLab() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')} aria-label="Вернуться на главную">
+        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')} aria-label={t('backToDashboard')}>
           <ChevronLeft size={20} />
         </Button>
         <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
@@ -363,13 +363,13 @@ export default function AuthSecurityLab() {
                 <div className="bg-slate-900 rounded-xl p-5 text-center">
                   <p className="text-xs text-slate-400 mb-2">Время полного перебора (10 млрд попыток/сек)</p>
                   <p className={`text-3xl font-bold font-mono ${
-                    crackTime === 'Мгновенно' || crackTime.includes('сек') || crackTime.includes('мин')
+                    crackTime.seconds < 3600
                       ? 'text-red-400'
-                      : crackTime.includes('ч') || crackTime.includes('дн')
+                      : crackTime.seconds < 86400
                         ? 'text-amber-400'
                         : 'text-emerald-400'
                   }`}>
-                    {crackTime}
+                    {crackTime.label}
                   </p>
                   <p className="text-[11px] text-slate-500 mt-2">
                     Комбинаций: {Math.pow(

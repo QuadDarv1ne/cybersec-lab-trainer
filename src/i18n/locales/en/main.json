@@ -319,7 +319,18 @@
     "incorrectAnswer": "Incorrect",
     "checkAnswerBtn": "Check answer",
     "taskLabel": "Task {current} of {total}",
-    "noChallenges": "No challenges available"
+    "noChallenges": "No challenges available",
+    "timeLabels": {
+      "instant": "Instant",
+      "seconds": "sec",
+      "minutes": "min",
+      "hours": "hr",
+      "days": "days",
+      "years": "years",
+      "thousandYears": "K years",
+      "millionYears": "M years",
+      "forever": "Forever"
+    }
   },
   "secureCoding": {
     "title": "Secure Coding",
@@ -423,7 +434,8 @@
     "pwManagerDesc": "Generating passwords is not enough — you need to store them securely. Use proven password managers that encrypt the vault with a master password:",
     "bitwardenDesc": "Open source, free, cross-platform",
     "keepassxcDesc": "Local storage, open source, browser plugins",
-    "onepasswordDesc": "Commercial, great UX, family plans"
+    "onepasswordDesc": "Commercial, great UX, family plans",
+    "backToDashboard": "Back to dashboard"
   },
   "achievements": {
     "title": "Achievements & Glossary",
