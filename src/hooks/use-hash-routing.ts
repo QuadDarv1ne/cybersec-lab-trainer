@@ -20,6 +20,7 @@ const pageToHash: Record<PageType, string> = {
   settings: 'settings',
   'weakness-review': 'weakness-review',
   blog: 'blog',
+  'ctf-labs': 'ctf-labs',
 };
 
 const hashToPage: Record<string, PageType> = {
@@ -39,6 +40,7 @@ const hashToPage: Record<string, PageType> = {
   settings: 'settings',
   'weakness-review': 'weakness-review',
   blog: 'blog',
+  'ctf-labs': 'ctf-labs',
 };
 
 /**
