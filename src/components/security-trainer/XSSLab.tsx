@@ -133,7 +133,6 @@ export default function XSSLab() {
   const t = useTranslations('xss');
   const [activeTab, setActiveTab] = useState(xssTypes.length > 0 ? xssTypes[0].id : '');
   const [showAttacks, setShowAttacks] = useState<Record<string, boolean>>({});
-  const [_attackTriggered, setAttackTriggered] = useState<Record<string, boolean>>({});
 
   const allCompleted = xssCompletedLevels.length === xssTypes.length;
   const isCompleted = completedModules.includes('xss');
@@ -154,7 +153,7 @@ export default function XSSLab() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')} aria-label="Вернуться на главную">
+        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')} aria-label={t('backToDashboard')}>
           <ChevronLeft size={20} />
         </Button>
         <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
@@ -180,7 +179,7 @@ export default function XSSLab() {
               <button
                 key={x.id}
                 onClick={() => setActiveTab(x.id)}
-                aria-label={`Перейти к типу XSS: ${t(`types.${x.id}` as const)}`}
+                aria-label={t('goToType', { type: t(`types.${x.id}` as const) })}
                 className={`flex-1 h-2 rounded-full transition-all ${
                   xssCompletedLevels.includes(x.id)
                     ? 'bg-emerald-500'
@@ -238,7 +237,7 @@ export default function XSSLab() {
               {/* Vulnerable code */}
               <Card className="border-slate-200">
                 <CardContent className="p-5">
-                  <h3 className="text-xs font-semibold text-red-600 mb-2 flex items-center gap-1"><XCircle size={14} /> Уязвимый код</h3>
+                  <h3 className="text-xs font-semibold text-red-600 mb-2 flex items-center gap-1"><XCircle size={14} /> {t('vulnerableCodeHeading')}</h3>
                   <CodeBlock code={xss.vulnerableCode} language="html" title="vulnerable.html" />
                 </CardContent>
               </Card>
@@ -246,7 +245,7 @@ export default function XSSLab() {
               {/* Secure code */}
               <Card className="border-slate-200">
                 <CardContent className="p-5">
-                  <h3 className="text-xs font-semibold text-emerald-600 mb-2 flex items-center gap-1"><CheckCircle2 size={14} /> Безопасный код</h3>
+                  <h3 className="text-xs font-semibold text-emerald-600 mb-2 flex items-center gap-1"><CheckCircle2 size={14} /> {t('secureCodeHeading')}</h3>
                   <CodeBlock code={xss.secureCode} language="html" title="secure.html" />
                 </CardContent>
               </Card>
@@ -255,18 +254,18 @@ export default function XSSLab() {
               <Card className="border-slate-200">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold flex items-center gap-1"><AlertTriangle size={16} className="text-amber-500" /> Интерактивная демонстрация</h3>
+                    <h3 className="text-sm font-semibold flex items-center gap-1"><AlertTriangle size={16} className="text-amber-500" /> {t('interactiveDemo')}</h3>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        setShowAttacks((prev) => ({ ...prev, [activeTab]: !prev[activeTab] }));
-                        if (!showAttacks[activeTab]) {
-                          setAttackTriggered((prev) => ({ ...prev, [activeTab]: true }));
-                        }
+                        setShowAttacks((prev) => {
+                          const willShow = !prev[activeTab];
+                          return { ...prev, [activeTab]: willShow };
+                        });
                       }}
                     >
-                    {showAttacks[activeTab] ? 'Скрыть демо' : 'Показать атаку'}
+                    {showAttacks[activeTab] ? t('hideAttack') : t('showAttack')}
                     </Button>
                   </div>
 

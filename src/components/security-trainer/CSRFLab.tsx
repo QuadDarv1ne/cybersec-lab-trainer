@@ -39,7 +39,7 @@ export default function CSRFLab() {
   if (!challenge) {
     return (
       <div className="flex items-center justify-center h-64 text-slate-400">
-        Нет доступных заданий
+        {t('noChallenges')}
       </div>
     );
   }
@@ -73,7 +73,7 @@ export default function CSRFLab() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')} aria-label="Вернуться на главную">
+        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')} aria-label={t('backToDashboard')}>
           <ChevronLeft size={20} />
         </Button>
         <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">

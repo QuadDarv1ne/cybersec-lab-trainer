@@ -38,7 +38,7 @@ const challenge = sqlChallenges[activeChallenge];
   if (!challenge) {
     return (
       <div className="flex items-center justify-center h-64 text-slate-400">
-        Нет доступных заданий
+        {t('noChallenges')}
       </div>
     );
   }
@@ -127,7 +127,7 @@ const challenge = sqlChallenges[activeChallenge];
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')} aria-label="Вернуться на главную">
+        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')} aria-label={t('backToDashboard')}>
           <ChevronLeft size={20} />
         </Button>
         <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
@@ -151,7 +151,7 @@ const challenge = sqlChallenges[activeChallenge];
               <button
                 key={c.id}
                 onClick={() => { setActiveChallenge(i); resetState(); }}
-                aria-label={`Перейти к заданию ${i + 1}: ${c.title}`}
+                aria-label={t('goToChallenge', { index: i + 1, title: c.title })}
                 className={`flex-1 h-2 rounded-full transition-all ${
                   sqlCompletedLevels.includes(c.id)
                     ? 'bg-emerald-500'

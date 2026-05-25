@@ -223,7 +223,10 @@
       "unionAttack": "UNION Attack",
       "blindSql": "Blind SQL Injection",
       "timeBased": "Time-based SQL Injection"
-    }
+    },
+    "noChallenges": "No challenges available",
+    "backToDashboard": "Back to dashboard",
+    "goToChallenge": "Go to challenge {index}: {title}"
   },
   "xss": {
     "title": "XSS Attacks",
@@ -231,6 +234,10 @@
     "subtitle": "Cross-Site Scripting — injection of malicious code",
     "progress": "Progress: {completed}/{total}",
     "moduleComplete": "Module complete!",
+    "goToType": "Go to XSS type: {type}",
+    "backToDashboard": "Back to dashboard",
+    "vulnerableCodeHeading": "Vulnerable code",
+    "secureCodeHeading": "Secure code",
     "sanitizationToggle": "Sanitization toggle",
     "toggleExplanation": "Enable sanitization to see how protection prevents XSS",
     "safeMode": "Safe mode",
@@ -279,7 +286,9 @@
     "hide": "Hide",
     "showCode": "Show code",
     "markComplete": "Mark as complete",
-    "moduleComplete": "Module complete!"
+    "moduleComplete": "Module complete!",
+    "noChallenges": "No challenges available",
+    "backToDashboard": "Back to dashboard"
   },
   "auth": {
     "title": "Authentication",

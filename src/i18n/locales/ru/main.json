@@ -223,7 +223,10 @@
       "unionAttack": "UNION-атака",
       "blindSql": "Слепая SQL-инъекция",
       "timeBased": "Временная SQL-инъекция"
-    }
+    },
+    "noChallenges": "Нет доступных заданий",
+    "backToDashboard": "Вернуться на главную",
+    "goToChallenge": "Перейти к заданию {index}: {title}"
   },
   "xss": {
     "title": "XSS-атаки",
@@ -231,6 +234,10 @@
     "subtitle": "Межсайтовый скриптинг — внедрение вредоносного кода",
     "progress": "Прогресс: {completed}/{total}",
     "moduleComplete": "Модуль завершён!",
+    "goToType": "Перейти к типу XSS: {type}",
+    "backToDashboard": "Вернуться на главную",
+    "vulnerableCodeHeading": "Уязвимый код",
+    "secureCodeHeading": "Безопасный код",
     "sanitizationToggle": "Переключатель санитизации",
     "toggleExplanation": "Включите санитизацию чтобы увидеть как защита предотвращает XSS",
     "safeMode": "Безопасный режим",
@@ -279,7 +286,9 @@
     "hide": "Скрыть",
     "showCode": "Показать код",
     "markComplete": "Отметить как завершённое",
-    "moduleComplete": "Модуль завершён!"
+    "moduleComplete": "Модуль завершён!",
+    "noChallenges": "Нет доступных заданий",
+    "backToDashboard": "Вернуться на главную"
   },
   "auth": {
     "title": "Аутентификация",
