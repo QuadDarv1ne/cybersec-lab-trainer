@@ -26,7 +26,8 @@ export type PageType =
   | 'notes'
   | 'analytics'
   | 'settings'
-  | 'weakness-review';
+  | 'weakness-review'
+  | 'blog';
 
 export interface QuizAttempt {
   id: string;

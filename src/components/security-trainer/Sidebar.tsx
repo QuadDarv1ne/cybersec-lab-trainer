@@ -23,6 +23,7 @@ import {
   BarChart3,
   Settings,
   AlertTriangle,
+  BookOpen,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
@@ -52,6 +53,7 @@ const iconMap: Record<string, React.ReactNode> = {
   BarChart3: <BarChart3 size={20} />,
   Settings: <Settings size={20} />,
   AlertTriangle: <AlertTriangle size={20} />,
+  BookOpen: <BookOpen size={20} />,
 };
 
 export default function Sidebar() {
@@ -96,6 +98,7 @@ export default function Sidebar() {
     { id: 'security-headers', label: t('securityHeaders'), iconKey: 'ShieldAlert' },
     { id: 'quiz', label: t('quiz'), iconKey: 'HelpCircle' },
     { id: 'achievements', label: t('achievements'), iconKey: 'Trophy' },
+    { id: 'blog', label: t('blog'), iconKey: 'BookOpen' },
     { id: 'notes', label: t('notes'), iconKey: 'StickyNote' },
     { id: 'analytics', label: t('analytics'), iconKey: 'BarChart3' },
     { id: 'settings', label: t('settings'), iconKey: 'Settings' },

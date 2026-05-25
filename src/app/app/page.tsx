@@ -27,6 +27,7 @@ const SettingsPage = dynamic(() => import('@/components/security-trainer/Setting
 const ContentSearch = dynamic(() => import('@/components/security-trainer/ContentSearch'), { ssr: false });
 const ProgressAnalytics = dynamic(() => import('@/components/security-trainer/ProgressAnalytics'), { ssr: false, loading: () => <PageSkeleton /> });
 const WeaknessReviewPage = dynamic(() => import('@/components/security-trainer/WeaknessReview'), { ssr: false, loading: () => <PageSkeleton /> });
+const BlogPage = dynamic(() => import('@/components/security-trainer/BlogPage'), { ssr: false, loading: () => <PageSkeleton /> });
 
 const pages: Record<string, React.ComponentType> = {
   dashboard: Dashboard,
@@ -44,6 +45,7 @@ const pages: Record<string, React.ComponentType> = {
   analytics: ProgressAnalytics,
   settings: SettingsPage,
   'weakness-review': WeaknessReviewPage,
+  blog: BlogPage,
 };
 
 function PageSkeleton() {

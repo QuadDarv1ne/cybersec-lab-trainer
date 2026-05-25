@@ -157,7 +157,8 @@
     "analytics": "Analytics",
     "settings": "Settings",
     "weaknessReview": "Weakness Review",
-    "notes": "Notes"
+    "notes": "Notes",
+    "blog": "Blog"
   },
   "owasp": {
     "title": "OWASP Top 10",
@@ -796,5 +797,15 @@
     "showHint": "Show hint",
     "hideHint": "Hide hint",
     "noFlags": "Lab exercises are loaded from the database. Run seed: npx tsx prisma/seed-labs.ts"
+  },
+  "blog": {
+    "title": "CyberSec Blog",
+    "subtitle": "Information security articles",
+    "back": "Back to home",
+    "search": "Search articles...",
+    "noResults": "Nothing found. Try a different query.",
+    "loadMore": "Load more",
+    "backToBlog": "Back to blog",
+    "relatedArticles": "Read also"
   }
 }
