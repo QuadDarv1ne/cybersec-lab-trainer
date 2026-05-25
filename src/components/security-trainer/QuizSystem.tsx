@@ -80,9 +80,10 @@ export default function QuizSystem() {
           timeUpRef.current = true;
           setTimerActive(false);
           if (!mountedRef.current) return 0;
+          // Only update state if still mounted — prevents updates after unmount in Strict Mode
           setShowAnswer(true);
+          const idx = currentQuestionRef.current;
           setAnswers((answersPrev) => {
-            const idx = currentQuestionRef.current;
             if (answersPrev[idx] !== null && answersPrev[idx] !== undefined) return answersPrev;
             const newAnswers = [...answersPrev];
             newAnswers[idx] = false;
@@ -177,13 +178,14 @@ export default function QuizSystem() {
     const question = categoryQuestions[currentQuestion];
     const isCorrect = parseInt(selectedAnswer) === question.correctIndex;
     const qIdx = currentQuestion;
+
     setAnswers((prev) => {
       if (prev[qIdx] !== null && prev[qIdx] !== undefined) return prev;
       const newAnswers = [...prev];
       newAnswers[qIdx] = isCorrect;
-      if (isCorrect) setCorrectCount((c) => c + 1);
       return newAnswers;
     });
+    if (isCorrect) setCorrectCount((c) => c + 1);
   };
 
   const resetQuiz = () => {
@@ -219,8 +221,21 @@ export default function QuizSystem() {
     ? Math.round((correctCount / categoryQuestions.length) * 100)
     : 0;
 
+  // Screen reader announcement for timer warnings
+  const timerAnnouncement = useMemo(() => {
+    if (!timerActive || quizState !== 'playing') return '';
+    if (timeLeft <= 0) return t('timeUp');
+    if (timeLeft === 10) return `${t('seconds', { count: 10 })} ${t('remaining') || 'remaining'}`;
+    if (timeLeft === 5) return `${t('seconds', { count: 5 })} ${t('remaining') || 'remaining'}`;
+    return '';
+  }, [timeLeft, timerActive, quizState, t]);
+
   return (
     <div className="space-y-6">
+      {/* Screen reader announcements */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {timerAnnouncement}
+      </div>
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => { resetQuiz(); setCurrentPage('dashboard'); }} aria-label={t('backToCategories')}>

@@ -94,6 +94,7 @@ interface AppActions {
     csrfViewedChallenges: number[];
     quizHistory: AppStore['quizHistory'];
     totalXP?: number;
+    notes?: NotesMap;
   }) => void;
   awardXP: (amount: number) => void;
   getXPLevel: () => { level: number; progress: number; xpToNext: number; totalXP: number };
@@ -911,7 +912,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       csrfViewedChallenges: data.csrfViewedChallenges,
       quizHistory: data.quizHistory,
       totalXP: data.totalXP ?? 0,
-      notes: ((data as Record<string, unknown>).notes as NotesMap | undefined) ?? {},
+      notes: data.notes ?? {},
     });
     ensureSync(get, set).catch((err) => logger.error('Sync failed after importProgressData:', err));
   },

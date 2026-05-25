@@ -80,8 +80,13 @@ export default async function RootLayout({
     session = null;
   }
 
+  // Detect locale server-side from Accept-Language header to prevent hydration mismatch
+  const { headers } = await import('next/headers');
+  const acceptLanguage = (await headers()).get('accept-language') || '';
+  const lang = acceptLanguage.toLowerCase().startsWith('en') ? 'en' : 'ru';
+
   return (
-    <html lang="ru" suppressHydrationWarning>
+    <html lang={lang}>
       <body className="antialiased font-sans">
         <LocaleLang />
         <a
