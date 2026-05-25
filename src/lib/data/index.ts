@@ -26,3 +26,6 @@ export type { SecurityHeaderTopic, HeaderChallenge } from './security-headers-da
 
 export { authChallenges } from './auth-challenges-data';
 export type { AuthChallenge } from './auth-challenges-data';
+
+export { ctfLabs, DIFFICULTY_META, CATEGORY_META } from './ctf-labs-data';
+export type { CTFLab } from './ctf-labs-data';

@@ -783,5 +783,18 @@
     "hideDetails": "Hide details",
     "reload": "Refresh page",
     "home": "Go home"
+  },
+  "ctf": {
+    "title": "CTF Labs",
+    "subtitle": "Practical flag-finding exercises",
+    "back": "Back",
+    "submit": "Submit",
+    "found": "Found",
+    "points": "points",
+    "flagNumber": "Flag {number}",
+    "flagPlaceholder": "Enter flag (e.g. CYBER{...})",
+    "showHint": "Show hint",
+    "hideHint": "Hide hint",
+    "noFlags": "Lab exercises are loaded from the database. Run seed: npx tsx prisma/seed-labs.ts"
   }
 }

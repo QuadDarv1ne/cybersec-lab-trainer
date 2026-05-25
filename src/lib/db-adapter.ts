@@ -14,6 +14,10 @@ import type {
   ItemProgress,
   Note,
   StudySession,
+  Lab,
+  LabFlag,
+  LabProgress,
+  FlagSubmission,
   Prisma,
 } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
@@ -42,6 +46,28 @@ interface AdapterResultWithCreateMany<T> {
   findMany: (where: WhereInput) => Promise<T[]>;
   createMany: (data: CreateInput[]) => Promise<void>;
   deleteMany: (where: WhereInput) => Promise<void>;
+}
+
+interface LabFlagAdapter {
+  findFirst: (where: WhereInput) => Promise<LabFlag | null>;
+}
+
+interface LabProgressAdapter {
+  findUnique: (where: WhereInput) => Promise<LabProgress | null>;
+  upsert: (where: WhereInput, create: CreateInput, update: UpdateInput) => Promise<LabProgress>;
+  create: (data: CreateInput) => Promise<LabProgress>;
+  update: (where: WhereInput, data: UpdateInput) => Promise<LabProgress>;
+}
+
+interface FlagSubmissionAdapter {
+  findFirst: (where: WhereInput) => Promise<FlagSubmission | null>;
+  findMany: (where: WhereInput) => Promise<FlagSubmission[]>;
+  create: (data: CreateInput) => Promise<FlagSubmission>;
+}
+
+interface LabAdapter {
+  findMany: (where?: WhereInput, include?: Record<string, boolean>) => Promise<(Lab & { flags?: LabFlag[] })[]>;
+  findUnique: (where: WhereInput, include?: Record<string, boolean>) => Promise<(Lab & { flags?: LabFlag[] }) | null>;
 }
 
 interface UserAdapter {
@@ -76,6 +102,12 @@ export interface DbAdapter {
   itemProgress: AdapterResult<ItemProgress>;
   note: AdapterResult<Note>;
   studySession: AdapterResultWithCreateMany<StudySession>;
+
+  // CTF lab models
+  lab: LabAdapter;
+  labFlag: LabFlagAdapter;
+  labProgress: LabProgressAdapter;
+  flagSubmission: FlagSubmissionAdapter;
 
   // Auth models (used by NextAuth adapter)
   user: UserAdapter;
@@ -155,6 +187,33 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
       deleteMany: async (where) => { await db.studySession.deleteMany({ where }); },
     },
 
+    // CTF lab models
+    lab: {
+      findMany: (where, include) => db.lab.findMany({ where, include: include as { flags: boolean } }),
+      findUnique: (where, include) => db.lab.findUnique({ where, include: include as { flags: boolean } }),
+    },
+
+    labFlag: {
+      findFirst: (where) => db.labFlag.findFirst({ where }),
+    },
+
+    labProgress: {
+      findUnique: (where) => db.labProgress.findUnique({ where }),
+      upsert: (where, create, update) => db.labProgress.upsert({
+        where: where as Prisma.LabProgressWhereUniqueInput,
+        create: create as Prisma.LabProgressCreateInput,
+        update: update as Prisma.LabProgressUpdateInput,
+      }),
+      create: (data) => db.labProgress.create({ data: data as Prisma.LabProgressCreateInput }),
+      update: (where, data) => db.labProgress.update({ where: where as Prisma.LabProgressWhereUniqueInput, data: data as Prisma.LabProgressUpdateInput }),
+    },
+
+    flagSubmission: {
+      findFirst: (where) => db.flagSubmission.findFirst({ where }),
+      findMany: (where) => db.flagSubmission.findMany({ where }),
+      create: (data) => db.flagSubmission.create({ data: data as Prisma.FlagSubmissionCreateInput }),
+    },
+
     user: {
       findUnique: (where) => db.user.findUnique({ where: where as Prisma.UserWhereUniqueInput }),
       create: (data) => db.user.create({ data: data as Prisma.UserCreateInput }),
@@ -185,6 +244,8 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
         db.itemProgress.deleteMany({ where: { userId } }),
         db.note.deleteMany({ where: { userId } }),
         db.studySession.deleteMany({ where: { userId } }),
+        db.labProgress.deleteMany({ where: { userId } }),
+        db.flagSubmission.deleteMany({ where: { userId } }),
       ]);
     },
 
@@ -264,6 +325,29 @@ function createMongooseAdapter(): DbAdapter {
       deleteMany: async (where) => { await StudySessionModel.deleteMany(where); },
     },
 
+    // CTF lab models (stub — MongoDB uses Prisma for lab data)
+    lab: {
+      findMany: async () => [],
+      findUnique: async () => null,
+    },
+
+    labFlag: {
+      findFirst: async () => null,
+    },
+
+    labProgress: {
+      findUnique: async () => { throw new Error('Lab progress not supported on MongoDB'); },
+      upsert: async () => { throw new Error('Lab progress not supported on MongoDB'); },
+      create: async () => { throw new Error('Lab progress not supported on MongoDB'); },
+      update: async () => { throw new Error('Lab progress not supported on MongoDB'); },
+    },
+
+    flagSubmission: {
+      findFirst: async () => null,
+      findMany: async () => [],
+      create: async () => { throw new Error('Flag submission not supported on MongoDB'); },
+    },
+
     user: {
       findUnique: async (where) => {
         const doc = await UserModel.findOne(where);
@@ -302,6 +386,7 @@ function createMongooseAdapter(): DbAdapter {
         await ItemProgressModel.deleteMany({ userId }, { session });
         await NoteModel.deleteMany({ userId }, { session });
         await StudySessionModel.deleteMany({ userId }, { session });
+        // Lab models use Prisma even on MongoDB — handled server-side
         await session.commitTransaction();
       } catch (error) {
         await session.abortTransaction();

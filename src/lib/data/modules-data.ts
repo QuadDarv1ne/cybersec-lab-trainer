@@ -288,6 +288,16 @@ export const modules: Module[] = [
     lessons: 8,
     totalSteps: 8,
   },
+  {
+    id: 'ctf-labs',
+    title: 'CTF Лабораторные',
+    description: 'Практические CTF-задания: OSINT, пентест, SQL-инъекции, аудит веб-ресурсов, ARP/DNS спуфинг. Найдите все флаги!',
+    icon: 'Flag',
+    difficulty: 'Средний',
+    difficultyColor: 'bg-yellow-100 text-yellow-800',
+    lessons: 5,
+    totalSteps: 16,
+  },
 ];
 
 /**
