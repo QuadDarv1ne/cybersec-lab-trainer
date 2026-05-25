@@ -38,7 +38,7 @@ if (providers.length === 0) {
         const email = (credentials?.email as string) || 'demo@example.com';
         const name = (credentials?.name as string) || 'Demo User';
         return {
-          id: `demo-${email.replace(/[^a-zA-Z0-9]/g, '-')}`,
+          id: `demo-${crypto.randomUUID()}`,
           name,
           email,
           image: null,

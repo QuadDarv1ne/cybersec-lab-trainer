@@ -190,7 +190,10 @@
       "dataIntegrity": "Сбои целостности данных",
       "loggingFailures": "Сбои логирования",
       "ssrf": "SSRF"
-    }
+    },
+    "noChallenges": "Нет доступных заданий",
+    "studyTab": "Обучение",
+    "challengesTab": "Задания ({count})"
   },
   "sqlInjection": {
     "title": "SQL-инъекции",
@@ -315,7 +318,8 @@
     "correctAnswer": "Верно!",
     "incorrectAnswer": "Неверно",
     "checkAnswerBtn": "Проверить ответ",
-    "taskLabel": "Задание {current} из {total}"
+    "taskLabel": "Задание {current} из {total}",
+    "noChallenges": "Нет доступных заданий"
   },
   "secureCoding": {
     "title": "Безопасное кодирование",
@@ -327,7 +331,8 @@
     "allComplete": "Все задания завершены!",
     "checkAnswer": "Проверить ответ",
     "back": "Назад",
-    "next": "Следующее"
+    "next": "Следующее",
+    "noChallenges": "Нет доступных заданий"
   },
   "tools": {
     "title": "Инструменты безопасности",
@@ -494,7 +499,8 @@
     "back": "Назад",
     "next": "Следующее",
     "correctAnswer": "Правильно!",
-    "incorrectAnswer": "Неправильно"
+    "incorrectAnswer": "Неправильно",
+    "noChallenges": "Нет доступных заданий"
   },
   "certificate": {
     "title": "Сертификат о прохождении",

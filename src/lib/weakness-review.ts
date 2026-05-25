@@ -181,7 +181,6 @@ export function buildWeaknessReview(
  * Returns the total count of weakness items across all sources.
  * Memoized to avoid expensive recalculation on every render.
  */
-const weaknessCountCache = new Map<string, number>();
 let lastCacheKey: string | null = null;
 let lastCacheResult = 0;
 
@@ -215,12 +214,6 @@ export function getWeaknessCount(
 
   lastCacheKey = cacheKey;
   lastCacheResult = review.totalCount;
-
-  // Evict old entries if cache grows too large
-  if (weaknessCountCache.size > 10) {
-    weaknessCountCache.clear();
-  }
-  weaknessCountCache.set(cacheKey, review.totalCount);
 
   return review.totalCount;
 }

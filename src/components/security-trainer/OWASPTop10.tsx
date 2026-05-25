@@ -61,7 +61,7 @@ export default function OWASPTop10() {
   if (!currentChallenge) {
     return (
       <div className="flex items-center justify-center h-64 text-slate-400">
-        Нет доступных заданий
+        {t('noChallenges')}
       </div>
     );
   }
@@ -131,10 +131,10 @@ export default function OWASPTop10() {
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'learn' | 'challenges')} className="space-y-4">
         <TabsList className="grid grid-cols-2 w-full">
           <TabsTrigger value="learn" className="text-xs">
-            <ShieldCheck size={14} className="mr-1" /> Обучение
+            <ShieldCheck size={14} className="mr-1" /> {t('studyTab')}
           </TabsTrigger>
           <TabsTrigger value="challenges" className="text-xs">
-            <Target size={14} className="mr-1" /> Задания ({owaspChallenges.length})
+            <Target size={14} className="mr-1" /> {t('challengesTab', { count: owaspChallenges.length })}
           </TabsTrigger>
         </TabsList>
 

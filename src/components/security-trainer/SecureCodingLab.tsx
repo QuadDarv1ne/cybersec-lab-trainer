@@ -62,7 +62,7 @@ export default function SecureCodingLab() {
   if (!challenge) {
     return (
       <div className="flex items-center justify-center h-64 text-slate-400">
-        Нет доступных заданий
+        {t('noChallenges')}
       </div>
     );
   }

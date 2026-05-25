@@ -81,12 +81,6 @@ export function calculateSessionXP(durationMs: number): number {
   return Math.min(xp, MAX_SESSION_XP);
 }
 
-function _getStartOfToday(): string {
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  return now.toISOString();
-}
-
 function isToday(dateStr: string): boolean {
   const sessionDate = new Date(dateStr);
   const today = new Date();

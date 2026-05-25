@@ -190,7 +190,10 @@
       "dataIntegrity": "Data Integrity Failures",
       "loggingFailures": "Logging and Monitoring Failures",
       "ssrf": "Server-Side Request Forgery"
-    }
+    },
+    "noChallenges": "No challenges available",
+    "studyTab": "Study",
+    "challengesTab": "Challenges ({count})"
   },
   "sqlInjection": {
     "title": "SQL Injections",
@@ -315,7 +318,8 @@
     "correctAnswer": "Correct!",
     "incorrectAnswer": "Incorrect",
     "checkAnswerBtn": "Check answer",
-    "taskLabel": "Task {current} of {total}"
+    "taskLabel": "Task {current} of {total}",
+    "noChallenges": "No challenges available"
   },
   "secureCoding": {
     "title": "Secure Coding",
@@ -327,7 +331,8 @@
     "allComplete": "All tasks complete!",
     "checkAnswer": "Check answer",
     "back": "Back",
-    "next": "Next"
+    "next": "Next",
+    "noChallenges": "No challenges available"
   },
   "tools": {
     "title": "Security Tools",
@@ -494,7 +499,8 @@
     "back": "Back",
     "next": "Next",
     "correctAnswer": "Correct!",
-    "incorrectAnswer": "Incorrect"
+    "incorrectAnswer": "Incorrect",
+    "noChallenges": "No challenges available"
   },
   "certificate": {
     "title": "Completion Certificate",
