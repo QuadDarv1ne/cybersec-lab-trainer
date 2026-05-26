@@ -220,3 +220,9 @@ export function getWeaknessCount(
 
   return review.totalCount;
 }
+
+/** Reset the internal cache (useful for testing) */
+export function resetWeaknessReviewCache(): void {
+  lastCacheKey = null;
+  lastCacheResult = 0;
+}
