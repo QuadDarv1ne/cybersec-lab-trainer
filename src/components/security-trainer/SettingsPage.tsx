@@ -49,7 +49,12 @@ export default function SettingsPage() {
 
   // Load goals from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem('study-goals');
+    let stored: string | null = null;
+    try {
+      stored = localStorage.getItem('study-goals');
+    } catch {
+      // localStorage may be inaccessible in private browsing mode
+    }
     if (stored) {
       try {
         setGoals(JSON.parse(stored));
@@ -89,7 +94,11 @@ export default function SettingsPage() {
   }, [studySessions, goals.weeklyDays]);
 
   const saveGoals = () => {
-    localStorage.setItem('study-goals', JSON.stringify(goals));
+    try {
+      localStorage.setItem('study-goals', JSON.stringify(goals));
+    } catch {
+      // localStorage may be inaccessible in private browsing mode
+    }
     setSaved(true);
     if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
     savedTimerRef.current = setTimeout(() => setSaved(false), 2000);

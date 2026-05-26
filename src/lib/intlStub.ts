@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import ru from '../i18n/locales/ru/main.json';
 import en from '../i18n/locales/en/main.json';
 
@@ -14,7 +14,13 @@ export function getCurrentLocale(): string {
   if (typeof window === 'undefined') {
     return 'ru';
   }
-  const stored = localStorage.getItem('app-locale');
+  let stored: string | null = null;
+  try {
+    stored = localStorage.getItem('app-locale');
+  } catch {
+    // localStorage may be inaccessible in private browsing mode
+    // Fall through to browser language detection
+  }
   if (stored === 'en' || stored === 'ru') return stored;
   const browserLang = navigator.language.toLowerCase();
   if (browserLang.startsWith('en')) return 'en';
@@ -26,7 +32,11 @@ export function getCurrentLocale(): string {
 export function setLocale(locale: string): void {
   if (typeof window === 'undefined') return;
   if (locale !== 'ru' && locale !== 'en') return;
-  localStorage.setItem('app-locale', locale);
+  try {
+    localStorage.setItem('app-locale', locale);
+  } catch {
+    // localStorage may be inaccessible in private browsing mode
+  }
   // Notify other components via storage event
   window.dispatchEvent(new StorageEvent('storage', { key: 'app-locale', newValue: locale }));
   // Also update document lang attribute for accessibility
@@ -99,7 +109,7 @@ function useLocale(): string {
     const actual = getCurrentLocale();
     setLocaleState(actual);
 
-    const handleStorage = (e: StorageEvent | Event) => {
+    const handleStorage = (_e: StorageEvent | Event) => {
       const current = getCurrentLocale();
       setLocaleState(current);
     };
