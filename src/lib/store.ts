@@ -291,7 +291,7 @@ const apiClient = {
       throw new Error(error.error || 'Failed to batch sync');
     }
 
-    return response.json();
+    return response.json().catch(() => { throw new Error('Invalid server response'); });
   },
 
   async saveChallengeProgress(challenges: { challengeType: string; correct: number; total: number; answered?: number[]; selectedOptions?: Record<string, number> }[]) {
@@ -309,7 +309,7 @@ const apiClient = {
       throw new Error(error.error || 'Failed to sync challenge progress');
     }
 
-    return response.json();
+    return response.json().catch(() => { throw new Error('Invalid server response'); });
   },
 
   async resetProgress() {
@@ -327,7 +327,7 @@ const apiClient = {
       throw new Error(error.error || 'Failed to reset progress');
     }
 
-    return response.json();
+    return response.json().catch(() => { throw new Error('Invalid server response'); });
   },
 
   async saveItemProgress(items: { moduleId: string; itemIds: string[] }[]) {
@@ -345,7 +345,7 @@ const apiClient = {
       throw new Error(error.error || 'Failed to sync item progress');
     }
 
-    return response.json();
+    return response.json().catch(() => { throw new Error('Invalid server response'); });
   },
 
   async saveNotes(notes: { id?: string; itemId: string; moduleId: string; moduleName: string; content: string }[]) {
@@ -363,7 +363,7 @@ const apiClient = {
       throw new Error(error.error || 'Failed to sync notes');
     }
 
-    return response.json();
+    return response.json().catch(() => { throw new Error('Invalid server response'); });
   },
 
   async deleteNote(noteId: string) {
@@ -381,7 +381,7 @@ const apiClient = {
       throw new Error(error.error || 'Failed to delete note');
     }
 
-    return response.json();
+    return response.json().catch(() => { throw new Error('Invalid server response'); });
   },
 
   async saveStudySessions(sessions: { id?: string; date: string; durationMs: number; pageType: string; xpEarned: number }[]) {
@@ -399,7 +399,7 @@ const apiClient = {
       throw new Error(error.error || 'Failed to sync study sessions');
     }
 
-    return response.json();
+    return response.json().catch(() => { throw new Error('Invalid server response'); });
   },
 };
 
