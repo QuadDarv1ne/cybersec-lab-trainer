@@ -26,6 +26,7 @@ import {
   UserModel, AccountModel, SessionModel, ProgressModel,
   QuizResultModel, ChallengeProgressModel, VerificationTokenModel,
   ItemProgressModel, NoteModel, StudySessionModel,
+  LabProgressModel, FlagSubmissionModel,
 } from './mongoose-schema';
 import { logger } from './logger';
 
@@ -328,7 +329,7 @@ function createMongooseAdapter(): DbAdapter {
       deleteMany: async (where) => { await StudySessionModel.deleteMany(where); },
     },
 
-    // CTF lab models (stub — MongoDB uses Prisma for lab data)
+    // CTF lab models
     lab: {
       findMany: async () => [],
       findUnique: async () => null,
@@ -339,16 +340,28 @@ function createMongooseAdapter(): DbAdapter {
     },
 
     labProgress: {
-      findUnique: async () => { throw new Error('Lab progress not supported on MongoDB'); },
-      upsert: async () => { throw new Error('Lab progress not supported on MongoDB'); },
-      create: async () => { throw new Error('Lab progress not supported on MongoDB'); },
-      update: async () => { throw new Error('Lab progress not supported on MongoDB'); },
+      findUnique: async (where) => {
+        const doc = await LabProgressModel.findOne(where);
+        return doc ? normalizeDoc<LabProgress>(doc) : null;
+      },
+      upsert: async (where, create, update) => {
+        const doc = await LabProgressModel.findOneAndUpdate(where, { $set: { ...create, ...update, updatedAt: new Date() } }, { upsert: true, new: true });
+        return normalizeDoc<LabProgress>(doc)!;
+      },
+      create: async (data) => normalizeDoc<LabProgress>(await LabProgressModel.create(data))!,
+      update: async (where, data) => {
+        const doc = await LabProgressModel.findOneAndUpdate(where, { $set: { ...data, updatedAt: new Date() } }, { new: true });
+        return normalizeDoc<LabProgress>(doc)!;
+      },
     },
 
     flagSubmission: {
-      findFirst: async () => null,
-      findMany: async () => [],
-      create: async () => { throw new Error('Flag submission not supported on MongoDB'); },
+      findFirst: async (where) => {
+        const doc = await FlagSubmissionModel.findOne(where);
+        return doc ? normalizeDoc<FlagSubmission>(doc) : null;
+      },
+      findMany: async (where) => normalizeArray<FlagSubmission>(await FlagSubmissionModel.find(where)),
+      create: async (data) => normalizeDoc<FlagSubmission>(await FlagSubmissionModel.create(data))!,
     },
 
     user: {
@@ -389,10 +402,11 @@ function createMongooseAdapter(): DbAdapter {
         await ItemProgressModel.deleteMany({ userId }, { session });
         await NoteModel.deleteMany({ userId }, { session });
         await StudySessionModel.deleteMany({ userId }, { session });
+        await LabProgressModel.deleteMany({ userId }, { session });
+        await FlagSubmissionModel.deleteMany({ userId }, { session });
         // Also delete auth-related records to prevent orphaned data
         await AccountModel.deleteMany({ userId }, { session });
         await SessionModel.deleteMany({ userId }, { session });
-        // Lab models use Prisma even on MongoDB — handled server-side
         await session.commitTransaction();
       } catch (error) {
         await session.abortTransaction();

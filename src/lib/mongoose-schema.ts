@@ -234,3 +234,53 @@ StudySessionSchema.index({ userId: 1, date: 1 });
 StudySessionSchema.index({ userId: 1, pageType: 1 });
 
 export const StudySessionModel: Model<IStudySession> = mongoose.models.StudySession || mongoose.model<IStudySession>('StudySession', StudySessionSchema);
+
+// --- LabProgress ---
+export interface ILabProgress {
+  id: string;
+  userId: string;
+  labId: string;
+  completed: boolean;
+  hintsUsed: number;
+  attempts: number;
+  lastAccessed: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const LabProgressSchema = new Schema<ILabProgress>({
+  userId: { type: String, required: true },
+  labId: { type: String, required: true },
+  completed: { type: Boolean, default: false },
+  hintsUsed: { type: Number, default: 0 },
+  attempts: { type: Number, default: 0 },
+  lastAccessed: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+}, { collection: 'lab_progress' });
+
+LabProgressSchema.index({ userId: 1, labId: 1 }, { unique: true });
+
+export const LabProgressModel: Model<ILabProgress> = mongoose.models.LabProgress || mongoose.model<ILabProgress>('LabProgress', LabProgressSchema);
+
+// --- FlagSubmission ---
+export interface IFlagSubmission {
+  id: string;
+  userId: string;
+  labId: string;
+  flagId: string;
+  submittedAt: Date;
+  correct: boolean;
+}
+
+const FlagSubmissionSchema = new Schema<IFlagSubmission>({
+  userId: { type: String, required: true },
+  labId: { type: String, required: true },
+  flagId: { type: String, required: true },
+  submittedAt: { type: Date, default: Date.now },
+  correct: { type: Boolean, default: false },
+}, { collection: 'flag_submissions' });
+
+FlagSubmissionSchema.index({ userId: 1, labId: 1, flagId: 1 }, { unique: true });
+
+export const FlagSubmissionModel: Model<IFlagSubmission> = mongoose.models.FlagSubmission || mongoose.model<IFlagSubmission>('FlagSubmission', FlagSubmissionSchema);
