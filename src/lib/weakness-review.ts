@@ -192,12 +192,15 @@ export function getWeaknessCount(
   secureCodingChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> },
 ): number {
   const cacheKey = JSON.stringify([
-    quizHistory.length,
-    quizHistory[quizHistory.length - 1]?.id,
+    quizHistory.map((h) => ({ id: h.id, score: h.score })),
     owaspChallengeScores.total,
     authChallengeScores.total,
     headersChallengeScores.total,
     secureCodingChallengeScores.total,
+    owaspChallengeScores.answered?.length ?? 0,
+    authChallengeScores.answered?.length ?? 0,
+    headersChallengeScores.answered?.length ?? 0,
+    secureCodingChallengeScores.answered?.length ?? 0,
   ]);
 
   if (cacheKey === lastCacheKey) {

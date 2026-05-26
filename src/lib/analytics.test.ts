@@ -12,7 +12,7 @@ describe('Analytics calculations', () => {
     const completedModules = ['owasp', 'sql-injection', 'xss'];
     const validCount = completedModules.filter((id) => modules.some((m) => m.id === id)).length;
     const percentage = Math.round((validCount / modules.length) * 100);
-    expect(percentage).toBe(Math.round((3 / 8) * 100));
+    expect(percentage).toBe(Math.round((3 / modules.length) * 100));
   });
 
   it('should calculate quiz average correctly', () => {

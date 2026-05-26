@@ -16,14 +16,14 @@ describe('Certificate visibility logic', () => {
     expect(allComplete).toBe(false);
   });
 
-  it('should not show certificate when 7 of 8 modules completed', () => {
-    const completedModules = allModuleIds.filter((id) => id !== 'tools');
-    expect(completedModules.length).toBe(7);
+  it('should not show certificate when one module short of completion', () => {
+    const completedModules = allModuleIds.slice(0, -1);
+    expect(completedModules.length).toBe(modules.length - 1);
     const allComplete = completedModules.filter((id) => modules.some((m) => m.id === id)).length >= modules.length;
     expect(allComplete).toBe(false);
   });
 
-  it('should show certificate when all 8 modules completed', () => {
+  it('should show certificate when all modules completed', () => {
     const completedModules = [...allModuleIds];
     const allComplete = completedModules.filter((id) => modules.some((m) => m.id === id)).length >= modules.length;
     expect(allComplete).toBe(true);
