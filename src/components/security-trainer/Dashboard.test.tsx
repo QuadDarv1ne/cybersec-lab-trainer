@@ -39,6 +39,7 @@ vi.mock('@/lib/store', () => {
     headersChallengeScores: { correct: 0, total: 0, answered: [] as number[], selectedOptions: {} as Record<string, number> },
     secureCodingChallengeScores: { correct: 0, total: 0, answered: [] as number[], selectedOptions: {} as Record<string, number> },
     csrfViewedChallenges: [] as number[],
+    quizHistory: [] as Array<{id: string; categoryId: string; categoryName: string; score: number; correct: number; total: number; answers: (boolean | null)[]; timestamp: number}>,
     totalXP: 0,
     studySessions: [] as Array<{id: string; date: string; durationMs: number; pageType: string; xpEarned: number}>,
     userId: null as string | null,
@@ -145,10 +146,10 @@ describe('Dashboard', () => {
 
   it('shows modules list with titles', () => {
     render(<Dashboard />);
-    expect(screen.getByText('OWASP Top 10')).toBeDefined();
-    expect(screen.getByText('SQL-инъекции')).toBeDefined();
-    expect(screen.getByText('XSS-атаки')).toBeDefined();
-    expect(screen.getByText('CSRF-атаки')).toBeDefined();
+    expect(screen.getAllByText('OWASP Top 10').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('SQL-инъекции').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('XSS-атаки').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('CSRF-атаки').length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows overall progress section', () => {

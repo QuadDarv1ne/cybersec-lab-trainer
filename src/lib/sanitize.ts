@@ -34,7 +34,6 @@ export function sanitizeNoteContent(raw: string): string {
           // Math
           sum: '\u2211', prod: '\u220F', part: '\u2202', int: '\u222B',
           ne: '\u2260', equiv: '\u2261', le: '\u2264', ge: '\u2265',
-          lt: '<', gt: '>',
           // Latin letters with diacritics (common ones)
           agrave: '\u00E0', aacute: '\u00E1', acirc: '\u00E2', atilde: '\u00E3',
           auml: '\u00E4', aring: '\u00E5', aelig: '\u00E6',

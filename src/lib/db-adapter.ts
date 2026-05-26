@@ -43,9 +43,9 @@ interface AdapterResult<T> {
   deleteMany: (where: WhereInput) => Promise<void>;
 }
 
-interface AdapterResultWithCreateMany<T> {
+interface AdapterResultWithUpsert<T> {
   findMany: (where: WhereInput) => Promise<T[]>;
-  createMany: (data: CreateInput[]) => Promise<void>;
+  upsert: (where: WhereInput, create: CreateInput, update: UpdateInput) => Promise<T>;
   deleteMany: (where: WhereInput) => Promise<void>;
 }
 
@@ -102,7 +102,7 @@ export interface DbAdapter {
   challengeProgress: AdapterResult<ChallengeProgress>;
   itemProgress: AdapterResult<ItemProgress>;
   note: AdapterResult<Note>;
-  studySession: AdapterResultWithCreateMany<StudySession>;
+  studySession: AdapterResultWithUpsert<StudySession>;
 
   // CTF lab models
   lab: LabAdapter;
@@ -180,11 +180,11 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
 
     studySession: {
       findMany: (where) => db.studySession.findMany({ where }),
-      createMany: async (data) => {
-        await db.studySession.createMany({
-          data: data as Prisma.StudySessionCreateManyInput[],
-        });
-      },
+      upsert: (where, create, update) => db.studySession.upsert({
+        where: where as Prisma.StudySessionWhereUniqueInput,
+        create: create as Prisma.StudySessionCreateInput,
+        update: update as Prisma.StudySessionUpdateInput,
+      }),
       deleteMany: async (where) => { await db.studySession.deleteMany({ where }); },
     },
 
@@ -323,8 +323,9 @@ function createMongooseAdapter(): DbAdapter {
 
     studySession: {
       findMany: async (where) => normalizeArray<StudySession>(await StudySessionModel.find(where)),
-      createMany: async (data) => {
-        await StudySessionModel.insertMany(data);
+      upsert: async (where, create, update) => {
+        const doc = await StudySessionModel.findOneAndUpdate(where, { $set: { ...create, ...update } }, { upsert: true, new: true });
+        return normalizeDoc<StudySession>(doc)!;
       },
       deleteMany: async (where) => { await StudySessionModel.deleteMany(where); },
     },

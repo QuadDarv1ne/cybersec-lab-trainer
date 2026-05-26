@@ -436,21 +436,19 @@ export async function POST(request: Request) {
           break;
         }
 
-        // Execute session inserts sequentially with error handling
+        // Execute session upserts sequentially with error handling (similar to notes-sync)
         let savedCount = 0;
         for (const session of sessions) {
           try {
-            await adapter.studySession.createMany([{
-              userId,
-              id: session.id || undefined,
-              date: session.date,
-              durationMs: session.durationMs,
-              pageType: session.pageType,
-              xpEarned: session.xpEarned ?? 0,
-            }]);
+            const sessionId = session.id || `session-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+            await adapter.studySession.upsert(
+              { id: sessionId },
+              { userId, id: sessionId, date: session.date, durationMs: session.durationMs, pageType: session.pageType, xpEarned: session.xpEarned ?? 0 },
+              { date: session.date, durationMs: session.durationMs, pageType: session.pageType, xpEarned: session.xpEarned ?? 0 }
+            );
             savedCount++;
           } catch (error) {
-            logger.error('[API] Study session insert failed:', error);
+            logger.error('[API] Study session upsert failed:', error);
           }
         }
 

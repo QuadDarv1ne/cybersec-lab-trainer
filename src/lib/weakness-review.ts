@@ -185,7 +185,7 @@ let lastCacheKey: string | null = null;
 let lastCacheResult = 0;
 
 export function getWeaknessCount(
-  quizHistory: QuizAttempt[],
+  quizHistory: QuizAttempt[] = [],
   owaspChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> },
   authChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> },
   headersChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> },

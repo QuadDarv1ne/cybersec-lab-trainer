@@ -47,6 +47,8 @@ vi.mock('@/lib/store', () => {
 });
 
 vi.mock('@/lib/intlStub', () => ({
+  getCurrentLocale: () => 'ru',
+  setLocale: () => {},
   useTranslations: () => (key: string, values?: Record<string, string | number>) => {
     const map: Record<string, string> = {
       'dashboard': 'Панель',

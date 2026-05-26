@@ -179,8 +179,9 @@ export function cleanupEventListeners(): void {
 }
 
 // During HMR, clean up listeners when the module is re-evaluated
-if (typeof window !== 'undefined' && import.meta.hot) {
-  import.meta.hot.dispose(() => {
+const importMeta = import.meta as { hot?: { dispose: (cb: () => void) => void } };
+if (typeof window !== 'undefined' && importMeta.hot) {
+  importMeta.hot.dispose(() => {
     cleanupEventListeners();
   });
 }

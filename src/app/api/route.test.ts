@@ -34,7 +34,7 @@ const mockNote = {
 
 const mockStudySession = {
   findMany: vi.fn(),
-  createMany: vi.fn(),
+  upsert: vi.fn(),
   deleteMany: vi.fn(),
 };
 

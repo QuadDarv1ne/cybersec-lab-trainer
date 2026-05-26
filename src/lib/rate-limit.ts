@@ -58,16 +58,8 @@ async function inMemoryRateLimit(ip: string): Promise<{ success: boolean; limit:
 
   if (!record || now > record.resetTime) {
     if (!record && requestCounts.size >= MAX_MAP_SIZE) {
-      // Evict the entry with the earliest resetTime (true FIFO by expiration)
-      let oldestKey: string | null = null;
-      let earliestReset = Infinity;
-      for (const [key, val] of requestCounts.entries()) {
-        if (val.resetTime < earliestReset) {
-          earliestReset = val.resetTime;
-          oldestKey = key;
-        }
-      }
-      if (oldestKey) requestCounts.delete(oldestKey);
+      const firstKey = requestCounts.keys().next().value;
+      if (firstKey !== undefined) requestCounts.delete(firstKey);
     }
     requestCounts.set(ip, { count: 1, resetTime: now + config.windowMs });
     return { success: true, limit: config.maxRequests, remaining: config.maxRequests - 1, reset: now + config.windowMs };
