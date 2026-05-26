@@ -116,7 +116,12 @@ export async function rateLimit(ip: string): Promise<{ response: NextResponse | 
   let result: { success: boolean; limit: number; remaining: number; reset: number };
 
   if (limiter) {
-    result = await limiter.limit(ip);
+    try {
+      result = await limiter.limit(ip);
+    } catch {
+      // Redis unreachable — fall back to in-memory rate limiting
+      result = await inMemoryRateLimit(ip);
+    }
   } else {
     result = await inMemoryRateLimit(ip);
   }
