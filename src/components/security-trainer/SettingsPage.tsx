@@ -57,7 +57,11 @@ export default function SettingsPage() {
     }
     if (stored) {
       try {
-        setGoals(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        // Validate that goals have positive values to prevent division by zero
+        if (parsed.dailyMinutes > 0 && parsed.weeklyDays > 0) {
+          setGoals(parsed);
+        }
       } catch { /* ignore */ }
     }
   }, []);
@@ -71,7 +75,7 @@ export default function SettingsPage() {
 
   // Today's progress
   const todayMinutes = Math.floor(getTodayTotalMs(studySessions) / 60000);
-  const dailyProgress = Math.min((todayMinutes / goals.dailyMinutes) * 100, 100);
+  const dailyProgress = goals.dailyMinutes > 0 ? Math.min((todayMinutes / goals.dailyMinutes) * 100, 100) : 0;
 
   // Weekly progress
   const weeklyProgress = useMemo(() => {
@@ -90,7 +94,7 @@ export default function SettingsPage() {
       }
     });
 
-    return Math.min((weekDays.size / goals.weeklyDays) * 100, 100);
+    return goals.weeklyDays > 0 ? Math.min((weekDays.size / goals.weeklyDays) * 100, 100) : 0;
   }, [studySessions, goals.weeklyDays]);
 
   const saveGoals = () => {
