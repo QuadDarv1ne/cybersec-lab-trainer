@@ -56,4 +56,34 @@ describe('sanitizeNoteContent', () => {
   it('handles mixed HTML and entities', () => {
     expect(sanitizeNoteContent('<p>Hello &amp; <b>World</b></p>')).toBe('Hello & World');
   });
+
+  it('decodes hex numeric entities', () => {
+    expect(sanitizeNoteContent('&#xA9;')).toBe('\u00A9'); // ©
+    expect(sanitizeNoteContent('&#x3C;')).toBe('<');
+    expect(sanitizeNoteContent('&#x2014;')).toBe('\u2014'); // —
+  });
+
+  it('decodes decimal numeric entities', () => {
+    expect(sanitizeNoteContent('&#169;')).toBe('\u00A9'); // ©
+    expect(sanitizeNoteContent('&#8212;')).toBe('\u2014'); // —
+    expect(sanitizeNoteContent('&#60;')).toBe('<');
+  });
+
+  it('decodes common named entities', () => {
+    expect(sanitizeNoteContent('&copy; &reg; &trade;')).toBe('\u00A9 \u00AE \u2122');
+    expect(sanitizeNoteContent('&mdash; &ndash; &hellip;')).toBe('\u2014 \u2013 \u2026');
+    expect(sanitizeNoteContent('&laquo; text &raquo;')).toBe('\u00AB text \u00BB');
+    expect(sanitizeNoteContent('&euro; &pound; &yen;')).toBe('\u20AC \u00A3 \u00A5');
+  });
+
+  it('preserves unknown named entities as-is', () => {
+    expect(sanitizeNoteContent('&unknown;')).toBe('&unknown;');
+    expect(sanitizeNoteContent('&foo; bar')).toBe('&foo; bar');
+  });
+
+  it('handles entities mixed with text', () => {
+    expect(sanitizeNoteContent('Copyright &copy; 2024 &mdash; All rights reserved')).toBe(
+      'Copyright \u00A9 2024 \u2014 All rights reserved'
+    );
+  });
 });
