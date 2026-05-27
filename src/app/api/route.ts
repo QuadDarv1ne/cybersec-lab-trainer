@@ -2,7 +2,7 @@ import { z } from "zod";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { quizResultSchema, progressUpdateSchema, glossarySearchSchema, batchSyncSchema, challengeBatchSchema, itemProgressBatchSchema, notesSyncSchema, noteDeleteSchema, studySessionsSyncSchema } from "@/lib/validations/api";
+import { quizResultSchema, progressUpdateSchema, glossarySearchSchema, batchSyncSchema, challengeBatchSchema, itemProgressBatchSchema, notesSyncSchema, noteDeleteSchema, studySessionsSyncSchema, quizHistorySyncSchema } from "@/lib/validations/api";
 import { getDbAdapter } from "@/lib/db-adapter";
 import { glossaryTerms } from "@/lib/data/glossary-data";
 import { modules } from "@/lib/data/modules-data";
@@ -464,6 +464,38 @@ export async function POST(request: Request) {
         }
 
         result = { saved: { sessions: savedCount }, message: "Study sessions sync completed" };
+        break;
+      }
+
+      case 'quiz-history-sync': {
+        const data = quizHistorySyncSchema.parse(payload);
+        const adapter = getDbAdapter();
+        const { quizHistory } = data;
+
+        if (quizHistory.length === 0) {
+          result = { saved: { quizHistory: 0 } };
+          break;
+        }
+
+        // Execute quiz history upserts sequentially with error handling
+        let savedCount = 0;
+        for (const qh of quizHistory) {
+          try {
+            const quizId = qh.id || `quiz-${Date.now()}-${generateUUID().slice(0, 8)}`;
+            const percentage = qh.total > 0 ? (qh.score / qh.total) * 100 : 0;
+            // Use categoryId as quizId for upsert, store the original quizId as the document id
+            await adapter.quizResult.upsert(
+              { userId, quizId: `${qh.categoryId}-${qh.timestamp}` },
+              { userId, id: quizId, quizId: `${qh.categoryId}-${qh.timestamp}`, score: qh.score, total: qh.total, percentage, createdAt: new Date(qh.timestamp) },
+              { score: qh.score, total: qh.total, percentage }
+            );
+            savedCount++;
+          } catch (error) {
+            logger.error('[API] Quiz history upsert failed:', error);
+          }
+        }
+
+        result = { saved: { quizHistory: savedCount }, message: "Quiz history sync completed" };
         break;
       }
 

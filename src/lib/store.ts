@@ -402,6 +402,24 @@ const apiClient = {
 
     return response.json().catch(() => { throw new Error('Invalid server response'); });
   },
+
+  async saveQuizHistory(quizHistory: { id?: string; categoryId: string; categoryName: string; score: number; correct: number; total: number; answers?: (boolean | null)[]; timestamp: number }[]) {
+    const response = await fetch('/api', {
+      method: 'POST',
+      headers: createApiHeaders(),
+      body: JSON.stringify({
+        type: 'quiz-history-sync',
+        payload: { quizHistory },
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || 'Failed to sync quiz history');
+    }
+
+    return response.json().catch(() => { throw new Error('Invalid server response'); });
+  },
 };
 
 // Sync with database via API (batch call)
@@ -494,6 +512,24 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
 
     if (sessionsToSync.length > 0) {
       savePromises.push(apiClient.saveStudySessions(sessionsToSync));
+    }
+
+    // Sync quiz history (only entries without server-assigned IDs)
+    const quizHistoryToSync = state.quizHistory
+      .filter((qh) => !qh.id || qh.id.startsWith('quiz-'))
+      .map((qh) => ({
+        id: qh.id,
+        categoryId: qh.categoryId,
+        categoryName: qh.categoryName,
+        score: qh.score,
+        correct: qh.correct,
+        total: qh.total,
+        answers: qh.answers,
+        timestamp: qh.timestamp,
+      }));
+
+    if (quizHistoryToSync.length > 0) {
+      savePromises.push(apiClient.saveQuizHistory(quizHistoryToSync));
     }
 
     if (savePromises.length > 0) {

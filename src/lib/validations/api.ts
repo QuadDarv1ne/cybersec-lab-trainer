@@ -119,6 +119,22 @@ export const studySessionsSyncSchema = z.object({
   sessions: z.array(studySessionSchema.omit({ sessionId: true }).extend({ id: z.string().optional() })).max(500).optional().default([]),
 });
 
+// Schema для синхронизации истории квизов (batch)
+export const quizHistorySyncSchema = z.object({
+  quizHistory: z.array(z.object({
+    id: z.string().optional(),
+    categoryId: z.string().min(1),
+    categoryName: z.string().min(1).max(200),
+    score: z.number().int().min(0),
+    correct: z.number().int().min(0),
+    total: z.number().int().min(1),
+    answers: z.array(z.boolean().nullable()).max(200).optional().default([]),
+    timestamp: z.number().int().min(0),
+  })).max(50).refine((items) => items.every((item) => item.score <= item.total), {
+    message: 'score не может превышать total',
+  }).optional().default([]),
+});
+
 // Типы для схем
 export type QuizResult = z.infer<typeof quizResultSchema>;
 export type ProgressUpdate = z.infer<typeof progressUpdateSchema>;
