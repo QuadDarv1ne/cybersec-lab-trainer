@@ -268,7 +268,7 @@ export interface IFlagSubmission {
   id: string;
   userId: string;
   labId: string;
-  flagId: string;
+  flagKey: string;
   submittedAt: Date;
   correct: boolean;
 }
@@ -276,11 +276,11 @@ export interface IFlagSubmission {
 const FlagSubmissionSchema = new Schema<IFlagSubmission>({
   userId: { type: String, required: true },
   labId: { type: String, required: true },
-  flagId: { type: String, required: true },
+  flagKey: { type: String, required: true },
   submittedAt: { type: Date, default: Date.now },
   correct: { type: Boolean, default: false },
 }, { collection: 'flag_submissions' });
 
-FlagSubmissionSchema.index({ userId: 1, labId: 1, flagId: 1 }, { unique: true });
+FlagSubmissionSchema.index({ userId: 1, labId: 1, flagKey: 1 }, { unique: true });
 
 export const FlagSubmissionModel: Model<IFlagSubmission> = mongoose.models.FlagSubmission || mongoose.model<IFlagSubmission>('FlagSubmission', FlagSubmissionSchema);
