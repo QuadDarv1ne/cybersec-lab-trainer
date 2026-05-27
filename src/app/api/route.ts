@@ -128,8 +128,17 @@ export async function GET(request: Request) {
         createdAt: toTime(ss.createdAt),
       }));
 
-      // Calculate totalXP from study sessions
-      const totalXP = studySessionRecords.reduce((sum, ss) => sum + (ss.xpEarned as number), 0);
+      // Calculate totalXP from all sources
+      // 1. Study sessions XP
+      const sessionXP = studySessionRecords.reduce((sum, ss) => sum + (ss.xpEarned as number), 0);
+
+      // 2. Module completion XP (each completed module grants XP_REWARDS.completeModule = 50 XP)
+      const moduleXP = completedModules.length * 50;
+
+      // 3. Quiz pass XP (each quiz with a score grants XP_REWARDS.quizPass = 30 XP minimum)
+      const quizXP = Object.keys(quizScores).length * 30;
+
+      const totalXP = sessionXP + moduleXP + quizXP;
 
       // Build quiz history from quiz results
       const quizHistory = quizResults.map((qr) => ({

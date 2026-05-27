@@ -135,7 +135,8 @@
     "warning": "Warning",
     "info": "Info",
     "level": "Level {level}",
-    "progress": "Progress"
+    "progress": "Progress",
+    "scrollToTop": "Scroll to top"
   },
   "sidebar": {
     "dashboard": "Dashboard",

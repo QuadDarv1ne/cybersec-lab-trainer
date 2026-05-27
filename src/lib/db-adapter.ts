@@ -272,8 +272,14 @@ function createMongooseAdapter(): DbAdapter {
     return { id, ...rest } as T;
   };
 
+  const normalizeOrThrow = <T extends { id: string }>(doc: unknown, operation: string): T => {
+    const result = normalizeDoc<T>(doc);
+    if (!result) throw new Error(`DB adapter: ${operation} returned null document`);
+    return result;
+  };
+
   const normalizeArray = <T extends { id: string }>(docs: unknown[]): T[] =>
-    docs.map(doc => normalizeDoc<T>(doc)!);
+    docs.map(doc => normalizeDoc<T>(doc)).filter((doc): doc is T => doc !== null);
 
   return {
     type: 'mongodb',
@@ -282,7 +288,7 @@ function createMongooseAdapter(): DbAdapter {
       findMany: async (where) => normalizeArray<Progress>(await ProgressModel.find(where)),
       upsert: async (where, create, update) => {
         const doc = await ProgressModel.findOneAndUpdate(where, { $set: { ...create, ...update, updatedAt: new Date() } }, { upsert: true, new: true });
-        return normalizeDoc<Progress>(doc)!;
+        return normalizeOrThrow<Progress>(doc, 'progress upsert');
       },
       deleteMany: async (where) => { await ProgressModel.deleteMany(where); },
     },
@@ -291,7 +297,7 @@ function createMongooseAdapter(): DbAdapter {
       findMany: async (where) => normalizeArray<QuizResult>(await QuizResultModel.find(where)),
       upsert: async (where, create, update) => {
         const doc = await QuizResultModel.findOneAndUpdate(where, { $set: { ...create, ...update } }, { upsert: true, new: true });
-        return normalizeDoc<QuizResult>(doc)!;
+        return normalizeOrThrow<QuizResult>(doc, 'quizResult upsert');
       },
       deleteMany: async (where) => { await QuizResultModel.deleteMany(where); },
     },
@@ -300,7 +306,7 @@ function createMongooseAdapter(): DbAdapter {
       findMany: async (where) => normalizeArray<ChallengeProgress>(await ChallengeProgressModel.find(where)),
       upsert: async (where, create, update) => {
         const doc = await ChallengeProgressModel.findOneAndUpdate(where, { $set: { ...create, ...update, updatedAt: new Date() } }, { upsert: true, new: true });
-        return normalizeDoc<ChallengeProgress>(doc)!;
+        return normalizeOrThrow<ChallengeProgress>(doc, 'challengeProgress upsert');
       },
       deleteMany: async (where) => { await ChallengeProgressModel.deleteMany(where); },
     },
@@ -309,7 +315,7 @@ function createMongooseAdapter(): DbAdapter {
       findMany: async (where) => normalizeArray<ItemProgress>(await ItemProgressModel.find(where)),
       upsert: async (where, create, update) => {
         const doc = await ItemProgressModel.findOneAndUpdate(where, { $set: { ...create, ...update, updatedAt: new Date() } }, { upsert: true, new: true });
-        return normalizeDoc<ItemProgress>(doc)!;
+        return normalizeOrThrow<ItemProgress>(doc, 'itemProgress upsert');
       },
       deleteMany: async (where) => { await ItemProgressModel.deleteMany(where); },
     },
@@ -318,7 +324,7 @@ function createMongooseAdapter(): DbAdapter {
       findMany: async (where) => normalizeArray<Note>(await NoteModel.find(where)),
       upsert: async (where, create, update) => {
         const doc = await NoteModel.findOneAndUpdate(where, { $set: { ...create, ...update, updatedAt: new Date() } }, { upsert: true, new: true });
-        return normalizeDoc<Note>(doc)!;
+        return normalizeOrThrow<Note>(doc, 'note upsert');
       },
       deleteMany: async (where) => { await NoteModel.deleteMany(where); },
     },
@@ -327,7 +333,7 @@ function createMongooseAdapter(): DbAdapter {
       findMany: async (where) => normalizeArray<StudySession>(await StudySessionModel.find(where)),
       upsert: async (where, create, update) => {
         const doc = await StudySessionModel.findOneAndUpdate(where, { $set: { ...create, ...update } }, { upsert: true, new: true });
-        return normalizeDoc<StudySession>(doc)!;
+        return normalizeOrThrow<StudySession>(doc, 'studySession upsert');
       },
       deleteMany: async (where) => { await StudySessionModel.deleteMany(where); },
     },
@@ -345,45 +351,45 @@ function createMongooseAdapter(): DbAdapter {
     labProgress: {
       findUnique: async (where) => {
         const doc = await LabProgressModel.findOne(where);
-        return doc ? normalizeDoc<LabProgress>(doc) : null;
+        return doc ? normalizeOrThrow<LabProgress>(doc, 'labProgress findUnique') : null;
       },
       upsert: async (where, create, update) => {
         const doc = await LabProgressModel.findOneAndUpdate(where, { $set: { ...create, ...update, updatedAt: new Date() } }, { upsert: true, new: true });
-        return normalizeDoc<LabProgress>(doc)!;
+        return normalizeOrThrow<LabProgress>(doc, 'labProgress upsert');
       },
-      create: async (data) => normalizeDoc<LabProgress>(await LabProgressModel.create(data))!,
+      create: async (data) => normalizeOrThrow<LabProgress>(await LabProgressModel.create(data), 'labProgress create'),
       update: async (where, data) => {
         const doc = await LabProgressModel.findOneAndUpdate(where, { $set: { ...data, updatedAt: new Date() } }, { new: true });
-        return normalizeDoc<LabProgress>(doc)!;
+        return normalizeOrThrow<LabProgress>(doc, 'labProgress update');
       },
     },
 
     flagSubmission: {
       findFirst: async (where) => {
         const doc = await FlagSubmissionModel.findOne(where);
-        return doc ? normalizeDoc<FlagSubmission>(doc) : null;
+        return doc ? normalizeOrThrow<FlagSubmission>(doc, 'flagSubmission findFirst') : null;
       },
       findMany: async (where) => normalizeArray<FlagSubmission>(await FlagSubmissionModel.find(where)),
-      create: async (data) => normalizeDoc<FlagSubmission>(await FlagSubmissionModel.create(data))!,
+      create: async (data) => normalizeOrThrow<FlagSubmission>(await FlagSubmissionModel.create(data), 'flagSubmission create'),
     },
 
     user: {
       findUnique: async (where) => {
         const doc = await UserModel.findOne(where);
-        return doc ? normalizeDoc<User>(doc) : null;
+        return doc ? normalizeOrThrow<User>(doc, 'user findUnique') : null;
       },
-      create: async (data) => normalizeDoc<User>(await UserModel.create(data))!,
+      create: async (data) => normalizeOrThrow<User>(await UserModel.create(data), 'user create'),
     },
 
     account: {
       findMany: async (where) => normalizeArray<Account>(await AccountModel.find(where)),
-      create: async (data) => normalizeDoc<Account>(await AccountModel.create(data))!,
+      create: async (data) => normalizeOrThrow<Account>(await AccountModel.create(data), 'account create'),
       deleteMany: async (where) => { await AccountModel.deleteMany(where); },
     },
 
     session: {
       findMany: async (where) => normalizeArray<Session>(await SessionModel.find(where)),
-      create: async (data) => normalizeDoc<Session>(await SessionModel.create(data))!,
+      create: async (data) => normalizeOrThrow<Session>(await SessionModel.create(data), 'session create'),
       deleteMany: async (where) => { await SessionModel.deleteMany(where); },
     },
 

@@ -518,9 +518,15 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
 
 // Load progress from database
 const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppStore) => Partial<AppStore>)) => void, _get: () => AppStore, userId: string, signal?: AbortSignal) => {
+  // If a reset is in progress, skip loading to prevent stale data from overwriting the clean state
+  if (isResetting) return;
+
   set({ syncStatus: 'syncing' });
   try {
     const data = await apiClient.loadProgress(signal);
+
+    // Double-check reset flag after async call completes
+    if (isResetting) return;
 
     // Check if request was aborted
     if (signal?.aborted) return;
