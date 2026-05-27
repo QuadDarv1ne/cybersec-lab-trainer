@@ -9,6 +9,7 @@ import { modules } from "@/lib/data/modules-data";
 import { quizCategories } from "@/lib/data/quiz-data";
 import { rateLimit, getClientIP, addRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { XP_REWARDS } from "@/lib/xp-system";
 import { setCsrfCookie, validateCsrfToken } from "@/lib/csrf-server";
 import { getCsrfCookieName, getCsrfHeaderName } from "@/lib/csrf";
 import { sanitizeNoteContent } from "@/lib/sanitize";
@@ -133,11 +134,11 @@ export async function GET(request: Request) {
       // 1. Study sessions XP
       const sessionXP = studySessionRecords.reduce((sum, ss) => sum + (ss.xpEarned as number), 0);
 
-      // 2. Module completion XP (each completed module grants XP_REWARDS.completeModule = 50 XP)
-      const moduleXP = completedModules.length * 50;
+      // 2. Module completion XP
+      const moduleXP = completedModules.length * XP_REWARDS.completeModule;
 
-      // 3. Quiz pass XP (each quiz with a score grants XP_REWARDS.quizPass = 30 XP minimum)
-      const quizXP = Object.keys(quizScores).length * 30;
+      // 3. Quiz pass XP (base reward per quiz, bonus calculated separately)
+      const quizXP = Object.keys(quizScores).length * XP_REWARDS.quizPass;
 
       const totalXP = sessionXP + moduleXP + quizXP;
 

@@ -6,6 +6,8 @@ import {
   batchSyncSchema,
   challengeProgressSchema,
   challengeBatchSchema,
+  studySessionSchema,
+  studySessionsSyncSchema,
 } from './api';
 
 describe('progressUpdateSchema', () => {
@@ -166,6 +168,119 @@ describe('challengeBatchSchema', () => {
       total: 10,
     }));
     const result = challengeBatchSchema.safeParse({ challenges });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('studySessionSchema', () => {
+  it('validates correct input', () => {
+    const result = studySessionSchema.safeParse({
+      date: '2025-01-15',
+      durationMs: 300000,
+      pageType: 'dashboard',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts all valid pageType values', () => {
+    const validTypes = [
+      'dashboard', 'owasp', 'sql-injection', 'xss', 'csrf',
+      'auth', 'secure-coding', 'tools', 'security-headers',
+      'quiz', 'achievements', 'notes', 'analytics', 'settings',
+      'weakness-review', 'blog', 'ctf-labs',
+    ];
+    for (const pageType of validTypes) {
+      const result = studySessionSchema.safeParse({
+        date: '2025-01-15',
+        durationMs: 300000,
+        pageType,
+      });
+      expect(result.success).toBe(true);
+    }
+  });
+
+  it('rejects invalid pageType value', () => {
+    const result = studySessionSchema.safeParse({
+      date: '2025-01-15',
+      durationMs: 300000,
+      pageType: 'invalid-page',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects empty pageType', () => {
+    const result = studySessionSchema.safeParse({
+      date: '2025-01-15',
+      durationMs: 300000,
+      pageType: '',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects invalid date format', () => {
+    const result = studySessionSchema.safeParse({
+      date: '15-01-2025',
+      durationMs: 300000,
+      pageType: 'dashboard',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects negative durationMs', () => {
+    const result = studySessionSchema.safeParse({
+      date: '2025-01-15',
+      durationMs: -1,
+      pageType: 'dashboard',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts optional xpEarned within range', () => {
+    const result = studySessionSchema.safeParse({
+      date: '2025-01-15',
+      durationMs: 300000,
+      pageType: 'dashboard',
+      xpEarned: 5,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('defaults xpEarned to 0', () => {
+    const result = studySessionSchema.safeParse({
+      date: '2025-01-15',
+      durationMs: 300000,
+      pageType: 'dashboard',
+    });
+    expect(result.success).toBe(true);
+    expect(result.data!.xpEarned).toBe(0);
+  });
+});
+
+describe('studySessionsSyncSchema', () => {
+  it('validates batch of sessions', () => {
+    const sessions = [
+      { date: '2025-01-15', durationMs: 300000, pageType: 'dashboard' },
+      { date: '2025-01-15', durationMs: 600000, pageType: 'sql-injection' },
+    ];
+    const result = studySessionsSyncSchema.safeParse({ sessions });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects batch with invalid pageType', () => {
+    const sessions = [
+      { date: '2025-01-15', durationMs: 300000, pageType: 'invalid-page' },
+    ];
+    const result = studySessionsSyncSchema.safeParse({ sessions });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects more than 500 sessions', () => {
+    const sessions = Array.from({ length: 501 }, () => ({
+      date: '2025-01-15',
+      durationMs: 300000,
+      pageType: 'dashboard',
+    }));
+    const result = studySessionsSyncSchema.safeParse({ sessions });
     expect(result.success).toBe(false);
   });
 });

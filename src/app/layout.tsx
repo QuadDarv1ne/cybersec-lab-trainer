@@ -5,9 +5,10 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LocaleLang } from "@/components/LocaleLang";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { SITE_URL } from "@/lib/constants";
 import "./globals.css";
 
-const siteUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: {
