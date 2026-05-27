@@ -641,7 +641,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
 
   setQuizScore: (category: string, score: number, attempt?: QuizAttempt) => {
     set((state) => {
-      const xpGain = XP_REWARDS.quizPass + Math.round(score * XP_REWARDS.quizBonusPerPercent);
+      const xpGain = category in state.quizScores ? 0 : XP_REWARDS.quizPass + Math.round(score * XP_REWARDS.quizBonusPerPercent);
       return {
         quizScores: { ...state.quizScores, [category]: score },
         quizHistory: attempt ? [attempt, ...state.quizHistory].slice(0, 50) : state.quizHistory,
