@@ -1,4 +1,5 @@
 import { type PageType } from '@/lib/store';
+import { generateUUID } from './utils';
 
 export interface StudySession {
   id: string;
@@ -157,7 +158,7 @@ export function getWeeklyStats(sessions: StudySession[], weeksBack = 1): WeeklyS
 }
 
 export function generateSessionId(): string {
-  return `session-${Date.now()}-${crypto.randomUUID()}`;
+  return `session-${Date.now()}-${generateUUID()}`;
 }
 
 /**

@@ -1,4 +1,5 @@
 // Notes/Bookmarks system types and utilities
+import { generateUUID } from './utils';
 
 export interface Note {
   id: string;            // unique note ID (UUID)
@@ -14,7 +15,7 @@ export type NotesMap = Record<string, Note>; // keyed by note id
 
 // Generate a unique ID using the Web Crypto API
 export function generateNoteId(): string {
-  return `note-${Date.now()}-${crypto.randomUUID()}`;
+  return `note-${Date.now()}-${generateUUID()}`;
 }
 
 // Count notes by module

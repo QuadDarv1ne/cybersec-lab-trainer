@@ -4,6 +4,7 @@ import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "./db";
+import { generateUUID } from './utils';
 
 const providers: NextAuthOptions["providers"] = [];
 
@@ -38,7 +39,7 @@ if (providers.length === 0) {
         const email = (credentials?.email as string) || 'demo@example.com';
         const name = (credentials?.name as string) || 'Demo User';
         return {
-          id: `demo-${crypto.randomUUID()}`,
+          id: `demo-${generateUUID()}`,
           name,
           email,
           image: null,

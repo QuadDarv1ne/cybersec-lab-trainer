@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import { quizQuestions, quizCategories } from '@/lib/security-data';
 import { useTranslations } from '@/lib/intlStub';
+import { generateUUID } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -153,7 +154,7 @@ export default function QuizSystem() {
       // Save quiz attempt to history
       const cat = quizCategories.find((c) => c.id === catId);
       const attempt = {
-        id: `attempt-${Date.now()}-${crypto.randomUUID()}`,
+        id: `attempt-${Date.now()}-${generateUUID()}`,
         categoryId: catId,
         categoryName: cat?.name || activeCategoryName,
         score,
