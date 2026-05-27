@@ -266,8 +266,10 @@ function createMongooseAdapter(): DbAdapter {
     const obj = (doc as { toObject: () => Record<string, unknown> }).toObject
       ? (doc as { toObject: () => Record<string, unknown> }).toObject()
       : doc as Record<string, unknown>;
-    const { _id, ...rest } = obj;
-    return { id: String(_id), ...rest } as T;
+    const { _id, id: existingId, ...rest } = obj;
+    const id = _id ? String(_id) : (existingId as string);
+    if (!id) return null;
+    return { id, ...rest } as T;
   };
 
   const normalizeArray = <T extends { id: string }>(docs: unknown[]): T[] =>
