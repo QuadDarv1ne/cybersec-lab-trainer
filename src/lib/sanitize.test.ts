@@ -86,4 +86,12 @@ describe('sanitizeNoteContent', () => {
       'Copyright \u00A9 2024 \u2014 All rights reserved'
     );
   });
+
+  it('handles entity-encoded text input without introducing HTML elements', () => {
+    expect(sanitizeNoteContent('&lt;b&gt;text&lt;/b&gt;')).toBe('<b>text</b>');
+  });
+
+  it('handles entity-encoded script input safely', () => {
+    expect(sanitizeNoteContent('&lt;script&gt;alert(1)&lt;/script&gt;')).toBe('<script>alert(1)</script>');
+  });
 });
