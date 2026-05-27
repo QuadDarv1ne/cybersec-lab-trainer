@@ -187,7 +187,7 @@ function ArticleReader({ article, onBack }: { article: BlogArticle; onBack: () =
 // ============================================================
 // Main Blog Page
 // ============================================================
-export default function BlogPage({ onBack }: { onBack: () => void }) {
+export default function BlogPage({ onBack }: { onBack?: () => void }) {
   const t = useTranslations('blog');
   const [selectedCategory, setSelectedCategory] = useState('Все');
   const [searchQuery, setSearchQuery] = useState('');
@@ -222,9 +222,11 @@ export default function BlogPage({ onBack }: { onBack: () => void }) {
             >
               {/* Header */}
               <div className="flex items-center gap-4 mb-6">
-                <Button variant="outline" size="sm" onClick={onBack}>
-                  <ChevronLeft size={16} /> {t('back')}
-                </Button>
+                {onBack && (
+                  <Button variant="outline" size="sm" onClick={onBack}>
+                    <ChevronLeft size={16} /> {t('back')}
+                  </Button>
+                )}
                 <div className="flex items-center gap-3">
                   <BookOpen className="w-7 h-7 text-emerald-600" />
                   <div>

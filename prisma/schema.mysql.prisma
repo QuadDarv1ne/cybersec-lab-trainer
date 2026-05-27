@@ -28,6 +28,8 @@ model User {
   itemProgress  ItemProgress[]
   notes         Note[]
   studySessions StudySession[]
+  labProgress   LabProgress[]
+  flagSubmissions FlagSubmission[]
 
   @@map("users")
 }
@@ -167,4 +169,73 @@ model StudySession {
   @@index([userId, date])
   @@index([userId, pageType])
   @@map("study_sessions")
+}
+
+// CTF Lab models
+
+model Lab {
+  id          String     @id @default(cuid())
+  number      Int        @unique
+  title       String
+  description String
+  goal        String
+  tools       String
+  difficulty  String     @default("medium")
+  category    String
+  order       Int        @default(0)
+  createdAt   DateTime   @default(now())
+
+  flags       LabFlag[]
+  progress    LabProgress[]
+  submissions FlagSubmission[]
+
+  @@map("labs")
+}
+
+model LabFlag {
+  id        String   @id @default(cuid())
+  labId     String
+  flagKey   String
+  flagValue String
+  points    Int      @default(10)
+  hint      String?
+
+  lab       Lab      @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@map("lab_flags")
+}
+
+model LabProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  labId       String
+  status      String   @default("not_started")
+  flagsFound  Int      @default(0)
+  totalFlags  Int      @default(0)
+  score       Int      @default(0)
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab         Lab      @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, labId])
+  @@map("lab_progress")
+}
+
+model FlagSubmission {
+  id        String   @id @default(cuid())
+  userId    String
+  labId     String
+  flagKey   String
+  flagValue String
+  correct   Boolean
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab       Lab      @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@index([userId, labId, flagKey])
+  @@index([userId, correct])
+  @@map("flag_submissions")
 }

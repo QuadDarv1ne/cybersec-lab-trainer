@@ -63,7 +63,7 @@ const ICON_MAP: Record<string, React.ComponentProps<typeof Target>['children']> 
 // CTFLabs Component
 // ============================================================
 
-export default function CTFLabs({ onBack }: { onBack: () => void }) {
+export default function CTFLabs({ onBack }: { onBack?: () => void }) {
   const t = useTranslations('ctf');
   const [activeLab, setActiveLab] = useState<number | null>(null);
   const [labs, setLabs] = useState<LabData[]>([]);
@@ -135,9 +135,11 @@ export default function CTFLabs({ onBack }: { onBack: () => void }) {
       <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" size="sm" onClick={onBack}>
-            <ChevronLeft size={16} /> {t('back')}
-          </Button>
+          {onBack && (
+            <Button variant="outline" size="sm" onClick={onBack}>
+              <ChevronLeft size={16} /> {t('back')}
+            </Button>
+          )}
           <div className="flex items-center gap-3">
             <Flag className="w-7 h-7 text-emerald-600" />
             <div>

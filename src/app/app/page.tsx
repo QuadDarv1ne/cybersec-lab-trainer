@@ -30,8 +30,8 @@ const WeaknessReviewPage = dynamic(() => import('@/components/security-trainer/W
 const BlogPage = dynamic(() => import('@/components/security-trainer/BlogPage'), { ssr: false, loading: () => <PageSkeleton /> });
 const CTFLabs = dynamic(() => import('@/components/security-trainer/CTFLabs'), { ssr: false, loading: () => <PageSkeleton /> });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const pages: Record<string, React.ComponentType<any>> = {
+// Components have varying prop types; all are rendered without props in this context
+const pages: Record<string, React.ComponentType> = {
   dashboard: Dashboard,
   'sql-injection': SQLInjectionLab,
   xss: XSSLab,
