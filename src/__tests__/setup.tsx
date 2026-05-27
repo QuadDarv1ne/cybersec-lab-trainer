@@ -4,7 +4,7 @@ import React from 'react';
 
 // Ensure DOMParser is available (happy-dom provides this, but just in case)
 if (typeof globalThis.DOMParser === 'undefined') {
-  // @ts-ignore - happy-dom provides DOMParser
+  // @ts-expect-error - happy-dom provides DOMParser
   globalThis.DOMParser = class DOMParser {
     parseFromString(str: string) {
       // Simple HTML parser for tests - strip tags and decode entities

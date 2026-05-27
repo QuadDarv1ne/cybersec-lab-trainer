@@ -58,7 +58,6 @@ export async function GET(request: Request) {
     const rl = await rateLimit(ip);
     if (rl.response) return rl.response;
 
-    const userId = session.user.id;
     const adapter = getDbAdapter();
 
     try {

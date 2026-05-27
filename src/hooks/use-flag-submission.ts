@@ -62,7 +62,7 @@ export function useFlagSubmission() {
 
       setLastResult(data);
       return data;
-    } catch (error) {
+    } catch {
       const result: FlagSubmissionResult = {
         correct: false,
         points: 0,

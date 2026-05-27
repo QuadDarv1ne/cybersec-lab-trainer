@@ -73,8 +73,6 @@ type ThemeCycle = 'light' | 'dark' | 'system';
 const THEME_CYCLE: ThemeCycle[] = ['light', 'dark', 'system'];
 const THEME_ICONS: Record<ThemeCycle, typeof Sun> = { light: Sun, dark: Moon, system: Monitor };
 
-const LOCALE_STORAGE_KEY = 'app-locale';
-
 export default function LandingPage() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();

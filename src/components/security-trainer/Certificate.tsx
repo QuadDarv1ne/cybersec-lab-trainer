@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import { modules, quizCategories } from '@/lib/security-data';
-import { calculateLevel, levelProgress } from '@/lib/xp-system';
+import { calculateLevel } from '@/lib/xp-system';
 import { getStreakInfo } from '@/lib/study-sessions';
 import { achievements } from '@/lib/security-data';
 import { getAchievementStatus } from '@/lib/achievement-utils';
@@ -33,7 +33,6 @@ export function Certificate() {
   const allComplete = completedModules.filter((id) => modules.some((m) => m.id === id)).length >= modules.length;
 
   const level = useMemo(() => calculateLevel(totalXP), [totalXP]);
-  const progress = useMemo(() => levelProgress(totalXP), [totalXP]);
   const streak = useMemo(() => getStreakInfo(studySessions), [studySessions]);
 
   const challengeStats = useMemo(() => ({

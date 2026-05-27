@@ -10,7 +10,6 @@ import { Progress } from '@/components/ui/progress';
 import { useTranslations } from '@/lib/intlStub';
 import { useFlagSubmission } from '@/hooks/use-flag-submission';
 import { ctfLabs, DIFFICULTY_META, CATEGORY_META } from '@/lib/data/ctf-labs-data';
-import type { CTFLab } from '@/lib/data/ctf-labs-data';
 import {
   ChevronLeft,
   Flag,
@@ -71,7 +70,7 @@ export default function CTFLabs({ onBack }: { onBack: () => void }) {
   const [flagInputs, setFlagInputs] = useState<Record<string, string>>({});
   const [revealedHints, setRevealedHints] = useState<Set<string>>(new Set());
   const [foundFlags, setFoundFlags] = useState<Set<string>>(new Set());
-  const [labProgress, setLabProgress] = useState<Record<string, { flagsFound: number; totalFlags: number; score: number }>>({});
+  const [labProgress] = useState<Record<string, { flagsFound: number; totalFlags: number; score: number }>>({});
 
   const { submitFlag, isSubmitting, lastResult } = useFlagSubmission();
 
