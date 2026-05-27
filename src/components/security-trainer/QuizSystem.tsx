@@ -177,7 +177,7 @@ export default function QuizSystem() {
     setTimerActive(false);
     setShowAnswer(true);
     const question = categoryQuestions[currentQuestion];
-    const isCorrect = parseInt(selectedAnswer) === question.correctIndex;
+    const isCorrect = parseInt(selectedAnswer, 10) === question.correctIndex;
     const qIdx = currentQuestion;
 
     setAnswers((prev) => {
