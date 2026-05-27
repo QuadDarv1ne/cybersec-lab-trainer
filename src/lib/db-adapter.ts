@@ -26,7 +26,7 @@ import {
   UserModel, AccountModel, SessionModel, ProgressModel,
   QuizResultModel, ChallengeProgressModel, VerificationTokenModel,
   ItemProgressModel, NoteModel, StudySessionModel,
-  LabProgressModel, FlagSubmissionModel,
+  LabProgressModel, FlagSubmissionModel, LabModel, LabFlagModel,
 } from './mongoose-schema';
 import { logger } from './logger';
 
@@ -340,12 +340,38 @@ function createMongooseAdapter(): DbAdapter {
 
     // CTF lab models
     lab: {
-      findMany: async () => [],
-      findUnique: async () => null,
+      findMany: async (where, include) => {
+        const labs = await LabModel.find(where || {}).sort({ order: 1, number: 1 });
+        if (include?.flags) {
+          const results: (Lab & { flags?: LabFlag[] })[] = [];
+          for (const lab of labs) {
+            const normalized = normalizeDoc<Lab>(lab);
+            if (!normalized) continue;
+            const flags = await LabFlagModel.find({ labId: normalized.id });
+            results.push({ ...normalized, flags: normalizeArray<LabFlag>(flags) });
+          }
+          return results;
+        }
+        return normalizeArray<Lab>(labs);
+      },
+      findUnique: async (where, include) => {
+        const lab = await LabModel.findOne(where);
+        if (!lab) return null;
+        const normalized = normalizeDoc<Lab>(lab);
+        if (!normalized) return null;
+        if (include?.flags) {
+          const flags = await LabFlagModel.find({ labId: normalized.id });
+          return { ...normalized, flags: normalizeArray<LabFlag>(flags) };
+        }
+        return normalized;
+      },
     },
 
     labFlag: {
-      findFirst: async () => null,
+      findFirst: async (where) => {
+        const doc = await LabFlagModel.findOne(where);
+        return doc ? normalizeDoc<LabFlag>(doc) : null;
+      },
     },
 
     labProgress: {

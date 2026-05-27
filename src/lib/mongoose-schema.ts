@@ -284,3 +284,51 @@ const FlagSubmissionSchema = new Schema<IFlagSubmission>({
 FlagSubmissionSchema.index({ userId: 1, labId: 1, flagKey: 1 }, { unique: true });
 
 export const FlagSubmissionModel: Model<IFlagSubmission> = mongoose.models.FlagSubmission || mongoose.model<IFlagSubmission>('FlagSubmission', FlagSubmissionSchema);
+
+// --- Lab ---
+export interface ILab {
+  id: string;
+  number: number;
+  title: string;
+  description: string;
+  goal: string;
+  tools: string;
+  difficulty: string;
+  category: string;
+  order: number;
+  createdAt: Date;
+}
+
+const LabSchema = new Schema<ILab>({
+  number: { type: Number, required: true, unique: true },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  goal: { type: String, required: true },
+  tools: { type: String, required: true },
+  difficulty: { type: String, default: 'medium' },
+  category: { type: String, required: true },
+  order: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now },
+}, { collection: 'labs' });
+
+export const LabModel: Model<ILab> = mongoose.models.Lab || mongoose.model<ILab>('Lab', LabSchema);
+
+// --- LabFlag ---
+export interface ILabFlag {
+  id: string;
+  labId: string;
+  flagKey: string;
+  flagValue: string;
+  points: number;
+  hint?: string;
+}
+
+const LabFlagSchema = new Schema<ILabFlag>({
+  labId: { type: String, required: true },
+  flagKey: { type: String, required: true },
+  flagValue: { type: String, required: true },
+  points: { type: Number, default: 10 },
+  hint: String,
+}, { collection: 'lab_flags' });
+
+export const LabFlagModel: Model<ILabFlag> = mongoose.models.LabFlag || mongoose.model<ILabFlag>('LabFlag', LabFlagSchema);
