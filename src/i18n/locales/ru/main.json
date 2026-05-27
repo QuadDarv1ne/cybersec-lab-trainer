@@ -135,7 +135,8 @@
     "warning": "Предупреждение",
     "info": "Информация",
     "level": "Уровень {level}",
-    "progress": "Прогресс"
+    "progress": "Прогресс",
+    "scrollToTop": "Прокрутить наверх"
   },
   "sidebar": {
     "dashboard": "Панель управления",
