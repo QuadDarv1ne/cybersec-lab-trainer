@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -78,12 +79,16 @@ export default function CTFLabs({ onBack }: { onBack: () => void }) {
     async function fetchLabs() {
       try {
         const res = await fetch('/api/flags?action=list-labs');
+        if (!res.ok) {
+          throw new Error(`Server returned ${res.status}: ${res.statusText}`);
+        }
         const data = await res.json();
         if (data.labs) {
           setLabs(data.labs);
         }
-      } catch {
-        // Fallback to static data
+      } catch (error) {
+        // Fallback to static data on server error or network failure
+        logger.warn('Failed to fetch CTF labs from server, using static data:', error);
         setLabs(ctfLabs.map(lab => ({
           ...lab,
           flags: [], // flags loaded from server only on submission

@@ -20,10 +20,19 @@ function constantTimeCompare(a: string, b: string): boolean {
 /**
  * Set CSRF token as an HTTP-only cookie and return the token value
  * that the client must include in the X-CSRF-Token header.
+ * Only generates a new token if one doesn't already exist, preventing
+ * token rotation during concurrent requests that could cause 403 errors.
  */
 export async function setCsrfCookie(): Promise<string> {
-  const token = generateCsrfToken();
   const cookieStore = await cookies();
+  const existingToken = cookieStore.get(getCsrfCookieName())?.value;
+
+  if (existingToken) {
+    // Re-use existing token to prevent concurrent request token mismatch
+    return existingToken;
+  }
+
+  const token = generateCsrfToken();
 
   cookieStore.set(getCsrfCookieName(), token, {
     httpOnly: false, // Client JS needs to read it for the Double Submit Cookie pattern

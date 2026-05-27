@@ -175,8 +175,8 @@ export default function ProgressAnalytics() {
               <span className="text-xs text-slate-600">{t('modules')}</span>
             </div>
             <div className="text-2xl font-bold text-emerald-900">{completedCount}/{modules.length}</div>
-            <Progress value={(completedCount / modules.length) * 100} className="h-1.5 mt-2" />
-            <span className="text-[10px] text-slate-500">{Math.round((completedCount / modules.length) * 100)}% завершено</span>
+            <Progress value={modules.length > 0 ? (completedCount / modules.length) * 100 : 0} className="h-1.5 mt-2" />
+            <span className="text-[10px] text-slate-500">{modules.length > 0 ? Math.round((completedCount / modules.length) * 100) : 0}% завершено</span>
           </CardContent>
         </Card>
 
