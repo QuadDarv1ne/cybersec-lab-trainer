@@ -4,6 +4,7 @@ import { useAppStore } from '@/lib/store';
 import { useHashRouting } from '@/hooks/use-hash-routing';
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useAchievementToasts } from '@/hooks/use-achievement-toasts';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import Sidebar from '@/components/security-trainer/Sidebar';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster } from 'sonner';
@@ -69,6 +70,7 @@ function PageSkeleton() {
 export default function AppPage() {
   const currentPage = useAppStore((s) => s.currentPage);
   const [searchOpen, setSearchOpen] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
   useHashRouting();
   useKeyboardShortcuts({ onOpenSearch: () => setSearchOpen(true) });
   useAchievementToasts();
@@ -91,10 +93,10 @@ export default function AppPage() {
           <AnimatePresence mode="wait">
             <motion.div
               key={currentPage}
-              initial={{ opacity: 0, y: 8 }}
+              initial={prefersReducedMotion ? {} : { opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
+              exit={prefersReducedMotion ? {} : { opacity: 0, y: -8 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
             >
               <Page />
             </motion.div>

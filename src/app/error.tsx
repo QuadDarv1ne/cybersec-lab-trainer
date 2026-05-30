@@ -18,7 +18,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex items-center justify-center min-h-[60vh] p-4">
+    <div className="flex items-center justify-center min-h-[60vh] p-4" role="alert" aria-live="assertive">
       <Card className="w-full max-w-md border-slate-200">
         <CardContent className="p-6 space-y-4">
           <div className="flex items-center gap-3">
@@ -49,7 +49,10 @@ export default function Error({
 
           <div className="flex gap-2">
             <Button
-              onClick={reset}
+              onClick={() => {
+                logger.error('User attempted retry for error:', error);
+                reset();
+              }}
               className="flex-1 bg-emerald-600 hover:bg-emerald-700"
             >
               <RefreshCw size={16} className="mr-2" />

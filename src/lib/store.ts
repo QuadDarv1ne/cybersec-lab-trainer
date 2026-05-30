@@ -797,6 +797,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
 
   awardXP: (amount: number) => {
     set((state) => ({ totalXP: state.totalXP + Math.max(0, amount) }));
+    ensureSync(get, set).catch((err) => logger.error('Sync failed after awardXP:', err));
   },
 
   getXPLevel: () => {
