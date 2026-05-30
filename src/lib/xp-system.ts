@@ -19,12 +19,12 @@ export const XP_REWARDS = {
 } as const;
 
 // Total possible XP from all actions (approximate)
-// 8 modules * 50 = 400
+// 9 modules * 50 = 450
 // 8 quizzes * (10 + 20) = 240
 // ~50 correct challenges * 5 = 250
 // First module bonus = 100
 // All modules bonus = 500
-// Total ≈ 1490 XP
+// Total ≈ 1540 XP
 
 export interface XPBreakdown {
   modules: number;
@@ -77,7 +77,7 @@ export function calculateXPBreakdown(
   quizScores: Record<string, number>,
   challengeCorrect: number,
   studySessionXP = 0,
-  totalModules = 8
+  totalModules = 9
 ): XPBreakdown {
   const moduleXP = completedModules.length * XP_REWARDS.completeModule;
   // First module bonus: awarded once the first module is completed (persists in breakdown)

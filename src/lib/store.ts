@@ -518,7 +518,7 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
 
     // Sync quiz history (only entries without server-assigned IDs)
     const quizHistoryToSync = (state.quizHistory ?? [])
-      .filter((qh) => !qh.id || qh.id.startsWith('quiz-'))
+      .filter((qh) => !qh.id || qh.id.startsWith('attempt-'))
       .map((qh) => ({
         id: qh.id,
         categoryId: qh.categoryId,
@@ -579,9 +579,10 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
         quizScores,
         userId,
         syncStatus: 'synced',
+        lastSyncedAt: Date.now(),
       });
     } else {
-      set({ userId, syncStatus: 'synced' });
+      set({ userId, syncStatus: 'synced', lastSyncedAt: Date.now() });
     }
 
     // Restore challenge progress if available
@@ -625,9 +626,15 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
       });
     }
 
-    // Restore totalXP if available (computed server-side from study sessions)
+    // Restore totalXP if available, preserving XP from local unsaved sessions
     if (typeof data.totalXP === 'number') {
-      set({ totalXP: data.totalXP });
+      set((state) => {
+        const serverIds = new Set(data.studySessions?.filter((ss: unknown) => ss && typeof ss === 'object' && 'id' in ss).map((ss: { id: string }) => ss.id) ?? []);
+        const localUnsavedXp = state.studySessions
+          .filter((ss) => !serverIds.has(ss.id))
+          .reduce((sum, ss) => sum + ss.xpEarned, 0);
+        return { totalXP: data.totalXP + localUnsavedXp };
+      });
     }
 
     // Restore quiz history if available
@@ -842,8 +849,8 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       state.authChallengeScores.correct +
       state.headersChallengeScores.correct +
       state.secureCodingChallengeScores.correct;
-    const todayTotalMs = getTodayTotalMs(state.studySessions);
-    const studySessionXP = calculateSessionXP(todayTotalMs);
+    const allTimeTotalMs = getTotalStudyTimeMs(state.studySessions);
+    const studySessionXP = calculateSessionXP(allTimeTotalMs);
     return calculateXPBreakdown(state.completedModules, state.quizScores, totalChallengeCorrect, studySessionXP, modules.length);
   },
 

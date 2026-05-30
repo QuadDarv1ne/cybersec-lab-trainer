@@ -189,16 +189,16 @@ describe('calculateXPBreakdown', () => {
     expect(breakdown.total).toBe(expectedTotal);
   });
 
-  it('uses default totalModules=8 when not specified', () => {
-    // 8 modules with default should trigger all-modules bonus + first module bonus
-    const eight = Array.from({ length: 8 }, (_, i) => `module-${i}`);
-    const breakdown = calculateXPBreakdown(eight, {}, 0, 0);
+  it('uses default totalModules=9 when not specified', () => {
+    // 9 modules with default should trigger all-modules bonus + first module bonus
+    const nine = Array.from({ length: 9 }, (_, i) => `module-${i}`);
+    const breakdown = calculateXPBreakdown(nine, {}, 0, 0);
     expect(breakdown.bonuses).toBe(XP_REWARDS.firstModuleComplete + XP_REWARDS.allModulesComplete);
 
-    // 7 modules should only have first module bonus
-    const seven = Array.from({ length: 7 }, (_, i) => `module-${i}`);
-    const breakdown7 = calculateXPBreakdown(seven, {}, 0, 0);
-    expect(breakdown7.bonuses).toBe(XP_REWARDS.firstModuleComplete);
+    // 8 modules should only have first module bonus
+    const eight = Array.from({ length: 8 }, (_, i) => `module-${i}`);
+    const breakdown8 = calculateXPBreakdown(eight, {}, 0, 0);
+    expect(breakdown8.bonuses).toBe(XP_REWARDS.firstModuleComplete);
   });
 });
 
