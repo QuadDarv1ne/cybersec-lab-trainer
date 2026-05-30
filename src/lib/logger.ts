@@ -29,7 +29,7 @@ export const logger = {
 
   error: (...args: unknown[]) => {
     // Always log errors, but format them consistently
-    const [message, ...rest] = args;
+    const [message = 'Unknown error', ...rest] = args;
     // eslint-disable-next-line no-console
     console.error(`[App] ${message}`, ...rest);
   },

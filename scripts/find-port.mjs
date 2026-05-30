@@ -64,6 +64,10 @@ function main() {
         stdio: 'inherit',
         shell: process.platform === 'win32',
       });
+      child.on('error', (err) => {
+        process.stderr.write(`Failed to start: ${err.message}\n`);
+        process.exit(1);
+      });
       child.on('exit', (code) => process.exit(code));
       return;
     }
@@ -84,6 +88,10 @@ function main() {
           shell: process.platform === 'win32',
         });
 
+        child.on('error', (err) => {
+          process.stderr.write(`Failed to start: ${err.message}\n`);
+          process.exit(1);
+        });
         child.on('exit', (code) => process.exit(code));
       })
       .catch((err) => {

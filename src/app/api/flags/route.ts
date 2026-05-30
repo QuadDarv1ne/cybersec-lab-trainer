@@ -37,12 +37,16 @@ export async function GET(request: Request) {
   if (action === 'list-labs') {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
+      await setCsrfCookie();
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const ip = getClientIP(request);
     const rl = await rateLimit(ip);
-    if (rl.response) return rl.response;
+    if (rl.response) {
+      await setCsrfCookie();
+      return rl.response;
+    }
 
     const adapter = getDbAdapter();
 

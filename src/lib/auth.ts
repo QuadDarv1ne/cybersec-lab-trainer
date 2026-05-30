@@ -87,14 +87,16 @@ if (hasOAuth) {
           return user ? { ...user.toObject(), id: user._id.toString() } : null;
         },
         linkAccount: async (data: AdapterAccount) => {
-          return AccountModel.create(data);
+          const account = await AccountModel.create(data);
+          return { ...account.toObject(), id: account._id.toString() } as AdapterAccount;
         },
         getSessionAndUser: async (sessionToken: string) => {
-          const session = await SessionModel.findOne({ sessionToken }).populate('userId');
-          if (!session || !session.userId) return null;
-          const userDoc = session.userId as { toObject: () => Record<string, unknown>; _id: string };
+          const session = await SessionModel.findOne({ sessionToken });
+          if (!session) return null;
+          const user = await UserModel.findById(session.userId);
+          if (!user) return null;
           return {
-            user: { ...userDoc.toObject(), id: userDoc._id.toString() } as AdapterUser,
+            user: { ...user.toObject(), id: user._id.toString() } as AdapterUser,
             session: { ...session.toObject(), id: session._id.toString() } as AdapterSession,
           };
         },
