@@ -460,11 +460,12 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
       total: quizCategories.find((c) => c.id === category)?.count ?? 100,
     }));
 
+    const defaultChallengeScores = { correct: 0, total: 0, answered: [] as number[], selectedOptions: {} as Record<string, number> };
     const challenges = [
-      { challengeType: 'owasp', ...state.owaspChallengeScores },
-      { challengeType: 'auth', ...state.authChallengeScores },
-      { challengeType: 'headers', ...state.headersChallengeScores },
-      { challengeType: 'secure-coding', ...state.secureCodingChallengeScores },
+      { challengeType: 'owasp', ...(state.owaspChallengeScores ?? defaultChallengeScores) },
+      { challengeType: 'auth', ...(state.authChallengeScores ?? defaultChallengeScores) },
+      { challengeType: 'headers', ...(state.headersChallengeScores ?? defaultChallengeScores) },
+      { challengeType: 'secure-coding', ...(state.secureCodingChallengeScores ?? defaultChallengeScores) },
     ].filter((c) => c.total > 0);
 
     const savePromises: Promise<unknown>[] = [];
@@ -488,7 +489,7 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
     }
 
     // Sync notes
-    const notesArray = Object.values(state.notes).map((note) => ({
+    const notesArray = Object.values(state.notes ?? {}).map((note) => ({
       id: note.id,
       itemId: note.itemId,
       moduleId: note.moduleId,
@@ -501,7 +502,7 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
     }
 
     // Sync study sessions
-    const sessionsToSync = state.studySessions
+    const sessionsToSync = (state.studySessions ?? [])
       .filter((ss) => ss.id?.startsWith('session-') || !ss.id)
       .map((ss) => ({
         id: ss.id,
@@ -516,7 +517,7 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
     }
 
     // Sync quiz history (only entries without server-assigned IDs)
-    const quizHistoryToSync = state.quizHistory
+    const quizHistoryToSync = (state.quizHistory ?? [])
       .filter((qh) => !qh.id || qh.id.startsWith('quiz-'))
       .map((qh) => ({
         id: qh.id,
@@ -875,9 +876,9 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   },
 
   deleteNote: async (noteId: string) => {
-    const removedNote = get().notes[noteId];
+    const removedNote = (get().notes ?? {})[noteId];
     set((state) => {
-      const { [noteId]: _removed, ...rest } = state.notes;
+      const { [noteId]: _removed, ...rest } = state.notes ?? {};
       return { notes: rest };
     });
     // Delete from DB first, then trigger full sync to reconcile state.
@@ -900,7 +901,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
 
   getNotesForItem: (itemId: string) => {
     const state = get();
-    return Object.values(state.notes)
+    return Object.values(state.notes ?? {})
       .filter((n) => n.itemId === itemId)
       .sort((a, b) => b.updatedAt - a.updatedAt);
   },

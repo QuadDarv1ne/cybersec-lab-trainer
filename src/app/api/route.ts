@@ -193,7 +193,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
+    const body = await request.json() ?? {};
     const { type, payload } = body;
 
     // glossary-search is public (no auth needed) — apply rate limit
