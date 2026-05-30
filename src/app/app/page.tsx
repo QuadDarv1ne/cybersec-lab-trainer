@@ -67,7 +67,7 @@ function PageSkeleton() {
 }
 
 export default function AppPage() {
-  const { currentPage } = useAppStore();
+  const currentPage = useAppStore((s) => s.currentPage);
   const [searchOpen, setSearchOpen] = useState(false);
   useHashRouting();
   useKeyboardShortcuts({ onOpenSearch: () => setSearchOpen(true) });

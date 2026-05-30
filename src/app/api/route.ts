@@ -343,7 +343,7 @@ export async function POST(request: Request) {
         }
 
         const now = new Date().toISOString();
-        const challengeResults = await Promise.all(
+        const challengeResults = await Promise.allSettled(
           challenges.map((c) =>
             adapter.challengeProgress.upsert(
               { userId, challengeType: c.challengeType },
@@ -352,8 +352,13 @@ export async function POST(request: Request) {
             )
           )
         );
+        const succeeded = challengeResults.filter((r) => r.status === 'fulfilled').length;
+        const failed = challengeResults.filter((r) => r.status === 'rejected');
+        if (failed.length > 0) {
+          logger.warn(`${failed.length} challenge upsert(s) failed during sync`);
+        }
 
-        result = { saved: { challenges: challengeResults.length }, message: "Challenge progress sync completed" };
+        result = { saved: { challenges: succeeded }, message: "Challenge progress sync completed" };
         break;
       }
 
@@ -367,7 +372,7 @@ export async function POST(request: Request) {
           break;
         }
 
-        const itemResults = await Promise.all(
+        const itemResults = await Promise.allSettled(
           items.map((item) =>
             adapter.itemProgress.upsert(
               { userId, moduleId: item.moduleId },
@@ -376,8 +381,13 @@ export async function POST(request: Request) {
             )
           )
         );
+        const succeeded = itemResults.filter((r) => r.status === 'fulfilled').length;
+        const failed = itemResults.filter((r) => r.status === 'rejected');
+        if (failed.length > 0) {
+          logger.warn(`${failed.length} item upsert(s) failed during sync`);
+        }
 
-        result = { saved: { items: itemResults.length }, message: "Item progress sync completed" };
+        result = { saved: { items: succeeded }, message: "Item progress sync completed" };
         break;
       }
 

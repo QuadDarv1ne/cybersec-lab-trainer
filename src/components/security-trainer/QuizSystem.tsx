@@ -226,8 +226,13 @@ export default function QuizSystem() {
   };
 
   const question = categoryQuestions[currentQuestion];
+  // Derive correct count from answers on the result screen to avoid stale state
+  // from React's batched updates when the timer fires immediately after the last answer.
+  const displayCorrectCount = quizState === 'result'
+    ? answersRef.current.filter(Boolean).length
+    : correctCount;
   const finalScore = categoryQuestions.length > 0
-    ? Math.round((correctCount / categoryQuestions.length) * 100)
+    ? Math.round((displayCorrectCount / categoryQuestions.length) * 100)
     : 0;
 
   // Screen reader announcement for timer warnings
@@ -286,7 +291,7 @@ export default function QuizSystem() {
                   }}
                   role="button"
                   tabIndex={0}
-                  aria-label={`Начать квиз: ${cat.name}, ${cat.count} вопросов`}
+                  aria-label={`${t('selectCategory')}: ${cat.name}, ${t('questionsCount', { count: cat.count })}`}
                 >
                   <CardContent className="p-5">
                     <div className="flex items-center gap-3">
@@ -450,7 +455,7 @@ export default function QuizSystem() {
 
               <div className="text-5xl font-bold font-mono mb-2">{finalScore}%</div>
               <p className="text-slate-400 text-sm mb-6">
-                {t('correctAnswers', { correct: correctCount, total: categoryQuestions.length })}
+                {t('correctAnswers', { correct: displayCorrectCount, total: categoryQuestions.length })}
               </p>
 
               <div className="flex gap-2 justify-center flex-wrap">

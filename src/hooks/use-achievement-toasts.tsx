@@ -12,7 +12,12 @@ import { toast } from 'sonner';
  * On initial mount, populates the previous set so that already-unlocked achievements don't trigger toasts.
  */
 export function useAchievementToasts() {
-  const { completedModules, quizScores, owaspChallengeScores, authChallengeScores, headersChallengeScores, secureCodingChallengeScores } = useAppStore();
+  const completedModules = useAppStore((s) => s.completedModules);
+  const quizScores = useAppStore((s) => s.quizScores);
+  const owaspChallengeScores = useAppStore((s) => s.owaspChallengeScores);
+  const authChallengeScores = useAppStore((s) => s.authChallengeScores);
+  const headersChallengeScores = useAppStore((s) => s.headersChallengeScores);
+  const secureCodingChallengeScores = useAppStore((s) => s.secureCodingChallengeScores);
   const previousUnlockedRef = useRef<Set<string> | null>(null);
 
   // Stable challenge stats — only changes when underlying values change

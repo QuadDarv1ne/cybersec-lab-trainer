@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { glossaryTerms } from '@/lib/data/glossary-data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -133,8 +133,17 @@ export function FlashcardMode() {
     setIsFlipped(false);
   }, [selectedCategory, studyMode]);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle keys when focus is within this component
+      const target = e.target as HTMLElement;
+      if (!containerRef.current?.contains(target)) return;
+      // Ignore when typing in inputs
+      const tagName = target.tagName.toLowerCase();
+      if (tagName === 'input' || tagName === 'textarea' || target.isContentEditable) return;
+
       if (e.key === 'ArrowRight') nextCard();
       if (e.key === 'ArrowLeft') prevCard();
       if (e.key === ' ' || e.key === 'Enter') {
@@ -142,8 +151,8 @@ export function FlashcardMode() {
         setIsFlipped((f) => !f);
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [nextCard, prevCard]);
 
   if (orderedTerms.length === 0) {
@@ -165,7 +174,7 @@ export function FlashcardMode() {
   const sessionDuration = Math.floor((Date.now() - sessionStart) / 60000);
 
   return (
-    <div className="space-y-4">
+    <div ref={containerRef} className="space-y-4" tabIndex={0}>
       {/* Controls */}
       <Card className="border-slate-200">
         <CardContent className="p-4 space-y-3">

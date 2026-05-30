@@ -22,7 +22,9 @@ interface ShortcutOptions {
  * Ignores events when focus is inside input/textarea/select elements.
  */
 export function useKeyboardShortcuts(options: ShortcutOptions = {}) {
-  const { setCurrentPage, toggleSidebar, currentPage } = useAppStore();
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
+  const toggleSidebar = useAppStore((s) => s.toggleSidebar);
+  const currentPage = useAppStore((s) => s.currentPage);
   const currentPageRef = useRef(currentPage);
   const optionsRef = useRef(options);
 
