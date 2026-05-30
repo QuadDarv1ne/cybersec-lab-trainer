@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import InlineNotes from './InlineNotes';
 import { useAppStore } from '@/lib/store';
 import { securityHeaders, headerChallenges } from '@/lib/data/security-headers-data';
@@ -36,20 +36,24 @@ export default function SecurityHeadersLab() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [correctCount, setCorrectCount] = useState(headersChallengeScores.correct);
+
+  // Keep a ref to answeredChallenges for the sync effect — avoids infinite re-render
+  const answeredChallengesRef = useRef<Set<number>>(new Set(headersChallengeScores.answered));
   const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set(headersChallengeScores.answered));
 
   // Re-sync local state when store values change
   useEffect(() => {
     setCorrectCount(headersChallengeScores.correct);
-    setAnsweredChallenges(new Set(headersChallengeScores.answered));
+    const newAnswered = new Set(headersChallengeScores.answered);
+    setAnsweredChallenges(newAnswered);
+    answeredChallengesRef.current = newAnswered;
     if (headersChallengeScores.selectedOptions[activeChallenge] !== undefined) {
       setSelectedOption(headersChallengeScores.selectedOptions[activeChallenge]);
-      setShowResult(answeredChallenges.has(activeChallenge));
+      setShowResult(answeredChallengesRef.current.has(activeChallenge));
     } else {
       setSelectedOption(null);
       setShowResult(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- including answeredChallenges would cause infinite re-render (effect creates new Set each run)
   }, [headersChallengeScores.correct, headersChallengeScores.answered, headersChallengeScores.selectedOptions, activeChallenge]);
 
   const challenge = headerChallenges[activeChallenge];
@@ -84,6 +88,7 @@ export default function SecurityHeadersLab() {
     const newAnswered = new Set(answeredChallenges);
     newAnswered.add(activeChallenge);
     setAnsweredChallenges(newAnswered);
+    answeredChallengesRef.current = newAnswered;
     const newCorrect = isCorrect ? correctCount + 1 : correctCount;
     setCorrectCount(newCorrect);
     const newSelectedOptions = { ...headersChallengeScores.selectedOptions, [activeChallenge]: selectedOption };

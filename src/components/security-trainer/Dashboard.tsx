@@ -65,8 +65,7 @@ function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: strin
     }
     const controls = animate(count, value, { duration: 1, ease: 'easeOut' });
     return controls.stop;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
+  }, [value, count, prefersReducedMotion]);
 
   return <motion.span>{text}</motion.span>;
 }

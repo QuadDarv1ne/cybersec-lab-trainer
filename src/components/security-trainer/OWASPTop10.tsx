@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { owaspTopics, owaspChallenges } from '@/lib/security-data';
 import { useTranslations } from '@/lib/intlStub';
@@ -13,7 +13,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, ChevronLeft, CheckCircle2, AlertTriangle, Shield, Target, XCircle } from 'lucide-react';
-import { useState } from 'react';
 import InlineNotes from './InlineNotes';
 
 export default function OWASPTop10() {
@@ -32,22 +31,27 @@ export default function OWASPTop10() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [correctCount, setCorrectCount] = useState(owaspChallengeScores.correct);
+
+  // Keep a ref to answeredChallenges for the sync effect — avoids infinite re-render
+  // since the effect sets answeredChallenges while also reading it.
+  const answeredChallengesRef = useRef<Set<number>>(new Set(owaspChallengeScores.answered));
   const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set(owaspChallengeScores.answered));
 
   // Re-sync local state when store values change (e.g., after navigation/rehydration)
   useEffect(() => {
     setCorrectCount(owaspChallengeScores.correct);
-    setAnsweredChallenges(new Set(owaspChallengeScores.answered));
+    const newAnswered = new Set(owaspChallengeScores.answered);
+    setAnsweredChallenges(newAnswered);
+    answeredChallengesRef.current = newAnswered;
     // Restore user's actual selection for the current challenge
     const savedSelection = owaspChallengeScores.selectedOptions?.[activeChallenge];
-    if (savedSelection !== undefined && answeredChallenges.has(activeChallenge)) {
+    if (savedSelection !== undefined && answeredChallengesRef.current.has(activeChallenge)) {
       setSelectedOption(savedSelection);
       setShowResult(true);
     } else {
       setSelectedOption(null);
       setShowResult(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- including answeredChallenges would cause infinite re-render loop (effect sets it with new Set reference each time)
   }, [owaspChallengeScores.correct, owaspChallengeScores.answered, owaspChallengeScores.selectedOptions, activeChallenge]);
 
   const studiedCount = useMemo(() => studiedOwaspItems.length, [studiedOwaspItems]);
@@ -83,6 +87,7 @@ export default function OWASPTop10() {
     const newAnswered = new Set(answeredChallenges);
     newAnswered.add(activeChallenge);
     setAnsweredChallenges(newAnswered);
+    answeredChallengesRef.current = newAnswered;
     const isCorrect = currentChallenge.options[selectedOption].correct;
     const newCorrect = isCorrect ? correctCount + 1 : correctCount;
     setCorrectCount(newCorrect);

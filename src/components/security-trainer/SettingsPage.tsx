@@ -133,7 +133,8 @@ export default function SettingsPage() {
     }
   };
 
-  const scheduleReminder = () => {
+  // Schedule reminder when goals change
+  useEffect(() => {
     if (!goals.notificationsEnabled || notificationPermission !== 'granted') return;
     if (!('Notification' in window)) return;
 
@@ -143,7 +144,6 @@ export default function SettingsPage() {
       const reminder = new Date();
       reminder.setHours(hours, minutes, 0, 0);
 
-      // If time already passed today, schedule for tomorrow
       if (reminder <= now) {
         reminder.setDate(reminder.getDate() + 1);
       }
@@ -155,22 +155,15 @@ export default function SettingsPage() {
           body: t('notificationBody'),
           icon: '/favicon.ico',
         });
-        // Schedule the next reminder after this one fires
         scheduleNext();
       }, msUntilReminder);
     };
 
     scheduleNext();
-  };
-
-  // Schedule reminder when goals change
-  useEffect(() => {
-    scheduleReminder();
     return () => {
       if (reminderTimerRef.current) clearTimeout(reminderTimerRef.current);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [goals.reminderTime, goals.notificationsEnabled]);
+  }, [goals, notificationPermission, t]);
 
   // Clean up saved timer on unmount
   useEffect(() => {

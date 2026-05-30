@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import InlineNotes from './InlineNotes';
 import { useAppStore } from '@/lib/store';
 import CodeBlock from './CodeBlock';
@@ -43,6 +43,12 @@ export default function AuthSecurityLab() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [correctCount, setCorrectCount] = useState(authChallengeScores.correct);
+
+  // Keep a ref to answeredChallenges for the sync effect — the effect reads
+  // answeredChallenges.has(activeChallenge) to restore showResult, but also
+  // calls setAnsweredChallenges. Adding the Set to deps would create a new
+  // reference each render and cause an infinite loop, so we use a ref instead.
+  const answeredChallengesRef = useRef<Set<number>>(new Set(authChallengeScores.answered));
   const [answeredChallenges, setAnsweredChallenges] = useState<Set<number>>(new Set(authChallengeScores.answered));
 
   const [password, setPassword] = useState('');
@@ -55,15 +61,16 @@ export default function AuthSecurityLab() {
   // Re-sync local state when store values change
   useEffect(() => {
     setCorrectCount(authChallengeScores.correct);
-    setAnsweredChallenges(new Set(authChallengeScores.answered));
+    const newAnswered = new Set(authChallengeScores.answered);
+    setAnsweredChallenges(newAnswered);
+    answeredChallengesRef.current = newAnswered;
     if (authChallengeScores.selectedOptions?.[activeChallenge] !== undefined) {
       setSelectedOption(authChallengeScores.selectedOptions[activeChallenge]);
-      setShowResult(answeredChallenges.has(activeChallenge));
+      setShowResult(answeredChallengesRef.current.has(activeChallenge));
     } else {
       setSelectedOption(null);
       setShowResult(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- including answeredChallenges would cause infinite re-render (effect creates new Set each run)
   }, [authChallengeScores.correct, authChallengeScores.answered, authChallengeScores.selectedOptions, activeChallenge]);
 
   // Simulated hash using Web Crypto API (SHA-256)
@@ -149,6 +156,7 @@ export default function AuthSecurityLab() {
     const newAnswered = new Set(answeredChallenges);
     newAnswered.add(activeChallenge);
     setAnsweredChallenges(newAnswered);
+    answeredChallengesRef.current = newAnswered;
     const isCorrect = currentChallenge.options[selectedOption].correct;
     const newCorrect = isCorrect ? correctCount + 1 : correctCount;
     setCorrectCount(newCorrect);
