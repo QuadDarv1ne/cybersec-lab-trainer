@@ -39,6 +39,8 @@ const mockStudySession = {
 };
 
 const mockTransaction = vi.fn();
+const mockBatchUpsertProgress = vi.fn();
+const mockBatchUpsertQuizResults = vi.fn();
 
 vi.mock('@/lib/db-adapter', () => ({
   getDbAdapter: vi.fn(() => ({
@@ -63,6 +65,8 @@ vi.mock('@/lib/db-adapter', () => ({
     session: { findMany: vi.fn(() => []), create: vi.fn(), deleteMany: vi.fn() },
     verificationToken: { create: vi.fn(), delete: vi.fn() },
     deleteAllForUser: mockTransaction,
+    batchUpsertProgress: mockBatchUpsertProgress,
+    batchUpsertQuizResults: mockBatchUpsertQuizResults,
     disconnect: vi.fn(),
   })),
 }));
@@ -280,8 +284,8 @@ describe('API Route POST /api', () => {
   it('performs batch sync when authenticated', async () => {
     vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
-    (mockProgress.upsert ).mockResolvedValue({ moduleId: 'sql-injection', completed: true, userId: 'test-user-1' });
-    (mockQuizResult.upsert ).mockResolvedValue({ quizId: 'owasp', score: 9, total: 10, userId: 'test-user-1' });
+    mockBatchUpsertProgress.mockResolvedValue(1);
+    mockBatchUpsertQuizResults.mockResolvedValue(1);
 
     const request = createPostRequest('http://localhost:3000/api', {
       type: 'batch-sync',
@@ -295,9 +299,17 @@ describe('API Route POST /api', () => {
 
     expect(response.status).toBe(200);
     const body = await response.json();
-    expect(body.message).toBe('Batch sync completed');
+    expect(body.message).toBe('Batch sync completed atomically');
     expect(body.saved.modules).toBe(1);
     expect(body.saved.quizzes).toBe(1);
+    expect(mockBatchUpsertProgress).toHaveBeenCalledWith(
+      'test-user-1',
+      [{ moduleId: 'sql-injection', completed: true, score: 85 }]
+    );
+    expect(mockBatchUpsertQuizResults).toHaveBeenCalledWith(
+      'test-user-1',
+      [{ quizId: 'owasp', score: 9, total: 10 }]
+    );
   });
 
   it('syncs challenge progress when authenticated', async () => {
@@ -399,7 +411,7 @@ describe('API Route POST /api', () => {
   it('filters invalid module IDs in batch-sync', async () => {
     vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
-    (mockProgress.upsert ).mockResolvedValue({ moduleId: 'sql-injection', completed: true });
+    mockBatchUpsertProgress.mockResolvedValue(1);
 
     const request = createPostRequest('http://localhost:3000/api', {
       type: 'batch-sync',
@@ -417,6 +429,10 @@ describe('API Route POST /api', () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.saved.modules).toBe(1); // Only valid module saved
+    expect(mockBatchUpsertProgress).toHaveBeenCalledWith(
+      'test-user-1',
+      [{ moduleId: 'sql-injection', completed: true, score: 0 }]
+    );
   });
 
   it('syncs notes when authenticated', async () => {
@@ -504,7 +520,7 @@ describe('API Route POST /api', () => {
   it('filters invalid quiz IDs in batch-sync', async () => {
     vi.mocked(getServerSession).mockResolvedValue(mockSession);
 
-    (mockQuizResult.upsert ).mockResolvedValue({ quizId: 'owasp', score: 9, total: 10 });
+    mockBatchUpsertQuizResults.mockResolvedValue(1);
 
     const request = createPostRequest('http://localhost:3000/api', {
       type: 'batch-sync',
@@ -522,6 +538,10 @@ describe('API Route POST /api', () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.saved.quizzes).toBe(1);
+    expect(mockBatchUpsertQuizResults).toHaveBeenCalledWith(
+      'test-user-1',
+      [{ quizId: 'owasp', score: 9, total: 10 }]
+    );
   });
 
   it('returns 400 for malformed JSON body', async () => {
