@@ -604,9 +604,20 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
       });
     }
 
-    // Restore quiz history if available
+    // Restore quiz history if available — merge with local unsaved quiz attempts
     if (Array.isArray(data.quizHistory)) {
-      set({ quizHistory: data.quizHistory.slice(0, MAX_QUIZ_HISTORY) });
+      set((state) => {
+        const serverIds = new Set(
+          data.quizHistory
+            .filter((qh: unknown) => qh && typeof qh === 'object' && 'id' in qh)
+            .map((qh: { id: string }) => qh.id)
+        );
+        const localUnsaved = state.quizHistory.filter((qh) => !qh.id || !serverIds.has(qh.id));
+        const merged = [...data.quizHistory, ...localUnsaved]
+          .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+          .slice(0, MAX_QUIZ_HISTORY);
+        return { quizHistory: merged };
+      });
     }
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') return;

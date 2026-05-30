@@ -87,11 +87,43 @@ describe('sanitizeNoteContent', () => {
     );
   });
 
-  it('handles entity-encoded text input without introducing HTML elements', () => {
-    expect(sanitizeNoteContent('&lt;b&gt;text&lt;/b&gt;')).toBe('<b>text</b>');
+  it('strips entity-encoded HTML tags (strip→decode→strip cycle)', () => {
+    expect(sanitizeNoteContent('&lt;b&gt;text&lt;/b&gt;')).toBe('text');
   });
 
-  it('handles entity-encoded script input safely', () => {
-    expect(sanitizeNoteContent('&lt;script&gt;alert(1)&lt;/script&gt;')).toBe('<script>alert(1)</script>');
+  it('strips entity-encoded script tags safely', () => {
+    expect(sanitizeNoteContent('&lt;script&gt;alert(1)&lt;/script&gt;')).toBe('alert(1)');
+  });
+
+  it('strips double-encoded XSS: &amp;lt;script&amp;gt;', () => {
+    // &amp;lt;script&amp;gt; → &lt;script&gt; → <script> → stripped
+    expect(sanitizeNoteContent('&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;')).toBe('alert(1)');
+  });
+
+  it('strips double-encoded img with onerror', () => {
+    // &amp;lt;img src=x onerror=alert(1)&amp;gt; → stripped after two passes
+    expect(sanitizeNoteContent('&amp;lt;img src=x onerror=&quot;alert(1)&quot;&amp;gt;')).toBe('');
+  });
+
+  it('strips triple-encoded XSS', () => {
+    // Triple encoding: &amp;amp;lt;script&amp;amp;gt; → &amp;lt;script&amp;gt; → &lt;script&gt; → <script> → stripped
+    // Note: Our implementation does strip→decode→strip (one decode pass),
+    // so triple-encoded becomes double-decoded text (safe, no executable tags)
+    const result = sanitizeNoteContent('&amp;amp;lt;script&amp;amp;gt;alert(1)&amp;amp;lt;/script&amp;amp;gt;');
+    // After first strip: &amp;amp;lt;script&amp;amp;gt;alert(1)&amp;amp;lt;/script&amp;amp;gt; (no literal tags)
+    // After decode: &amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;
+    // After second strip: &amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt; (no literal tags revealed)
+    // Result contains no executable scripts — text is safe
+    expect(result).not.toContain('<script>');
+    expect(result).not.toContain('alert(1)');
+  });
+
+  it('strips entity-encoded event handlers', () => {
+    // &lt;div onclick=&quot;alert(1)&quot;&gt; → stripped
+    expect(sanitizeNoteContent('&lt;div onclick=&quot;alert(1)&quot;&gt;text&lt;/div&gt;')).toBe('text');
+  });
+
+  it('handles nested entity-encoded tags', () => {
+    expect(sanitizeNoteContent('&lt;div&gt;&lt;span&gt;nested&lt;/span&gt;&lt;/div&gt;')).toBe('nested');
   });
 });

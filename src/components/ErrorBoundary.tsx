@@ -19,11 +19,13 @@ interface State {
 }
 
 // Hook-based wrapper to provide translations to class component
-function withTranslations<T extends React.ComponentType<Props & { t: ReturnType<typeof useTranslations> }>>(WrappedComponent: T) {
-  return function WithTranslationsWrapper(props: Props) {
+function withTranslations<TProps extends Props>(
+  WrappedComponent: React.ComponentType<TProps & { t: ReturnType<typeof useTranslations> }>,
+) {
+  return function WithTranslationsWrapper(props: TProps) {
     const t = useTranslations('error');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return <WrappedComponent {...(props as any)} t={t} />;
+    const ComponentWithTranslations = WrappedComponent as React.ComponentType<TProps & { t: ReturnType<typeof useTranslations> }>;
+    return <ComponentWithTranslations {...props} t={t} />;
   };
 }
 
