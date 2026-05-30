@@ -43,12 +43,6 @@ interface AdapterResult<T> {
   deleteMany: (where: WhereInput) => Promise<void>;
 }
 
-interface AdapterResultWithUpsert<T> {
-  findMany: (where: WhereInput) => Promise<T[]>;
-  upsert: (where: WhereInput, create: CreateInput, update: UpdateInput) => Promise<T>;
-  deleteMany: (where: WhereInput) => Promise<void>;
-}
-
 interface LabFlagAdapter {
   findFirst: (where: WhereInput) => Promise<LabFlag | null>;
 }
@@ -102,7 +96,7 @@ export interface DbAdapter {
   challengeProgress: AdapterResult<ChallengeProgress>;
   itemProgress: AdapterResult<ItemProgress>;
   note: AdapterResult<Note>;
-  studySession: AdapterResultWithUpsert<StudySession>;
+  studySession: AdapterResult<StudySession>;
 
   // CTF lab models
   lab: LabAdapter;

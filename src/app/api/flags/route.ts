@@ -15,23 +15,9 @@ import { authOptions } from '@/lib/auth';
 import { getDbAdapter } from '@/lib/db-adapter';
 import { rateLimit, getClientIP, addRateLimitHeaders } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
-import { setCsrfCookie, validateCsrfToken } from '@/lib/csrf-server';
+import { setCsrfCookie, validateCsrfToken, constantTimeCompare } from '@/lib/csrf-server';
 import { getCsrfCookieName, getCsrfHeaderName } from '@/lib/csrf';
-import { timingSafeEqual, createHash } from 'crypto';
-
-/**
- * Constant-time string comparison to prevent timing attacks on flag values.
- * Pads inputs to the same length and uses crypto.timingSafeEqual.
- */
-function constantTimeCompare(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    // Pad shorter string to match length — timingSafeEqual requires equal lengths
-    return false;
-  }
-  const aBuf = Buffer.from(a, 'utf8');
-  const bBuf = Buffer.from(b, 'utf8');
-  return timingSafeEqual(aBuf, bBuf);
-}
+import { createHash } from 'crypto';
 
 /** Hash a flag value for more secure storage (prevents DB compromise from revealing flags) */
 function hashFlagValue(value: string): string {

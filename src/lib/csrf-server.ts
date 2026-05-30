@@ -7,7 +7,7 @@ import { generateCsrfToken, hashToken, getCsrfCookieName, getCsrfHeaderName } fr
  * Uses crypto.timingSafeEqual under the hood.
  * Pads inputs to the same length to avoid timing leak from length mismatch.
  */
-function constantTimeCompare(a: string, b: string): boolean {
+export function constantTimeCompare(a: string, b: string): boolean {
   const maxLen = Math.max(a.length, b.length);
   // Pad both strings to the same length with null bytes
   const aPadded = a.padEnd(maxLen, '\0');

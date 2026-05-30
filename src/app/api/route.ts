@@ -23,6 +23,9 @@ const validQuizIds = new Set(quizCategories.map((c) => c.id));
 function toDate(val: unknown): Date {
   if (val instanceof Date) return val;
   if (typeof val === 'string') return new Date(val);
+  if (val === null || val === undefined) {
+    throw new Error(`Invalid date value: ${val}`);
+  }
   return new Date();
 }
 
@@ -232,16 +235,16 @@ export async function POST(request: Request) {
     }
     const userId = session.user.id;
 
+    // Validate CSRF token before consuming rate limit
+    const csrfValid = await validateCsrfToken(request);
+    if (!csrfValid) {
+      return NextResponse.json({ error: "Invalid or missing CSRF token" }, { status: 403 });
+    }
+
     // Apply rate limit only for authenticated requests
     rateLimitResult = await applyRateLimit(request);
     if (rateLimitResult.response) {
       return rateLimitResult.response;
-    }
-
-    // Validate CSRF token for all authenticated POST requests
-    const csrfValid = await validateCsrfToken(request);
-    if (!csrfValid) {
-      return NextResponse.json({ error: "Invalid or missing CSRF token" }, { status: 403 });
     }
 
     let result: Record<string, unknown>;
