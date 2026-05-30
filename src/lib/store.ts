@@ -956,6 +956,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       quizHistory: data.quizHistory,
       totalXP: data.totalXP ?? 0,
       notes: data.notes ?? {},
+      studySessions: data.studySessions ?? [],
     });
     ensureSync(get, set).catch((err) => logger.error('Sync failed after importProgressData:', err));
   },
@@ -976,7 +977,8 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     if (isInternalSignal) {
       loadAbortController = new AbortController();
     }
-    const effectiveSignal = signal ?? loadAbortController!.signal;
+    const effectiveSignal = signal ?? loadAbortController?.signal;
+    if (!effectiveSignal) return;
     try {
       await loadFromDatabase(set, get, userId, effectiveSignal);
     } finally {

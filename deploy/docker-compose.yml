@@ -23,10 +23,8 @@ services:
         condition: service_healthy
       mysql-db:
         condition: service_healthy
-        required: false
       mongo-db:
         condition: service_healthy
-        required: false
     restart: unless-stopped
     networks:
       - cybersec
