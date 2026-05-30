@@ -35,27 +35,24 @@ export interface XPBreakdown {
   total: number;
 }
 
-// Calculate level from total XP
+// Calculate level from total XP using closed-form triangular number formula.
+// Cumulative XP to reach level N from level 1: sum(1..N-1) * 100 = (N-1)*N/2 * 100.
+// Solving for N given totalXP: N ≈ floor((sqrt(1 + 8*totalXP/100) - 1) / 2) + 1
 export function calculateLevel(totalXP: number): number {
   if (totalXP <= 0) return 1;
-  let level = 1;
-  let remaining = totalXP;
-  while (remaining >= XP_PER_LEVEL(level) && level < MAX_LEVEL) {
-    remaining -= XP_PER_LEVEL(level);
-    level++;
-  }
-  return level;
+  // Solve (N-1)*N/2 * 100 <= totalXP for N
+  const discriminant = 1 + (8 * totalXP) / 100;
+  const level = Math.floor((Math.sqrt(discriminant) - 1) / 2) + 1;
+  return Math.min(level, MAX_LEVEL);
 }
 
 // Calculate XP needed for next level (returns 0 if at max level)
 export function xpToNextLevel(totalXP: number): number {
   const level = calculateLevel(totalXP);
   if (level >= MAX_LEVEL) return 0;
-  let accumulated = 0;
-  for (let i = 1; i < level; i++) {
-    accumulated += XP_PER_LEVEL(i);
-  }
-  const currentLevelXP = totalXP - accumulated;
+  // Cumulative XP spent reaching current level: (level-1)*level/2 * 100
+  const cumulativeXP = ((level - 1) * level / 2) * 100;
+  const currentLevelXP = totalXP - cumulativeXP;
   return XP_PER_LEVEL(level) - currentLevelXP;
 }
 
@@ -63,11 +60,8 @@ export function xpToNextLevel(totalXP: number): number {
 export function levelProgress(totalXP: number): number {
   const level = calculateLevel(totalXP);
   if (level >= MAX_LEVEL) return 100;
-  let accumulated = 0;
-  for (let i = 1; i < level; i++) {
-    accumulated += XP_PER_LEVEL(i);
-  }
-  const currentLevelXP = totalXP - accumulated;
+  const cumulativeXP = ((level - 1) * level / 2) * 100;
+  const currentLevelXP = totalXP - cumulativeXP;
   return Math.round((currentLevelXP / XP_PER_LEVEL(level)) * 100);
 }
 

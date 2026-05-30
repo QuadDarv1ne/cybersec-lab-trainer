@@ -124,6 +124,8 @@ let pendingResolve: (() => void) | null = null;
 let isExecuting = false; // true while syncWithDatabase is actually running
 let followUpScheduled = false;
 const SYNC_DELAY_MS = 500;
+const MAX_STUDY_SESSIONS = 100;
+const MAX_QUIZ_HISTORY = 50;
 
 // Abort controller for in-flight loadFromDatabase requests
 let loadAbortController: AbortController | null = null;
@@ -622,7 +624,7 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
       set((state) => {
         const serverIds = new Set(data.studySessions.filter((ss: unknown) => ss && typeof ss === 'object' && 'id' in ss).map((ss: { id: string }) => ss.id));
         const localUnsaved = state.studySessions.filter((ss) => !serverIds.has(ss.id));
-        return { studySessions: [...data.studySessions, ...localUnsaved].slice(0, 100) };
+        return { studySessions: [...data.studySessions, ...localUnsaved].slice(0, MAX_STUDY_SESSIONS) };
       });
     }
 
@@ -639,7 +641,7 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
 
     // Restore quiz history if available
     if (Array.isArray(data.quizHistory)) {
-      set({ quizHistory: data.quizHistory.slice(0, 50) });
+      set({ quizHistory: data.quizHistory.slice(0, MAX_QUIZ_HISTORY) });
     }
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') return;
@@ -695,7 +697,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       const xpGain = category in state.quizScores ? 0 : XP_REWARDS.quizPass + Math.round(score * XP_REWARDS.quizBonusPerPercent);
       return {
         quizScores: { ...state.quizScores, [category]: score },
-        quizHistory: attempt ? [attempt, ...state.quizHistory].slice(0, 50) : state.quizHistory,
+        quizHistory: attempt ? [attempt, ...state.quizHistory].slice(0, MAX_QUIZ_HISTORY) : state.quizHistory,
         totalXP: state.totalXP + xpGain,
       };
     });
@@ -705,7 +707,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
 
   addQuizAttempt: (attempt: QuizAttempt) => {
     set((state) => ({
-      quizHistory: [attempt, ...state.quizHistory].slice(0, 50),
+      quizHistory: [attempt, ...state.quizHistory].slice(0, MAX_QUIZ_HISTORY),
     }));
     ensureSync(get, set).catch((err) => logger.error('Sync failed after addQuizAttempt:', err));
   },
@@ -932,7 +934,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
           pageType: activeSessionPage!,
           xpEarned,
         },
-      ].slice(0, 100),
+      ].slice(0, MAX_STUDY_SESSIONS),
       totalXP: state.totalXP + xpEarned,
     }));
     activeSessionStart = null;

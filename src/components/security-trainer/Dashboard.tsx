@@ -640,12 +640,18 @@ export default function Dashboard() {
                 }
                 const reader = new FileReader();
                 reader.onload = (ev) => {
-                  const content = ev.target?.result as string;
-                  const data = importProgress(content);
-                  if (data) {
-                    importProgressData(data);
-                    toast.success(t('exportImport.importSuccess'));
-                  } else {
+                  try {
+                    const content = ev.target?.result as string;
+                    const data = importProgress(content);
+                    if (data) {
+                      importProgressData(data);
+                      toast.success(t('exportImport.importSuccess'));
+                    } else {
+                      toast.error(t('exportImport.importError'), {
+                        icon: <AlertTriangle size={16} />,
+                      });
+                    }
+                  } catch {
                     toast.error(t('exportImport.importError'), {
                       icon: <AlertTriangle size={16} />,
                     });
