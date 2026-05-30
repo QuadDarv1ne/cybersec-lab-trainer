@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import SyncIndicator from './SyncIndicator';
 
-// Mock modules first (hoisted)
 vi.mock('@/hooks/use-session', () => ({
   useSession: vi.fn(),
 }));
@@ -11,11 +10,12 @@ vi.mock('@/lib/store', () => ({
   useAppStore: vi.fn(),
 }));
 
-// Then create mock references using dynamic imports
-const mockUseSession = vi.mocked((await import('@/hooks/use-session')).useSession);
-const mockUseAppStore = vi.mocked((await import('@/lib/store')).useAppStore);
+const { useSession } = await import('@/hooks/use-session');
+const { useAppStore } = await import('@/lib/store');
 
-// Helper to create a valid session object with required expires field
+const mockUseSession = vi.mocked(useSession);
+const mockUseAppStore = vi.mocked(useAppStore);
+
 function createMockSession() {
   return {
     user: { id: 'user-123', name: 'Test User', email: null, image: null },
@@ -23,7 +23,6 @@ function createMockSession() {
   };
 }
 
-// Helper to create a minimal AppStore mock with only the fields SyncIndicator uses
 function createAppStoreMock(overrides: Partial<{ syncStatus: 'idle' | 'syncing' | 'synced' | 'error'; lastSyncedAt: number | null; userId: string | null }> = {}) {
   const state = {
     syncStatus: 'idle' as const,
@@ -37,7 +36,6 @@ function createAppStoreMock(overrides: Partial<{ syncStatus: 'idle' | 'syncing' 
 describe('SyncIndicator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default mocks
     mockUseSession.mockReturnValue({
       isAuthenticated: false,
       session: null,
@@ -46,10 +44,10 @@ describe('SyncIndicator', () => {
       user: undefined,
       update: vi.fn(),
     });
-    
+
     mockUseAppStore.mockImplementation((selector) => {
       const state = createAppStoreMock();
-      return selector ? selector(state as any) : state;
+      return selector ? selector(state) : state;
     });
   });
 
@@ -70,7 +68,7 @@ describe('SyncIndicator', () => {
 
     mockUseAppStore.mockImplementation((selector) => {
       const state = createAppStoreMock({ userId: null });
-      return selector ? selector(state as any) : state;
+      return selector ? selector(state) : state;
     });
 
     const { container } = render(<SyncIndicator />);
@@ -89,7 +87,7 @@ describe('SyncIndicator', () => {
 
     mockUseAppStore.mockImplementation((selector) => {
       const state = createAppStoreMock({ userId: 'user-123' });
-      return selector ? selector(state as any) : state;
+      return selector ? selector(state) : state;
     });
 
     render(<SyncIndicator />);
@@ -108,7 +106,7 @@ describe('SyncIndicator', () => {
 
     mockUseAppStore.mockImplementation((selector) => {
       const state = createAppStoreMock({ userId: 'user-123' });
-      return selector ? selector(state as any) : state;
+      return selector ? selector(state) : state;
     });
 
     render(<SyncIndicator />);
@@ -127,7 +125,7 @@ describe('SyncIndicator', () => {
 
     mockUseAppStore.mockImplementation((selector) => {
       const state = createAppStoreMock({ syncStatus: 'syncing', userId: 'user-123' });
-      return selector ? selector(state as any) : state;
+      return selector ? selector(state) : state;
     });
 
     render(<SyncIndicator />);
@@ -146,7 +144,7 @@ describe('SyncIndicator', () => {
 
     mockUseAppStore.mockImplementation((selector) => {
       const state = createAppStoreMock({ syncStatus: 'synced', lastSyncedAt: Date.now() - 3000, userId: 'user-123' });
-      return selector ? selector(state as any) : state;
+      return selector ? selector(state) : state;
     });
 
     render(<SyncIndicator />);
@@ -165,7 +163,7 @@ describe('SyncIndicator', () => {
 
     mockUseAppStore.mockImplementation((selector) => {
       const state = createAppStoreMock({ syncStatus: 'error', userId: 'user-123' });
-      return selector ? selector(state as any) : state;
+      return selector ? selector(state) : state;
     });
 
     render(<SyncIndicator />);
@@ -184,7 +182,7 @@ describe('SyncIndicator', () => {
 
     mockUseAppStore.mockImplementation((selector) => {
       const state = createAppStoreMock({ syncStatus: 'synced', lastSyncedAt: Date.now() - 2000, userId: 'user-123' });
-      return selector ? selector(state as any) : state;
+      return selector ? selector(state) : state;
     });
 
     render(<SyncIndicator />);
@@ -203,7 +201,7 @@ describe('SyncIndicator', () => {
 
     mockUseAppStore.mockImplementation((selector) => {
       const state = createAppStoreMock({ syncStatus: 'synced', lastSyncedAt: Date.now() - 45000, userId: 'user-123' });
-      return selector ? selector(state as any) : state;
+      return selector ? selector(state) : state;
     });
 
     render(<SyncIndicator />);
@@ -222,7 +220,7 @@ describe('SyncIndicator', () => {
 
     mockUseAppStore.mockImplementation((selector) => {
       const state = createAppStoreMock({ syncStatus: 'synced', lastSyncedAt: Date.now() - 120000, userId: 'user-123' });
-      return selector ? selector(state as any) : state;
+      return selector ? selector(state) : state;
     });
 
     render(<SyncIndicator />);
@@ -241,7 +239,7 @@ describe('SyncIndicator', () => {
 
     mockUseAppStore.mockImplementation((selector) => {
       const state = createAppStoreMock({ syncStatus: 'synced', lastSyncedAt: Date.now(), userId: 'user-123' });
-      return selector ? selector(state as any) : state;
+      return selector ? selector(state) : state;
     });
 
     render(<SyncIndicator />);

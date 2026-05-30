@@ -22,7 +22,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN bunx prisma generate
 
-RUN bun build
+RUN bun run build
 
 # Stage 3: Production runner
 FROM base AS runner
