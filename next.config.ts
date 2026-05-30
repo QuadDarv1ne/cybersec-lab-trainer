@@ -21,7 +21,8 @@ const nextConfig: NextConfig = {
 
     return [
       {
-        source: '/:path*',
+        // Page routes — full security headers
+        source: '/((?!api).*)',
         headers: [
           {
             key: 'Content-Security-Policy',
@@ -34,6 +35,13 @@ const nextConfig: NextConfig = {
           ...(process.env.NODE_ENV === 'production'
             ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }]
             : []),
+        ],
+      },
+      {
+        // API routes — minimal headers (no CSP, no DNS prefetch)
+        source: '/api/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
         ],
       },
     ];

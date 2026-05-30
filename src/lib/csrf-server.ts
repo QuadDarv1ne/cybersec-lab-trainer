@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { timingSafeEqual } from 'crypto';
-import { generateCsrfToken, hashToken, getCsrfCookieName, getCsrfHeaderName } from './csrf';
+import { getCsrfCookieName, getCsrfHeaderName } from './csrf-constants';
+import { generateCsrfToken, hashToken } from './csrf';
 
 /**
  * Perform constant-time string comparison to prevent timing attacks.

@@ -1,7 +1,6 @@
 import { createHash, randomBytes } from 'crypto';
+import { getCsrfCookieName, getCsrfHeaderName } from './csrf-constants';
 
-const CSRF_COOKIE_NAME = 'csrf-token';
-const CSRF_HEADER_NAME = 'x-csrf-token';
 const TOKEN_LENGTH = 32;
 
 /**
@@ -18,16 +17,4 @@ export function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
 
-/**
- * Get the CSRF cookie name for client-side reference.
- */
-export function getCsrfCookieName(): string {
-  return CSRF_COOKIE_NAME;
-}
-
-/**
- * Get the CSRF header name for client-side reference.
- */
-export function getCsrfHeaderName(): string {
-  return CSRF_HEADER_NAME;
-}
+export { getCsrfCookieName, getCsrfHeaderName };

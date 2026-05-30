@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import SyncIndicator from './SyncIndicator';
+import type { AppStore } from '@/lib/store';
 
 vi.mock('@/hooks/use-session', () => ({
   useSession: vi.fn(),
@@ -23,13 +24,13 @@ function createMockSession() {
   };
 }
 
-function createAppStoreMock(overrides: Partial<{ syncStatus: 'idle' | 'syncing' | 'synced' | 'error'; lastSyncedAt: number | null; userId: string | null }> = {}) {
-  const state = {
-    syncStatus: 'idle' as const,
+function createAppStoreMock(overrides: Partial<Pick<AppStore, 'syncStatus' | 'lastSyncedAt' | 'userId'>> = {}) {
+  const state: AppStore = {
+    syncStatus: 'idle',
     lastSyncedAt: null,
     userId: null,
     ...overrides,
-  };
+  } as AppStore;
   return state;
 }
 

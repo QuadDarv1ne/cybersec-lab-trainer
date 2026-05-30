@@ -8,7 +8,7 @@ import { logger } from './logger';
 import { XP_REWARDS, calculateLevel, xpToNextLevel, calculateXPBreakdown, levelProgress, type XPBreakdown } from './xp-system';
 import { type NotesMap, type Note, generateNoteId } from './notes-system';
 import { type StudySession, calculateSessionXP, generateSessionId, getTodayTotalMs, getTotalStudyTimeMs } from './study-sessions';
-import { getCsrfCookieName, getCsrfHeaderName } from './csrf';
+import { getCsrfCookieName, getCsrfHeaderName } from './csrf-constants';
 import { sanitizeNoteContent } from './sanitize';
 
 export type PageType =
@@ -95,6 +95,7 @@ interface AppActions {
     quizHistory: AppStore['quizHistory'];
     totalXP?: number;
     notes?: NotesMap;
+    studySessions?: StudySession[];
   }) => void;
   awardXP: (amount: number) => void;
   getXPLevel: () => { level: number; progress: number; xpToNext: number; totalXP: number };
