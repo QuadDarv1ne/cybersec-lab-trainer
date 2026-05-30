@@ -112,7 +112,7 @@ interface AppActions {
   loadFromDatabase: (userId: string, signal?: AbortSignal) => Promise<void>;
 }
 
-type AppStore = AppState & AppActions;
+export type AppStore = AppState & AppActions;
 
 // Debounced sync coalescer — batches rapid state changes into a single API call.
 // Uses a timer to wait SYNC_DELAY_MS after the last trigger before flushing.
