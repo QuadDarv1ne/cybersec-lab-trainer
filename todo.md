@@ -20,7 +20,7 @@
 - **Dockerfile fix** — `prisma generate` перед build
 - **`.dockerignore`** — создан
 - **Доступность FlashcardMode** — `onKeyDown` для Enter/Space
-- **Batch-sync улучшен** — `Promise.allSettled` с обработкой ошибок
+- **Batch-sync транзакции** — заменён `Promise.allSettled` на атомарные транзакции через `prisma.$transaction` / MongoDB session transactions. Теперь либо все обновления сохраняются, либо ни одно (rollback при ошибе).
 - **FIFO eviction в rate-limit** — корректное удаление oldest entry по resetTime вместо `entries().next()`
 - **Тесты** — sanitize.ts (13 тестов), store actions (19 тестов), API route edge cases (8 новых), i18n completeness (12 новых)
 
@@ -53,8 +53,3 @@ SecureCodingLab и челленджи не имеют подсказок — с�
 - Прогрессивные подсказки (общая → конкретная, до 3 уровней)
 - Каждая подсказка уменьшает максимальный XP за задачу
 - Визуальный индикатор: «подсказка использована, XP −20%»
-
-## 5. Batch-sync транзакции
-**Приоритет:** Средний
-API использует `Promise.allSettled` — можно улучшить до `prisma.$transaction` для полной атомарности.
-- Заменить на `prisma.$transaction` с `createMany`/`updateMany`

@@ -113,6 +113,10 @@ export interface DbAdapter {
   // Atomic delete of all user data across all tables
   deleteAllForUser: (userId: string) => Promise<void>;
 
+  // Atomic batch operations — either all succeed or none do
+  batchUpsertProgress: (userId: string, modules: Array<{ moduleId: string; completed: boolean; score: number }>) => Promise<number>;
+  batchUpsertQuizResults: (userId: string, quizzes: Array<{ quizId: string; score: number; total: number }>) => Promise<number>;
+
   // Disconnect
   disconnect: () => Promise<void>;
 }
@@ -245,6 +249,37 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
         db.account.deleteMany({ where: { userId } }),
         db.session.deleteMany({ where: { userId } }),
       ]);
+    },
+
+    batchUpsertProgress: async (userId: string, modules: Array<{ moduleId: string; completed: boolean; score: number }>) => {
+      if (modules.length === 0) return 0;
+      const now = new Date().toISOString();
+      await db.$transaction(
+        modules.map((m) =>
+          db.progress.upsert({
+            where: { userId_moduleId: { userId, moduleId: m.moduleId } },
+            create: { userId, moduleId: m.moduleId, completed: m.completed, score: m.score, lastAccessed: now },
+            update: { completed: m.completed, score: m.score, lastAccessed: now },
+          })
+        )
+      );
+      return modules.length;
+    },
+
+    batchUpsertQuizResults: async (userId: string, quizzes: Array<{ quizId: string; score: number; total: number }>) => {
+      if (quizzes.length === 0) return 0;
+      const now = new Date().toISOString();
+      await db.$transaction(
+        quizzes.map((q) => {
+          const pct = q.total > 0 ? (q.score / q.total) * 100 : 0;
+          return db.quizResult.upsert({
+            where: { userId_quizId: { userId, quizId: q.quizId } },
+            create: { userId, quizId: q.quizId, score: q.score, total: q.total, percentage: pct, createdAt: now },
+            update: { score: q.score, total: q.total, percentage: pct },
+          });
+        })
+      );
+      return quizzes.length;
     },
 
     disconnect: async () => {
@@ -437,6 +472,52 @@ function createMongooseAdapter(): DbAdapter {
         await AccountModel.deleteMany({ userId }, { session });
         await SessionModel.deleteMany({ userId }, { session });
         await session.commitTransaction();
+      } catch (error) {
+        await session.abortTransaction();
+        throw error;
+      } finally {
+        session.endSession();
+      }
+    },
+
+    batchUpsertProgress: async (userId: string, modules: Array<{ moduleId: string; completed: boolean; score: number }>) => {
+      if (modules.length === 0) return 0;
+      const session = await mongoose.startSession();
+      session.startTransaction();
+      try {
+        const now = new Date();
+        for (const m of modules) {
+          await ProgressModel.findOneAndUpdate(
+            { userId, moduleId: m.moduleId },
+            { $set: { userId, moduleId: m.moduleId, completed: m.completed, score: m.score, lastAccessed: now, updatedAt: now } },
+            { upsert: true, new: true, session }
+          );
+        }
+        await session.commitTransaction();
+        return modules.length;
+      } catch (error) {
+        await session.abortTransaction();
+        throw error;
+      } finally {
+        session.endSession();
+      }
+    },
+
+    batchUpsertQuizResults: async (userId: string, quizzes: Array<{ quizId: string; score: number; total: number }>) => {
+      if (quizzes.length === 0) return 0;
+      const session = await mongoose.startSession();
+      session.startTransaction();
+      try {
+        for (const q of quizzes) {
+          const pct = q.total > 0 ? (q.score / q.total) * 100 : 0;
+          await QuizResultModel.findOneAndUpdate(
+            { userId, quizId: q.quizId },
+            { $set: { userId, quizId: q.quizId, score: q.score, total: q.total, percentage: pct } },
+            { upsert: true, new: true, session }
+          );
+        }
+        await session.commitTransaction();
+        return quizzes.length;
       } catch (error) {
         await session.abortTransaction();
         throw error;

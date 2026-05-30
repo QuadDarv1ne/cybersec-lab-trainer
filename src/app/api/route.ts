@@ -306,41 +306,29 @@ export async function POST(request: Request) {
           break;
         }
 
-        const now = new Date().toISOString();
-        const savePromises: Promise<unknown>[] = [];
-        if (modules.length > 0) {
-          for (const m of modules) {
-            savePromises.push(
-              adapter.progress.upsert(
-                { userId, moduleId: m.moduleId },
-                { userId, moduleId: m.moduleId, completed: m.completed, score: m.score ?? 0, lastAccessed: now },
-                { completed: m.completed, score: m.score ?? 0, lastAccessed: now }
-              )
+        // Use atomic batch operations — either all succeed or none do
+        // This prevents partial syncs that corrupt user state (e.g., modules saved but quizzes fail)
+        let savedModules = 0;
+        let savedQuizzes = 0;
+        try {
+          if (modules.length > 0) {
+            savedModules = await adapter.batchUpsertProgress(
+              userId,
+              modules.map((m) => ({ moduleId: m.moduleId, completed: m.completed, score: m.score ?? 0 }))
             );
           }
-        }
-        if (quizzes.length > 0) {
-          for (const q of quizzes) {
-            const pct = q.total > 0 ? (q.score / q.total) * 100 : 0;
-            savePromises.push(
-              adapter.quizResult.upsert(
-                { userId, quizId: q.quizId },
-                { userId, quizId: q.quizId, score: q.score, total: q.total, percentage: pct, createdAt: now },
-                { score: q.score, total: q.total, percentage: pct }
-              )
+          if (quizzes.length > 0) {
+            savedQuizzes = await adapter.batchUpsertQuizResults(
+              userId,
+              quizzes.map((q) => ({ quizId: q.quizId, score: q.score, total: q.total }))
             );
           }
+        } catch (error) {
+          logger.error('Batch-sync transaction failed, all changes rolled back:', error);
+          throw new Error('Batch sync failed — transaction rolled back for data consistency');
         }
 
-        const results = await Promise.allSettled(savePromises);
-        const failures = results.filter((r) => r.status === 'rejected');
-        if (failures.length > 0) {
-          throw new Error(`${failures.length} upsert(s) failed`);
-        }
-
-        const moduleResults = results.slice(0, modules.length);
-        const quizResults = results.slice(modules.length);
-        result = { saved: { modules: moduleResults.length, quizzes: quizResults.length }, message: "Batch sync completed" };
+        result = { saved: { modules: savedModules, quizzes: savedQuizzes }, message: "Batch sync completed atomically" };
         break;
       }
 
