@@ -6,7 +6,8 @@ import { Star, TrendingUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 export default function XPDisplay() {
-  const { getXPLevel, getXPBreakdown } = useAppStore();
+  const getXPLevel = useAppStore((s) => s.getXPLevel);
+  const getXPBreakdown = useAppStore((s) => s.getXPBreakdown);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const xpInfo = getXPLevel();
   const breakdown = useMemo(() => getXPBreakdown(), [getXPBreakdown]);

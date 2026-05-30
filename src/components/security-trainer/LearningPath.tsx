@@ -24,7 +24,8 @@ for (const mod of modules) {
 }
 
 export function LearningPath() {
-  const { setCurrentPage, completedModules } = useAppStore();
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
+  const completedModules = useAppStore((s) => s.completedModules);
   const t = useTranslations('dashboard');
 
   const pathModules = useMemo(() =>

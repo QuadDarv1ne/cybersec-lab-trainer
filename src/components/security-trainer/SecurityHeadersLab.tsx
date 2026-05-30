@@ -24,7 +24,11 @@ import {
 
 export default function SecurityHeadersLab() {
   const t = useTranslations('securityHeaders');
-  const { completeModule, setCurrentPage, completedModules, headersChallengeScores, setHeadersChallengeScore } = useAppStore();
+  const completeModule = useAppStore((s) => s.completeModule);
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
+  const completedModules = useAppStore((s) => s.completedModules);
+  const headersChallengeScores = useAppStore((s) => s.headersChallengeScores);
+  const setHeadersChallengeScore = useAppStore((s) => s.setHeadersChallengeScore);
   const isCompleted = completedModules.includes('security-headers');
 
   // Challenge state

@@ -264,6 +264,16 @@ const createApiHeaders = (): Record<string, string> => {
   return headers;
 };
 
+// Parse API response with consistent error handling.
+// Throws on non-2xx status or invalid JSON, with descriptive messages.
+const parseApiResponse = async <T = unknown>(response: Response, action: string): Promise<T> => {
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(error.error || `Failed to ${action}`);
+  }
+  return response.json().catch(() => { throw new Error(`Invalid server response while trying to ${action}`); });
+};
+
 // API client functions
 const apiClient = {
   async loadProgress(signal?: AbortSignal) {
@@ -272,12 +282,7 @@ const apiClient = {
       signal,
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(error.error || 'Failed to load progress');
-    }
-
-    return response.json().catch(() => { throw new Error('Invalid server response'); });
+    return parseApiResponse(response, 'load progress');
   },
 
   async saveBatch(modules: { moduleId: string; completed: boolean; score?: number }[], quizzes: { quizId: string; score: number; total: number }[]) {
@@ -290,12 +295,7 @@ const apiClient = {
       }),
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(error.error || 'Failed to batch sync');
-    }
-
-    return response.json().catch(() => { throw new Error('Invalid server response'); });
+    return parseApiResponse(response, 'batch sync');
   },
 
   async saveChallengeProgress(challenges: { challengeType: string; correct: number; total: number; answered?: number[]; selectedOptions?: Record<string, number> }[]) {
@@ -308,12 +308,7 @@ const apiClient = {
       }),
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(error.error || 'Failed to sync challenge progress');
-    }
-
-    return response.json().catch(() => { throw new Error('Invalid server response'); });
+    return parseApiResponse(response, 'sync challenge progress');
   },
 
   async resetProgress() {
@@ -326,12 +321,7 @@ const apiClient = {
       }),
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(error.error || 'Failed to reset progress');
-    }
-
-    return response.json().catch(() => { throw new Error('Invalid server response'); });
+    return parseApiResponse(response, 'reset progress');
   },
 
   async saveItemProgress(items: { moduleId: string; itemIds: string[] }[]) {
@@ -344,12 +334,7 @@ const apiClient = {
       }),
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(error.error || 'Failed to sync item progress');
-    }
-
-    return response.json().catch(() => { throw new Error('Invalid server response'); });
+    return parseApiResponse(response, 'sync item progress');
   },
 
   async saveNotes(notes: { id?: string; itemId: string; moduleId: string; moduleName: string; content: string }[]) {
@@ -362,12 +347,7 @@ const apiClient = {
       }),
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(error.error || 'Failed to sync notes');
-    }
-
-    return response.json().catch(() => { throw new Error('Invalid server response'); });
+    return parseApiResponse(response, 'sync notes');
   },
 
   async deleteNote(noteId: string) {
@@ -380,12 +360,7 @@ const apiClient = {
       }),
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(error.error || 'Failed to delete note');
-    }
-
-    return response.json().catch(() => { throw new Error('Invalid server response'); });
+    return parseApiResponse(response, 'delete note');
   },
 
   async saveStudySessions(sessions: { id?: string; date: string; durationMs: number; pageType: string; xpEarned: number }[]) {
@@ -398,12 +373,7 @@ const apiClient = {
       }),
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(error.error || 'Failed to sync study sessions');
-    }
-
-    return response.json().catch(() => { throw new Error('Invalid server response'); });
+    return parseApiResponse(response, 'sync study sessions');
   },
 
   async saveQuizHistory(quizHistory: { id?: string; categoryId: string; categoryName: string; score: number; correct: number; total: number; answers?: (boolean | null)[]; timestamp: number }[]) {
@@ -416,12 +386,7 @@ const apiClient = {
       }),
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(error.error || 'Failed to sync quiz history');
-    }
-
-    return response.json().catch(() => { throw new Error('Invalid server response'); });
+    return parseApiResponse(response, 'sync quiz history');
   },
 };
 

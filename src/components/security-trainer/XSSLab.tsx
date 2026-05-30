@@ -129,7 +129,11 @@ const renderDefense = (xssId: string, attackDemo: string) => {
 };
 
 export default function XSSLab() {
-  const { xssCompletedLevels, addXssLevel, completeModule, setCurrentPage, completedModules } = useAppStore();
+  const xssCompletedLevels = useAppStore((s) => s.xssCompletedLevels);
+  const addXssLevel = useAppStore((s) => s.addXssLevel);
+  const completeModule = useAppStore((s) => s.completeModule);
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
+  const completedModules = useAppStore((s) => s.completedModules);
   const t = useTranslations('xss');
   const [activeTab, setActiveTab] = useState(xssTypes.length > 0 ? xssTypes[0].id : '');
   const [showAttacks, setShowAttacks] = useState<Record<string, boolean>>({});

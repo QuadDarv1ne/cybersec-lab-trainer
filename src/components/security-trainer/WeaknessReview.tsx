@@ -23,15 +23,13 @@ import {
 
 export default function WeaknessReview() {
   const t = useTranslations('review');
-  const {
-    setCurrentPage,
-    quizHistory,
-    owaspChallengeScores,
-    authChallengeScores,
-    headersChallengeScores,
-    secureCodingChallengeScores,
-    awardXP,
-  } = useAppStore();
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
+  const quizHistory = useAppStore((s) => s.quizHistory);
+  const owaspChallengeScores = useAppStore((s) => s.owaspChallengeScores);
+  const authChallengeScores = useAppStore((s) => s.authChallengeScores);
+  const headersChallengeScores = useAppStore((s) => s.headersChallengeScores);
+  const secureCodingChallengeScores = useAppStore((s) => s.secureCodingChallengeScores);
+  const awardXP = useAppStore((s) => s.awardXP);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);

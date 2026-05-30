@@ -20,7 +20,11 @@ const levelColors: Record<string, string> = {
 };
 
 export default function CSRFLab() {
-  const { completedModules, completeModule, setCurrentPage, csrfViewedChallenges, markCsrfChallengeViewed } = useAppStore();
+  const completedModules = useAppStore((s) => s.completedModules);
+  const completeModule = useAppStore((s) => s.completeModule);
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
+  const csrfViewedChallenges = useAppStore((s) => s.csrfViewedChallenges);
+  const markCsrfChallengeViewed = useAppStore((s) => s.markCsrfChallengeViewed);
   const t = useTranslations('csrf');
   const [activeChallenge, setActiveChallenge] = useState(0);
   const [showDefense, setShowDefense] = useState(false);

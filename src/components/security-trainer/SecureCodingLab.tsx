@@ -21,13 +21,11 @@ import {
 
 export default function SecureCodingLab() {
   const t = useTranslations('secureCoding');
-  const {
-    completeModule,
-    setCurrentPage,
-    completedModules,
-    secureCodingChallengeScores,
-    setSecureCodingChallengeScore,
-  } = useAppStore();
+  const completeModule = useAppStore((s) => s.completeModule);
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
+  const completedModules = useAppStore((s) => s.completedModules);
+  const secureCodingChallengeScores = useAppStore((s) => s.secureCodingChallengeScores);
+  const setSecureCodingChallengeScore = useAppStore((s) => s.setSecureCodingChallengeScore);
   const [activeChallenge, setActiveChallenge] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);

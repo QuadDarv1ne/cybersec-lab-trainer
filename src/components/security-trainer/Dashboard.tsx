@@ -103,7 +103,22 @@ const achievementIcons: Record<string, React.ReactNode> = {
 };
 
 export default function Dashboard() {
-  const { setCurrentPage, completedModules, quizScores, toggleSidebar, owaspChallengeScores, authChallengeScores, headersChallengeScores, secureCodingChallengeScores, studiedOwaspItems, sqlCompletedLevels, xssCompletedLevels, csrfViewedChallenges, quizHistory, importProgressData, totalXP, notes } = useAppStore();
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
+  const completedModules = useAppStore((s) => s.completedModules);
+  const quizScores = useAppStore((s) => s.quizScores);
+  const toggleSidebar = useAppStore((s) => s.toggleSidebar);
+  const owaspChallengeScores = useAppStore((s) => s.owaspChallengeScores);
+  const authChallengeScores = useAppStore((s) => s.authChallengeScores);
+  const headersChallengeScores = useAppStore((s) => s.headersChallengeScores);
+  const secureCodingChallengeScores = useAppStore((s) => s.secureCodingChallengeScores);
+  const studiedOwaspItems = useAppStore((s) => s.studiedOwaspItems);
+  const sqlCompletedLevels = useAppStore((s) => s.sqlCompletedLevels);
+  const xssCompletedLevels = useAppStore((s) => s.xssCompletedLevels);
+  const csrfViewedChallenges = useAppStore((s) => s.csrfViewedChallenges);
+  const quizHistory = useAppStore((s) => s.quizHistory);
+  const importProgressData = useAppStore((s) => s.importProgressData);
+  const totalXP = useAppStore((s) => s.totalXP);
+  const notes = useAppStore((s) => s.notes);
   const t = useTranslations('dashboard');
   const tCommon = useTranslations('common');
   const fileInputRef = useRef<HTMLInputElement>(null);

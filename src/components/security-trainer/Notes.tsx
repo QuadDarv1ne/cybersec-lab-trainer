@@ -18,7 +18,10 @@ for (const mod of modules) {
 }
 
 export default function Notes() {
-  const { notes, setCurrentPage, deleteNote, updateNote } = useAppStore();
+  const notes = useAppStore((s) => s.notes);
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
+  const deleteNote = useAppStore((s) => s.deleteNote);
+  const updateNote = useAppStore((s) => s.updateNote);
   const t = useTranslations('notes');
   const [search, setSearch] = useState('');
   const [moduleFilter, setModuleFilter] = useState<string>('all');

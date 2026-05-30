@@ -6,7 +6,9 @@ import { Cloud, CloudOff, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useTranslations, type Translator } from '@/lib/intlStub';
 
 export default function SyncIndicator() {
-  const { syncStatus, lastSyncedAt, userId } = useAppStore();
+  const syncStatus = useAppStore((s) => s.syncStatus);
+  const lastSyncedAt = useAppStore((s) => s.lastSyncedAt);
+  const userId = useAppStore((s) => s.userId);
   const { isAuthenticated } = useSession();
   const t = useTranslations('sync');
 

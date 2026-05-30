@@ -259,7 +259,7 @@ function getCachedSearchIndex(): ReturnType<typeof buildSearchIndex> {
 }
 
 export default function ContentSearch({ open, onClose }: ContentSearchProps) {
-  const { setCurrentPage } = useAppStore();
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
   const t = useTranslations('search');
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(-1);

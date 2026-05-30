@@ -77,7 +77,9 @@ function CopyButton({ text }: { text: string }) {
 
 export default function ToolsLab() {
   const t = useTranslations('tools');
-  const { completeModule, setCurrentPage, completedModules } = useAppStore();
+  const completeModule = useAppStore((s) => s.completeModule);
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
+  const completedModules = useAppStore((s) => s.completedModules);
   const isCompleted = completedModules.includes('tools');
 
   // Caesar state

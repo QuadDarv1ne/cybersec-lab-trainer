@@ -15,7 +15,10 @@ interface InlineNotesProps {
 }
 
 export default function InlineNotes({ itemId, moduleId, moduleName }: InlineNotesProps) {
-  const { addNote, updateNote, deleteNote, getNotesForItem } = useAppStore();
+  const addNote = useAppStore((s) => s.addNote);
+  const updateNote = useAppStore((s) => s.updateNote);
+  const deleteNote = useAppStore((s) => s.deleteNote);
+  const getNotesForItem = useAppStore((s) => s.getNotesForItem);
   const t = useTranslations('inlineNotes');
   const itemNotes = getNotesForItem(itemId);
   const [showAdd, setShowAdd] = useState(false);

@@ -43,7 +43,10 @@ const iconMap: Record<string, React.ReactNode> = {
 type QuizState = 'select' | 'playing' | 'result';
 
 export default function QuizSystem() {
-  const { quizScores, quizHistory, setQuizScore, setCurrentPage } = useAppStore();
+  const quizScores = useAppStore((s) => s.quizScores);
+  const quizHistory = useAppStore((s) => s.quizHistory);
+  const setQuizScore = useAppStore((s) => s.setQuizScore);
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
   const t = useTranslations('quiz');
   const [quizState, setQuizState] = useState<QuizState>('select');
   const [activeCategory, setActiveCategory] = useState('');
@@ -149,7 +152,12 @@ export default function QuizSystem() {
       setTimerActive(true);
     } else {
       const catId = activeCategory;
-      const score = Math.round((correctCountRef.current / totalQuestions) * 100);
+      // Compute score from answers directly — correctCountRef can be stale
+      // due to React's batched state updates when the timer fires immediately
+      // after the last answer.
+      const finalAnswers = [...answersRef.current];
+      const correctCount = finalAnswers.filter(Boolean).length;
+      const score = Math.round((correctCount / totalQuestions) * 100);
 
       // Save quiz attempt to history
       const cat = quizCategories.find((c) => c.id === catId);
@@ -158,9 +166,9 @@ export default function QuizSystem() {
         categoryId: catId,
         categoryName: cat?.name || activeCategoryName,
         score,
-        correct: correctCountRef.current,
+        correct: correctCount,
         total: totalQuestions,
-        answers: [...answersRef.current],
+        answers: finalAnswers,
         timestamp: Date.now(),
       };
       setQuizScore(catId, score, attempt);
@@ -488,7 +496,10 @@ export default function QuizSystem() {
           </Card>
 
           {/* Quiz history for this category */}
-          {quizHistory.filter((h) => h.categoryId === activeCategory).length > 0 && (
+          {(() => {
+            const categoryQuizHistory = quizHistory.filter((h) => h.categoryId === activeCategory);
+            if (categoryQuizHistory.length === 0) return null;
+            return (
             <Card className="border-slate-200">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -497,12 +508,11 @@ export default function QuizSystem() {
                     <h3 className="text-sm font-semibold">{t('quizHistory')}</h3>
                   </div>
                   <Badge variant="secondary" className="text-[10px]">
-                    {quizHistory.filter((h) => h.categoryId === activeCategory).length} {t('attempts')}
+                    {categoryQuizHistory.length} {t('attempts')}
                   </Badge>
                 </div>
                 <div className="space-y-2">
-                  {quizHistory
-                    .filter((h) => h.categoryId === activeCategory)
+                  {categoryQuizHistory
                     .slice(0, 10)
                     .map((attempt) => (
                       <div
@@ -546,7 +556,8 @@ export default function QuizSystem() {
                 </div>
               </CardContent>
             </Card>
-          )}
+            );
+          })()}
         </motion.div>
       )}
     </div>

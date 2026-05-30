@@ -35,7 +35,8 @@ export interface StudyGoals {
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
-  const { studySessions, setCurrentPage } = useAppStore();
+  const studySessions = useAppStore((s) => s.studySessions);
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
   const [goals, setGoals] = useState<StudyGoals>({
     dailyMinutes: 30,
     weeklyDays: 5,

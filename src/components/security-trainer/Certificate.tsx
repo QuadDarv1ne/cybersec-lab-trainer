@@ -24,11 +24,15 @@ import {
 
 export function Certificate() {
   const t = useTranslations('certificate');
-  const {
-    completedModules, quizScores, quizHistory, totalXP, studySessions,
-    owaspChallengeScores, authChallengeScores, headersChallengeScores,
-    secureCodingChallengeScores,
-  } = useAppStore();
+  const completedModules = useAppStore((s) => s.completedModules);
+  const quizScores = useAppStore((s) => s.quizScores);
+  const quizHistory = useAppStore((s) => s.quizHistory);
+  const totalXP = useAppStore((s) => s.totalXP);
+  const studySessions = useAppStore((s) => s.studySessions);
+  const owaspChallengeScores = useAppStore((s) => s.owaspChallengeScores);
+  const authChallengeScores = useAppStore((s) => s.authChallengeScores);
+  const headersChallengeScores = useAppStore((s) => s.headersChallengeScores);
+  const secureCodingChallengeScores = useAppStore((s) => s.secureCodingChallengeScores);
 
   const allComplete = completedModules.filter((id) => modules.some((m) => m.id === id)).length >= modules.length;
 

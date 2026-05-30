@@ -36,11 +36,16 @@ interface QuizTrend {
 
 export default function ProgressAnalytics() {
   const t = useTranslations('analytics');
-  const {
-    setCurrentPage, completedModules, quizScores, quizHistory,
-    totalXP, studySessions, owaspChallengeScores, authChallengeScores,
-    headersChallengeScores, secureCodingChallengeScores,
-  } = useAppStore();
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
+  const completedModules = useAppStore((s) => s.completedModules);
+  const quizScores = useAppStore((s) => s.quizScores);
+  const quizHistory = useAppStore((s) => s.quizHistory);
+  const totalXP = useAppStore((s) => s.totalXP);
+  const studySessions = useAppStore((s) => s.studySessions);
+  const owaspChallengeScores = useAppStore((s) => s.owaspChallengeScores);
+  const authChallengeScores = useAppStore((s) => s.authChallengeScores);
+  const headersChallengeScores = useAppStore((s) => s.headersChallengeScores);
+  const secureCodingChallengeScores = useAppStore((s) => s.secureCodingChallengeScores);
 
   const level = useMemo(() => calculateLevel(totalXP), [totalXP]);
   const progress = useMemo(() => levelProgress(totalXP), [totalXP]);

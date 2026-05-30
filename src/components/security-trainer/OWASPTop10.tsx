@@ -17,7 +17,13 @@ import { useState } from 'react';
 import InlineNotes from './InlineNotes';
 
 export default function OWASPTop10() {
-  const { studiedOwaspItems, addStudiedOwasp, completeModule, setCurrentPage, completedModules, setOwaspChallengeScore, owaspChallengeScores } = useAppStore();
+  const studiedOwaspItems = useAppStore((s) => s.studiedOwaspItems);
+  const addStudiedOwasp = useAppStore((s) => s.addStudiedOwasp);
+  const completeModule = useAppStore((s) => s.completeModule);
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
+  const completedModules = useAppStore((s) => s.completedModules);
+  const setOwaspChallengeScore = useAppStore((s) => s.setOwaspChallengeScore);
+  const owaspChallengeScores = useAppStore((s) => s.owaspChallengeScores);
   const t = useTranslations('owasp');
   const isCompleted = completedModules.includes('owasp');
 

@@ -58,13 +58,11 @@ const iconMap: Record<string, React.ReactNode> = {
 
 export default function Sidebar() {
   const t = useTranslations('sidebar');
-  const {
-    currentPage,
-    sidebarOpen,
-    setSidebarOpen,
-    setCurrentPage,
-    completedModules,
-  } = useAppStore();
+  const currentPage = useAppStore((s) => s.currentPage);
+  const sidebarOpen = useAppStore((s) => s.sidebarOpen);
+  const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
+  const setCurrentPage = useAppStore((s) => s.setCurrentPage);
+  const completedModules = useAppStore((s) => s.completedModules);
 
   const { session, isAuthenticated, isLoading } = useSession();
   const [currentLocale, setCurrentLocale] = useState(() => getCurrentLocale());
