@@ -20,11 +20,11 @@ describe('getClientIP', () => {
     expect(getClientIP(req)).toBe('10.0.0.1');
   });
 
-  it('takes the last entry from X-Forwarded-For (Nginx appends real IP at end)', () => {
+  it('takes the first entry from X-Forwarded-For (original client IP)', () => {
     const prev = process.env.TRUST_PROXY;
     process.env.TRUST_PROXY = '1';
     const req = makeRequest({
-      'x-forwarded-for': 'spoofed-ip, proxy1, 10.0.0.5',
+      'x-forwarded-for': '10.0.0.5, proxy1, proxy2',
     });
     expect(getClientIP(req)).toBe('10.0.0.5');
     process.env.TRUST_PROXY = prev;
