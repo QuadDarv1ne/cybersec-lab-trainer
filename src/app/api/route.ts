@@ -146,16 +146,19 @@ export async function GET(request: Request) {
       const totalXP = sessionXP + moduleXP + quizXP;
 
       // Build quiz history from quiz results
-      const quizHistory = quizResults.map((qr) => ({
-        id: qr.id as string,
-        categoryId: qr.quizId as string,
-        categoryName: qr.quizId as string,
-        score: qr.score as number,
-        correct: qr.score as number,
-        total: qr.total as number,
-        answers: [] as (boolean | null)[],
-        timestamp: toTime(qr.createdAt),
-      }));
+      const quizHistory = quizResults.map((qr) => {
+        const category = quizCategories.find((c) => c.id === qr.quizId);
+        return {
+          id: qr.id as string,
+          categoryId: qr.quizId as string,
+          categoryName: category?.name ?? (qr.quizId as string),
+          score: qr.score as number,
+          correct: qr.score as number,
+          total: qr.total as number,
+          answers: [] as (boolean | null)[],
+          timestamp: toTime(qr.createdAt),
+        };
+      });
 
       await setCsrfCookie();
       const response = NextResponse.json({ completedModules, quizScores, quizHistory, challenges, itemProgress, csrfViewedChallenges, notes, studySessions, totalXP, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() });
