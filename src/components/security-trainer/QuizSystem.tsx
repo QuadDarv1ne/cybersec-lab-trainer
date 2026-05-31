@@ -226,11 +226,14 @@ export default function QuizSystem() {
   };
 
   const question = categoryQuestions[currentQuestion];
-  // Derive correct count from answers on the result screen to avoid stale state
+  // Derive correct count from answers state on the result screen to avoid stale state
   // from React's batched updates when the timer fires immediately after the last answer.
-  const displayCorrectCount = quizState === 'result'
-    ? answersRef.current.filter(Boolean).length
-    : correctCount;
+  const displayCorrectCount = useMemo(
+    () => quizState === 'result'
+      ? answers.filter(Boolean).length
+      : correctCount,
+    [quizState, answers, correctCount],
+  );
   const finalScore = categoryQuestions.length > 0
     ? Math.round((displayCorrectCount / categoryQuestions.length) * 100)
     : 0;
