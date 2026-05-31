@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTheme } from 'next-themes';
 import {
   Shield, Database, FileText, Link, Lock, Code, KeyRound, ShieldAlert,
-  Trophy, BookOpen, Target, Zap, ChevronRight, Star, Menu, X, Sun, Moon, Monitor, Languages
+  Trophy, BookOpen, Target, Zap, ChevronRight, Star, Menu, X
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { modules } from '@/lib/security-data';
 import { quizCategories } from '@/lib/data/quiz-data';
-import { useTranslations, getCurrentLocale, setLocale } from '@/lib/intlStub';
+import { useTranslations } from '@/lib/intlStub';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 const iconMap: Record<string, React.ReactNode> = {
   Shield: <Shield size={24} />,
@@ -69,35 +70,10 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-type ThemeCycle = 'light' | 'dark' | 'system';
-const THEME_CYCLE: ThemeCycle[] = ['light', 'dark', 'system'];
-const THEME_ICONS: Record<ThemeCycle, typeof Sun> = { light: Sun, dark: Moon, system: Monitor };
-
 export default function LandingPage() {
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [locale, setLocaleState] = useState(() => getCurrentLocale());
   const t = useTranslations('landing');
-
-  useEffect(() => {
-    setMounted(true);
-    const handleLocaleChange = () => setLocaleState(getCurrentLocale());
-    window.addEventListener('localechange', handleLocaleChange);
-    return () => window.removeEventListener('localechange', handleLocaleChange);
-  }, []);
-
-  const currentTheme: ThemeCycle = (theme as ThemeCycle) || 'system';
-  const nextThemeIndex = (THEME_CYCLE.indexOf(currentTheme) + 1) % THEME_CYCLE.length;
-  const nextTheme = THEME_CYCLE[nextThemeIndex];
-  const ThemeIcon = THEME_ICONS[currentTheme];
-
-  const toggleLocale = () => {
-    const next = locale === 'ru' ? 'en' : 'ru';
-    setLocale(next);
-    window.dispatchEvent(new Event('localechange'));
-  };
 
   const scrollTo = (id: string) => {
     setMobileMenuOpen(false);
@@ -115,36 +91,15 @@ export default function LandingPage() {
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-4">
+          <nav className="hidden md:flex items-center gap-2">
             <button onClick={() => scrollTo('features')} className="text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
               {t('features')}
             </button>
             <button onClick={() => scrollTo('modules')} className="text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
               {t('modules')}
             </button>
-            {mounted && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 text-slate-600 dark:text-slate-300"
-                onClick={() => setTheme(nextTheme)}
-                title={`Тема: ${currentTheme} → ${nextTheme}`}
-              >
-                <ThemeIcon className="h-4 w-4" />
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 text-slate-600 dark:text-slate-300"
-              onClick={toggleLocale}
-              aria-label="Toggle language"
-            >
-              <Languages className="h-4 w-4" />
-              {mounted && (
-                <span className="ml-1 text-xs">{locale === 'ru' ? 'EN' : 'RU'}</span>
-              )}
-            </Button>
+            <LanguageSelector />
+            <ThemeToggle />
             <Button variant="outline" className="border-emerald-600/50 dark:border-emerald-500/50 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10" onClick={() => router.push('/auth/signin')}>
               {t('signIn')}
             </Button>
@@ -166,24 +121,8 @@ export default function LandingPage() {
               {t('modules')}
             </button>
             <div className="flex items-center gap-2 py-2">
-              {mounted && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9 text-slate-600 dark:text-slate-300"
-                  onClick={() => setTheme(nextTheme)}
-                >
-                  <ThemeIcon className="h-4 w-4" />
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 text-slate-600 dark:text-slate-300"
-                onClick={toggleLocale}
-              >
-                <Languages className="h-4 w-4" />
-              </Button>
+              <LanguageSelector />
+              <ThemeToggle />
             </div>
             <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => router.push('/auth/signin')}>
               {t('signIn')}

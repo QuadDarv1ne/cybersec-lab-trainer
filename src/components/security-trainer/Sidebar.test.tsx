@@ -47,6 +47,11 @@ vi.mock('@/lib/store', () => {
 });
 
 vi.mock('@/lib/intlStub', () => ({
+  LOCALES: {
+    ru: { label: 'Russian', native: 'Русский', flag: '🇺' },
+    en: { label: 'English', native: 'English', flag: '🇬🇧' },
+    zh: { label: 'Chinese', native: '中文', flag: '🇨🇳' },
+  },
   getCurrentLocale: () => 'ru',
   setLocale: () => {},
   useTranslations: () => (key: string, values?: Record<string, string | number>) => {

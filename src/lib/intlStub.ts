@@ -1,45 +1,49 @@
 import { useState, useEffect } from 'react';
 import ru from '../i18n/locales/ru/main.json';
 import en from '../i18n/locales/en/main.json';
+import zh from '../i18n/locales/zh/main.json';
 
-const locales: Record<string, typeof ru> = {
+export type Locale = 'ru' | 'en' | 'zh';
+
+export const LOCALES: Record<Locale, { label: string; native: string; flag: string }> = {
+  ru: { label: 'Russian', native: 'Русский', flag: '🇺' },
+  en: { label: 'English', native: 'English', flag: '🇬🇧' },
+  zh: { label: 'Chinese', native: '中文', flag: '🇨🇳' },
+};
+
+const locales: Record<Locale, typeof ru> = {
   ru,
   en,
+  zh,
 };
 
 // Read current locale: check localStorage first, then browser language
-export function getCurrentLocale(): string {
-  // On server (SSR), always return 'ru' to ensure consistent hydration
-  // Client will use this default until it reads localStorage/browser language
-  if (typeof window === 'undefined') {
-    return 'ru';
-  }
+export function getCurrentLocale(): Locale {
+  if (typeof window === 'undefined') return 'ru';
   let stored: string | null = null;
   try {
     stored = localStorage.getItem('app-locale');
   } catch {
     // localStorage may be inaccessible in private browsing mode
-    // Fall through to browser language detection
   }
-  if (stored === 'en' || stored === 'ru') return stored;
+  if (stored === 'en' || stored === 'ru' || stored === 'zh') return stored as Locale;
   const browserLang = navigator.language.toLowerCase();
+  if (browserLang.startsWith('zh')) return 'zh';
   if (browserLang.startsWith('en')) return 'en';
   if (browserLang.startsWith('ru')) return 'ru';
-  return 'ru'; // default fallback
+  return 'ru';
 }
 
 // Set locale and emit storage event for cross-component reactivity
-export function setLocale(locale: string): void {
+export function setLocale(locale: Locale): void {
   if (typeof window === 'undefined') return;
-  if (locale !== 'ru' && locale !== 'en') return;
+  if (locale !== 'ru' && locale !== 'en' && locale !== 'zh') return;
   try {
     localStorage.setItem('app-locale', locale);
   } catch {
     // localStorage may be inaccessible in private browsing mode
   }
-  // Notify other components via storage event
   window.dispatchEvent(new StorageEvent('storage', { key: 'app-locale', newValue: locale }));
-  // Also update document lang attribute for accessibility
   document.documentElement.lang = locale;
 }
 
@@ -76,7 +80,7 @@ function getTranslator(locale: string, namespace: string): Translator {
     }
   }
 
-  const translations = locales[locale] || locales.ru;
+  const translations = locales[locale as Locale] || locales.ru;
 
   const translator = (key: string, values?: Record<string, string | number>) => {
     const fullKey = `${namespace}.${key}`;

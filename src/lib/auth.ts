@@ -36,14 +36,17 @@ if (providers.length === 0) {
         name: { label: 'Name', type: 'text' },
       },
       async authorize(credentials) {
+        console.log('[AUTH] Demo authorize called, credentials:', credentials);
         const email = (credentials?.email as string) || 'demo@example.com';
         const name = (credentials?.name as string) || 'Demo User';
-        return {
+        const user = {
           id: `demo-${generateUUID()}`,
           name,
           email,
           image: null,
         };
+        console.log('[AUTH] Returning demo user:', user);
+        return user;
       },
     }),
   );
@@ -133,15 +136,19 @@ export const authOptions: NextAuthOptions = {
   providers,
   callbacks: {
     async jwt({ token, user }) {
+      console.log('[AUTH] JWT callback, user:', user?.id, 'token.sub:', token.sub);
       if (user?.id) {
         token.id = user.id;
       }
+      console.log('[AUTH] JWT returning token with id:', token.id);
       return token;
     },
     async session({ session, token }) {
+      console.log('[AUTH] Session callback, token.id:', token.id, 'token.sub:', token.sub);
       if (session.user) {
         session.user.id = (typeof token.id === 'string' ? token.id : token.sub) ?? "";
       }
+      console.log('[AUTH] Session returning with user.id:', session.user?.id);
       return session;
     },
   },

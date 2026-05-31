@@ -1,6 +1,5 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +9,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast, Toaster } from 'sonner';
 import { isValidEmail, getEmailValidationError } from '@/lib/email-validation';
+import { LanguageSelector } from '@/components/LanguageSelector';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { signIn } from 'next-auth/react';
 
 const pageVariants = {
   hidden: { opacity: 0 },
@@ -25,7 +27,7 @@ const itemVariants = {
 };
 
 export default function SignInPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/app';
 
@@ -83,18 +85,27 @@ export default function SignInPage() {
 
     setLoadingProvider('credentials');
     try {
-      const result = await signIn('credentials', {
-        redirect: false,
-        email,
-        name: name || undefined,
-        callbackUrl,
+      const csrfRes = await fetch('/api/auth/csrf');
+      const { csrfToken } = await csrfRes.json();
+
+      const res = await fetch('/api/auth/callback/credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          csrfToken,
+          email,
+          ...(name && { name }),
+          callbackUrl,
+          redirect: 'false',
+        }),
+        redirect: 'manual',
       });
 
-      if (result?.error) {
-        toast.error('Ошибка авторизации. Попробуйте ещё раз.');
-        setLoadingProvider(null);
-      } else if (result?.url) {
-        router.push(result.url);
+      const location = res.headers.get('location');
+      if (location) {
+        window.location.replace(location);
+      } else {
+        window.location.replace(callbackUrl);
       }
     } catch {
       toast.error('Произошла ошибка. Попробуйте ещё раз.');
@@ -115,8 +126,30 @@ export default function SignInPage() {
   const handleDemo = async () => {
     setLoadingProvider('demo');
     try {
-      await signIn('credentials', { callbackUrl });
-    } catch {
+      const csrfRes = await fetch('/api/auth/csrf');
+      const { csrfToken } = await csrfRes.json();
+
+      const res = await fetch('/api/auth/callback/credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          csrfToken,
+          email: 'demo@example.com',
+          name: 'Demo User',
+          callbackUrl,
+          redirect: 'false',
+        }),
+        redirect: 'manual',
+      });
+
+      const location = res.headers.get('location');
+      if (location) {
+        window.location.replace(location);
+      } else {
+        window.location.replace(callbackUrl);
+      }
+    } catch (err) {
+      console.error('[SIGNIN] handleDemo error:', err);
       toast.error('Ошибка при входе');
       setLoadingProvider(null);
     }
@@ -141,6 +174,12 @@ export default function SignInPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-950">
+      {/* Language and theme controls */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-1">
+        <LanguageSelector />
+        <ThemeToggle />
+      </div>
+
       {/* Animated background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -left-40 h-80 w-80 rounded-full bg-emerald-400/20 blur-3xl animate-float" />

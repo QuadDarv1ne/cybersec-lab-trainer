@@ -87,7 +87,7 @@ export default async function RootLayout({
   const lang = acceptLanguage.toLowerCase().startsWith('en') ? 'en' : 'ru';
 
   return (
-    <html lang={lang}>
+    <html lang={lang} suppressHydrationWarning>
       <body className="antialiased font-sans">
         <LocaleLang />
         <a
@@ -98,12 +98,7 @@ export default async function RootLayout({
         </a>
         <SessionProvider session={session}>
           <div suppressHydrationWarning>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
+            <ThemeProvider>
               <ErrorBoundary>
                 {children}
               </ErrorBoundary>
