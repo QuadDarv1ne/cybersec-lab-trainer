@@ -38,9 +38,11 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/scripts/check-secrets.sh ./scripts/check-secrets.sh
 COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
 
 RUN chown -R nextjs:nodejs /app
+RUN chmod +x ./scripts/check-secrets.sh
 
 USER nextjs
 
@@ -49,4 +51,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
+ENTRYPOINT ["./scripts/check-secrets.sh"]
 CMD ["bun", "server.js"]

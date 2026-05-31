@@ -9,10 +9,10 @@ services:
       - "3000:3000"
     environment:
       - DATABASE_TYPE=${DATABASE_TYPE:-postgresql}
-      - DATABASE_URL=${DATABASE_URL:-postgresql://${POSTGRES_USER:-cybersec}:${POSTGRES_PASSWORD:-cybersec}@db:5432/${POSTGRES_DB:-cybersec_trainer}}
+      - DATABASE_URL=${DATABASE_URL:?NEXTAUTH_SECRET is required. Generate with: openssl rand -base64 32}
       - MONGODB_URI=${MONGODB_URI:-mongodb://mongo-db:27017/cybersec_lab}
-      - NEXTAUTH_URL=http://localhost:3000
-      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me-in-production}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?NEXTAUTH_SECRET is required. Generate with: openssl rand -base64 32}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
       - GITHUB_ID=${GITHUB_ID:-}
@@ -36,7 +36,7 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-cybersec}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-cybersec}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       - POSTGRES_DB=${POSTGRES_DB:-cybersec_trainer}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -55,7 +55,7 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-cybersec}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
       - MYSQL_DATABASE=${MYSQL_DATABASE:-cybersec_trainer}
     volumes:
       - mysql_data:/var/lib/mysql

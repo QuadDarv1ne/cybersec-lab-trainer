@@ -137,30 +137,34 @@ export async function rateLimit(ip: string): Promise<{ response: NextResponse | 
 }
 
 export function getClientIP(request: Request): string {
-  // X-Real-IP is set by the reverse proxy from $remote_addr (trusted, not spoofable).
-  const realIP = request.headers.get("x-real-ip");
-  if (realIP) {
-    return realIP.trim();
-  }
-
-  // X-Forwarded-For is only trustworthy when behind a known reverse proxy.
-  // Never auto-trust based on NODE_ENV — clients can spoof this header.
-  // Set TRUST_PROXY=1 explicitly when deploying behind a trusted proxy.
-  // Format: client, proxy1, proxy2 — original client IP is always first.
+  // Only trust X-Real-IP and X-Forwarded-For when explicitly behind a trusted proxy.
+  // Without TRUST_PROXY=1, these headers can be spoofed by any client.
   const trustProxy = process.env.TRUST_PROXY === '1';
+
   if (trustProxy) {
+    // X-Real-IP is set by the reverse proxy from $remote_addr (trusted, not spoofable).
+    const realIP = request.headers.get("x-real-ip");
+    if (realIP && isValidIP(realIP.trim())) {
+      return realIP.trim();
+    }
+
+    // X-Forwarded-For format: client, proxy1, proxy2 — original client IP is always first.
     const forwarded = request.headers.get("x-forwarded-for");
     if (forwarded) {
       const entries = forwarded.split(",").map((e) => e.trim());
       const first = entries[0];
-      if (first) return first;
+      if (first && isValidIP(first)) return first;
     }
   }
 
-  // Fallback: use a shared bucket for all anonymous requests when no IP is available.
-  // This is a trade-off: without a real IP, we cannot distinguish users.
-  // In production, ensure the reverse proxy always sets X-Real-IP.
+  // Fallback: use connection remoteAddress if available, otherwise shared anonymous bucket.
+  // In production, ensure the reverse proxy is configured with TRUST_PROXY=1.
   return "anonymous";
+}
+
+function isValidIP(str: string): boolean {
+  // Basic IPv4 and IPv6 validation
+  return /^(\d{1,3}\.){3}\d{1,3}$/.test(str) || /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/.test(str);
 }
 
 export function addRateLimitHeaders(response: NextResponse, remaining: number, reset: number): void {

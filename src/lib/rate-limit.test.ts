@@ -7,17 +7,23 @@ describe('getClientIP', () => {
     return new Request('http://localhost', { headers });
   }
 
-  it('uses X-Real-IP when available', () => {
+  it('uses X-Real-IP when available with TRUST_PROXY=1', () => {
+    const prev = process.env.TRUST_PROXY;
+    process.env.TRUST_PROXY = '1';
     const req = makeRequest({ 'x-real-ip': '10.0.0.1' });
     expect(getClientIP(req)).toBe('10.0.0.1');
+    process.env.TRUST_PROXY = prev;
   });
 
-  it('prioritizes X-Real-IP over X-Forwarded-For', () => {
+  it('prioritizes X-Real-IP over X-Forwarded-With TRUST_PROXY=1', () => {
+    const prev = process.env.TRUST_PROXY;
+    process.env.TRUST_PROXY = '1';
     const req = makeRequest({
       'x-forwarded-for': '1.2.3.4',
       'x-real-ip': '10.0.0.1',
     });
     expect(getClientIP(req)).toBe('10.0.0.1');
+    process.env.TRUST_PROXY = prev;
   });
 
   it('takes the first entry from X-Forwarded-For (original client IP)', () => {
@@ -55,9 +61,20 @@ describe('getClientIP', () => {
     expect(getClientIP(req)).toBe('anonymous');
   });
 
-  it('trims whitespace from IP addresses', () => {
+  it('ignores X-Real-IP when TRUST_PROXY is not set', () => {
+    const prev = process.env.TRUST_PROXY;
+    delete process.env.TRUST_PROXY;
+    const req = makeRequest({ 'x-real-ip': '10.0.0.1' });
+    expect(getClientIP(req)).toBe('anonymous');
+    process.env.TRUST_PROXY = prev;
+  });
+
+  it('trims whitespace from IP addresses with TRUST_PROXY=1', () => {
+    const prev = process.env.TRUST_PROXY;
+    process.env.TRUST_PROXY = '1';
     const req = makeRequest({ 'x-real-ip': '  10.0.0.1  ' });
     expect(getClientIP(req)).toBe('10.0.0.1');
+    process.env.TRUST_PROXY = prev;
   });
 });
 
