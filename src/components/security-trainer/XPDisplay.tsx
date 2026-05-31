@@ -3,14 +3,15 @@
 import { useAppStore } from '@/lib/store';
 import { motion } from 'framer-motion';
 import { Star, TrendingUp } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 export default function XPDisplay() {
+  const totalXP = useAppStore((s) => s.totalXP);
   const getXPLevel = useAppStore((s) => s.getXPLevel);
   const getXPBreakdown = useAppStore((s) => s.getXPBreakdown);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const xpInfo = getXPLevel();
-  const breakdown = useMemo(() => getXPBreakdown(), [getXPBreakdown]);
+  const breakdown = getXPBreakdown();
 
   return (
     <div className="space-y-2">
@@ -34,7 +35,7 @@ export default function XPDisplay() {
               Уровень {xpInfo.level}
             </span>
             <span className="text-xs text-slate-500">
-              {xpInfo.totalXP} XP
+              {totalXP} XP
             </span>
           </div>
           <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
