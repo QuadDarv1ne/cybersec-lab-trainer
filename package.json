@@ -87,7 +87,6 @@
     "*.{ts,tsx}": "eslint"
   },
   "devDependencies": {
-    "2": "^3.0.0",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",

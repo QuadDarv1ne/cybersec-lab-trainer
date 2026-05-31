@@ -76,28 +76,37 @@ export default function CTFLabs({ onBack }: { onBack?: () => void }) {
   const { submitFlag, isSubmitting, lastResult } = useFlagSubmission();
 
   useEffect(() => {
+    const controller = new AbortController();
+
     async function fetchLabs() {
       try {
-        const res = await fetch('/api/flags?action=list-labs');
+        const res = await fetch('/api/flags?action=list-labs', { signal: controller.signal });
         if (!res.ok) {
           throw new Error(`Server returned ${res.status}: ${res.statusText}`);
         }
         const data = await res.json();
-        if (data.labs) {
+        if (!controller.signal.aborted && data.labs) {
           setLabs(data.labs);
         }
       } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
         // Fallback to static data on server error or network failure
         logger.warn('Failed to fetch CTF labs from server, using static data:', error);
-        setLabs(ctfLabs.map(lab => ({
-          ...lab,
-          flags: [], // flags loaded from server only on submission
-        })));
+        if (!controller.signal.aborted) {
+          setLabs(ctfLabs.map(lab => ({
+            ...lab,
+            flags: [], // flags loaded from server only on submission
+          })));
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     }
     fetchLabs();
+
+    return () => controller.abort();
   }, []);
 
   const handleFlagSubmit = useCallback(async (labId: string, flagKey: string) => {

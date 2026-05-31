@@ -545,9 +545,15 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
   // If a reset is in progress, skip loading to prevent stale data from overwriting the clean state
   if (isResetting) return;
 
+  // Create AbortController with timeout for hydration fetch
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+  // If caller provided their own signal, wire it up to abort our controller too
+  signal?.addEventListener('abort', () => controller.abort(), { once: true });
+
   set({ syncStatus: 'syncing' });
   try {
-    const data = await apiClient.loadProgress(signal);
+    const data = await apiClient.loadProgress(controller.signal);
 
     // Double-check reset flag after async call completes
     if (isResetting) return;
@@ -642,11 +648,15 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
         return { quizHistory: merged };
       });
     }
+
+    clearTimeout(timeoutId);
   } catch (error) {
+    clearTimeout(timeoutId);
     if (error instanceof DOMException && error.name === 'AbortError') return;
     logger.error('Failed to load progress from database:', error);
     set({ syncStatus: 'error' });
   }
+  clearTimeout(timeoutId);
 };
 
 // Create the store

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAppStore } from '@/lib/store';
 import { getTodayTotalMs } from '@/lib/study-sessions';
+import { logger } from '@/lib/logger';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -63,7 +64,11 @@ export default function SettingsPage() {
         if (parsed.dailyMinutes > 0 && parsed.weeklyDays > 0) {
           setGoals(parsed);
         }
-      } catch { /* ignore */ }
+      } catch (e) {
+        logger.warn('Failed to parse study goals from localStorage, data may be corrupted:', e);
+        // Clear corrupted data so user can set fresh goals
+        try { localStorage.removeItem('study-goals'); } catch { /* ignore */ }
+      }
     }
   }, []);
 
