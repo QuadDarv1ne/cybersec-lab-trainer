@@ -41,6 +41,25 @@ export interface QuizAttempt {
   timestamp: number;
 }
 
+interface ChallengeProgress {
+  correct: number;
+  total: number;
+  answered: number[];
+  selectedOptions: Record<string, number>;
+}
+
+interface LoadProgressResponse {
+  completedModules?: string[];
+  quizScores?: Record<string, number>;
+  quizHistory?: QuizAttempt[];
+  challenges?: Record<string, ChallengeProgress>;
+  itemProgress?: Record<string, string[]>;
+  csrfViewedChallenges?: number[];
+  notes?: Record<string, Note>;
+  studySessions?: StudySession[];
+  totalXP?: number;
+}
+
 interface AppState {
   currentPage: PageType;
   sidebarOpen: boolean;
@@ -276,7 +295,7 @@ const parseApiResponse = async <T = unknown>(response: Response, action: string)
 
 // API client functions
 const apiClient = {
-  async loadProgress(signal?: AbortSignal) {
+  async loadProgress(signal?: AbortSignal): Promise<LoadProgressResponse> {
     const response = await fetch('/api?action=load-progress', {
       method: 'GET',
       signal,
@@ -586,34 +605,38 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
 
     // Restore study sessions if available — merge with local unsaved sessions
     if (Array.isArray(data.studySessions)) {
+      const studySessions = data.studySessions;
       set((state) => {
-        const serverIds = new Set(data.studySessions.filter((ss: unknown) => ss && typeof ss === 'object' && 'id' in ss).map((ss: { id: string }) => ss.id));
+        const serverIds = new Set(studySessions.filter((ss: unknown) => ss && typeof ss === 'object' && 'id' in ss).map((ss: { id: string }) => ss.id));
         const localUnsaved = state.studySessions.filter((ss) => !serverIds.has(ss.id));
-        return { studySessions: [...data.studySessions, ...localUnsaved].slice(0, MAX_STUDY_SESSIONS) };
+        return { studySessions: [...studySessions, ...localUnsaved].slice(0, MAX_STUDY_SESSIONS) };
       });
     }
 
     // Restore totalXP if available, preserving XP from local unsaved sessions
     if (typeof data.totalXP === 'number') {
+      const totalXP = data.totalXP;
+      const studySessions = data.studySessions;
       set((state) => {
-        const serverIds = new Set(data.studySessions?.filter((ss: unknown) => ss && typeof ss === 'object' && 'id' in ss).map((ss: { id: string }) => ss.id) ?? []);
+        const serverIds = new Set(studySessions?.filter((ss: unknown) => ss && typeof ss === 'object' && 'id' in ss).map((ss: { id: string }) => ss.id) ?? []);
         const localUnsavedXp = state.studySessions
           .filter((ss) => !serverIds.has(ss.id))
           .reduce((sum, ss) => sum + ss.xpEarned, 0);
-        return { totalXP: data.totalXP + localUnsavedXp };
+        return { totalXP: totalXP + localUnsavedXp };
       });
     }
 
     // Restore quiz history if available — merge with local unsaved quiz attempts
     if (Array.isArray(data.quizHistory)) {
+      const quizHistory = data.quizHistory;
       set((state) => {
         const serverIds = new Set(
-          data.quizHistory
+          quizHistory
             .filter((qh: unknown) => qh && typeof qh === 'object' && 'id' in qh)
             .map((qh: { id: string }) => qh.id)
         );
         const localUnsaved = state.quizHistory.filter((qh) => !qh.id || !serverIds.has(qh.id));
-        const merged = [...data.quizHistory, ...localUnsaved]
+        const merged = [...quizHistory, ...localUnsaved]
           .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
           .slice(0, MAX_QUIZ_HISTORY);
         return { quizHistory: merged };
