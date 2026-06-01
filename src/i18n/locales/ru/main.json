@@ -186,7 +186,8 @@
     "blog": "Блог",
     "ctfLabs": "CTF Лабораторные",
     "advancedCTF": "Продвинутая CTF",
-    "realAppSimulation": "Симуляция приложения"
+    "realAppSimulation": "Симуляция приложения",
+    "devsecops": "DevSecOps"
   },
   "owasp": {
     "title": "OWASP Top 10",

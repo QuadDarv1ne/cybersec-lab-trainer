@@ -30,7 +30,8 @@ export type PageType =
   | 'blog'
   | 'ctf-labs'
   | 'advanced-ctf'
-  | 'real-app-simulation';
+  | 'real-app-simulation'
+  | 'devsecops-simulation';
 
 export interface QuizAttempt {
   id: string;

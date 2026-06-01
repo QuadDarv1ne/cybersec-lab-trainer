@@ -203,7 +203,8 @@
     "blog": "博客",
     "ctfLabs": "CTF实验室",
     "advancedCTF": "高级CTF",
-    "realAppSimulation": "应用模拟"
+    "realAppSimulation": "应用模拟",
+    "devsecops": "DevSecOps"
   },
   "owasp": {
     "title": "OWASP Top 10",

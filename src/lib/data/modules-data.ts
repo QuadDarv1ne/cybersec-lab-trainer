@@ -318,12 +318,22 @@ export const modules: Module[] = [
     lessons: 8,
     totalSteps: 8,
   },
+  {
+    id: 'devsecops-simulation',
+    title: 'DevSecOps Симуляция',
+    description: 'Симуляция безопасного пайплайна разработки: SAST, DAST, SCA, secret scanning и мониторинг безопасности в CI/CD.',
+    icon: 'Workflow',
+    difficulty: 'Эксперт',
+    difficultyColor: 'bg-red-100 text-red-800',
+    lessons: 6,
+    totalSteps: 6,
+  },
 ];
 
 /**
  * Learning Path: ordered module sequence for guided learning.
  * Each module requires the previous one to be completed.
- * OWASP -> SQL -> XSS -> CSRF -> Auth -> Headers -> Secure Coding -> Tools -> Advanced CTF -> Real App Simulation
+ * OWASP -> SQL -> XSS -> CSRF -> Auth -> Headers -> Secure Coding -> Tools -> Advanced CTF -> Real App Simulation -> DevSecOps
  */
 export const learningPathOrder: string[] = [
   'owasp',
@@ -336,6 +346,7 @@ export const learningPathOrder: string[] = [
   'tools',
   'advanced-ctf',
   'real-app-simulation',
+  'devsecops-simulation',
 ];
 
 /**

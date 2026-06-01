@@ -46,6 +46,7 @@ import {
   Upload,
   AlertTriangle,
   Globe,
+  Workflow,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { PageType } from '@/lib/store';
@@ -81,6 +82,7 @@ const iconMap: Record<string, React.ReactNode> = {
   KeyRound: <KeyRound size={28} />,
   ShieldAlert: <ShieldAlert size={28} />,
   Globe: <Globe size={28} />,
+  Workflow: <Workflow size={28} />,
 };
 
 const achievementIcons: Record<string, React.ReactNode> = {

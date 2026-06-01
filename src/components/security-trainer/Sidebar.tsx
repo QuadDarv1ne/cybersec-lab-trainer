@@ -26,6 +26,7 @@ import {
   BookOpen,
   Flag,
   Globe,
+  Workflow,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
@@ -52,6 +53,7 @@ const iconMap: Record<string, React.ReactNode> = {
   ShieldAlert: <ShieldAlert size={20} />,
   Flag: <Flag size={20} />,
   Globe: <Globe size={20} />,
+  Workflow: <Workflow size={20} />,
   StickyNote: <StickyNote size={20} />,
   BarChart3: <BarChart3 size={20} />,
   Settings: <Settings size={20} />,
@@ -82,6 +84,7 @@ export default function Sidebar() {
     { id: 'ctf-labs', label: t('ctfLabs'), iconKey: 'Flag' },
     { id: 'advanced-ctf', label: t('advancedCTF'), iconKey: 'ShieldAlert' },
     { id: 'real-app-simulation', label: t('realAppSimulation'), iconKey: 'Globe' },
+    { id: 'devsecops-simulation', label: t('devsecops'), iconKey: 'Workflow' },
     { id: 'quiz', label: t('quiz'), iconKey: 'HelpCircle' },
     { id: 'achievements', label: t('achievements'), iconKey: 'Trophy' },
     { id: 'blog', label: t('blog'), iconKey: 'BookOpen' },
