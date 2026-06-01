@@ -298,12 +298,22 @@ export const modules: Module[] = [
     lessons: 5,
     totalSteps: 16,
   },
+  {
+    id: 'advanced-ctf',
+    title: 'Продвинутая CTF Симуляция',
+    description: 'Реалистичная симуляция Capture The Flag с цепочками атак, таймерами, системой очков и соревнованием с другими командами.',
+    icon: 'ShieldAlert',
+    difficulty: 'Эксперт',
+    difficultyColor: 'bg-red-100 text-red-800',
+    lessons: 4,
+    totalSteps: 4,
+  },
 ];
 
 /**
  * Learning Path: ordered module sequence for guided learning.
  * Each module requires the previous one to be completed.
- * OWASP -> SQL -> XSS -> CSRF -> Auth -> Headers -> Secure Coding -> Tools
+ * OWASP -> SQL -> XSS -> CSRF -> Auth -> Headers -> Secure Coding -> Tools -> Advanced CTF
  */
 export const learningPathOrder: string[] = [
   'owasp',
@@ -314,6 +324,7 @@ export const learningPathOrder: string[] = [
   'security-headers',
   'secure-coding',
   'tools',
+  'advanced-ctf',
 ];
 
 /**

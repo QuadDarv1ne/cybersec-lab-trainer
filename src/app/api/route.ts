@@ -547,7 +547,7 @@ export async function POST(request: Request) {
 
     const rl = rateLimitResult ?? { remaining: 0, reset: 0 };
     if (error instanceof z.ZodError) {
-      const details = error.flatten().fieldErrors;
+      const details = error.format();
       const response = NextResponse.json(
         { error: "Validation failed", details },
         { status: 400 }

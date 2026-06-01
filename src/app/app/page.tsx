@@ -30,6 +30,7 @@ const ProgressAnalytics = dynamic(() => import('@/components/security-trainer/Pr
 const WeaknessReviewPage = dynamic(() => import('@/components/security-trainer/WeaknessReview'), { ssr: false, loading: () => <PageSkeleton /> });
 const BlogPage = dynamic(() => import('@/components/security-trainer/BlogPage'), { ssr: false, loading: () => <PageSkeleton /> });
 const CTFLabs = dynamic(() => import('@/components/security-trainer/CTFLabs'), { ssr: false, loading: () => <PageSkeleton /> });
+const AdvancedCTFSimulation = dynamic(() => import('@/components/security-trainer/AdvancedCTFSimulation'), { ssr: false, loading: () => <PageSkeleton /> });
 
 // Components have varying prop types; all are rendered without props in this context
 const pages: Record<string, React.ComponentType> = {
@@ -50,6 +51,7 @@ const pages: Record<string, React.ComponentType> = {
   'weakness-review': WeaknessReviewPage,
   blog: BlogPage,
   'ctf-labs': CTFLabs,
+  'advanced-ctf': AdvancedCTFSimulation,
 };
 
 function PageSkeleton() {

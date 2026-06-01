@@ -75,6 +75,8 @@ export default function Sidebar() {
     { id: 'secure-coding', label: t('secureCoding'), iconKey: 'Code' },
     { id: 'tools', label: t('tools'), iconKey: 'KeyRound' },
     { id: 'security-headers', label: t('securityHeaders'), iconKey: 'ShieldAlert' },
+    { id: 'ctf-labs', label: t('ctfLabs'), iconKey: 'Flag' },
+    { id: 'advanced-ctf', label: 'Продвинутая CTF', iconKey: 'ShieldAlert' },
     { id: 'quiz', label: t('quiz'), iconKey: 'HelpCircle' },
     { id: 'achievements', label: t('achievements'), iconKey: 'Trophy' },
     { id: 'blog', label: t('blog'), iconKey: 'BookOpen' },

@@ -120,7 +120,7 @@ export async function POST(request: Request) {
 
   const parsed = flagSubmissionSchema.safeParse(body);
   if (!parsed.success) {
-    const response = NextResponse.json({ error: 'Validation failed', details: parsed.error.flatten().fieldErrors }, { status: 400 });
+    const response = NextResponse.json({ error: 'Validation failed', details: parsed.error.format() }, { status: 400 });
     addRateLimitHeaders(response, rl.remaining, rl.reset);
     return response;
   }
@@ -132,7 +132,7 @@ export async function POST(request: Request) {
     // Check if flag was already submitted correctly by this user
     const existingCorrect = await adapter.flagSubmission.findFirst({
       userId, labId, flagKey, correct: true,
-    } as Record<string, unknown>);
+    });
 
     if (existingCorrect) {
       await setCsrfCookie();
@@ -151,7 +151,7 @@ export async function POST(request: Request) {
     // Find the flag in the database
     const flag = await adapter.labFlag.findFirst({
       labId, flagKey,
-    } as Record<string, unknown>);
+    });
 
     if (!flag) {
       await setCsrfCookie();
@@ -169,7 +169,7 @@ export async function POST(request: Request) {
     // Store hashed flag value instead of plaintext
     const previousAttempts = await adapter.flagSubmission.findMany({
       userId, labId, flagKey,
-    } as Record<string, unknown>);
+    });
 
     if (previousAttempts.length === 0 || correct) {
       await adapter.flagSubmission.create({
@@ -181,7 +181,7 @@ export async function POST(request: Request) {
       // Update lab progress
       const existing = await adapter.labProgress.findUnique({
         userId, labId,
-      } as Record<string, unknown>);
+      });
 
       if (existing) {
         const newFlagsFound = (existing.flagsFound as number) + 1;
@@ -191,7 +191,7 @@ export async function POST(request: Request) {
         const isComplete = newFlagsFound >= totalFlags;
 
         await adapter.labProgress.update(
-          { userId, labId } as Record<string, unknown>,
+          { userId, labId },
           {
             flagsFound: newFlagsFound,
             totalFlags,
