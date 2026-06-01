@@ -24,6 +24,8 @@ import {
   Settings,
   AlertTriangle,
   BookOpen,
+  Flag,
+  Globe,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
@@ -48,6 +50,8 @@ const iconMap: Record<string, React.ReactNode> = {
   KeyRound: <KeyRound size={20} />,
   Trophy: <Trophy size={20} />,
   ShieldAlert: <ShieldAlert size={20} />,
+  Flag: <Flag size={20} />,
+  Globe: <Globe size={20} />,
   StickyNote: <StickyNote size={20} />,
   BarChart3: <BarChart3 size={20} />,
   Settings: <Settings size={20} />,
@@ -76,7 +80,8 @@ export default function Sidebar() {
     { id: 'tools', label: t('tools'), iconKey: 'KeyRound' },
     { id: 'security-headers', label: t('securityHeaders'), iconKey: 'ShieldAlert' },
     { id: 'ctf-labs', label: t('ctfLabs'), iconKey: 'Flag' },
-    { id: 'advanced-ctf', label: 'Продвинутая CTF', iconKey: 'ShieldAlert' },
+    { id: 'advanced-ctf', label: t('advancedCTF'), iconKey: 'ShieldAlert' },
+    { id: 'real-app-simulation', label: t('realAppSimulation'), iconKey: 'Globe' },
     { id: 'quiz', label: t('quiz'), iconKey: 'HelpCircle' },
     { id: 'achievements', label: t('achievements'), iconKey: 'Trophy' },
     { id: 'blog', label: t('blog'), iconKey: 'BookOpen' },

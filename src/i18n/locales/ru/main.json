@@ -159,7 +159,10 @@
     "settings": "Настройки",
     "weaknessReview": "Повторение ошибок",
     "notes": "Заметки",
-    "blog": "Блог"
+    "blog": "Блог",
+    "ctfLabs": "CTF Лабораторные",
+    "advancedCTF": "Продвинутая CTF",
+    "realAppSimulation": "Симуляция приложения"
   },
   "owasp": {
     "title": "OWASP Top 10",
@@ -674,67 +677,6 @@
       "challenge": "Задание",
       "achievement": "Достижение",
       "owasp": "OWASP"
-    }
-  },
-  "dashboard": {
-    "hero": {
-      "title": "Лаборатория кибербезопасности",
-      "description": "Интерактивная платформа для изучения уязвимостей веб-приложений: OWASP Top 10, SQL-инъекции, XSS, CSRF и безопасное кодирование.",
-      "modules": "8 модулей",
-      "progress": "Прогресс: {percent}%",
-      "quizScore": "Средний балл: {score}%",
-      "takeQuiz": "Пройдите квиз",
-      "achievements": "{count} достижений"
-    },
-    "stats": {
-      "modulesCompleted": "Модули",
-      "quizzesCompleted": "Квизы",
-      "averageScore": "Средний балл",
-      "achievements": "Достижения"
-    },
-    "recommendationBanner": {
-      "title": "Рекомендация"
-    },
-    "recommendations": {
-      "owaspStart": "Начните с изучения OWASP Top 10",
-      "sqlTry": "Попробуйте SQL-инъекции",
-      "xssLearn": "Изучите XSS-атаки",
-      "csrfLearn": "Изучите CSRF-атаки",
-      "authLearn": "Изучите аутентификацию",
-      "secureCodingLearn": "Изучите безопасное кодирование",
-      "toolsTry": "Попробуйте инструменты",
-      "headersLearn": "Изучите заголовки безопасности",
-      "quizCheck": "Проверьте знания в квизе",
-      "completeRemaining": "Завершите оставшиеся модули",
-      "wellDone": "Отличная работа! Все модули пройдены."
-    },
-    "nextAchievement": "Следующее достижение",
-    "modulesTitle": "Модули обучения",
-    "modulesLessons": "{count} уроков",
-    "quizCard": {
-      "title": "Квиз по безопасности",
-      "description": "Проверьте свои знания по всем темам информационной безопасности",
-      "categories": "{count} категорий",
-      "questions": "{count} вопросов"
-    },
-    "achievementsCard": {
-      "title": "Достижения",
-      "description": "Получайте достижения за прогресс в обучении",
-      "unlocked": "{unlocked}/{total}",
-      "terms": "{count} условий"
-    },
-    "overallProgress": {
-      "title": "Общий прогресс",
-      "completed": "Все модули пройдены!",
-      "notStarted": "Начните изучение первого модуля",
-      "inProgress": "Осталось модулей: {remaining}"
-    },
-    "learningPath": {
-      "title": "Учебный путь",
-      "subtitle": "Пройдено {completed} из {total}",
-      "complete": "Завершён!",
-      "done": "Пройден",
-      "continue": "Продолжить: {module}"
     },
     "weaknessReview": {
       "ariaLabel": "Повторение ошибок",

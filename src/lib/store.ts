@@ -29,7 +29,8 @@ export type PageType =
   | 'weakness-review'
   | 'blog'
   | 'ctf-labs'
-  | 'advanced-ctf';
+  | 'advanced-ctf'
+  | 'real-app-simulation';
 
 export interface QuizAttempt {
   id: string;

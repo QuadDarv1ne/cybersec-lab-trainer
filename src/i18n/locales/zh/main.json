@@ -176,7 +176,10 @@
     "settings": "设置",
     "weaknessReview": "弱点回顾",
     "notes": "笔记",
-    "blog": "博客"
+    "blog": "博客",
+    "ctfLabs": "CTF实验室",
+    "advancedCTF": "高级CTF",
+    "realAppSimulation": "应用模拟"
   },
   "owasp": {
     "title": "OWASP Top 10",

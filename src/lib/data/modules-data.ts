@@ -308,12 +308,22 @@ export const modules: Module[] = [
     lessons: 4,
     totalSteps: 4,
   },
+  {
+    id: 'real-app-simulation',
+    title: 'Симуляция реального приложения',
+    description: 'Полноценная симуляция интернет-магазина с цепочкой уязвимостей: SQLi, XSS, CSRF, IDOR и недостаточная авторизация.',
+    icon: 'Globe',
+    difficulty: 'Эксперт',
+    difficultyColor: 'bg-red-100 text-red-800',
+    lessons: 8,
+    totalSteps: 8,
+  },
 ];
 
 /**
  * Learning Path: ordered module sequence for guided learning.
  * Each module requires the previous one to be completed.
- * OWASP -> SQL -> XSS -> CSRF -> Auth -> Headers -> Secure Coding -> Tools -> Advanced CTF
+ * OWASP -> SQL -> XSS -> CSRF -> Auth -> Headers -> Secure Coding -> Tools -> Advanced CTF -> Real App Simulation
  */
 export const learningPathOrder: string[] = [
   'owasp',
@@ -325,6 +335,7 @@ export const learningPathOrder: string[] = [
   'secure-coding',
   'tools',
   'advanced-ctf',
+  'real-app-simulation',
 ];
 
 /**

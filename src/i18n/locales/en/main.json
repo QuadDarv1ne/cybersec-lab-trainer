@@ -159,7 +159,10 @@
     "settings": "Settings",
     "weaknessReview": "Weakness Review",
     "notes": "Notes",
-    "blog": "Blog"
+    "blog": "Blog",
+    "ctfLabs": "CTF Labs",
+    "advancedCTF": "Advanced CTF",
+    "realAppSimulation": "App Simulation"
   },
   "owasp": {
     "title": "OWASP Top 10",
