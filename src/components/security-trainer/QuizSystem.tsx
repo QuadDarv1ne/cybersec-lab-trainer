@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import { quizQuestions, quizCategories } from '@/lib/security-data';
-import { useTranslations } from '@/lib/intlStub';
+import { useTranslations, formatDate } from '@/lib/intlStub';
 import { generateUUID } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -537,7 +537,7 @@ export default function QuizSystem() {
                             {attempt.correct}/{attempt.total} {t('correctAnswersShort')}
                           </p>
                           <p className="text-[11px] text-slate-400">
-                            {new Date(attempt.timestamp).toLocaleString('ru-RU', {
+                            {formatDate(attempt.timestamp, {
                               day: '2-digit',
                               month: '2-digit',
                               year: '2-digit',

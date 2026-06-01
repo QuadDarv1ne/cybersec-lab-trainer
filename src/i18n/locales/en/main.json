@@ -35,6 +35,30 @@
     "footerName": "CyberSec Lab — Security Training",
     "footerMajor": "09.03.04 Software Engineering"
   },
+  "auth": {
+    "title": "CyberSec Lab",
+    "subtitle": "Cybersecurity Training Platform",
+    "signInTitle": "Sign In",
+    "signInSubtitle": "Enter your email or sign in via social networks",
+    "signUpTitle": "Create an Account",
+    "signUpSubtitle": "Register to start learning",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "register": "Register",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "name@example.com",
+    "enterEmail": "Enter an email",
+    "errorOccurred": "An error occurred. Please try again.",
+    "authError": "Authentication error via {provider}",
+    "loginError": "Login error",
+    "orVia": "or via",
+    "or": "or",
+    "signInAsDemo": "Sign in as demo user",
+    "backToHome": "Back to home",
+    "loadingProviders": "Loading providers..."
+  },
   "dashboard": {
     "hero": {
       "title": "Cybersecurity Laboratory",

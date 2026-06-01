@@ -5,13 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Github, Loader2, Shield, Mail, User, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast, Toaster } from 'sonner';
 import { isValidEmail, getEmailValidationError } from '@/lib/email-validation';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { signIn } from 'next-auth/react';
+import { useTranslations } from '@/lib/intlStub';
 
 const pageVariants = {
   hidden: { opacity: 0 },
@@ -27,7 +28,7 @@ const itemVariants = {
 };
 
 export default function SignInPage() {
-  const _router = useRouter();
+  const t = useTranslations('auth');
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/app';
 
@@ -79,7 +80,7 @@ export default function SignInPage() {
     e.preventDefault();
 
     if (!email.trim()) {
-      toast.error('Введите email');
+      toast.error(t('enterEmail'));
       return;
     }
 
@@ -108,7 +109,7 @@ export default function SignInPage() {
         window.location.replace(callbackUrl);
       }
     } catch {
-      toast.error('Произошла ошибка. Попробуйте ещё раз.');
+      toast.error(t('errorOccurred'));
       setLoadingProvider(null);
     }
   };
@@ -118,7 +119,7 @@ export default function SignInPage() {
     try {
       await signIn(provider, { callbackUrl });
     } catch {
-      toast.error('Ошибка авторизации через ' + provider);
+      toast.error(t('authError', { provider }));
       setLoadingProvider(null);
     }
   };
@@ -150,7 +151,7 @@ export default function SignInPage() {
       }
     } catch (err) {
       console.error('[SIGNIN] handleDemo error:', err);
-      toast.error('Ошибка при входе');
+      toast.error(t('loginError'));
       setLoadingProvider(null);
     }
   };
@@ -204,7 +205,7 @@ export default function SignInPage() {
           </div>
           <div className="text-center">
             <h1 className="font-bold text-2xl text-slate-900 dark:text-white">CyberSec Lab</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Тренажёр по информационной безопасности</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{t('subtitle')}</p>
           </div>
         </motion.div>
 
@@ -213,12 +214,12 @@ export default function SignInPage() {
           {/* Dynamic title */}
           <motion.div variants={itemVariants} className="mb-6">
             <h2 className="font-bold text-2xl text-slate-900 dark:text-white">
-              {isSignUp ? 'Создайте аккаунт' : 'Вход в аккаунт'}
+              {isSignUp ? t('signUpTitle') : t('signInTitle')}
             </h2>
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
               {isSignUp
-                ? 'Зарегистрируйтесь, чтобы начать изучение'
-                : 'Введите email или войдите через соцсети'}
+                ? t('signUpSubtitle')
+                : t('signInSubtitle')}
             </p>
           </motion.div>
 
@@ -237,7 +238,7 @@ export default function SignInPage() {
                 }`}
                 onClick={() => setIsSignUp(false)}
               >
-                Вход
+                {t('signIn')}
               </button>
               <button
                 className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors ${
@@ -245,7 +246,7 @@ export default function SignInPage() {
                 }`}
                 onClick={() => setIsSignUp(true)}
               >
-                Регистрация
+                {t('signUp')}
               </button>
             </div>
           </motion.div>
@@ -255,14 +256,14 @@ export default function SignInPage() {
             {isSignUp && (
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Имя
+                  {t('nameLabel')}
                 </Label>
                 <div className="relative group">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Ваше имя"
+                    placeholder={t('namePlaceholder')}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="pl-10 h-11 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:border-emerald-500 dark:focus:border-emerald-500"
@@ -272,14 +273,14 @@ export default function SignInPage() {
             )}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Email
+                {t('emailLabel')}
               </Label>
               <div className="relative group">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="name@example.com"
+                  placeholder={t('emailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onBlur={() => setEmailTouched(true)}
@@ -332,7 +333,7 @@ export default function SignInPage() {
               ) : (
                 <Shield className="mr-2 h-4 w-4" />
               )}
-              {isSignUp ? 'Зарегистрироваться' : 'Войти'}
+              {isSignUp ? t('register') : t('signIn')}
             </Button>
           </motion.form>
 
@@ -340,7 +341,7 @@ export default function SignInPage() {
           {hasOAuth && (
             <motion.div variants={itemVariants} className="relative flex items-center gap-3 py-4">
               <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
-              <span className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">или через</span>
+              <span className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">{t('orVia')}</span>
               <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
             </motion.div>
           )}
@@ -391,7 +392,7 @@ export default function SignInPage() {
               {!hasOAuth && (
                 <motion.div variants={itemVariants} className="relative flex items-center gap-3 py-4">
                   <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
-                  <span className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">или</span>
+                  <span className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">{t('or')}</span>
                   <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
                 </motion.div>
               )}
@@ -407,7 +408,7 @@ export default function SignInPage() {
                   ) : (
                     <Shield className="mr-2 h-4 w-4" />
                   )}
-                  Войти как демо-пользователь
+                  {t('signInAsDemo')}
                 </Button>
               </motion.div>
             </>
@@ -417,7 +418,7 @@ export default function SignInPage() {
         {/* Back to landing */}
         <motion.p variants={itemVariants} className="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
           <a href="/" className="text-emerald-600 dark:text-emerald-400 hover:underline">
-            ← Вернуться на главную
+            ← {t('backToHome')}
           </a>
         </motion.p>
       </motion.div>

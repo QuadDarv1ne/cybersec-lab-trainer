@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { StickyNote, Plus, Trash2, Edit2, Check, X } from 'lucide-react';
 import { useState } from 'react';
-import { useTranslations } from '@/lib/intlStub';
+import { useTranslations, formatDate } from '@/lib/intlStub';
 
 interface InlineNotesProps {
   itemId: string;
@@ -116,7 +116,7 @@ export default function InlineNotes({ itemId, moduleId, moduleName }: InlineNote
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-slate-700 whitespace-pre-wrap break-words">{note.content}</p>
                   <p className="text-[10px] text-slate-400 mt-1">
-                    {new Date(note.updatedAt).toLocaleString('ru-RU')}
+                    {formatDate(note.updatedAt)}
                   </p>
                 </div>
                 <div className="flex gap-1 shrink-0">

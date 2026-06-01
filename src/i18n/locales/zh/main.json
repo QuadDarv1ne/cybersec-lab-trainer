@@ -35,6 +35,30 @@
     "footerName": "CyberSec Lab — 安全培训",
     "footerMajor": "09.03.04 软件工程"
   },
+  "auth": {
+    "title": "CyberSec Lab",
+    "subtitle": "网络安全培训平台",
+    "signInTitle": "登录账户",
+    "signInSubtitle": "输入邮箱或通过社交网络登录",
+    "signUpTitle": "创建账户",
+    "signUpSubtitle": "注册以开始学习",
+    "signIn": "登录",
+    "signUp": "注册",
+    "register": "注册",
+    "nameLabel": "姓名",
+    "namePlaceholder": "您的姓名",
+    "emailLabel": "邮箱",
+    "emailPlaceholder": "name@example.com",
+    "enterEmail": "输入邮箱",
+    "errorOccurred": "发生错误，请重试。",
+    "authError": "通过{provider}认证错误",
+    "loginError": "登录错误",
+    "orVia": "或通过",
+    "or": "或",
+    "signInAsDemo": "以演示用户登录",
+    "backToHome": "返回首页",
+    "loadingProviders": "加载提供商中..."
+  },
   "dashboard": {
     "hero": {
       "title": "网络安全实验室",

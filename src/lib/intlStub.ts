@@ -34,6 +34,23 @@ export function getCurrentLocale(): Locale {
   return 'ru';
 }
 
+// Map locale codes to BCP 47 language tags for date formatting
+const LOCALE_TO_BCP47: Record<Locale, string> = {
+  ru: 'ru-RU',
+  en: 'en-US',
+  zh: 'zh-CN',
+};
+
+/**
+ * Format a date using the current app locale.
+ * Returns locale-aware date/time string.
+ */
+export function formatDate(date: Date | string | number, options?: Intl.DateTimeFormatOptions): string {
+  const locale = getCurrentLocale();
+  const bcp47 = LOCALE_TO_BCP47[locale];
+  return new Date(date).toLocaleString(bcp47, options);
+}
+
 // Set locale and emit storage event for cross-component reactivity
 export function setLocale(locale: Locale): void {
   if (typeof window === 'undefined') return;

@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { StickyNote, Search, Trash2, Edit2, Check, X, ChevronRight, Filter } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useTranslations } from '@/lib/intlStub';
+import { useTranslations, formatDate } from '@/lib/intlStub';
 
 const iconMap: Record<string, React.ReactNode> = {};
 for (const mod of modules) {
@@ -189,7 +189,7 @@ export default function Notes() {
                           <p className="text-sm text-slate-700 whitespace-pre-wrap break-words">{note.content}</p>
                           <div className="flex items-center justify-between mt-2">
                             <p className="text-[10px] text-slate-400">
-                              {new Date(note.updatedAt).toLocaleString('ru-RU')}
+                              {formatDate(note.updatedAt)}
                             </p>
                             <div className="flex gap-1">
                               <button
