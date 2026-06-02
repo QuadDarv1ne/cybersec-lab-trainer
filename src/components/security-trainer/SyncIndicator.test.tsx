@@ -19,7 +19,7 @@ const mockUseAppStore = vi.mocked(useAppStore);
 
 function createMockSession() {
   return {
-    user: { id: 'user-123', name: 'Test User', email: null, image: null },
+    user: { id: 'user-123', name: 'Test User', email: null, image: null, role: 'STUDENT' as const },
     expires: new Date(Date.now() + 86400000).toISOString(),
   };
 }

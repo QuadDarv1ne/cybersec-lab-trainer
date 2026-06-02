@@ -56,6 +56,103 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const action = url.searchParams.get('action');
 
+    if (action === 'leaderboard') {
+      const timeframe = url.searchParams.get('timeframe') || 'all';
+      const adapter = getDbAdapter();
+
+      if (adapter.type === 'mongodb') {
+        // MongoDB leaderboard
+        const { StudySessionModel, ProgressModel, QuizResultModel } = require('@/lib/mongoose-schema');
+        const match: Record<string, unknown> = {};
+        if (timeframe === 'weekly') {
+          const weekAgo = new Date();
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          match.createdAt = { $gte: weekAgo };
+        }
+        const sessions = await StudySessionModel.aggregate([
+          { $match: match },
+          { $group: { _id: '$userId', totalXP: { $sum: '$xpEarned' } } },
+          { $sort: { totalXP: -1 } },
+          { $limit: 50 },
+        ]);
+        const userIds = sessions.map((s: { _id: string }) => s._id);
+        const [progressCounts, quizCounts] = await Promise.all([
+          ProgressModel.aggregate([
+            { $match: { userId: { $in: userIds }, completed: true } },
+            { $group: { _id: '$userId', count: { $sum: 1 } } },
+          ]),
+          QuizResultModel.aggregate([
+            { $match: { userId: { $in: userIds } } },
+            { $group: { _id: '$userId', count: { $sum: 1 } } },
+          ]),
+        ]);
+        const progressMap = Object.fromEntries(progressCounts.map((p: { _id: string; count: number }) => [p._id, p.count]));
+        const quizMap = Object.fromEntries(quizCounts.map((q: { _id: string; count: number }) => [q._id, q.count]));
+        const { calculateLevel } = require('@/lib/xp-system');
+        const leaderboard = [];
+        for (const s of sessions) {
+          const user = await adapter.user.findUnique({ id: s._id });
+          if (user) {
+            const sessionXP = s.totalXP;
+            const completedModules = progressMap[s._id] ?? 0;
+            const quizCount = quizMap[s._id] ?? 0;
+            const moduleXP = completedModules * XP_REWARDS.completeModule;
+            const quizXP = quizCount * XP_REWARDS.quizPass;
+            const totalXP = sessionXP + moduleXP + quizXP;
+            leaderboard.push({
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              image: user.image,
+              totalXP,
+              level: calculateLevel(totalXP),
+              completedModules,
+            });
+          }
+        }
+        return NextResponse.json({ leaderboard });
+      }
+
+      // SQLite/PostgreSQL leaderboard
+      const { db } = require('@/lib/db');
+      const { calculateLevel } = require('@/lib/xp-system');
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+
+      const users = await db.user.findMany({
+        where: { role: 'STUDENT' },
+        select: {
+          id: true, name: true, email: true, image: true,
+          studySessions: timeframe === 'weekly' ? {
+            where: { createdAt: { gte: weekAgo } },
+            select: { xpEarned: true },
+          } : { select: { xpEarned: true } },
+          _count: { select: { progress: { where: { completed: true } }, quizResults: true } },
+        },
+        take: 50,
+      });
+
+      const leaderboard = users
+        .map((u: { id: string; name: string | null; email: string | null; image: string | null; studySessions: { xpEarned: number }[]; _count: { progress: number; quizResults: number } }) => {
+          const sessionXP = u.studySessions.reduce((sum: number, s: { xpEarned: number }) => sum + s.xpEarned, 0);
+          const moduleXP = u._count.progress * XP_REWARDS.completeModule;
+          const quizXP = u._count.quizResults * XP_REWARDS.quizPass;
+          const totalXP = sessionXP + moduleXP + quizXP;
+          return {
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            image: u.image,
+            totalXP,
+            level: calculateLevel(totalXP),
+            completedModules: u._count.progress,
+          };
+        })
+        .sort((a: { totalXP: number }, b: { totalXP: number }) => b.totalXP - a.totalXP);
+
+      return NextResponse.json({ leaderboard });
+    }
+
     if (action === 'load-progress') {
       const adapter = getDbAdapter();
       const [progressRecords, quizResults, challengeProgressRecords, itemProgressRecords, notesRecords, studySessionRecords] = await Promise.all([
@@ -487,10 +584,9 @@ export async function POST(request: Request) {
           try {
             const quizId = qh.id || `quiz-${Date.now()}-${generateUUID().slice(0, 8)}`;
             const percentage = qh.total > 0 ? (qh.score / qh.total) * 100 : 0;
-            // Use categoryId as quizId for upsert, store the original quizId as the document id
             await adapter.quizResult.upsert(
-              { userId, quizId: `${qh.categoryId}-${qh.timestamp}` },
-              { userId, id: quizId, quizId: `${qh.categoryId}-${qh.timestamp}`, score: qh.score, total: qh.total, percentage, createdAt: new Date(qh.timestamp) },
+              { userId, quizId },
+              { userId, id: quizId, quizId, score: qh.score, total: qh.total, percentage, createdAt: new Date(qh.timestamp) },
               { score: qh.score, total: qh.total, percentage }
             );
             savedCount++;

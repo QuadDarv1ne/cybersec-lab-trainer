@@ -5,6 +5,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "./db";
 import { generateUUID } from './utils';
+import { getDbAdapter } from './db-adapter';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -99,6 +100,9 @@ if (hasOAuth) {
           const account = await AccountModel.create(data);
           return { ...account.toObject(), id: account._id.toString() } as AdapterAccount;
         },
+        unlinkAccount: async ({ provider, providerAccountId }: { provider: string; providerAccountId: string }) => {
+          await AccountModel.deleteOne({ provider, providerAccountId });
+        },
         getSessionAndUser: async (sessionToken: string) => {
           const session = await SessionModel.findOne({ sessionToken });
           if (!session) return null;
@@ -141,20 +145,36 @@ export const authOptions: NextAuthOptions = {
   ...adapterConfig,
   providers,
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       authLog('JWT callback, user:', user?.id, 'token.sub:', token.sub);
       if (user?.id) {
         token.id = user.id;
+        // При новом входе загружаем роль из БД
+        if (account) {
+          try {
+            const adapter = getDbAdapter();
+            const dbUser = await adapter.user.findUnique({ id: user.id });
+            if (dbUser && 'role' in dbUser) {
+              const r = dbUser.role as string;
+              token.role = (['STUDENT', 'TEACHER', 'ADMIN'].includes(r) ? r : 'STUDENT') as 'STUDENT' | 'TEACHER' | 'ADMIN';
+            }
+          } catch {
+            token.role = 'STUDENT';
+          }
+        }
       }
-      authLog('JWT returning token with id:', token.id);
+      // При последующих запросах роль уже есть в токене
+      authLog('JWT returning token with id:', token.id, 'role:', token.role);
       return token;
     },
     async session({ session, token }) {
       authLog('Session callback, token.id:', token.id, 'token.sub:', token.sub);
       if (session.user) {
         session.user.id = (typeof token.id === 'string' ? token.id : token.sub) ?? "";
+        const role = (token.role as string) || 'STUDENT';
+        session.user.role = (['STUDENT', 'TEACHER', 'ADMIN'].includes(role) ? role : 'STUDENT') as 'STUDENT' | 'TEACHER' | 'ADMIN';
       }
-      authLog('Session returning with user.id:', session.user?.id);
+      authLog('Session returning with user.id:', session.user?.id, 'role:', session.user?.role);
       return session;
     },
   },

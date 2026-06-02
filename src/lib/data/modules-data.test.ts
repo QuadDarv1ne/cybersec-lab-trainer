@@ -7,16 +7,16 @@ import {
 
 describe('modules-data', () => {
   describe('learningPathOrder', () => {
-    it('contains all 8 modules in the path', () => {
-      expect(learningPathOrder).toHaveLength(8);
+    it('contains all modules in the path', () => {
+      expect(learningPathOrder).toHaveLength(11);
     });
 
     it('starts with owasp', () => {
       expect(learningPathOrder[0]).toBe('owasp');
     });
 
-    it('ends with tools', () => {
-      expect(learningPathOrder[learningPathOrder.length - 1]).toBe('tools');
+    it('ends with devsecops-simulation', () => {
+      expect(learningPathOrder[learningPathOrder.length - 1]).toBe('devsecops-simulation');
     });
   });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useAppStore } from '@/lib/store';
+import { useAppStore, type PageType } from '@/lib/store';
 import { useHashRouting } from '@/hooks/use-hash-routing';
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useAchievementToasts } from '@/hooks/use-achievement-toasts';
@@ -33,9 +33,12 @@ const CTFLabs = dynamic(() => import('@/components/security-trainer/CTFLabs'), {
 const AdvancedCTFSimulation = dynamic(() => import('@/components/security-trainer/AdvancedCTFSimulation'), { ssr: false, loading: () => <PageSkeleton /> });
 const RealAppSimulation = dynamic(() => import('@/components/security-trainer/RealAppSimulation'), { ssr: false, loading: () => <PageSkeleton /> });
 const DevSecOpsSimulation = dynamic(() => import('@/components/security-trainer/DevSecOpsSimulation'), { ssr: false, loading: () => <PageSkeleton /> });
+const AdminDashboard = dynamic(() => import('@/components/security-trainer/admin/AdminDashboard'), { ssr: false, loading: () => <PageSkeleton /> });
+const TeacherDashboard = dynamic(() => import('@/components/security-trainer/teacher/TeacherDashboard'), { ssr: false, loading: () => <PageSkeleton /> });
+const LeaderboardPage = dynamic(() => import('@/components/security-trainer/Leaderboard'), { ssr: false, loading: () => <PageSkeleton /> });
+const ProfilePage = dynamic(() => import('@/components/security-trainer/Profile'), { ssr: false, loading: () => <PageSkeleton /> });
 
-// Components have varying prop types; all are rendered without props in this context
-const pages: Record<string, React.ComponentType> = {
+const pages: Record<PageType, React.ComponentType> = {
   dashboard: Dashboard,
   'sql-injection': SQLInjectionLab,
   xss: XSSLab,
@@ -56,6 +59,10 @@ const pages: Record<string, React.ComponentType> = {
   'advanced-ctf': AdvancedCTFSimulation,
   'real-app-simulation': RealAppSimulation,
   'devsecops-simulation': DevSecOpsSimulation,
+  admin: AdminDashboard,
+  teacher: TeacherDashboard,
+  leaderboard: LeaderboardPage,
+  profile: ProfilePage,
 };
 
 function PageSkeleton() {
@@ -77,12 +84,12 @@ export default function AppPage() {
   const currentPage = useAppStore((s) => s.currentPage);
   const [searchOpen, setSearchOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
-  useHashRouting();
+  const hashReady = useHashRouting();
   useKeyboardShortcuts({ onOpenSearch: () => setSearchOpen(true) });
   useAchievementToasts();
   const mainRef = useRef<HTMLElement>(null);
 
-  const Page = pages[currentPage] || Dashboard;
+  const Page = pages[currentPage] ?? Dashboard;
 
   useEffect(() => {
     if (mainRef.current) {
@@ -96,17 +103,21 @@ export default function AppPage() {
       <Sidebar />
       <main id="main-content" ref={mainRef} className="flex-1 min-w-0" tabIndex={-1}>
         <div className="max-w-4xl mx-auto p-4 md:p-6 lg:p-8">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentPage}
-              initial={prefersReducedMotion ? {} : { opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={prefersReducedMotion ? {} : { opacity: 0, y: -8 }}
-              transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
-            >
-              <Page />
-            </motion.div>
-          </AnimatePresence>
+          {hashReady ? (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPage}
+                initial={prefersReducedMotion ? {} : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={prefersReducedMotion ? {} : { opacity: 0, y: -8 }}
+                transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
+              >
+                <Page />
+              </motion.div>
+            </AnimatePresence>
+          ) : (
+            <PageSkeleton />
+          )}
         </div>
       </main>
       <Toaster position="top-right" />

@@ -31,7 +31,11 @@ export type PageType =
   | 'ctf-labs'
   | 'advanced-ctf'
   | 'real-app-simulation'
-  | 'devsecops-simulation';
+  | 'devsecops-simulation'
+  | 'admin'
+  | 'teacher'
+  | 'leaderboard'
+  | 'profile';
 
 export interface QuizAttempt {
   id: string;
@@ -558,10 +562,10 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
   try {
     const data = await apiClient.loadProgress(controller.signal);
 
-    // Double-check reset flag after async call completes
+    clearTimeout(timeoutId);
+
     if (isResetting) return;
 
-    // Check if request was aborted
     if (signal?.aborted) return;
 
     // Runtime validation: normalize top-level fields
@@ -651,15 +655,12 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
         return { quizHistory: merged };
       });
     }
-
-    clearTimeout(timeoutId);
   } catch (error) {
     clearTimeout(timeoutId);
     if (error instanceof DOMException && error.name === 'AbortError') return;
     logger.error('Failed to load progress from database:', error);
     set({ syncStatus: 'error' });
   }
-  clearTimeout(timeoutId);
 };
 
 // Create the store

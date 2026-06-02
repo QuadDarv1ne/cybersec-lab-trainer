@@ -6,6 +6,7 @@ export interface IUser {
   email: string;
   name?: string;
   image?: string;
+  role: 'STUDENT' | 'TEACHER' | 'ADMIN';
   emailVerified?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -15,6 +16,7 @@ const UserSchema = new Schema<IUser>({
   email: { type: String, required: true, unique: true },
   name: String,
   image: String,
+  role: { type: String, enum: ['STUDENT', 'TEACHER', 'ADMIN'], default: 'STUDENT' },
   emailVerified: Date,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -332,3 +334,122 @@ const LabFlagSchema = new Schema<ILabFlag>({
 }, { collection: 'lab_flags' });
 
 export const LabFlagModel: Model<ILabFlag> = mongoose.models.LabFlag || mongoose.model<ILabFlag>('LabFlag', LabFlagSchema);
+
+// --- TeacherGroup ---
+export interface ITeacherGroup {
+  id: string;
+  name: string;
+  description?: string;
+  teacherId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const TeacherGroupSchema = new Schema<ITeacherGroup>({
+  name: { type: String, required: true },
+  description: String,
+  teacherId: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+}, { collection: 'teacher_groups' });
+
+TeacherGroupSchema.index({ teacherId: 1 });
+
+export const TeacherGroupModel: Model<ITeacherGroup> = mongoose.models.TeacherGroup || mongoose.model<ITeacherGroup>('TeacherGroup', TeacherGroupSchema);
+
+// --- GroupMember ---
+export interface IGroupMember {
+  id: string;
+  groupId: string;
+  userId: string;
+  joinedAt: Date;
+}
+
+const GroupMemberSchema = new Schema<IGroupMember>({
+  groupId: { type: String, required: true },
+  userId: { type: String, required: true },
+  joinedAt: { type: Date, default: Date.now },
+}, { collection: 'group_members' });
+
+GroupMemberSchema.index({ groupId: 1, userId: 1 }, { unique: true });
+
+export const GroupMemberModel: Model<IGroupMember> = mongoose.models.GroupMember || mongoose.model<IGroupMember>('GroupMember', GroupMemberSchema);
+
+// --- Assignment ---
+export interface IAssignment {
+  id: string;
+  title: string;
+  description?: string;
+  moduleId?: string;
+  groupId?: string;
+  teacherId: string;
+  dueDate?: Date;
+  maxScore: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const AssignmentSchema = new Schema<IAssignment>({
+  title: { type: String, required: true },
+  description: String,
+  moduleId: String,
+  groupId: String,
+  teacherId: { type: String, required: true },
+  dueDate: Date,
+  maxScore: { type: Number, default: 100 },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+}, { collection: 'assignments' });
+
+AssignmentSchema.index({ teacherId: 1 });
+AssignmentSchema.index({ groupId: 1 });
+
+export const AssignmentModel: Model<IAssignment> = mongoose.models.Assignment || mongoose.model<IAssignment>('Assignment', AssignmentSchema);
+
+// --- AssignmentSubmission ---
+export interface IAssignmentSubmission {
+  id: string;
+  assignmentId: string;
+  userId: string;
+  score?: number;
+  comment?: string;
+  submittedAt: Date;
+  gradedAt?: Date;
+}
+
+const AssignmentSubmissionSchema = new Schema<IAssignmentSubmission>({
+  assignmentId: { type: String, required: true },
+  userId: { type: String, required: true },
+  score: Number,
+  comment: String,
+  submittedAt: { type: Date, default: Date.now },
+  gradedAt: Date,
+}, { collection: 'assignment_submissions' });
+
+AssignmentSubmissionSchema.index({ assignmentId: 1, userId: 1 }, { unique: true });
+
+export const AssignmentSubmissionModel: Model<IAssignmentSubmission> = mongoose.models.AssignmentSubmission || mongoose.model<IAssignmentSubmission>('AssignmentSubmission', AssignmentSubmissionSchema);
+
+// --- AdminAction ---
+export interface IAdminAction {
+  id: string;
+  adminId: string;
+  action: string;
+  targetUserId?: string;
+  details?: string;
+  createdAt: Date;
+}
+
+const AdminActionSchema = new Schema<IAdminAction>({
+  adminId: { type: String, required: true },
+  action: { type: String, required: true },
+  targetUserId: String,
+  details: String,
+  createdAt: { type: Date, default: Date.now },
+}, { collection: 'admin_actions' });
+
+AdminActionSchema.index({ adminId: 1 });
+AdminActionSchema.index({ action: 1 });
+AdminActionSchema.index({ createdAt: -1 });
+
+export const AdminActionModel: Model<IAdminAction> = mongoose.models.AdminAction || mongoose.model<IAdminAction>('AdminAction', AdminActionSchema);

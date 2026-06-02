@@ -69,7 +69,7 @@ describe('achievement-utils', () => {
     });
 
     it('returns unlocked for full-completion when all modules completed', () => {
-      const allModules = ['owasp', 'sql-injection', 'xss', 'csrf', 'auth', 'secure-coding', 'tools', 'security-headers', 'ctf-labs'];
+      const allModules = ['owasp', 'sql-injection', 'xss', 'csrf', 'auth', 'secure-coding', 'tools', 'security-headers', 'ctf-labs', 'advanced-ctf', 'real-app-simulation', 'devsecops-simulation'];
       const status = getAchievementStatus('full-completion', allModules, {});
       expect(status).toBe(true);
     });

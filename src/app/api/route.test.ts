@@ -112,7 +112,7 @@ import { getServerSession, Session } from 'next-auth';
 
 // Typed mock session helper
 const mockSession: Session = {
-  user: { id: 'test-user-1', name: null, email: null, image: null },
+  user: { id: 'test-user-1', name: null, email: null, image: null, role: 'STUDENT' as const },
   expires: new Date(Date.now() + 86400000).toISOString(),
 };
 

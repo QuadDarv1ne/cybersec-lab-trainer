@@ -19,6 +19,7 @@ import {
   Keyboard,
   LogIn,
   LogOut,
+  User,
   StickyNote,
   BarChart3,
   Settings,
@@ -38,6 +39,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import { useSession } from '@/hooks/use-session';
 import { signIn, signOut } from 'next-auth/react';
 import SyncIndicator from './SyncIndicator';
+import { ROLE_LABELS, ROLE_BADGE_COLORS, type Role } from '@/lib/rbac-types';
 
 const iconMap: Record<string, React.ReactNode> = {
   LayoutDashboard: <LayoutDashboard size={20} />,
@@ -59,6 +61,7 @@ const iconMap: Record<string, React.ReactNode> = {
   Settings: <Settings size={20} />,
   AlertTriangle: <AlertTriangle size={20} />,
   BookOpen: <BookOpen size={20} />,
+  User: <User size={20} />,
 };
 
 export default function Sidebar() {
@@ -70,6 +73,7 @@ export default function Sidebar() {
   const completedModules = useAppStore((s) => s.completedModules);
 
   const { session, isAuthenticated, isLoading } = useSession();
+  const userRole = session?.user?.role as Role | undefined;
 
   const navItems: { id: PageType; label: string; iconKey: string }[] = [
     { id: 'dashboard', label: t('dashboard'), iconKey: 'LayoutDashboard' },
@@ -87,15 +91,22 @@ export default function Sidebar() {
     { id: 'devsecops-simulation', label: t('devsecops'), iconKey: 'Workflow' },
     { id: 'quiz', label: t('quiz'), iconKey: 'HelpCircle' },
     { id: 'achievements', label: t('achievements'), iconKey: 'Trophy' },
+    { id: 'leaderboard', label: 'Лидерборд', iconKey: 'Trophy' },
+    { id: 'profile', label: 'Профиль', iconKey: 'User' },
     { id: 'blog', label: t('blog'), iconKey: 'BookOpen' },
     { id: 'notes', label: t('notes'), iconKey: 'StickyNote' },
     { id: 'analytics', label: t('analytics'), iconKey: 'BarChart3' },
     { id: 'settings', label: t('settings'), iconKey: 'Settings' },
     { id: 'weakness-review', label: t('weaknessReview'), iconKey: 'AlertTriangle' },
+    { id: 'teacher', label: 'Преподаватель', iconKey: 'BookOpen' },
+    { id: 'admin', label: 'Администрирование', iconKey: 'Settings' },
   ];
 
-  // Count trackable items (excluding dashboard, achievements, quiz)
-  const trackableItems = navItems.filter((item) => item.id !== 'dashboard' && item.id !== 'achievements' && item.id !== 'quiz');
+  // Count trackable items (excluding dashboard, achievements, quiz, role-based pages)
+  const trackableItems = navItems.filter((item) =>
+    item.id !== 'dashboard' && item.id !== 'achievements' && item.id !== 'quiz' &&
+    item.id !== 'teacher' && item.id !== 'admin' && item.id !== 'leaderboard'
+  );
   const completedCount = trackableItems.filter((item) => completedModules.includes(item.id)).length;
   const progressPct = trackableItems.length > 0 ? Math.round((completedCount / trackableItems.length) * 100) : 0;
 
@@ -131,6 +142,10 @@ export default function Sidebar() {
       {/* Nav items */}
       <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1" aria-label="Main navigation">
         {navItems.map((item) => {
+          // Role-based visibility
+          if (item.id === 'teacher' && userRole !== 'TEACHER' && userRole !== 'ADMIN') return null;
+          if (item.id === 'admin' && userRole !== 'ADMIN') return null;
+
           const isActive = currentPage === item.id;
           const isCompleted = completedModules.includes(item.id);
 
@@ -185,6 +200,11 @@ export default function Sidebar() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{session.user.name}</p>
                     <p className="text-xs text-slate-400 truncate">{session.user.email}</p>
+                    {userRole && (
+                      <span className={`inline-block text-[10px] px-1.5 py-0.5 rounded mt-0.5 font-medium ${ROLE_BADGE_COLORS[userRole as Role] || 'bg-slate-700 text-slate-300'}`}>
+                        {ROLE_LABELS[userRole as Role] || userRole}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <Button

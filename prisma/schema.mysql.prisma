@@ -10,12 +10,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+
+  @@map("roles")
+}
+
 // Пользователи системы
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
   name          String?
   image         String?
+  role          Role      @default(STUDENT)
   emailVerified DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -31,7 +40,90 @@ model User {
   labProgress   LabProgress[]
   flagSubmissions FlagSubmission[]
 
+  teacherGroups TeacherGroup[]    @relation("TeacherGroups")
+  ownAssignments Assignment[]    @relation("AssignmentTeacher")
+
+  groupMemberships GroupMember[]
+  assignmentSubmissions AssignmentSubmission[]
+
   @@map("users")
+}
+
+model TeacherGroup {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  teacherId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  teacher     User           @relation("TeacherGroups", fields: [teacherId], references: [id], onDelete: Cascade)
+  members     GroupMember[]
+  assignments Assignment[]
+
+  @@map("teacher_groups")
+}
+
+model GroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  userId    String
+  joinedAt  DateTime @default(now())
+
+  group     TeacherGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@map("group_members")
+}
+
+model Assignment {
+  id          String   @id @default(cuid())
+  title       String   @db.VarChar(255)
+  description String?  @db.Text
+  moduleId    String?
+  groupId     String?
+  teacherId   String
+  dueDate     DateTime?
+  maxScore    Int      @default(100)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  teacher     User                   @relation("AssignmentTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  group       TeacherGroup?          @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  submissions AssignmentSubmission[]
+
+  @@map("assignments")
+}
+
+model AssignmentSubmission {
+  id           String   @id @default(cuid())
+  assignmentId String
+  userId       String
+  score        Int?
+  comment      String?  @db.Text
+  submittedAt  DateTime @default(now())
+  gradedAt     DateTime?
+
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, userId])
+  @@map("assignment_submissions")
+}
+
+model AdminAction {
+  id            String   @id @default(cuid())
+  adminId       String   @db.VarChar(255)
+  action        String   @db.VarChar(100)
+  targetUserId  String?  @db.VarChar(255)
+  details       Json?
+  createdAt     DateTime @default(now())
+
+  @@index([adminId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("admin_actions")
 }
 
 // Учётные записи для аутентификации (NextAuth.js)
