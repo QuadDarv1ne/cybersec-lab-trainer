@@ -1,24 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { motion } from 'framer-motion';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Code,
   Bug,
   CheckCircle2,
   AlertTriangle,
-  Zap,
   Play,
   RefreshCw,
-  BarChart3,
   Settings,
   Terminal,
   Cpu,

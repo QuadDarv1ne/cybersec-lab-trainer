@@ -6,8 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Trophy, BookOpen, Brain, Clock, Target, Zap, Star, GraduationCap, CheckCircle2, BarChart3 } from 'lucide-react';
+import { BookOpen, Brain, Clock, Target, Zap, Star, GraduationCap, CheckCircle2, BarChart3 } from 'lucide-react';
 import { ROLE_LABELS, ROLE_BADGE_COLORS } from '@/lib/rbac-types';
 import { modules } from '@/lib/data/modules-data';
 import { quizCategories } from '@/lib/data/quiz-data';
@@ -20,7 +19,7 @@ export default function Profile() {
   const quizScores = store.quizScores;
   const totalXP = store.totalXP;
   const studySessions = store.studySessions;
-  const userId = store.userId;
+  const _userId = store.userId;
 
   const level = calculateLevel(totalXP);
   const progress = levelProgress(totalXP);

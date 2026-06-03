@@ -62,6 +62,7 @@ export async function GET(request: Request) {
 
       if (adapter.type === 'mongodb') {
         // MongoDB leaderboard
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { StudySessionModel, ProgressModel, QuizResultModel } = require('@/lib/mongoose-schema');
         const match: Record<string, unknown> = {};
         if (timeframe === 'weekly') {
@@ -88,6 +89,7 @@ export async function GET(request: Request) {
         ]);
         const progressMap = Object.fromEntries(progressCounts.map((p: { _id: string; count: number }) => [p._id, p.count]));
         const quizMap = Object.fromEntries(quizCounts.map((q: { _id: string; count: number }) => [q._id, q.count]));
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { calculateLevel } = require('@/lib/xp-system');
         const leaderboard = [];
         for (const s of sessions) {
@@ -114,7 +116,9 @@ export async function GET(request: Request) {
       }
 
       // SQLite/PostgreSQL leaderboard
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { db } = require('@/lib/db');
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { calculateLevel } = require('@/lib/xp-system');
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);

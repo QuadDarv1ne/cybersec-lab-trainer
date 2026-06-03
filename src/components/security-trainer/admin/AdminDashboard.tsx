@@ -3,16 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Users, Shield, BookOpen, CheckCircle2, BarChart3, Search,
-  UserCog, Trash2, ChevronRight, Loader2, GraduationCap,
-  Activity, Clock, TrendingUp,
+  Users, BarChart3, Search,
+  Trash2, Loader2,
+  Activity, TrendingUp,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ROLE_LABELS, ROLE_BADGE_COLORS, type Role } from '@/lib/rbac-types';
 import { toast } from 'sonner';
 
 type UserData = {

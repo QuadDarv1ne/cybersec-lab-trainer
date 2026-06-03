@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Users, BookOpen, CheckCircle2, BarChart3, Plus, Trash2,
-  ChevronRight, Loader2, GraduationCap, Clock, Target,
-  UserPlus, UserMinus, FileText, Search, X, Star, Eye,
-  ClipboardList, ArrowLeft,
+  Users, Plus, Trash2,
+  Loader2, GraduationCap,
+  UserPlus, UserMinus, FileText, Search, Star, Eye,
+  ArrowLeft,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

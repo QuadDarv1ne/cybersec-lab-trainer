@@ -1,27 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { motion } from 'framer-motion';
 import {
   ShoppingCart,
   User,
   Settings,
   Code,
-  Shield,
   Eye,
   EyeOff,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  Zap,
   Flag,
   Terminal,
   BarChart3,
@@ -30,6 +22,7 @@ import {
   Package,
   Server,
   Trash2,
+  Zap,
 } from 'lucide-react';
 
 interface Vulnerability {
@@ -66,7 +59,7 @@ export default function RealAppSimulation() {
     balance: 5000,
     cart: [] as string[],
   });
-  const [adminSession, setAdminSession] = useState({
+  const [adminSession, _setAdminSession] = useState({
     id: 'admin-001',
     name: 'Администратор',
     email: 'admin@store.com',

@@ -62,7 +62,7 @@ export function getHintLevelLabel(level: HintLevel): string {
 /**
  * Default hints for any task.
  */
-function getDefaultHints(taskKey: string): Hint[] {
+function getDefaultHints(_taskKey: string): Hint[] {
   return [
     {
       level: 1,

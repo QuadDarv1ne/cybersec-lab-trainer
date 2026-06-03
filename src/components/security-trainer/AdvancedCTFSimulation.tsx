@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { motion } from 'framer-motion';
 import {
   Shield,
   Flag,
@@ -15,10 +14,6 @@ import {
   Trophy,
   AlertTriangle,
   CheckCircle2,
-  XCircle,
-  Zap,
-  ChevronRight,
-  ChevronLeft,
   RefreshCw,
   HelpCircle,
   Users,
@@ -102,7 +97,7 @@ export default function AdvancedCTFSimulation() {
     }
   };
 
-  const nextLevel = () => {
+  const _nextLevel = () => {
     if (currentLevel < ctfLevels.length - 1) {
       const nextIdx = currentLevel + 1;
       setCurrentLevel(nextIdx);
@@ -110,7 +105,7 @@ export default function AdvancedCTFSimulation() {
     }
   };
 
-  const prevLevel = () => {
+  const _prevLevel = () => {
     if (currentLevel > 0) {
       const prevIdx = currentLevel - 1;
       setCurrentLevel(prevIdx);

@@ -12,6 +12,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const action = url.searchParams.get('action') || 'students';
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { db } = require('@/lib/db');
     await setCsrfCookie();
 
@@ -176,6 +177,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const { action, payload } = body;
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { db } = require('@/lib/db');
 
     switch (action) {

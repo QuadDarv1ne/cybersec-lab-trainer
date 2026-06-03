@@ -6,14 +6,14 @@ import { validateCsrfToken, setCsrfCookie } from "@/lib/csrf-server";
 import { getCsrfCookieName, getCsrfHeaderName } from "@/lib/csrf-constants";
 
 export async function GET(request: Request) {
-  const { error, userId } = await requireRole(['ADMIN']);
+  const { error, userId: _userId } = await requireRole(['ADMIN']);
   if (error) return error;
 
   try {
     const url = new URL(request.url);
     const action = url.searchParams.get('action') || 'stats';
 
-    const adapter = getDbAdapter();
+    const _adapter = getDbAdapter();
 
     switch (action) {
       case 'users': {
@@ -22,6 +22,7 @@ export async function GET(request: Request) {
         const page = parseInt(url.searchParams.get('page') || '1', 10);
         const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10), 100);
         const skip = (page - 1) * limit;
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { db } = require('@/lib/db');
         const [users, total] = await Promise.all([
           db.user.findMany({
@@ -60,6 +61,7 @@ export async function GET(request: Request) {
         if (!targetUserId) {
           return NextResponse.json({ error: "User ID required" }, { status: 400 });
         }
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { db } = require('@/lib/db');
         const user = await db.user.findUnique({
           where: { id: targetUserId },
@@ -82,6 +84,7 @@ export async function GET(request: Request) {
       }
 
       case 'stats': {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { db } = require('@/lib/db');
         const now = new Date();
         const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000);
@@ -116,6 +119,7 @@ export async function GET(request: Request) {
       }
 
       case 'audit-log': {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { db } = require('@/lib/db');
         const page = parseInt(url.searchParams.get('page') || '1', 10);
         const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10), 100);
@@ -141,7 +145,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { error, userId, role } = await requireRole(['ADMIN']);
+  const { error, userId } = await requireRole(['ADMIN']);
   if (error) return error;
 
   try {
@@ -155,6 +159,7 @@ export async function POST(request: Request) {
     const { action, payload } = body;
 
     const adapter = getDbAdapter();
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { db } = require('@/lib/db');
 
     // Helper to log admin actions
