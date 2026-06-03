@@ -36,28 +36,43 @@
     "footerMajor": "09.03.04 Software Engineering"
   },
   "auth": {
-    "title": "CyberSec Lab",
-    "subtitle": "Cybersecurity Training Platform",
-    "signInTitle": "Sign In",
-    "signInSubtitle": "Enter your email or sign in via social networks",
-    "signUpTitle": "Create an Account",
-    "signUpSubtitle": "Register to start learning",
-    "signIn": "Sign In",
-    "signUp": "Sign Up",
-    "register": "Register",
-    "nameLabel": "Name",
-    "namePlaceholder": "Your name",
-    "emailLabel": "Email",
-    "emailPlaceholder": "name@example.com",
-    "enterEmail": "Enter an email",
-    "errorOccurred": "An error occurred. Please try again.",
-    "authError": "Authentication error via {provider}",
-    "loginError": "Login error",
-    "orVia": "or via",
-    "or": "or",
-    "signInAsDemo": "Sign in as demo user",
-    "backToHome": "Back to home",
-    "loadingProviders": "Loading providers..."
+    "title": "Authentication",
+    "description": "Authentication and password security trainers",
+    "subtitle": "Learn authentication methods and password protection",
+    "passwordStrength": "Password strength",
+    "bruteForce": "Brute force",
+    "hashing": "Hashing",
+    "jwtExplainer": "What is JWT",
+    "passwordInput": "Enter password",
+    "passwordAnalysis": "Password analysis",
+    "estimatedTime": "Estimated crack time",
+    "passwordLength": "Password length",
+    "complexity": "Complexity",
+    "hashInput": "Enter text to hash",
+    "hashResult": "Hash result",
+    "hashAlgorithm": "Hash algorithm",
+    "markComplete": "Mark as complete",
+    "moduleComplete": "Module complete!",
+    "correctCount": "{count} correct",
+    "allTasksPassed": "All tasks completed!",
+    "backBtn": "Back",
+    "nextBtn": "Next",
+    "correctAnswer": "Correct!",
+    "incorrectAnswer": "Incorrect",
+    "checkAnswerBtn": "Check answer",
+    "taskLabel": "Task {current} of {total}",
+    "noChallenges": "No challenges available",
+    "timeLabels": {
+      "instant": "Instant",
+      "seconds": "sec",
+      "minutes": "min",
+      "hours": "hr",
+      "days": "days",
+      "years": "years",
+      "thousandYears": "K years",
+      "millionYears": "M years",
+      "forever": "Forever"
+    }
   },
   "dashboard": {
     "hero": {
@@ -118,6 +133,23 @@
       "complete": "Complete!",
       "done": "Done",
       "continue": "Continue: {module}"
+    },
+    "weaknessReview": {
+      "ariaLabel": "Weakness review",
+      "title": "Weakness Review",
+      "hasWeaknesses": "Found {count} mistakes to review. Strengthen your weak spots!",
+      "noWeaknesses": "No mistakes to review. Great job!",
+      "xpBonus": "+5 XP for each corrected answer"
+    },
+    "exportImport": {
+      "title": "Export / Import Data",
+      "description": "Save a backup of your progress or restore from a file",
+      "export": "Export",
+      "import": "Import",
+      "exportSuccess": "Progress exported ({date})",
+      "importSuccess": "Progress successfully restored",
+      "importError": "Invalid file format",
+      "readError": "File read error"
     }
   },
   "notes": {
@@ -187,7 +219,11 @@
     "ctfLabs": "CTF Labs",
     "advancedCTF": "Advanced CTF",
     "realAppSimulation": "App Simulation",
-    "devsecops": "DevSecOps"
+    "devsecops": "DevSecOps",
+    "leaderboard": "Leaderboard",
+    "profile": "Profile",
+    "teacher": "Teacher",
+    "admin": "Administration"
   },
   "owasp": {
     "title": "OWASP Top 10",
@@ -330,45 +366,6 @@
     "moduleComplete": "Module complete!",
     "noChallenges": "No challenges available",
     "backToDashboard": "Back to dashboard"
-  },
-  "auth": {
-    "title": "Authentication",
-    "description": "Authentication and password security trainers",
-    "subtitle": "Learn authentication methods and password protection",
-    "passwordStrength": "Password strength",
-    "bruteForce": "Brute force",
-    "hashing": "Hashing",
-    "jwtExplainer": "What is JWT",
-    "passwordInput": "Enter password",
-    "passwordAnalysis": "Password analysis",
-    "estimatedTime": "Estimated crack time",
-    "passwordLength": "Password length",
-    "complexity": "Complexity",
-    "hashInput": "Enter text to hash",
-    "hashResult": "Hash result",
-    "hashAlgorithm": "Hash algorithm",
-    "markComplete": "Mark as complete",
-    "moduleComplete": "Module complete!",
-    "correctCount": "{count} correct",
-    "allTasksPassed": "All tasks completed!",
-    "backBtn": "Back",
-    "nextBtn": "Next",
-    "correctAnswer": "Correct!",
-    "incorrectAnswer": "Incorrect",
-    "checkAnswerBtn": "Check answer",
-    "taskLabel": "Task {current} of {total}",
-    "noChallenges": "No challenges available",
-    "timeLabels": {
-      "instant": "Instant",
-      "seconds": "sec",
-      "minutes": "min",
-      "hours": "hr",
-      "days": "days",
-      "years": "years",
-      "thousandYears": "K years",
-      "millionYears": "M years",
-      "forever": "Forever"
-    }
   },
   "secureCoding": {
     "title": "Secure Coding",
@@ -702,84 +699,6 @@
       "challenge": "Challenge",
       "achievement": "Achievement",
       "owasp": "OWASP"
-    }
-  },
-  "dashboard": {
-    "hero": {
-      "title": "Cybersecurity Laboratory",
-      "description": "Interactive platform for learning web application vulnerabilities: OWASP Top 10, SQL injections, XSS, CSRF and secure coding.",
-      "modules": "8 modules",
-      "progress": "Progress: {percent}%",
-      "quizScore": "Average score: {score}%",
-      "takeQuiz": "Take a quiz",
-      "achievements": "{count} achievements"
-    },
-    "stats": {
-      "modulesCompleted": "Modules",
-      "quizzesCompleted": "Quizzes",
-      "averageScore": "Average score",
-      "achievements": "Achievements"
-    },
-    "recommendationBanner": {
-      "title": "Recommendation"
-    },
-    "recommendations": {
-      "owaspStart": "Start with OWASP Top 10",
-      "sqlTry": "Try SQL injections",
-      "xssLearn": "Learn XSS attacks",
-      "csrfLearn": "Learn CSRF attacks",
-      "authLearn": "Learn authentication",
-      "secureCodingLearn": "Learn secure coding",
-      "toolsTry": "Try security tools",
-      "headersLearn": "Learn security headers",
-      "quizCheck": "Check your knowledge in quiz",
-      "completeRemaining": "Complete remaining modules",
-      "wellDone": "Great job! All modules completed."
-    },
-    "nextAchievement": "Next achievement",
-    "modulesTitle": "Learning Modules",
-    "modulesLessons": "{count} lessons",
-    "quizCard": {
-      "title": "Security Quiz",
-      "description": "Test your knowledge on all information security topics",
-      "categories": "{count} categories",
-      "questions": "{count} questions"
-    },
-    "achievementsCard": {
-      "title": "Achievements",
-      "description": "Earn achievements for learning progress",
-      "unlocked": "{unlocked}/{total}",
-      "terms": "{count} conditions"
-    },
-    "overallProgress": {
-      "title": "Overall Progress",
-      "completed": "All modules completed!",
-      "notStarted": "Start learning the first module",
-      "inProgress": "Modules remaining: {remaining}"
-    },
-    "learningPath": {
-      "title": "Learning Path",
-      "subtitle": "{completed} of {total} completed",
-      "complete": "Complete!",
-      "done": "Done",
-      "continue": "Continue: {module}"
-    },
-    "weaknessReview": {
-      "ariaLabel": "Weakness review",
-      "title": "Weakness Review",
-      "hasWeaknesses": "Found {count} mistakes to review. Strengthen your weak spots!",
-      "noWeaknesses": "No mistakes to review. Great job!",
-      "xpBonus": "+5 XP for each corrected answer"
-    },
-    "exportImport": {
-      "title": "Export / Import Data",
-      "description": "Save a backup of your progress or restore from a file",
-      "export": "Export",
-      "import": "Import",
-      "exportSuccess": "Progress exported ({date})",
-      "importSuccess": "Progress successfully restored",
-      "importError": "Invalid file format",
-      "readError": "File read error"
     }
   },
   "heatmap": {

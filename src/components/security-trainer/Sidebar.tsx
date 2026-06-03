@@ -91,15 +91,15 @@ export default function Sidebar() {
     { id: 'devsecops-simulation', label: t('devsecops'), iconKey: 'Workflow' },
     { id: 'quiz', label: t('quiz'), iconKey: 'HelpCircle' },
     { id: 'achievements', label: t('achievements'), iconKey: 'Trophy' },
-    { id: 'leaderboard', label: 'Лидерборд', iconKey: 'Trophy' },
-    { id: 'profile', label: 'Профиль', iconKey: 'User' },
+    { id: 'leaderboard', label: t('leaderboard'), iconKey: 'Trophy' },
+    { id: 'profile', label: t('profile'), iconKey: 'User' },
     { id: 'blog', label: t('blog'), iconKey: 'BookOpen' },
     { id: 'notes', label: t('notes'), iconKey: 'StickyNote' },
     { id: 'analytics', label: t('analytics'), iconKey: 'BarChart3' },
     { id: 'settings', label: t('settings'), iconKey: 'Settings' },
     { id: 'weakness-review', label: t('weaknessReview'), iconKey: 'AlertTriangle' },
-    { id: 'teacher', label: 'Преподаватель', iconKey: 'BookOpen' },
-    { id: 'admin', label: 'Администрирование', iconKey: 'Settings' },
+    { id: 'teacher', label: t('teacher'), iconKey: 'BookOpen' },
+    { id: 'admin', label: t('admin'), iconKey: 'Settings' },
   ];
 
   // Count trackable items (excluding dashboard, achievements, quiz, role-based pages)

@@ -12,7 +12,7 @@ import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslations, formatDate } from '@/lib/intlStub';
 
-const iconMap: Record<string, React.ReactNode> = {};
+const iconMap: Record<string, string> = {};
 for (const mod of modules) {
   iconMap[mod.id] = mod.title;
 }

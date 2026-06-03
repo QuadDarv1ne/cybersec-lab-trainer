@@ -312,7 +312,7 @@ export default function QuizSystem() {
                           </Badge>
                         ) : (
                           <Badge variant="outline" className="text-[10px]">
-                            Новый
+                            {t('new')}
                           </Badge>
                         )}
                       </div>
