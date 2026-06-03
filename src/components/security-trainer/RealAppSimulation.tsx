@@ -59,13 +59,13 @@ export default function RealAppSimulation() {
     balance: 5000,
     cart: [] as string[],
   });
-  const [adminSession, _setAdminSession] = useState({
+  const adminSession = {
     id: 'admin-001',
     name: 'Администратор',
     email: 'admin@store.com',
-    role: 'admin',
+    role: 'admin' as const,
     permissions: ['users', 'products', 'orders', 'settings'],
-  });
+  };
 
   const modules: AppModule[] = [
     {

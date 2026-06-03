@@ -443,7 +443,7 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
       return 100;
     };
 
-    const modules = state.completedModules.map((moduleId) => ({
+    const completedModulesList = state.completedModules.map((moduleId) => ({
       moduleId, completed: true, score: getModuleScore(moduleId),
     }));
 
@@ -462,8 +462,8 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
     ].filter((c) => c.total > 0);
 
     const savePromises: Promise<unknown>[] = [];
-    if (modules.length > 0 || quizzes.length > 0) {
-      savePromises.push(apiClient.saveBatch(modules, quizzes));
+    if (completedModulesList.length > 0 || quizzes.length > 0) {
+      savePromises.push(apiClient.saveBatch(completedModulesList, quizzes));
     }
     if (challenges.length > 0) {
       savePromises.push(apiClient.saveChallengeProgress(challenges));

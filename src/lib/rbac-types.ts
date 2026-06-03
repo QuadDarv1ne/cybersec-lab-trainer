@@ -12,12 +12,6 @@ export const ROLE_LABELS: Record<Role, string> = {
   ADMIN: 'Администратор',
 };
 
-export const ROLE_COLORS: Record<Role, string> = {
-  STUDENT: 'text-blue-500',
-  TEACHER: 'text-emerald-500',
-  ADMIN: 'text-purple-500',
-};
-
 export const ROLE_BADGE_COLORS: Record<Role, string> = {
   STUDENT: 'bg-blue-100 text-blue-700 border-blue-200',
   TEACHER: 'bg-emerald-100 text-emerald-700 border-emerald-200',

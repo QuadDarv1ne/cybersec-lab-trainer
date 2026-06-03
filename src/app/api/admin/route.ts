@@ -6,14 +6,12 @@ import { validateCsrfToken, setCsrfCookie } from "@/lib/csrf-server";
 import { getCsrfCookieName, getCsrfHeaderName } from "@/lib/csrf-constants";
 
 export async function GET(request: Request) {
-  const { error, userId: _userId } = await requireRole(['ADMIN']);
+  const { error } = await requireRole(['ADMIN']);
   if (error) return error;
 
   try {
     const url = new URL(request.url);
     const action = url.searchParams.get('action') || 'stats';
-
-    const _adapter = getDbAdapter();
 
     switch (action) {
       case 'users': {

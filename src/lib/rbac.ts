@@ -29,13 +29,3 @@ export async function requireRole(allowedRoles: Role[]): Promise<{ error: import
   }
   return { error: null, userId: session.user.id, role: userRole };
 }
-
-/**
- * Получает роль пользователя из сессии.
- */
-export async function getUserRole(): Promise<string | null> {
-  const { getServerSession } = await import("next-auth");
-  const { authOptions } = await import("./auth");
-  const session = await getServerSession(authOptions);
-  return session?.user?.role || null;
-}

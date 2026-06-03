@@ -19,7 +19,6 @@ export default function Profile() {
   const quizScores = store.quizScores;
   const totalXP = store.totalXP;
   const studySessions = store.studySessions;
-  const _userId = store.userId;
 
   const level = calculateLevel(totalXP);
   const progress = levelProgress(totalXP);

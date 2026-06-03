@@ -97,22 +97,6 @@ export default function AdvancedCTFSimulation() {
     }
   };
 
-  const _nextLevel = () => {
-    if (currentLevel < ctfLevels.length - 1) {
-      const nextIdx = currentLevel + 1;
-      setCurrentLevel(nextIdx);
-      startLevel(ctfLevels[nextIdx]);
-    }
-  };
-
-  const _prevLevel = () => {
-    if (currentLevel > 0) {
-      const prevIdx = currentLevel - 1;
-      setCurrentLevel(prevIdx);
-      startLevel(ctfLevels[prevIdx]);
-    }
-  };
-
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;

@@ -6,7 +6,7 @@ import zh from '../i18n/locales/zh/main.json';
 export type Locale = 'ru' | 'en' | 'zh';
 
 export const LOCALES: Record<Locale, { label: string; native: string; flag: string }> = {
-  ru: { label: 'Russian', native: 'Русский', flag: '🇺' },
+  ru: { label: 'Russian', native: 'Русский', flag: '🇷🇺' },
   en: { label: 'English', native: 'English', flag: '🇬🇧' },
   zh: { label: 'Chinese', native: '中文', flag: '🇨🇳' },
 };
