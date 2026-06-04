@@ -76,7 +76,8 @@
     "authErrorTitle": "认证错误",
     "oauthAccountNotLinked": "此账户已关联到其他登录方式。",
     "callbackError": "认证过程中发生错误，请重试。",
-    "signinError": "登录时发生错误。"
+    "signinError": "登录时发生错误。",
+    "backToHome": "返回主页"
   },
   "dashboard": {
     "hero": {

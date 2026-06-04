@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: true,
+  
+  // Разрешить кросс-оригинные запросы в режиме разработки
+  allowedDevOrigins: ['192.168.31.38'],
 
   // CSP заголовки для безопасности
   // OAuth домены добавляются только если настроены соответствующие переменные окружения
