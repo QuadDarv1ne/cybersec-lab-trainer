@@ -72,7 +72,11 @@
       "thousandYears": "тыс. лет",
       "millionYears": "млн лет",
       "forever": "Бесконечно"
-    }
+    },
+    "authErrorTitle": "Ошибка аутентификации",
+    "oauthAccountNotLinked": "Аккаунт уже привязан к другому провайдеру.",
+    "callbackError": "Ошибка при аутентификации. Попробуйте снова.",
+    "signinError": "Произошла ошибка при входе."
   },
   "dashboard": {
     "hero": {
@@ -756,5 +760,20 @@
     "loadMore": "Загрузить ещё",
     "backToBlog": "Назад к блогу",
     "relatedArticles": "Читайте также"
+  },
+  "leaderboard": {
+    "title": "Лидерборд",
+    "subtitle": "Лучшие студенты по очкам опыта",
+    "allTime": "За всё время",
+    "thisWeek": "На этой неделе",
+    "modulesCompleted": "Модулей пройдено: {count}",
+    "noData": "Пока нет данных. Начните обучение, чтобы появиться в рейтинге!",
+    "loadError": "Не удалось загрузить рейтинг",
+    "level": "Уровень {level}",
+    "you": "Вы"
+  },
+  "crypto": {
+    "encodingError": "Ошибка кодирования",
+    "decodingError": "Ошибка декодирования"
   }
 }

@@ -7,6 +7,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useAppStore } from '@/lib/store';
+import { useTranslations } from '@/lib/intlStub';
+import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 type LeaderboardEntry = {
   id: string;
@@ -19,6 +22,7 @@ type LeaderboardEntry = {
 };
 
 export default function Leaderboard() {
+  const t = useTranslations('leaderboard');
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState<'all' | 'weekly'>('all');
@@ -31,9 +35,12 @@ export default function Leaderboard() {
       .then((data) => {
         if (data.leaderboard) setEntries(data.leaderboard);
       })
-      .catch(() => {})
+      .catch(() => {
+        toast.error(t('loadError'));
+        logger.error('Leaderboard fetch failed');
+      })
       .finally(() => setLoading(false));
-  }, [timeframe]);
+  }, [timeframe, t]);
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Crown size={20} className="text-amber-500" />;
@@ -62,9 +69,9 @@ export default function Leaderboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Trophy className="text-amber-500" /> Leaderboard
+            <Trophy className="text-amber-500" /> {t('title')}
           </h1>
-          <p className="text-slate-500 text-sm">Top students by experience points</p>
+          <p className="text-slate-500 text-sm">{t('subtitle')}</p>
         </div>
         <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
           <Badge
@@ -72,14 +79,14 @@ export default function Leaderboard() {
             className="cursor-pointer"
             onClick={() => setTimeframe('all')}
           >
-            All Time
+            {t('allTime')}
           </Badge>
           <Badge
             variant={timeframe === 'weekly' ? 'default' : 'outline'}
             className="cursor-pointer"
             onClick={() => setTimeframe('weekly')}
           >
-            This Week
+            {t('thisWeek')}
           </Badge>
         </div>
       </div>
@@ -115,7 +122,7 @@ export default function Leaderboard() {
             </div>
             <p className="text-sm font-bold mt-1 truncate max-w-[100px]">{entries[0].name || 'User'}</p>
             <p className="text-xs text-amber-600 font-semibold">{entries[0].totalXP} XP</p>
-            <p className="text-[10px] text-slate-400">Level {entries[0].level}</p>
+            <p className="text-[10px] text-slate-400">{t('level', { level: entries[0].level })}</p>
           </div>
 
           {/* 3rd */}
@@ -159,21 +166,21 @@ export default function Leaderboard() {
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium truncate">{entry.name || 'Anonymous'}</p>
                     {entry.id === currentUserId && (
-                      <Badge variant="outline" className="text-[10px] border-emerald-300 text-emerald-600">You</Badge>
+                      <Badge variant="outline" className="text-[10px] border-emerald-300 text-emerald-600">{t('you')}</Badge>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500">{entry.completedModules} modules completed</p>
+                  <p className="text-xs text-slate-500">{t('modulesCompleted', { count: entry.completedModules })}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold">{entry.totalXP} XP</p>
-                  <p className={`text-xs ${getLevelColor(entry.level)}`}>Level {entry.level}</p>
+                  <p className={`text-xs ${getLevelColor(entry.level)}`}>{t('level', { level: entry.level })}</p>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
         ))}
         {entries.length === 0 && (
-          <p className="text-center text-slate-500 py-8">No data yet. Start learning to appear on the leaderboard!</p>
+          <p className="text-center text-slate-500 py-8">{t('noData')}</p>
         )}
       </div>
     </div>

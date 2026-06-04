@@ -72,7 +72,11 @@
       "thousandYears": "千年",
       "millionYears": "百万年",
       "forever": "永远"
-    }
+    },
+    "authErrorTitle": "认证错误",
+    "oauthAccountNotLinked": "此账户已关联到其他登录方式。",
+    "callbackError": "认证过程中发生错误，请重试。",
+    "signinError": "登录时发生错误。"
   },
   "dashboard": {
     "hero": {
@@ -756,5 +760,20 @@
     "loadMore": "加载更多",
     "backToBlog": "返回博客",
     "relatedArticles": "推荐阅读"
+  },
+  "leaderboard": {
+    "title": "排行榜",
+    "subtitle": "按经验值排名的学生",
+    "allTime": "全部时间",
+    "thisWeek": "本周",
+    "modulesCompleted": "已完成 {count} 个模块",
+    "noData": "暂无数据。开始学习以登上排行榜！",
+    "loadError": "加载排行榜失败",
+    "level": "等级 {level}",
+    "you": "我"
+  },
+  "crypto": {
+    "encodingError": "编码错误",
+    "decodingError": "解码错误"
   }
 }

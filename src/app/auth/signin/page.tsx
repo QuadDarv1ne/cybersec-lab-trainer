@@ -13,6 +13,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { signIn } from 'next-auth/react';
 import { useTranslations } from '@/lib/intlStub';
+import { logger } from '@/lib/logger';
 
 const pageVariants = {
   hidden: { opacity: 0 },
@@ -150,7 +151,7 @@ export default function SignInPage() {
         window.location.replace(callbackUrl);
       }
     } catch (err) {
-      console.error('[SIGNIN] handleDemo error:', err);
+      logger.error('[SIGNIN] handleDemo error:', err);
       toast.error(t('loginError'));
       setLoadingProvider(null);
     }

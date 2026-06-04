@@ -1,3 +1,8 @@
+export const CRYPTO_ERRORS = {
+  encodingError: 'Encoding error',
+  decodingError: 'Decoding error',
+} as const;
+
 // ============================================================
 // Caesar Cipher
 // Educational note: The Caesar cipher is one of the simplest substitution ciphers.
@@ -101,8 +106,8 @@ export function xorDecrypt(hex: string, key: string): string {
       .filter((h) => h.length > 0)
       .map((h, i) => String.fromCharCode(parseInt(h, 16) ^ key.charCodeAt(i % key.length)))
       .join('');
-  } catch {
-    return 'Ошибка декодирования';
+} catch {
+    return CRYPTO_ERRORS.decodingError;
   }
 }
 
@@ -119,7 +124,7 @@ export function base64Encode(text: string): string {
     const binary = Array.from(bytes, (b) => String.fromCharCode(b)).join('');
     return btoa(binary);
   }
-  catch { return 'Ошибка кодирования'; }
+  catch { return CRYPTO_ERRORS.encodingError; }
 }
 
 export function base64Decode(text: string): string {
@@ -129,7 +134,7 @@ export function base64Decode(text: string): string {
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return new TextDecoder().decode(bytes);
   }
-  catch { return 'Ошибка декодирования'; }
+  catch { return CRYPTO_ERRORS.decodingError; }
 }
 
 // ============================================================
@@ -145,7 +150,7 @@ export function urlEncode(text: string): string {
 
 export function urlDecode(text: string): string {
   try { return decodeURIComponent(text); }
-  catch { return 'Ошибка декодирования'; }
+  catch { return CRYPTO_ERRORS.decodingError; }
 }
 
 // ============================================================

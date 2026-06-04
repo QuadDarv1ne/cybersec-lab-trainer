@@ -33,11 +33,7 @@ function ensureCleanupInterval(): void {
     }
   }, CLEANUP_INTERVAL_MS);
 
-  if (typeof process !== 'undefined' && typeof process.on === 'function') {
-    if (signalListenersRegistered) {
-      process.removeListener('SIGTERM', stopCleanupInterval);
-      process.removeListener('SIGINT', stopCleanupInterval);
-    }
+  if (typeof process !== 'undefined' && typeof process.on === 'function' && !signalListenersRegistered) {
     process.on('SIGTERM', stopCleanupInterval);
     process.on('SIGINT', stopCleanupInterval);
     signalListenersRegistered = true;

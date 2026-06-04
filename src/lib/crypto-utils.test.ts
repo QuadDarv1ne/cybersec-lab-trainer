@@ -11,6 +11,7 @@ import {
   urlEncode,
   urlDecode,
   simpleHash,
+  CRYPTO_ERRORS,
 } from './crypto-utils';
 
 describe('Caesar Cipher', () => {
@@ -120,7 +121,7 @@ describe('Base64', () => {
   });
 
   it('returns error message on invalid input', () => {
-    expect(base64Decode('!!!invalid!!!')).toBe('Ошибка декодирования');
+    expect(base64Decode('!!!invalid!!!')).toBe(CRYPTO_ERRORS.decodingError);
   });
 });
 

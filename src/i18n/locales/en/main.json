@@ -72,7 +72,12 @@
       "thousandYears": "K years",
       "millionYears": "M years",
       "forever": "Forever"
-    }
+    },
+    "authErrorTitle": "Authentication Error",
+    "oauthAccountNotLinked": "This account is already linked to another provider.",
+    "callbackError": "An error occurred during authentication. Please try again.",
+    "signinError": "An error occurred during sign in.",
+    "backToHome": "Back to home"
   },
   "dashboard": {
     "hero": {
@@ -756,5 +761,20 @@
     "loadMore": "Load more",
     "backToBlog": "Back to blog",
     "relatedArticles": "Read also"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "subtitle": "Top students by experience points",
+    "allTime": "All Time",
+    "thisWeek": "This Week",
+    "modulesCompleted": "{count} modules completed",
+    "noData": "No data yet. Start learning to appear on the leaderboard!",
+    "loadError": "Failed to load leaderboard",
+    "level": "Level {level}",
+    "you": "You"
+  },
+  "crypto": {
+    "encodingError": "Encoding error",
+    "decodingError": "Decoding error"
   }
 }

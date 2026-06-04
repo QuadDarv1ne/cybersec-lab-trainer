@@ -152,6 +152,7 @@ let followUpScheduled = false;
 const SYNC_DELAY_MS = 500;
 const MAX_STUDY_SESSIONS = 100;
 const MAX_QUIZ_HISTORY = 50;
+const LOAD_TIMEOUT_MS = 15_000;
 
 // Abort controller for in-flight loadFromDatabase requests
 let loadAbortController: AbortController | null = null;
@@ -554,7 +555,7 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
 
   // Create AbortController with timeout for hydration fetch
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+  const timeoutId = setTimeout(() => controller.abort(), LOAD_TIMEOUT_MS); // 15 second timeout
   // If caller provided their own signal, wire it up to abort our controller too
   signal?.addEventListener('abort', () => controller.abort(), { once: true });
 

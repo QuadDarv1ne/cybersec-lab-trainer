@@ -156,10 +156,14 @@ export default function SettingsPage() {
       const msUntilReminder = reminder.getTime() - now.getTime();
       if (reminderTimerRef.current) clearTimeout(reminderTimerRef.current);
       reminderTimerRef.current = setTimeout(() => {
-        new Notification('CyberSec Lab', {
-          body: t('notificationBody'),
-          icon: '/favicon.ico',
-        });
+        try {
+          new Notification('CyberSec Lab', {
+            body: t('notificationBody'),
+            icon: '/favicon.ico',
+          });
+        } catch {
+          // Notification constructor can throw if permission was revoked
+        }
         scheduleNext();
       }, msUntilReminder);
     };
