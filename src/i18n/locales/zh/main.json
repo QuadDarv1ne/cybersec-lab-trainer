@@ -83,7 +83,8 @@
     "hero": {
       "title": "网络安全实验室",
       "description": "互动平台，学习Web应用漏洞：OWASP Top 10、SQL注入、XSS、CSRF和安全编码。",
-      "modules": "8个模块",
+      "modules": "{count}个模块",
+      "major": "09.03.04 软件工程",
       "progress": "进度：{percent}%",
       "quizScore": "平均分：{score}%",
       "takeQuiz": "参加测验",
@@ -94,6 +95,17 @@
       "quizzesCompleted": "测验",
       "averageScore": "平均分",
       "achievements": "成就"
+    },
+    "xp": {
+      "level": "等级 {level}",
+      "xpToNext": "还需 {xp} XP 升至 {level} 级",
+      "breakdownTitle": "XP 来源",
+      "modules": "模块",
+      "quizzes": "测验",
+      "challenges": "挑战",
+      "bonuses": "奖励",
+      "study": "学习",
+      "total": "总计"
     },
     "recommendationBanner": {
       "title": "推荐"
@@ -144,6 +156,7 @@
       "title": "弱点回顾",
       "hasWeaknesses": "发现{count}个错误需要复习。加强你的弱点！",
       "noWeaknesses": "没有错误需要复习。做得好！",
+      "count": "{count}个错误",
       "xpBonus": "+5 XP 每个修正答案"
     },
     "exportImport": {

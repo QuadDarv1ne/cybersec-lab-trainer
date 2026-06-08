@@ -339,16 +339,15 @@ export async function POST(request: Request) {
     }
     const userId = session.user.id;
 
-    // Validate CSRF token before consuming rate limit
-    const csrfValid = await validateCsrfToken(request);
-    if (!csrfValid) {
-      return NextResponse.json({ error: "Invalid or missing CSRF token" }, { status: 403 });
-    }
-
-    // Apply rate limit only for authenticated requests
+    // Apply rate limit BEFORE CSRF validation to protect server resources
     rateLimitResult = await applyRateLimit(request);
     if (rateLimitResult.response) {
       return rateLimitResult.response;
+    }
+
+    const csrfValid = await validateCsrfToken(request);
+    if (!csrfValid) {
+      return NextResponse.json({ error: "Invalid or missing CSRF token" }, { status: 403 });
     }
 
     let result: Record<string, unknown>;
@@ -586,16 +585,14 @@ export async function POST(request: Request) {
         let savedCount = 0;
         for (const qh of quizHistory) {
           try {
-            const quizId = qh.id || `quiz-${Date.now()}-${generateUUID().slice(0, 8)}`;
+            const id = qh.id || `quiz-${Date.now()}-${generateUUID().slice(0, 8)}`;
             const percentage = qh.total > 0 ? (qh.score / qh.total) * 100 : 0;
-            await adapter.quizResult.upsert(
-              { userId, quizId },
-              { userId, id: quizId, quizId, score: qh.score, total: qh.total, percentage, createdAt: new Date(qh.timestamp) },
-              { score: qh.score, total: qh.total, percentage }
+            await adapter.quizResult.create(
+              { userId, id, quizId: id, score: qh.score, total: qh.total, percentage, createdAt: new Date(qh.timestamp) }
             );
             savedCount++;
           } catch (error) {
-            logger.error('[API] Quiz history upsert failed:', error);
+            logger.error('[API] Quiz history create failed:', error);
           }
         }
 

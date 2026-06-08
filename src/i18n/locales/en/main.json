@@ -83,7 +83,8 @@
     "hero": {
       "title": "Cybersecurity Laboratory",
       "description": "Interactive platform for learning web application vulnerabilities: OWASP Top 10, SQL injections, XSS, CSRF and secure coding.",
-      "modules": "8 modules",
+      "modules": "{count} modules",
+      "major": "09.03.04 Software Engineering",
       "progress": "Progress: {percent}%",
       "quizScore": "Average score: {score}%",
       "takeQuiz": "Take a quiz",
@@ -94,6 +95,17 @@
       "quizzesCompleted": "Quizzes",
       "averageScore": "Average score",
       "achievements": "Achievements"
+    },
+    "xp": {
+      "level": "Level {level}",
+      "xpToNext": "{xp} XP to level {level}",
+      "breakdownTitle": "XP Sources",
+      "modules": "Modules",
+      "quizzes": "Quizzes",
+      "challenges": "Challenges",
+      "bonuses": "Bonuses",
+      "study": "Study",
+      "total": "Total"
     },
     "recommendationBanner": {
       "title": "Recommendation"
@@ -144,6 +156,7 @@
       "title": "Weakness Review",
       "hasWeaknesses": "Found {count} mistakes to review. Strengthen your weak spots!",
       "noWeaknesses": "No mistakes to review. Great job!",
+      "count": "{count} mistake(s)",
       "xpBonus": "+5 XP for each corrected answer"
     },
     "exportImport": {

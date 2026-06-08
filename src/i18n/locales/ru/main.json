@@ -83,7 +83,8 @@
     "hero": {
       "title": "Лаборатория кибербезопасности",
       "description": "Интерактивная платформа для изучения уязвимостей веб-приложений: OWASP Top 10, SQL-инъекции, XSS, CSRF и безопасное кодирование.",
-      "modules": "8 модулей",
+      "modules": "{count} модулей",
+      "major": "09.03.04 Программная инженерия",
       "progress": "Прогресс: {percent}%",
       "quizScore": "Средний балл: {score}%",
       "takeQuiz": "Пройдите квиз",
@@ -94,6 +95,17 @@
       "quizzesCompleted": "Квизы",
       "averageScore": "Средний балл",
       "achievements": "Достижения"
+    },
+    "xp": {
+      "level": "Уровень {level}",
+      "xpToNext": "{xp} XP до уровня {level}",
+      "breakdownTitle": "Источники XP",
+      "modules": "Модули",
+      "quizzes": "Тесты",
+      "challenges": "Челленджи",
+      "bonuses": "Бонусы",
+      "study": "Учёба",
+      "total": "Итого"
     },
     "recommendationBanner": {
       "title": "Рекомендация"
@@ -144,6 +156,7 @@
       "title": "Повторение ошибок",
       "hasWeaknesses": "Найдено {count} ошибок для повторения. Закрепите слабые места!",
       "noWeaknesses": "Нет ошибок для повторения. Отличная работа!",
+      "count": "{count} ошибок",
       "xpBonus": "+5 XP за каждый исправленный ответ"
     },
     "exportImport": {

@@ -244,7 +244,7 @@ export default function Dashboard() {
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-500/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
         <div className="relative z-10">
           <Badge className="bg-emerald-600/30 text-emerald-300 border-emerald-600/30 mb-4">
-            09.03.04 Программная инженерия
+            {t('major')}
           </Badge>
           <h1 className="text-2xl md:text-3xl font-bold mb-3">
             {t('hero.title')}
@@ -573,7 +573,7 @@ export default function Dashboard() {
                 {weaknessCount > 0 && (
                   <div className="flex items-center gap-2 mt-3">
                     <Badge className="bg-orange-200 text-orange-800 border-0 text-[10px]">
-                      {weaknessCount} {weaknessCount === 1 ? 'ошибка' : weaknessCount < 5 ? 'ошибки' : 'ошибок'}
+                      {t('weaknessReview.count', { count: weaknessCount })}
                     </Badge>
                     <span className="text-[11px] text-slate-400">{t('weaknessReview.xpBonus')}</span>
                   </div>

@@ -968,6 +968,13 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
   },
 
   importProgressData: (data) => {
+    // Sanitize note content on import to prevent stored XSS
+    const sanitizedNotes: NotesMap = {};
+    if (data.notes) {
+      for (const [key, note] of Object.entries(data.notes)) {
+        sanitizedNotes[key] = { ...note, content: sanitizeNoteContent(note.content) };
+      }
+    }
     set({
       completedModules: data.completedModules,
       quizScores: data.quizScores,
@@ -981,7 +988,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       csrfViewedChallenges: data.csrfViewedChallenges,
       quizHistory: data.quizHistory,
       totalXP: data.totalXP ?? 0,
-      notes: data.notes ?? {},
+      notes: sanitizedNotes,
       studySessions: data.studySessions ?? [],
     });
     ensureSync(get, set).catch((err) => logger.error('Sync failed after importProgressData:', err));
