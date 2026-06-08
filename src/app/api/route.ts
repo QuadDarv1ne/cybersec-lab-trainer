@@ -63,7 +63,7 @@ export async function GET(request: Request) {
       if (adapter.type === 'mongodb') {
         // MongoDB leaderboard
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { StudySessionModel, ProgressModel, QuizResultModel } = require('@/lib/mongoose-schema');
+        const { UserModel, StudySessionModel, ProgressModel, QuizResultModel } = require('@/lib/mongoose-schema');
         const match: Record<string, unknown> = {};
         if (timeframe === 'weekly') {
           const weekAgo = new Date();
@@ -77,7 +77,7 @@ export async function GET(request: Request) {
           { $limit: 50 },
         ]);
         const userIds = sessions.map((s: { _id: string }) => s._id);
-        const [progressCounts, quizCounts] = await Promise.all([
+        const [progressCounts, quizCounts, users] = await Promise.all([
           ProgressModel.aggregate([
             { $match: { userId: { $in: userIds }, completed: true } },
             { $group: { _id: '$userId', count: { $sum: 1 } } },
@@ -86,14 +86,16 @@ export async function GET(request: Request) {
             { $match: { userId: { $in: userIds } } },
             { $group: { _id: '$userId', count: { $sum: 1 } } },
           ]),
+          UserModel.find({ _id: { $in: userIds } }).lean(),
         ]);
         const progressMap = Object.fromEntries(progressCounts.map((p: { _id: string; count: number }) => [p._id, p.count]));
         const quizMap = Object.fromEntries(quizCounts.map((q: { _id: string; count: number }) => [q._id, q.count]));
+        const userMap = Object.fromEntries((users as Array<{ _id: string; name: string | null; email: string | null; image: string | null }>).map((u) => [String(u._id), u]));
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { calculateLevel } = require('@/lib/xp-system');
         const leaderboard = [];
         for (const s of sessions) {
-          const user = await adapter.user.findUnique({ id: s._id });
+          const user = userMap[s._id];
           if (user) {
             const sessionXP = s.totalXP;
             const completedModules = progressMap[s._id] ?? 0;
@@ -102,7 +104,7 @@ export async function GET(request: Request) {
             const quizXP = quizCount * XP_REWARDS.quizPass;
             const totalXP = sessionXP + moduleXP + quizXP;
             leaderboard.push({
-              id: user.id,
+              id: user._id,
               name: user.name,
               email: user.email,
               image: user.image,

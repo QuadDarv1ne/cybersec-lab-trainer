@@ -10,6 +10,7 @@
     "build": "node scripts/auto-config.mjs && next build",
     "start": "cross-env NODE_ENV=production node scripts/find-port.mjs --run bun .next/standalone/server.js",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
