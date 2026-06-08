@@ -112,4 +112,7 @@ async function seed() {
   console.log('Lab seed completed!')
 }
 
-seed().catch(console.error)
+seed().catch((err) => {
+  console.error('Lab seed failed:', err);
+  process.exit(1);
+})

@@ -27,7 +27,7 @@ const VALID_TYPES = ['postgresql', 'mysql', 'sqlite', 'mongodb'];
 const DATABASE_URLS = {
   postgresql: 'postgresql://postgres:postgres@localhost:5432/cybersec_lab?schema=public',
   mysql: 'mysql://root:password@localhost:3306/cybersec_lab',
-  sqlite: 'file:./prisma/dev.db',
+  sqlite: 'file:./dev.db',
   mongodb: 'mongodb://localhost:27017/cybersec_lab',
 };
 

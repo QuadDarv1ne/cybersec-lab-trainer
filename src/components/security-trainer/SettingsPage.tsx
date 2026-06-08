@@ -67,7 +67,7 @@ export default function SettingsPage() {
       } catch (e) {
         logger.warn('Failed to parse study goals from localStorage, data may be corrupted:', e);
         // Clear corrupted data so user can set fresh goals
-        try { localStorage.removeItem('study-goals'); } catch { /* ignore */ }
+        try { localStorage.removeItem('study-goals'); } catch { logger.warn('Failed to clear corrupted data from localStorage'); }
       }
     }
   }, []);
@@ -107,7 +107,7 @@ export default function SettingsPage() {
     try {
       localStorage.setItem('study-goals', JSON.stringify(goals));
     } catch {
-      // localStorage may be inaccessible in private browsing mode
+      logger.warn('Failed to save study goals to localStorage (private browsing?)');
     }
     setSaved(true);
     if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
@@ -162,7 +162,7 @@ export default function SettingsPage() {
             icon: '/favicon.ico',
           });
         } catch {
-          // Notification constructor can throw if permission was revoked
+          logger.warn('Failed to show notification — permission may have been revoked');
         }
         scheduleNext();
       }, msUntilReminder);
