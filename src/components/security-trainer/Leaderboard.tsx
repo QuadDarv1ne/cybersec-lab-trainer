@@ -29,17 +29,22 @@ export default function Leaderboard() {
   const currentUserId = useAppStore((s) => s.userId);
 
   useEffect(() => {
+    const controller = new AbortController();
     setLoading(true);
-    fetch(`/api?action=leaderboard&timeframe=${timeframe}`)
+    fetch(`/api?action=leaderboard&timeframe=${timeframe}`, { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
-        if (data.leaderboard) setEntries(data.leaderboard);
+        if (!controller.signal.aborted && data.leaderboard) setEntries(data.leaderboard);
       })
-      .catch(() => {
+      .catch((err) => {
+        if (controller.signal.aborted) return;
         toast.error(t('loadError'));
-        logger.error('Leaderboard fetch failed');
+        logger.error('Leaderboard fetch failed:', err);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
   }, [timeframe, t]);
 
   const getRankIcon = (rank: number) => {
@@ -98,7 +103,7 @@ export default function Leaderboard() {
           <div className="text-center">
             <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-1 ring-2 ring-slate-300">
               <Avatar className="w-14 h-14">
-                <AvatarImage src={entries[1].image || undefined} />
+                <AvatarImage src={entries[1].image || undefined} alt={entries[1].name || '2nd place'} />
                 <AvatarFallback className="bg-slate-300 text-white">
                   {(entries[1].name || 'U').charAt(0).toUpperCase()}
                 </AvatarFallback>
@@ -114,7 +119,7 @@ export default function Leaderboard() {
             <Crown size={24} className="text-amber-500 mx-auto mb-1" />
             <div className="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-1 ring-2 ring-amber-400">
               <Avatar className="w-18 h-18">
-                <AvatarImage src={entries[0].image || undefined} />
+                <AvatarImage src={entries[0].image || undefined} alt={entries[0].name || '1st place'} />
                 <AvatarFallback className="bg-amber-400 text-white text-lg">
                   {(entries[0].name || 'U').charAt(0).toUpperCase()}
                 </AvatarFallback>
@@ -129,7 +134,7 @@ export default function Leaderboard() {
           <div className="text-center">
             <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-1 ring-2 ring-orange-300">
               <Avatar className="w-14 h-14">
-                <AvatarImage src={entries[2].image || undefined} />
+                <AvatarImage src={entries[2].image || undefined} alt={entries[2].name || '3rd place'} />
                 <AvatarFallback className="bg-orange-300 text-white">
                   {(entries[2].name || 'U').charAt(0).toUpperCase()}
                 </AvatarFallback>
@@ -157,7 +162,7 @@ export default function Leaderboard() {
                   {getRankIcon(index + 1)}
                 </div>
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={entry.image || undefined} />
+                  <AvatarImage src={entry.image || undefined} alt={entry.name || 'User'} />
                   <AvatarFallback className="bg-emerald-600 text-white text-xs">
                     {(entry.name || 'U').charAt(0).toUpperCase()}
                   </AvatarFallback>

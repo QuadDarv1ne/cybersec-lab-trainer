@@ -286,7 +286,7 @@ export default function TeacherDashboard() {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-9 w-9">
-                      <AvatarImage src={s.image || undefined} />
+                      <AvatarImage src={s.image || undefined} alt={s.name || 'Student'} />
                       <AvatarFallback className="bg-emerald-600 text-white text-xs">
                         {(s.name || 'U').charAt(0).toUpperCase()}
                       </AvatarFallback>
@@ -389,7 +389,7 @@ export default function TeacherDashboard() {
                     {g.members.map((member) => (
                       <div key={member.user.id} className="flex items-center gap-2 py-1.5 px-2 rounded hover:bg-slate-50 group">
                         <Avatar className="h-6 w-6">
-                          <AvatarImage src={member.user.image || undefined} />
+                          <AvatarImage src={member.user.image || undefined} alt={member.user.name || 'Member'} />
                           <AvatarFallback className="bg-slate-400 text-white text-[9px]">
                             {(member.user.name || 'U').charAt(0).toUpperCase()}
                           </AvatarFallback>
@@ -435,7 +435,7 @@ export default function TeacherDashboard() {
                       <CardContent className="p-4">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={sub.user.image || undefined} />
+                            <AvatarImage src={sub.user.image || undefined} alt={sub.user.name || 'Student'} />
                             <AvatarFallback className="bg-emerald-600 text-white text-xs">
                               {(sub.user.name || 'U').charAt(0).toUpperCase()}
                             </AvatarFallback>

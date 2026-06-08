@@ -237,7 +237,7 @@ export default function AdminDashboard() {
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.image || undefined} />
+                        <AvatarImage src={user.image || undefined} alt={user.name || 'User'} />
                         <AvatarFallback className="bg-emerald-600 text-white text-sm">
                           {(user.name || 'U').charAt(0).toUpperCase()}
                         </AvatarFallback>

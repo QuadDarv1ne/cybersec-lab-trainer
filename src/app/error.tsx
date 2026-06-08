@@ -25,17 +25,17 @@ export default function Error({
             <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
               <AlertCircle size={20} className="text-red-600" />
             </div>
-            <h2 className="text-lg font-bold">Ошибка приложения</h2>
+            <h2 className="text-lg font-bold">Application Error</h2>
           </div>
 
           <p className="text-sm text-slate-600">
-            Произошла непредвиденная ошибка. Попробуйте обновить страницу или вернитесь на главную.
+            An unexpected error occurred. Please try refreshing the page or return to the home page.
           </p>
 
           {process.env.NODE_ENV === "development" && (
             <details className="bg-slate-50 rounded-lg p-3 text-xs font-mono text-slate-700 space-y-1">
               <summary className="cursor-pointer font-sans font-semibold text-slate-600">
-                Показать детали ошибки
+                Show error details
               </summary>
               <p className="text-red-600 font-bold">{error.message}</p>
               <pre className="whitespace-pre-wrap text-[10px] text-slate-500">
@@ -56,14 +56,14 @@ export default function Error({
               className="flex-1 bg-emerald-600 hover:bg-emerald-700"
             >
               <RefreshCw size={16} className="mr-2" />
-              Попробовать снова
+              Try Again
             </Button>
             <Button
               variant="outline"
               onClick={() => (window.location.href = "/")}
             >
               <Home size={16} className="mr-2" />
-              На главную
+              Go Home
             </Button>
           </div>
         </CardContent>
