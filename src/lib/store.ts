@@ -175,6 +175,10 @@ if (typeof window !== 'undefined') {
 export function cleanupEventListeners(): void {
   if (typeof window === 'undefined') return;
 
+  if (syncTimeout) {
+    clearTimeout(syncTimeout);
+    syncTimeout = null;
+  }
   if (beforeUnloadHandler) {
     window.removeEventListener('beforeunload', beforeUnloadHandler);
     beforeUnloadHandler = null;

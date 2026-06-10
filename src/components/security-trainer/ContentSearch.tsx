@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useAppStore, type PageType } from '@/lib/store';
+import { toPageType } from '@/lib/constants';
 import { modules, achievements, glossaryTerms } from '@/lib/security-data';
 import { quizCategories, quizQuestions } from '@/lib/data/quiz-data';
 import { owaspTopics, owaspChallenges, sqlChallenges, csrfChallenges, authChallenges, secureCodingChallenges, securityHeaders, headerChallenges } from '@/lib/data';
@@ -60,7 +61,7 @@ function buildSearchIndex(): SearchResult[] {
       title: mod.title,
       description: mod.description,
       category: 'module',
-      page: mod.id as PageType,
+      page: toPageType(mod.id),
       icon: mod.icon,
       score: 0,
     });

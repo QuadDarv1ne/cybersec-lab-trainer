@@ -49,7 +49,7 @@ import {
   Workflow,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import type { PageType } from '@/lib/store';
+import { toPageType } from '@/lib/constants';
 
 function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: string }) {
   const count = useMotionValue(value);
@@ -182,38 +182,38 @@ export default function Dashboard() {
   // Recommendations
   const recommendation = useMemo(() => {
     if (completedModules.length === 0) {
-      return { text: t('recommendations.owaspStart'), page: 'owasp' as PageType };
+      return { text: t('recommendations.owaspStart'), page: toPageType('owasp') };
     }
     if (!completedModules.includes('sql-injection')) {
-      return { text: t('recommendations.sqlTry'), page: 'sql-injection' as PageType };
+      return { text: t('recommendations.sqlTry'), page: toPageType('sql-injection') };
     }
     if (!completedModules.includes('xss')) {
-      return { text: t('recommendations.xssLearn'), page: 'xss' as PageType };
+      return { text: t('recommendations.xssLearn'), page: toPageType('xss') };
     }
     if (!completedModules.includes('csrf')) {
-      return { text: t('recommendations.csrfLearn'), page: 'csrf' as PageType };
+      return { text: t('recommendations.csrfLearn'), page: toPageType('csrf') };
     }
     if (!completedModules.includes('auth')) {
-      return { text: t('recommendations.authLearn'), page: 'auth' as PageType };
+      return { text: t('recommendations.authLearn'), page: toPageType('auth') };
     }
     if (!completedModules.includes('secure-coding')) {
-      return { text: t('recommendations.secureCodingLearn'), page: 'secure-coding' as PageType };
+      return { text: t('recommendations.secureCodingLearn'), page: toPageType('secure-coding') };
     }
     if (!completedModules.includes('tools')) {
-      return { text: t('recommendations.toolsTry'), page: 'tools' as PageType };
+      return { text: t('recommendations.toolsTry'), page: toPageType('tools') };
     }
     if (!completedModules.includes('security-headers')) {
-      return { text: t('recommendations.headersLearn'), page: 'security-headers' as PageType };
+      return { text: t('recommendations.headersLearn'), page: toPageType('security-headers') };
     }
     if (totalProgress < 100) {
       const remainingModule = modules.find((m) => !completedModules.includes(m.id));
-      return { text: t('recommendations.completeRemaining'), page: (remainingModule?.id ?? 'dashboard') as PageType };
+      return { text: t('recommendations.completeRemaining'), page: toPageType(remainingModule?.id ?? 'dashboard') };
     }
-    return { text: t('recommendations.wellDone'), page: 'achievements' as PageType };
+    return { text: t('recommendations.wellDone'), page: toPageType('achievements') };
   }, [completedModules, totalProgress, t]);
 
   const handleStartModule = (moduleId: string) => {
-    setCurrentPage(moduleId as PageType);
+    setCurrentPage(toPageType(moduleId));
   };
 
   const handleCardKeyDown = (e: React.KeyboardEvent, action: () => void) => {

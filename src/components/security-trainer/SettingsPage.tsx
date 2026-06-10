@@ -54,8 +54,8 @@ export default function SettingsPage() {
     let stored: string | null = null;
     try {
       stored = localStorage.getItem('study-goals');
-    } catch {
-      // localStorage may be inaccessible in private browsing mode
+    } catch (e) {
+      logger.warn('localStorage access failed — may be in private browsing mode:', e);
     }
     if (stored) {
       try {
@@ -67,7 +67,7 @@ export default function SettingsPage() {
       } catch (e) {
         logger.warn('Failed to parse study goals from localStorage, data may be corrupted:', e);
         // Clear corrupted data so user can set fresh goals
-        try { localStorage.removeItem('study-goals'); } catch { logger.warn('Failed to clear corrupted data from localStorage'); }
+        try { localStorage.removeItem('study-goals'); } catch (e) { logger.warn('Failed to clear corrupted data from localStorage:', e); }
       }
     }
   }, []);
@@ -144,7 +144,11 @@ export default function SettingsPage() {
     if (!('Notification' in window)) return;
 
     const scheduleNext = () => {
-      const [hours, minutes] = goals.reminderTime.split(':').map(Number);
+      const parts = goals.reminderTime.split(':');
+      if (parts.length !== 2) return;
+      const hours = Number(parts[0]);
+      const minutes = Number(parts[1]);
+      if (isNaN(hours) || isNaN(minutes)) return;
       const now = new Date();
       const reminder = new Date();
       reminder.setHours(hours, minutes, 0, 0);

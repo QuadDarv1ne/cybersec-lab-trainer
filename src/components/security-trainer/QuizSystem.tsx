@@ -416,10 +416,10 @@ export default function QuizSystem() {
                   className="mt-4 space-y-3"
                 >
                   <div className={`rounded-lg p-3 ${
-                    answers[currentQuestion] ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'
+                    answers[currentQuestion] ?? false ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'
                   }`}>
-                    <p className={`text-xs font-semibold ${answers[currentQuestion] ? 'text-emerald-700' : 'text-red-700'}`}>
-                      {answers[currentQuestion] ? `${t('correct')}!` : timeLeft <= 0 ? `${t('timeUp')}!` : `${t('incorrect')}!`}
+                    <p className={`text-xs font-semibold ${answers[currentQuestion] ?? false ? 'text-emerald-700' : 'text-red-700'}`}>
+                      {answers[currentQuestion] ?? false ? `${t('correct')}!` : timeLeft <= 0 ? `${t('timeUp')}!` : `${t('incorrect')}!`}
                     </p>
                     <p className="text-xs text-slate-600 mt-1 leading-relaxed">{question.explanation}</p>
                   </div>

@@ -2,7 +2,8 @@
 
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useAppStore, type PageType } from '@/lib/store';
+import { useAppStore } from '@/lib/store';
+import { toPageType } from '@/lib/constants';
 import { modules, learningPathOrder, isModuleAccessible, getNextLearningPathModule } from '@/lib/data/modules-data';
 import { useTranslations } from '@/lib/intlStub';
 import { Card, CardContent } from '@/components/ui/card';
@@ -50,7 +51,7 @@ export function LearningPath() {
 
   const handleNavigate = (moduleId: string, accessible: boolean) => {
     if (accessible) {
-      setCurrentPage(moduleId as PageType);
+      setCurrentPage(toPageType(moduleId));
     }
   };
 
@@ -151,7 +152,7 @@ export function LearningPath() {
             <Button
               size="sm"
               className="w-full mt-4 bg-sky-600 hover:bg-sky-700 text-white"
-              onClick={() => setCurrentPage(nextModule as PageType)}
+              onClick={() => setCurrentPage(toPageType(nextModule))}
             >
               <Play size={14} className="mr-1.5" />
               {t('learningPath.continue', { module: moduleIconMap[nextModule] ?? nextModule })}

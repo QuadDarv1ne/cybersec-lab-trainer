@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAppStore, type PageType } from '@/lib/store';
+import { toPageType } from '@/lib/constants';
 
 const pageToHash: Record<PageType, string> = {
   dashboard: '',
@@ -31,7 +32,7 @@ const pageToHash: Record<PageType, string> = {
 };
 
 const hashToPage: Record<string, PageType> = Object.fromEntries(
-  Object.entries(pageToHash).map(([page, hash]) => [hash, page as PageType])
+  Object.entries(pageToHash).map(([page, hash]) => [hash, toPageType(page)])
 );
 
 /**

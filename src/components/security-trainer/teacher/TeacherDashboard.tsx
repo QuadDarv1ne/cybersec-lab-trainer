@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 type StudentInfo = {
   id: string; name: string | null; email: string | null;
@@ -83,7 +84,7 @@ export default function TeacherDashboard() {
       const res = await fetch(`/api/teacher?${params}`);
       const data = await res.json();
       if (data.students) setStudents(data.students);
-    } catch { toast.error('Failed to load students'); }
+    } catch (err) { toast.error('Failed to load students'); logger.error('loadStudents failed:', err); }
   }, []);
 
   const loadGroups = useCallback(async () => {
@@ -91,7 +92,7 @@ export default function TeacherDashboard() {
       const res = await fetch('/api/teacher?action=groups');
       const data = await res.json();
       if (data.groups) setGroups(data.groups);
-    } catch { toast.error('Failed to load groups'); }
+    } catch (err) { toast.error('Failed to load groups'); logger.error('loadGroups failed:', err); }
   }, []);
 
   const loadAssignments = useCallback(async () => {
@@ -99,7 +100,7 @@ export default function TeacherDashboard() {
       const res = await fetch('/api/teacher?action=assignments');
       const data = await res.json();
       if (data.assignments) setAssignments(data.assignments);
-    } catch { toast.error('Failed to load assignments'); }
+    } catch (err) { toast.error('Failed to load assignments'); logger.error('loadAssignments failed:', err); }
   }, []);
 
   useEffect(() => {
@@ -123,7 +124,7 @@ export default function TeacherDashboard() {
         const res = await fetch(`/api/teacher?action=students&search=${addStudentSearch}`);
         const data = await res.json();
         if (data.students) setAddStudentResults(data.students);
-      } catch { /* ignore */ }
+      } catch { /* ignore — search typing is debounced, failures are expected */ }
     }, 300);
     return () => clearTimeout(timer);
   }, [addStudentSearch]);
@@ -138,7 +139,7 @@ export default function TeacherDashboard() {
         toast.success('Student added to group');
         loadGroups();
       }
-    } catch { toast.error('Failed to add student'); }
+    } catch (err) { toast.error('Failed to add student'); logger.error('addStudent failed:', err); }
   };
 
   const handleRemoveStudent = async (groupId: string, studentId: string) => {
@@ -151,7 +152,7 @@ export default function TeacherDashboard() {
         toast.success('Student removed from group');
         loadGroups();
       }
-    } catch { toast.error('Failed to remove student'); }
+    } catch (err) { toast.error('Failed to remove student'); logger.error('removeStudent failed:', err); }
   };
 
   const handleCreateGroup = async () => {
@@ -166,7 +167,7 @@ export default function TeacherDashboard() {
         setShowGroupForm(false); setGroupName(''); setGroupDesc('');
         loadGroups();
       }
-    } catch { toast.error('Failed to create group'); }
+    } catch (err) { toast.error('Failed to create group'); logger.error('createGroup failed:', err); }
   };
 
   const handleDeleteGroup = async (groupId: string) => {
@@ -177,7 +178,7 @@ export default function TeacherDashboard() {
         body: JSON.stringify({ action: 'delete-group', payload: { groupId } }),
       });
       if (res.ok) { toast.success('Group deleted'); loadGroups(); }
-    } catch { toast.error('Failed to delete group'); }
+    } catch (err) { toast.error('Failed to delete group'); logger.error('deleteGroup failed:', err); }
   };
 
   const handleCreateAssignment = async () => {
@@ -195,7 +196,7 @@ export default function TeacherDashboard() {
         setShowAssignmentForm(false); setAssignTitle(''); setAssignDesc(''); setAssignGroup(''); setAssignDue('');
         loadAssignments();
       }
-    } catch { toast.error('Failed to create assignment'); }
+    } catch (err) { toast.error('Failed to create assignment'); logger.error('createAssignment failed:', err); }
   };
 
   const handleDeleteAssignment = async (assignmentId: string) => {
@@ -206,7 +207,7 @@ export default function TeacherDashboard() {
         body: JSON.stringify({ action: 'delete-assignment', payload: { assignmentId } }),
       });
       if (res.ok) { toast.success('Assignment deleted'); loadAssignments(); }
-    } catch { toast.error('Failed to delete assignment'); }
+    } catch (err) { toast.error('Failed to delete assignment'); logger.error('deleteAssignment failed:', err); }
   };
 
   const loadSubmissions = async (assignmentId: string) => {
@@ -217,7 +218,7 @@ export default function TeacherDashboard() {
       const data = await res.json();
       if (data.submissions) setSubmissions(data.submissions);
       if (data.assignment) setSubmissionsAssignment(data.assignment);
-    } catch { toast.error('Failed to load submissions'); }
+    } catch (err) { toast.error('Failed to load submissions'); logger.error('loadSubmissions failed:', err); }
     finally { setSubmissionsLoading(false); }
   };
 
@@ -238,7 +239,7 @@ export default function TeacherDashboard() {
         setGradeSubmissionId(null); setGradeScore(''); setGradeComment('');
         if (viewSubmissionsFor) loadSubmissions(viewSubmissionsFor);
       }
-    } catch { toast.error('Failed to grade submission'); }
+    } catch (err) { toast.error('Failed to grade submission'); logger.error('gradeSubmission failed:', err); }
   };
 
   if (loading) {

@@ -36,3 +36,12 @@ export const PAGE_TYPES = [
   'leaderboard',
   'profile',
 ] as const satisfies string[];
+
+export type PageType = typeof PAGE_TYPES[number];
+
+const PAGE_TYPE_SET = new Set<string>(PAGE_TYPES);
+
+export function toPageType(value: string): PageType {
+  if (PAGE_TYPE_SET.has(value)) return value as PageType;
+  return 'dashboard';
+}
