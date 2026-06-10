@@ -12,8 +12,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const action = url.searchParams.get('action') || 'students';
 
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { db } = require('@/lib/db');
+    const { db } = await import('@/lib/db');
     await setCsrfCookie();
 
     switch (action) {
@@ -93,7 +92,7 @@ export async function GET(request: Request) {
 
       case 'groups': {
         const groups = await db.teacherGroup.findMany({
-          where: { teacherId: userId },
+          where: { teacherId: userId! },
           include: {
             members: {
               include: { user: { select: { id: true, name: true, email: true, image: true } } },
@@ -177,8 +176,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const { action, payload } = body;
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { db } = require('@/lib/db');
+    const { db } = await import('@/lib/db');
 
     switch (action) {
       case 'create-group': {
@@ -187,7 +185,7 @@ export async function POST(request: Request) {
           return NextResponse.json({ error: "Group name required" }, { status: 400 });
         }
         const group = await db.teacherGroup.create({
-          data: { name, description, teacherId: userId },
+          data: { name, description, teacherId: userId! },
         });
         return NextResponse.json({ group, message: "Group created" });
       }
@@ -198,7 +196,7 @@ export async function POST(request: Request) {
           return NextResponse.json({ error: "groupId required" }, { status: 400 });
         }
         const group = await db.teacherGroup.update({
-          where: { id: groupId, teacherId: userId },
+          where: { id: groupId, teacherId: userId! },
           data: { ...(name ? { name } : {}), ...(description !== undefined ? { description } : {}) },
         });
         return NextResponse.json({ group, message: "Group updated" });
@@ -209,7 +207,7 @@ export async function POST(request: Request) {
         if (!groupId) {
           return NextResponse.json({ error: "groupId required" }, { status: 400 });
         }
-        await db.teacherGroup.delete({ where: { id: groupId, teacherId: userId } });
+        await db.teacherGroup.delete({ where: { id: groupId, teacherId: userId! } });
         return NextResponse.json({ message: "Group deleted" });
       }
 
@@ -246,7 +244,7 @@ export async function POST(request: Request) {
             description,
             moduleId,
             groupId,
-            teacherId: userId,
+            teacherId: userId!,
             dueDate: dueDate ? new Date(dueDate) : null,
             maxScore: maxScore || 100,
           },
@@ -259,7 +257,7 @@ export async function POST(request: Request) {
         if (!assignmentId) {
           return NextResponse.json({ error: "assignmentId required" }, { status: 400 });
         }
-        await db.assignment.delete({ where: { id: assignmentId, teacherId: userId } });
+        await db.assignment.delete({ where: { id: assignmentId, teacherId: userId! } });
         return NextResponse.json({ message: "Assignment deleted" });
       }
 

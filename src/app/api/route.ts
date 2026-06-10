@@ -62,8 +62,7 @@ export async function GET(request: Request) {
 
       if (adapter.type === 'mongodb') {
         // MongoDB leaderboard
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { UserModel, StudySessionModel, ProgressModel, QuizResultModel } = require('@/lib/mongoose-schema');
+        const { UserModel, StudySessionModel, ProgressModel, QuizResultModel } = await import('@/lib/mongoose-schema');
         const match: Record<string, unknown> = {};
         if (timeframe === 'weekly') {
           const weekAgo = new Date();
@@ -90,9 +89,8 @@ export async function GET(request: Request) {
         ]);
         const progressMap = Object.fromEntries(progressCounts.map((p: { _id: string; count: number }) => [p._id, p.count]));
         const quizMap = Object.fromEntries(quizCounts.map((q: { _id: string; count: number }) => [q._id, q.count]));
-        const userMap = Object.fromEntries((users as Array<{ _id: string; name: string | null; email: string | null; image: string | null }>).map((u) => [String(u._id), u]));
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { calculateLevel } = require('@/lib/xp-system');
+        const userMap = Object.fromEntries((users as unknown as Array<{ _id: string; name: string | null; email: string | null; image: string | null }>).map((u) => [String(u._id), u]));
+        const { calculateLevel } = await import('@/lib/xp-system');
         const leaderboard = [];
         for (const s of sessions) {
           const user = userMap[s._id];
@@ -118,10 +116,8 @@ export async function GET(request: Request) {
       }
 
       // SQLite/PostgreSQL leaderboard
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { db } = require('@/lib/db');
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { calculateLevel } = require('@/lib/xp-system');
+      const { db } = await import('@/lib/db');
+      const { calculateLevel } = await import('@/lib/xp-system');
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
 

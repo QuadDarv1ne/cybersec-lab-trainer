@@ -20,8 +20,7 @@ export async function GET(request: Request) {
         const page = parseInt(url.searchParams.get('page') || '1', 10);
         const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10), 100);
         const skip = (page - 1) * limit;
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { db } = require('@/lib/db');
+        const { db } = await import('@/lib/db');
         const [users, total] = await Promise.all([
           db.user.findMany({
             where: {
@@ -31,7 +30,7 @@ export async function GET(request: Request) {
                   { email: { contains: search } },
                 ],
               } : {}),
-              ...(role ? { role } : {}),
+              ...(role ? { role: role as import('@prisma/client').Role } : {}),
             },
             orderBy: { createdAt: 'desc' },
             skip,
@@ -45,7 +44,7 @@ export async function GET(request: Request) {
                   { email: { contains: search } },
                 ],
               } : {}),
-              ...(role ? { role } : {}),
+              ...(role ? { role: role as import('@prisma/client').Role } : {}),
             },
           }),
         ]);
@@ -59,8 +58,7 @@ export async function GET(request: Request) {
         if (!targetUserId) {
           return NextResponse.json({ error: "User ID required" }, { status: 400 });
         }
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { db } = require('@/lib/db');
+        const { db } = await import('@/lib/db');
         const user = await db.user.findUnique({
           where: { id: targetUserId },
           include: {
@@ -82,8 +80,7 @@ export async function GET(request: Request) {
       }
 
       case 'stats': {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { db } = require('@/lib/db');
+        const { db } = await import('@/lib/db');
         const now = new Date();
         const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000);
         const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400000);
@@ -117,8 +114,7 @@ export async function GET(request: Request) {
       }
 
       case 'audit-log': {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { db } = require('@/lib/db');
+        const { db } = await import('@/lib/db');
         const page = parseInt(url.searchParams.get('page') || '1', 10);
         const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10), 100);
         const skip = (page - 1) * limit;
@@ -157,8 +153,7 @@ export async function POST(request: Request) {
     const { action, payload } = body;
 
     const adapter = getDbAdapter();
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { db } = require('@/lib/db');
+    const { db } = await import('@/lib/db');
 
     // Helper to log admin actions
     const logAction = async (actionName: string, targetUserId: string, details: Record<string, unknown> = {}) => {
@@ -166,7 +161,7 @@ export async function POST(request: Request) {
         if (db.adminAction?.create) {
           await db.adminAction.create({
             data: {
-              adminId: userId,
+              adminId: userId!,
               action: actionName,
               targetUserId,
               details: JSON.stringify(details),
