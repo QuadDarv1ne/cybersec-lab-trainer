@@ -73,6 +73,23 @@
       "millionYears": "M years",
       "forever": "Forever"
     },
+    "passwordChecks": {
+      "minLength": "Minimum 8 characters",
+      "lowercase": "Lowercase letters (a-z)",
+      "uppercase": "Uppercase letters (A-Z)",
+      "digits": "Digits (0-9)",
+      "special": "Special characters (!@#$...)",
+      "minLength12": "Minimum 12 characters",
+      "noRepeats": "No repeated characters",
+      "noSequences": "No sequences (abc, 123)"
+    },
+    "passwordStrength": {
+      "veryWeak": "Very Weak",
+      "weak": "Weak",
+      "medium": "Medium",
+      "strong": "Strong",
+      "excellent": "Excellent"
+    },
     "authErrorTitle": "Authentication Error",
     "oauthAccountNotLinked": "This account is already linked to another provider.",
     "callbackError": "An error occurred during authentication. Please try again.",

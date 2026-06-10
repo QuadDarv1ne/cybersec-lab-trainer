@@ -106,8 +106,8 @@ export default function SettingsPage() {
   const saveGoals = () => {
     try {
       localStorage.setItem('study-goals', JSON.stringify(goals));
-    } catch {
-      logger.warn('Failed to save study goals to localStorage (private browsing?)');
+    } catch (e) {
+      logger.warn('Failed to save study goals to localStorage:', e);
     }
     setSaved(true);
     if (savedTimerRef.current) clearTimeout(savedTimerRef.current);

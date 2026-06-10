@@ -116,14 +116,14 @@ export default function AuthSecurityLab() {
     if (!password) return { score: 0, label: '', color: '', checks: [] };
 
     const checks = [
-      { label: 'Минимум 8 символов', passed: password.length >= 8 },
-      { label: 'Строчные буквы (a-z)', passed: /[a-z]/.test(password) },
-      { label: 'Заглавные буквы (A-Z)', passed: /[A-Z]/.test(password) },
-      { label: 'Цифры (0-9)', passed: /[0-9]/.test(password) },
-      { label: 'Спецсимволы (!@#$...)', passed: /[^a-zA-Z0-9]/.test(password) },
-      { label: 'Минимум 12 символов', passed: password.length >= 12 },
-      { label: 'Нет повторяющихся символов', passed: !/(.)\1{2,}/.test(password) },
-      { label: 'Нет последовательностей (abc, 123)', passed: !/(?:abc|bcd|cde|def|efg|012|123|234|345|456|567|678|789)/i.test(password) },
+      { label: t('passwordChecks.minLength'), passed: password.length >= 8 },
+      { label: t('passwordChecks.lowercase'), passed: /[a-z]/.test(password) },
+      { label: t('passwordChecks.uppercase'), passed: /[A-Z]/.test(password) },
+      { label: t('passwordChecks.digits'), passed: /[0-9]/.test(password) },
+      { label: t('passwordChecks.special'), passed: /[^a-zA-Z0-9]/.test(password) },
+      { label: t('passwordChecks.minLength12'), passed: password.length >= 12 },
+      { label: t('passwordChecks.noRepeats'), passed: !/(.)\1{2,}/.test(password) },
+      { label: t('passwordChecks.noSequences'), passed: !/(?:abc|bcd|cde|def|efg|012|123|234|345|456|567|678|789)/i.test(password) },
     ];
 
     const passedCount = checks.filter((c) => c.passed).length;
@@ -131,14 +131,14 @@ export default function AuthSecurityLab() {
     let label = '';
     let color = '';
 
-    if (passedCount <= 2) { score = 20; label = 'Очень слабый'; color = 'bg-red-500'; }
-    else if (passedCount <= 3) { score = 40; label = 'Слабый'; color = 'bg-red-400'; }
-    else if (passedCount <= 5) { score = 60; label = 'Средний'; color = 'bg-yellow-500'; }
-    else if (passedCount <= 6) { score = 80; label = 'Надёжный'; color = 'bg-emerald-500'; }
-    else { score = 100; label = 'Отличный'; color = 'bg-emerald-600'; }
+    if (passedCount <= 2) { score = 20; label = t('passwordStrength.veryWeak'); color = 'bg-red-500'; }
+    else if (passedCount <= 3) { score = 40; label = t('passwordStrength.weak'); color = 'bg-red-400'; }
+    else if (passedCount <= 5) { score = 60; label = t('passwordStrength.medium'); color = 'bg-yellow-500'; }
+    else if (passedCount <= 6) { score = 80; label = t('passwordStrength.strong'); color = 'bg-emerald-500'; }
+    else { score = 100; label = t('passwordStrength.excellent'); color = 'bg-emerald-600'; }
 
     return { score, label, color, checks };
-  }, [password]);
+  }, [password, t]);
 
   const currentChallenge = authChallenges[activeChallenge];
   const isChallengeAnswered = answeredChallenges.has(activeChallenge);

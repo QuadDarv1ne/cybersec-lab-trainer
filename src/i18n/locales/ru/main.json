@@ -73,6 +73,23 @@
       "millionYears": "млн лет",
       "forever": "Бесконечно"
     },
+    "passwordChecks": {
+      "minLength": "Минимум 8 символов",
+      "lowercase": "Строчные буквы (a-z)",
+      "uppercase": "Заглавные буквы (A-Z)",
+      "digits": "Цифры (0-9)",
+      "special": "Спецсимволы (!@#$...)",
+      "minLength12": "Минимум 12 символов",
+      "noRepeats": "Нет повторяющихся символов",
+      "noSequences": "Нет последовательностей (abc, 123)"
+    },
+    "passwordStrength": {
+      "veryWeak": "Очень слабый",
+      "weak": "Слабый",
+      "medium": "Средний",
+      "strong": "Надёжный",
+      "excellent": "Отличный"
+    },
     "authErrorTitle": "Ошибка аутентификации",
     "oauthAccountNotLinked": "Аккаунт уже привязан к другому провайдеру.",
     "callbackError": "Ошибка при аутентификации. Попробуйте снова.",

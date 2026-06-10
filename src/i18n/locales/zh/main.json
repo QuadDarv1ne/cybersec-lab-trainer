@@ -73,6 +73,23 @@
       "millionYears": "百万年",
       "forever": "永远"
     },
+    "passwordChecks": {
+      "minLength": "至少8个字符",
+      "lowercase": "小写字母 (a-z)",
+      "uppercase": "大写字母 (A-Z)",
+      "digits": "数字 (0-9)",
+      "special": "特殊字符 (!@#$...)",
+      "minLength12": "至少12个字符",
+      "noRepeats": "无重复字符",
+      "noSequences": "无序列 (abc, 123)"
+    },
+    "passwordStrength": {
+      "veryWeak": "非常弱",
+      "weak": "弱",
+      "medium": "中等",
+      "strong": "强",
+      "excellent": "优秀"
+    },
     "authErrorTitle": "认证错误",
     "oauthAccountNotLinked": "此账户已关联到其他登录方式。",
     "callbackError": "认证过程中发生错误，请重试。",
