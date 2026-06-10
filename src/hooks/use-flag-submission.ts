@@ -4,7 +4,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { getCsrfCookieName, getCsrfHeaderName } from '@/lib/csrf';
+import { getCsrfCookieName, getCsrfHeaderName } from '@/lib/csrf-constants';
 
 interface FlagSubmissionResult {
   correct: boolean;

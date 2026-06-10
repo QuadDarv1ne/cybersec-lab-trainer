@@ -143,6 +143,13 @@ export async function POST(request: Request) {
   if (error) return error;
 
   try {
+    // Reject oversized payloads before parsing to prevent memory exhaustion DoS
+    const contentLength = request.headers.get('content-length');
+    const contentLengthNum = contentLength ? Number(contentLength) : NaN;
+    if (!isNaN(contentLengthNum) && contentLengthNum > 512_000) {
+      return NextResponse.json({ error: 'Request body too large (max 512 KB)' }, { status: 413 });
+    }
+
     // Validate CSRF token
     const csrfValid = await validateCsrfToken(request);
     if (!csrfValid) {
@@ -183,12 +190,14 @@ export async function POST(request: Request) {
         if (!['STUDENT', 'TEACHER', 'ADMIN'].includes(newRole)) {
           return NextResponse.json({ error: "Invalid role" }, { status: 400 });
         }
+        const existing = await db.user.findUnique({ where: { id: targetUserId }, select: { role: true } });
+        const oldRole = existing?.role;
         const updated = await db.user.update({
           where: { id: targetUserId },
           data: { role: newRole },
         });
-        await logAction('update-role', targetUserId, { oldRole: updated.role, newRole });
-        logger.info(`[ADMIN] User ${userId} changed role of ${targetUserId} to ${newRole}`);
+        await logAction('update-role', targetUserId, { oldRole, newRole });
+        logger.info(`[ADMIN] User ${userId} changed role of ${targetUserId} from ${oldRole} to ${newRole}`);
         return NextResponse.json({ user: updated, message: "Role updated" });
       }
 

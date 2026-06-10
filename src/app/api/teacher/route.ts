@@ -168,6 +168,13 @@ export async function POST(request: Request) {
   if (error) return error;
 
   try {
+    // Reject oversized payloads before parsing to prevent memory exhaustion DoS
+    const contentLength = request.headers.get('content-length');
+    const contentLengthNum = contentLength ? Number(contentLength) : NaN;
+    if (!isNaN(contentLengthNum) && contentLengthNum > 512_000) {
+      return NextResponse.json({ error: 'Request body too large (max 512 KB)' }, { status: 413 });
+    }
+
     // Validate CSRF token
     const csrfValid = await validateCsrfToken(request);
     if (!csrfValid) {
