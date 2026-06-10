@@ -11,6 +11,7 @@ const mockProgress = {
 const mockQuizResult = {
   findMany: vi.fn(),
   upsert: vi.fn(),
+  create: vi.fn(),
   deleteMany: vi.fn(),
 };
 
@@ -486,6 +487,52 @@ describe('API Route POST /api', () => {
     const response = await POST(request);
 
     expect(response.status).toBe(200);
+  });
+
+  it('syncs quiz history when authenticated', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
+
+    (mockQuizResult.create).mockResolvedValue({
+      id: 'quiz-history-1',
+      userId: 'test-user-1',
+      quizId: 'owasp',
+      score: 8,
+      total: 10,
+      percentage: 80,
+    });
+
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'quiz-history-sync',
+      payload: {
+        quizHistory: [
+          { id: 'qh-1', categoryId: 'owasp', categoryName: 'OWASP Top 10', score: 8, correct: 8, total: 10, answers: [true, false, true], timestamp: Date.now() },
+        ],
+      },
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.saved.quizHistory).toBe(1);
+    expect(mockQuizResult.create).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'test-user-1', quizId: 'owasp', score: 8, total: 10 })
+    );
+  });
+
+  it('handles empty quiz history gracefully', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
+
+    const request = createPostRequest('http://localhost:3000/api', {
+      type: 'quiz-history-sync',
+      payload: { quizHistory: [] },
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.saved.quizHistory).toBe(0);
   });
 
   it('deletes a note when authenticated', async () => {
