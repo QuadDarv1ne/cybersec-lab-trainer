@@ -82,6 +82,7 @@ export default function TeacherDashboard() {
       const params = new URLSearchParams({ action: 'students' });
       if (search) params.set('search', search);
       const res = await fetch(`/api/teacher?${params}`);
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
       const data = await res.json();
       if (data.students) setStudents(data.students);
     } catch (err) { toast.error('Failed to load students'); logger.error('loadStudents failed:', err); }
@@ -90,6 +91,7 @@ export default function TeacherDashboard() {
   const loadGroups = useCallback(async () => {
     try {
       const res = await fetch('/api/teacher?action=groups');
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
       const data = await res.json();
       if (data.groups) setGroups(data.groups);
     } catch (err) { toast.error('Failed to load groups'); logger.error('loadGroups failed:', err); }
@@ -98,6 +100,7 @@ export default function TeacherDashboard() {
   const loadAssignments = useCallback(async () => {
     try {
       const res = await fetch('/api/teacher?action=assignments');
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
       const data = await res.json();
       if (data.assignments) setAssignments(data.assignments);
     } catch (err) { toast.error('Failed to load assignments'); logger.error('loadAssignments failed:', err); }
@@ -122,6 +125,7 @@ export default function TeacherDashboard() {
     const timer = setTimeout(async () => {
       try {
         const res = await fetch(`/api/teacher?action=students&search=${addStudentSearch}`);
+        if (!res.ok) return;
         const data = await res.json();
         if (data.students) setAddStudentResults(data.students);
       } catch { /* ignore — search typing is debounced, failures are expected */ }

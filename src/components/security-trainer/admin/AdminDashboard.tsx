@@ -44,6 +44,7 @@ export default function AdminDashboard() {
   const loadStats = useCallback(async () => {
     try {
       const res = await fetch('/api/admin?action=stats');
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
       const data = await res.json();
       if (data.stats) setStats(data.stats);
     } catch {
@@ -58,6 +59,7 @@ export default function AdminDashboard() {
       if (s) params.set('search', s);
       if (r) params.set('role', r);
       const res = await fetch(`/api/admin?${params}`);
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
       const data = await res.json();
       if (data.users) setUsers(data.users);
     } catch {

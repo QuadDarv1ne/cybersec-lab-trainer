@@ -35,6 +35,7 @@ export default function Leaderboard() {
     (async () => {
       try {
         const res = await fetch(`/api?action=leaderboard&timeframe=${timeframe}`, { signal: controller.signal });
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
         const data = await res.json();
         if (!controller.signal.aborted && data.leaderboard) setEntries(data.leaderboard);
       } catch (err) {
