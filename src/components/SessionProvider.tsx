@@ -3,6 +3,7 @@
 import { SessionProvider as NextAuthSessionProvider } from "next-auth/react";
 import { useEffect, useRef } from "react";
 import { useAppStore } from "@/lib/store";
+import { logger } from "@/lib/logger";
 import type { Session } from "next-auth";
 
 interface SessionProviderProps {
@@ -23,7 +24,10 @@ export function SessionProvider({ children, session }: SessionProviderProps) {
       const controller = new AbortController();
       controllerRef.current = controller;
       setUserId(session.user.id);
-      loadFromDatabase(session.user.id, controller.signal);
+      loadFromDatabase(session.user.id, controller.signal).catch((err) => {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        logger.error('SessionProvider: loadFromDatabase failed:', err);
+      });
     } else {
       controllerRef.current = null;
       setUserId(null);

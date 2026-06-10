@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 type UserData = {
   id: string;
@@ -47,8 +48,9 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error(`Server returned ${res.status}`);
       const data = await res.json();
       if (data.stats) setStats(data.stats);
-    } catch {
+    } catch (err) {
       toast.error('Failed to load stats');
+      logger.error('loadStats failed:', err);
     }
   }, []);
 
@@ -62,8 +64,9 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error(`Server returned ${res.status}`);
       const data = await res.json();
       if (data.users) setUsers(data.users);
-    } catch {
+    } catch (err) {
       toast.error('Failed to load users');
+      logger.error('loadUsers failed:', err);
     } finally {
       setLoading(false);
     }
@@ -95,8 +98,9 @@ export default function AdminDashboard() {
         toast.success('Role updated');
         loadUsers(search, roleFilter);
       }
-    } catch {
+    } catch (err) {
       toast.error('Failed to update role');
+      logger.error('updateRole failed:', err);
     }
   };
 
@@ -115,8 +119,9 @@ export default function AdminDashboard() {
         toast.success('User deleted');
         loadUsers(search, roleFilter);
       }
-    } catch {
+    } catch (err) {
       toast.error('Failed to delete user');
+      logger.error('deleteUser failed:', err);
     }
   };
 
