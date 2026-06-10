@@ -20,7 +20,7 @@ import type {
   FlagSubmission,
   Prisma,
 } from '@prisma/client';
-import { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
 import mongoose from 'mongoose';
 import {
   UserModel, AccountModel, SessionModel, ProgressModel,

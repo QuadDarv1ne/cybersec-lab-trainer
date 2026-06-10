@@ -3,7 +3,6 @@ import type { Adapter, AdapterUser, AdapterSession, AdapterAccount, Verification
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { db } from "./db";
 import { generateUUID } from './utils';
 import { getDbAdapter } from './db-adapter';
 import { logger } from './logger';
@@ -129,9 +128,11 @@ if (hasOAuth) {
       },
     };
   } else {
-    // SQL: use PrismaAdapter
+    // SQL: use PrismaAdapter (lazy import to avoid Prisma init for MongoDB)
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { PrismaAdapter } = require('@next-auth/prisma-adapter');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { db } = require('./db');
     adapterConfig = { adapter: PrismaAdapter(db) };
   }
 }
