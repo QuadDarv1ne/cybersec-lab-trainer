@@ -8,12 +8,12 @@ export default withAuth({
     authorized({ req, token }) {
       const path = req.nextUrl.pathname;
 
-      // /app/admin only for ADMIN
-      if (path.startsWith('/app/admin') && token?.role !== 'ADMIN') {
+      // /app/admin/* and /app/admin — only ADMIN
+      if ((path.startsWith('/app/admin/') || path === '/app/admin') && token?.role !== 'ADMIN') {
         return false;
       }
-      // /app/teacher only for TEACHER and ADMIN
-      if (path.startsWith('/app/teacher') && token?.role !== 'TEACHER' && token?.role !== 'ADMIN') {
+      // /app/teacher/* and /app/teacher — only TEACHER and ADMIN
+      if ((path.startsWith('/app/teacher/') || path === '/app/teacher') && token?.role !== 'TEACHER' && token?.role !== 'ADMIN') {
         return false;
       }
 

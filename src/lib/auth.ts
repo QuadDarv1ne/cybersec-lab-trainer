@@ -154,7 +154,8 @@ export const authOptions: NextAuthOptions = {
               const r = dbUser.role as string;
               token.role = (['STUDENT', 'TEACHER', 'ADMIN'].includes(r) ? r : 'STUDENT') as 'STUDENT' | 'TEACHER' | 'ADMIN';
             }
-          } catch {
+          } catch (e) {
+            logger.warn('[AUTH] Could not load user role from DB, defaulting to STUDENT:', e);
             token.role = 'STUDENT';
           }
         }

@@ -385,14 +385,18 @@ function createMongooseAdapter(): DbAdapter {
       findMany: async (where, include) => {
         const labs = await LabModel.find(where || {}).sort({ order: 1, number: 1 });
         if (include?.flags) {
-          const results: (Lab & { flags?: LabFlag[] })[] = [];
-          for (const lab of labs) {
-            const normalized = normalizeDoc<Lab>(lab);
+          const normalizedLabs = normalizeArray<Lab>(labs);
+          const labIds = normalizedLabs.map((l) => l.id);
+          const allFlags = await LabFlagModel.find({ labId: { $in: labIds } });
+          const flagsByLabId = new Map<string, LabFlag[]>();
+          for (const f of allFlags) {
+            const normalized = normalizeDoc<LabFlag>(f);
             if (!normalized) continue;
-            const flags = await LabFlagModel.find({ labId: normalized.id });
-            results.push({ ...normalized, flags: normalizeArray<LabFlag>(flags) });
+            const list = flagsByLabId.get(normalized.labId) ?? [];
+            list.push(normalized);
+            flagsByLabId.set(normalized.labId, list);
           }
-          return results;
+          return normalizedLabs.map((lab) => ({ ...lab, flags: flagsByLabId.get(lab.id) ?? [] }));
         }
         return normalizeArray<Lab>(labs);
       },

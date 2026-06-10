@@ -34,6 +34,9 @@ function ensureCleanupInterval(): void {
   }, CLEANUP_INTERVAL_MS);
 
   if (typeof process !== 'undefined' && typeof process.on === 'function' && !signalListenersRegistered) {
+    // Remove any stale listeners from previous HMR module instances first
+    process.removeListener('SIGTERM', stopCleanupInterval);
+    process.removeListener('SIGINT', stopCleanupInterval);
     process.on('SIGTERM', stopCleanupInterval);
     process.on('SIGINT', stopCleanupInterval);
     signalListenersRegistered = true;

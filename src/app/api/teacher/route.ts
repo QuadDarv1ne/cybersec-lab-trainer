@@ -3,10 +3,14 @@ import { requireRole } from "@/lib/rbac";
 import { logger } from "@/lib/logger";
 import { validateCsrfToken, setCsrfCookie } from "@/lib/csrf-server";
 import { getCsrfCookieName, getCsrfHeaderName } from "@/lib/csrf-constants";
+import { rateLimit, getClientIP, addRateLimitHeaders } from "@/lib/rate-limit";
 
 export async function GET(request: Request) {
   const { error, userId } = await requireRole(['TEACHER', 'ADMIN']);
   if (error) return error;
+
+  const rateLimitResult = await rateLimit(getClientIP(request));
+  if (rateLimitResult.response) return rateLimitResult.response;
 
   try {
     const url = new URL(request.url);
@@ -167,6 +171,9 @@ export async function POST(request: Request) {
   const { error, userId } = await requireRole(['TEACHER', 'ADMIN']);
   if (error) return error;
 
+  const rateLimitResult = await rateLimit(getClientIP(request));
+  if (rateLimitResult.response) return rateLimitResult.response;
+
   try {
     // Reject oversized payloads before parsing to prevent memory exhaustion DoS
     const contentLength = request.headers.get('content-length');
@@ -223,6 +230,11 @@ export async function POST(request: Request) {
         if (!groupId || !studentId) {
           return NextResponse.json({ error: "groupId and studentId required" }, { status: 400 });
         }
+        // Verify group ownership
+        const group = await db.teacherGroup.findUnique({ where: { id: groupId }, select: { teacherId: true } });
+        if (!group || group.teacherId !== userId) {
+          return NextResponse.json({ error: "Group not found" }, { status: 404 });
+        }
         await db.groupMember.create({
           data: { groupId, userId: studentId },
         });
@@ -234,6 +246,13 @@ export async function POST(request: Request) {
         if (!groupId || !studentId) {
           return NextResponse.json({ error: "groupId and studentId required" }, { status: 400 });
         }
+        // Verify group ownership (use deleteMany's own where clause — it only deletes
+        // if the group belongs to this teacher due to schema relations, but we still
+        // check explicitly for a clear error message)
+        const group = await db.teacherGroup.findUnique({ where: { id: groupId }, select: { teacherId: true } });
+        if (!group || group.teacherId !== userId) {
+          return NextResponse.json({ error: "Group not found" }, { status: 404 });
+        }
         await db.groupMember.deleteMany({
           where: { groupId, userId: studentId },
         });
@@ -244,6 +263,13 @@ export async function POST(request: Request) {
         const { title, description, moduleId, groupId, dueDate, maxScore } = payload;
         if (!title) {
           return NextResponse.json({ error: "Title required" }, { status: 400 });
+        }
+        // Verify group ownership if groupId is provided
+        if (groupId) {
+          const group = await db.teacherGroup.findUnique({ where: { id: groupId }, select: { teacherId: true } });
+          if (!group || group.teacherId !== userId) {
+            return NextResponse.json({ error: "Group not found" }, { status: 404 });
+          }
         }
         const assignment = await db.assignment.create({
           data: {

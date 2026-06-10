@@ -73,11 +73,11 @@ function getNestedValue(obj: Record<string, unknown>, path: string): string {
     if (current && typeof current === 'object' && key in current) {
       current = (current as Record<string, unknown>)[key];
     } else {
-      return path; // return key as fallback
+      return ''; // not found — caller will fall back to default locale
     }
   }
 
-  return typeof current === 'string' ? current : path;
+  return typeof current === 'string' ? current : '';
 }
 
 export type Translator = (key: string, values?: Record<string, string | number>) => string;
@@ -103,6 +103,14 @@ function getTranslator(locale: string, namespace: string): Translator {
   const translator = (key: string, values?: Record<string, string | number>) => {
     const fullKey = `${namespace}.${key}`;
     let text = getNestedValue(translations, fullKey);
+
+    // Fall back to default locale (ru) if key is missing in current locale
+    if (!text && locale !== 'ru') {
+      text = getNestedValue(locales.ru, fullKey);
+    }
+
+    // Last resort: return the raw key path so the developer can spot missing translations
+    if (!text) text = fullKey;
 
     // Interpolate values like {count}, {percent}, etc.
     if (values) {

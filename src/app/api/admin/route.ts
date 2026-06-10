@@ -4,10 +4,14 @@ import { getDbAdapter } from "@/lib/db-adapter";
 import { logger } from "@/lib/logger";
 import { validateCsrfToken, setCsrfCookie } from "@/lib/csrf-server";
 import { getCsrfCookieName, getCsrfHeaderName } from "@/lib/csrf-constants";
+import { rateLimit, getClientIP, addRateLimitHeaders } from "@/lib/rate-limit";
 
 export async function GET(request: Request) {
   const { error } = await requireRole(['ADMIN']);
   if (error) return error;
+
+  const rateLimitResult = await rateLimit(getClientIP(request));
+  if (rateLimitResult.response) return rateLimitResult.response;
 
   try {
     const url = new URL(request.url);
@@ -142,6 +146,9 @@ export async function POST(request: Request) {
   const { error, userId } = await requireRole(['ADMIN']);
   if (error) return error;
 
+  const rateLimitResult = await rateLimit(getClientIP(request));
+  if (rateLimitResult.response) return rateLimitResult.response;
+
   try {
     // Reject oversized payloads before parsing to prevent memory exhaustion DoS
     const contentLength = request.headers.get('content-length');
@@ -190,6 +197,10 @@ export async function POST(request: Request) {
         if (!['STUDENT', 'TEACHER', 'ADMIN'].includes(newRole)) {
           return NextResponse.json({ error: "Invalid role" }, { status: 400 });
         }
+        // Prevent admin from downgrading themselves
+        if (targetUserId === userId) {
+          return NextResponse.json({ error: "Cannot change your own role" }, { status: 400 });
+        }
         const existing = await db.user.findUnique({ where: { id: targetUserId }, select: { role: true } });
         const oldRole = existing?.role;
         const updated = await db.user.update({
@@ -205,6 +216,10 @@ export async function POST(request: Request) {
         const { userId: targetUserId } = payload;
         if (!targetUserId) {
           return NextResponse.json({ error: "userId required" }, { status: 400 });
+        }
+        // Prevent admin from deleting themselves
+        if (targetUserId === userId) {
+          return NextResponse.json({ error: "Cannot delete your own account" }, { status: 400 });
         }
         const targetUser = await db.user.findUnique({ where: { id: targetUserId } });
         if (!targetUser) {
