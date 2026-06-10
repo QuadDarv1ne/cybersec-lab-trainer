@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -191,6 +191,8 @@ export default function RealAppSimulation() {
   ];
 
   const currentModule = modules.find(m => m.id === activeModule) || modules[0];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const allVulnerabilities = useMemo(() => modules.flatMap(m => m.vulnerabilities), []);
 
   const addToLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -200,7 +202,7 @@ export default function RealAppSimulation() {
   const discoverVulnerability = (vulnId: string) => {
     if (!discoveredVulns.includes(vulnId)) {
       setDiscoveredVulns(prev => [...prev, vulnId]);
-      const vuln = modules.flatMap(m => m.vulnerabilities).find(v => v.id === vulnId);
+      const vuln = allVulnerabilities.find(v => v.id === vulnId);
       if (vuln) {
         addToLog(`🔍 Обнаружена уязвимость: ${vuln.name}`);
       }
@@ -210,7 +212,7 @@ export default function RealAppSimulation() {
   const exploitVulnerability = (vulnId: string) => {
     if (!exploitedVulns.includes(vulnId)) {
       setExploitedVulns(prev => [...prev, vulnId]);
-      const vuln = modules.flatMap(m => m.vulnerabilities).find(v => v.id === vulnId);
+      const vuln = allVulnerabilities.find(v => v.id === vulnId);
       if (vuln) {
         addToLog(`⚡ Эксплуатирована уязвимость: ${vuln.name}`);
         
@@ -295,7 +297,7 @@ export default function RealAppSimulation() {
     }
   };
 
-  const totalVulns = modules.flatMap(m => m.vulnerabilities).length;
+  const totalVulns = allVulnerabilities.length;
   const discoveredCount = discoveredVulns.length;
   const exploitedCount = exploitedVulns.length;
 
@@ -669,7 +671,7 @@ export default function RealAppSimulation() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {modules.flatMap(m => m.vulnerabilities).map(vuln => (
+                {allVulnerabilities.map(vuln => (
                   <div
                     key={vuln.id}
                     className={`p-3 rounded-lg border ${
