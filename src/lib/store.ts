@@ -10,32 +10,9 @@ import { type NotesMap, type Note, generateNoteId } from './notes-system';
 import { type StudySession, calculateSessionXP, generateSessionId, getTodayTotalMs, getTotalStudyTimeMs } from './study-sessions';
 import { getCsrfCookieName, getCsrfHeaderName } from './csrf-constants';
 import { sanitizeNoteContent } from './sanitize';
+import { PAGE_TYPES } from './constants';
 
-export type PageType =
-  | 'dashboard'
-  | 'owasp'
-  | 'sql-injection'
-  | 'xss'
-  | 'csrf'
-  | 'auth'
-  | 'secure-coding'
-  | 'tools'
-  | 'security-headers'
-  | 'quiz'
-  | 'achievements'
-  | 'notes'
-  | 'analytics'
-  | 'settings'
-  | 'weakness-review'
-  | 'blog'
-  | 'ctf-labs'
-  | 'advanced-ctf'
-  | 'real-app-simulation'
-  | 'devsecops-simulation'
-  | 'admin'
-  | 'teacher'
-  | 'leaderboard'
-  | 'profile';
+export type PageType = typeof PAGE_TYPES[number];
 
 export interface QuizAttempt {
   id: string;

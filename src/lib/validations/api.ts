@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PAGE_TYPES } from '../constants';
 
 // Schema для сохранения результатов квиза
 export const quizResultSchema = z.object({
@@ -92,32 +93,7 @@ export const studySessionSchema = z.object({
   sessionId: z.string().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date должен быть в формате YYYY-MM-DD'),
   durationMs: z.number().int().min(0, 'durationMs должен быть >= 0'),
-  pageType: z.enum([
-    'dashboard',
-    'owasp',
-    'sql-injection',
-    'xss',
-    'csrf',
-    'auth',
-    'secure-coding',
-    'tools',
-    'security-headers',
-    'quiz',
-    'achievements',
-    'notes',
-    'analytics',
-    'settings',
-    'weakness-review',
-    'blog',
-    'ctf-labs',
-    'advanced-ctf',
-    'real-app-simulation',
-    'devsecops-simulation',
-    'admin',
-    'teacher',
-    'leaderboard',
-    'profile',
-  ], { message: 'pageType должен быть допустимым типом страницы' }),
+  pageType: z.enum(PAGE_TYPES, { message: 'pageType должен быть допустимым типом страницы' }),
   xpEarned: z.number().int().min(0).max(100).optional().default(0),
 });
 

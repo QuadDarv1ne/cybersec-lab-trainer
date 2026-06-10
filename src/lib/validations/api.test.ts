@@ -9,6 +9,7 @@ import {
   studySessionSchema,
   studySessionsSyncSchema,
 } from './api';
+import { PAGE_TYPES } from '../constants';
 
 describe('progressUpdateSchema', () => {
   it('validates correct input', () => {
@@ -183,13 +184,7 @@ describe('studySessionSchema', () => {
   });
 
   it('accepts all valid pageType values', () => {
-    const validTypes = [
-      'dashboard', 'owasp', 'sql-injection', 'xss', 'csrf',
-      'auth', 'secure-coding', 'tools', 'security-headers',
-      'quiz', 'achievements', 'notes', 'analytics', 'settings',
-      'weakness-review', 'blog', 'ctf-labs',
-    ];
-    for (const pageType of validTypes) {
+    for (const pageType of PAGE_TYPES) {
       const result = studySessionSchema.safeParse({
         date: '2025-01-15',
         durationMs: 300000,
