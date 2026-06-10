@@ -7,7 +7,7 @@ import { useAchievementToasts } from '@/hooks/use-achievement-toasts';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import Sidebar from '@/components/security-trainer/Sidebar';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Toaster } from 'sonner';
+import { Toaster } from '@/components/ui/sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import dynamic from 'next/dynamic';
 import { useRef, useEffect, useState } from 'react';
