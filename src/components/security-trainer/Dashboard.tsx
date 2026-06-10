@@ -380,7 +380,7 @@ export default function Dashboard() {
           <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50">
             <CardContent className="p-4 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-500 shrink-0">
-                {achievementIcons[nextAchievement.id]}
+                {achievementIcons[nextAchievement.id] ?? <Award size={18} />}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-amber-600">{t('nextAchievement')}</p>

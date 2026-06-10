@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -307,31 +308,37 @@ export default function DevSecOpsSimulation() {
     setPipelineProgress(0);
     addToLog('🚀 Запуск DevSecOps пайплайна...');
     
-    // Симуляция выполнения пайплайна
-    for (let i = 0; i < pipelineStages.length; i++) {
-      const stage = pipelineStages[i];
-      setActiveStage(stage.id);
-      addToLog(`▶️ Выполняется этап: ${stage.name}`);
-      
-      // Симуляция выполнения этапа
-      for (let progress = 0; progress <= 100; progress += 10) {
-        setPipelineProgress(((i * 100) + progress) / pipelineStages.length);
-        await new Promise(resolve => setTimeout(resolve, 100));
+    try {
+      // Симуляция выполнения пайплайна
+      for (let i = 0; i < pipelineStages.length; i++) {
+        const stage = pipelineStages[i];
+        setActiveStage(stage.id);
+        addToLog(`▶️ Выполняется этап: ${stage.name}`);
+        
+        // Симуляция выполнения этапа
+        for (let progress = 0; progress <= 100; progress += 10) {
+          setPipelineProgress(((i * 100) + progress) / pipelineStages.length);
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        // Обнаружение уязвимостей на этом этапе
+        stage.vulnerabilities.forEach(vuln => {
+          if (Math.random() > 0.3) { // 70% шанс обнаружения
+            detectVulnerability(vuln.id);
+          }
+        });
+        
+        addToLog(`✅ Этап завершен: ${stage.name}`);
       }
       
-      // Обнаружение уязвимостей на этом этапе
-      stage.vulnerabilities.forEach(vuln => {
-        if (Math.random() > 0.3) { // 70% шанс обнаружения
-          detectVulnerability(vuln.id);
-        }
-      });
-      
-      addToLog(`✅ Этап завершен: ${stage.name}`);
+      addToLog('🎉 DevSecOps пайплайн завершен!');
+    } catch (err) {
+      addToLog('❌ Ошибка выполнения пайплайна. Попробуйте снова.');
+      logger.error('DevSecOps pipeline failed:', err);
+    } finally {
+      setPipelineRunning(false);
+      setPipelineProgress(100);
     }
-    
-    addToLog('🎉 DevSecOps пайплайн завершен!');
-    setPipelineRunning(false);
-    setPipelineProgress(100);
   };
 
   const getSeverityColor = (severity: string) => {

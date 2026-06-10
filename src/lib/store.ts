@@ -248,6 +248,11 @@ const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>)
 const addUnique = <T>(array: T[], item: T): T[] =>
   array.includes(item) ? array : [...array, item];
 
+// Helper: fire-and-forget sync with unified error logging (DRY)
+const triggerSync = (get: () => AppStore, set: (partial: Partial<AppStore>) => void, action: string) => {
+  ensureSync(get, set).catch((err) => logger.error(`Sync failed after ${action}:`, err));
+};
+
 // Get CSRF token from cookie
 const getCsrfToken = (): string | undefined => {
   if (typeof document === 'undefined') return undefined;
@@ -671,7 +676,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         totalXP: state.totalXP + xpGain,
       };
     });
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after completeModule:', err));
+    triggerSync(get, set, 'completeModule');
     return Promise.resolve();
   },
 
@@ -684,7 +689,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         totalXP: state.totalXP + xpGain,
       };
     });
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after setQuizScore:', err));
+    triggerSync(get, set, 'setQuizScore');
     return Promise.resolve();
   },
 
@@ -692,12 +697,12 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     set((state) => ({
       quizHistory: [attempt, ...state.quizHistory].slice(0, MAX_QUIZ_HISTORY),
     }));
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after addQuizAttempt:', err));
+    triggerSync(get, set, 'addQuizAttempt');
   },
 
   clearQuizHistory: () => {
     set({ quizHistory: [] });
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after clearQuizHistory:', err));
+    triggerSync(get, set, 'clearQuizHistory');
   },
 
   resetProgress: async () => {
@@ -767,55 +772,55 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     set((state) => ({
       studiedOwaspItems: addUnique(state.studiedOwaspItems, id),
     }));
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after addStudiedOwasp:', err));
+    triggerSync(get, set, 'addStudiedOwasp');
   },
 
   addSqlLevel: (level: string) => {
     set((state) => ({
       sqlCompletedLevels: addUnique(state.sqlCompletedLevels, level),
     }));
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after addSqlLevel:', err));
+    triggerSync(get, set, 'addSqlLevel');
   },
 
   addXssLevel: (level: string) => {
     set((state) => ({
       xssCompletedLevels: addUnique(state.xssCompletedLevels, level),
     }));
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after addXssLevel:', err));
+    triggerSync(get, set, 'addXssLevel');
   },
 
   setOwaspChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ owaspChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after setOwaspChallengeScore:', err));
+    triggerSync(get, set, 'setOwaspChallengeScore');
   },
 
   setAuthChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ authChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after setAuthChallengeScore:', err));
+    triggerSync(get, set, 'setAuthChallengeScore');
   },
 
   setHeadersChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ headersChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after setHeadersChallengeScore:', err));
+    triggerSync(get, set, 'setHeadersChallengeScore');
   },
 
   setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
     set({ secureCodingChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after setSecureCodingChallengeScore:', err));
+    triggerSync(get, set, 'setSecureCodingChallengeScore');
   },
 
   markCsrfChallengeViewed: (index: number) => {
     set((state) => ({
       csrfViewedChallenges: addUnique(state.csrfViewedChallenges, index),
     }));
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after markCsrfChallengeViewed:', err));
+    triggerSync(get, set, 'markCsrfChallengeViewed');
   },
 
   setUserId: (userId: string | null) => set({ userId }),
 
   awardXP: (amount: number) => {
     set((state) => ({ totalXP: state.totalXP + Math.max(0, amount) }));
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after awardXP:', err));
+    triggerSync(get, set, 'awardXP');
   },
 
   getXPLevel: () => {
@@ -850,7 +855,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         [noteId]: { id: noteId, itemId, moduleId, moduleName, content: sanitized, createdAt: now, updatedAt: now },
       },
     }));
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after addNote:', err));
+    triggerSync(get, set, 'addNote');
   },
 
   updateNote: (noteId: string, content: string) => {
@@ -865,7 +870,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         },
       };
     });
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after updateNote:', err));
+    triggerSync(get, set, 'updateNote');
   },
 
   deleteNote: async (noteId: string) => {
@@ -889,7 +894,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
         }
       }
     }
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after deleteNote:', err));
+    triggerSync(get, set, 'deleteNote');
   },
 
   getNotesForItem: (itemId: string) => {
@@ -923,7 +928,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     }));
     activeSessionStart = null;
     activeSessionPage = null;
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after endStudySession:', err));
+    triggerSync(get, set, 'endStudySession');
   },
 
   getTodayStudyTime: () => {
@@ -960,7 +965,7 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       notes: sanitizedNotes,
       studySessions: data.studySessions ?? [],
     });
-    ensureSync(get, set).catch((err) => logger.error('Sync failed after importProgressData:', err));
+    triggerSync(get, set, 'importProgressData');
   },
 
   syncWithDatabase: async () => {

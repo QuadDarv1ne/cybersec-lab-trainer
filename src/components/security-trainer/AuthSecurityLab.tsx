@@ -81,15 +81,21 @@ export default function AuthSecurityLab() {
     }
     let cancelled = false;
     const computeHash = async () => {
-      const salt = 'a1b2c3d4e5f6';
-      const encoder = new TextEncoder();
-      const data = encoder.encode(salt + hashInput);
-      const buffer = await crypto.subtle.digest('SHA-256', data);
-      const hashHex = Array.from(new Uint8Array(buffer))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-      if (!cancelled) {
-        setSimulatedHash(hashHex);
+      try {
+        const salt = 'a1b2c3d4e5f6';
+        const encoder = new TextEncoder();
+        const data = encoder.encode(salt + hashInput);
+        const buffer = await crypto.subtle.digest('SHA-256', data);
+        const hashHex = Array.from(new Uint8Array(buffer))
+          .map(b => b.toString(16).padStart(2, '0'))
+          .join('');
+        if (!cancelled) {
+          setSimulatedHash(hashHex);
+        }
+      } catch {
+        if (!cancelled) {
+          setSimulatedHash('(crypto unavailable)');
+        }
       }
     };
     computeHash();

@@ -56,7 +56,8 @@ export default function AdvancedCTFSimulation() {
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [isRunning, timeLeft]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRunning]);
 
   const startLevel = (lvl?: CTFLevel) => {
     const targetLevel = lvl ?? level;
