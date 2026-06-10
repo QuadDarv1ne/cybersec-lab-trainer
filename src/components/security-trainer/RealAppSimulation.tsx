@@ -199,7 +199,7 @@ export default function RealAppSimulation() {
 
   const discoverVulnerability = (vulnId: string) => {
     if (!discoveredVulns.includes(vulnId)) {
-      setDiscoveredVulns([...discoveredVulns, vulnId]);
+      setDiscoveredVulns(prev => [...prev, vulnId]);
       const vuln = modules.flatMap(m => m.vulnerabilities).find(v => v.id === vulnId);
       if (vuln) {
         addToLog(`🔍 Обнаружена уязвимость: ${vuln.name}`);
@@ -209,7 +209,7 @@ export default function RealAppSimulation() {
 
   const exploitVulnerability = (vulnId: string) => {
     if (!exploitedVulns.includes(vulnId)) {
-      setExploitedVulns([...exploitedVulns, vulnId]);
+      setExploitedVulns(prev => [...prev, vulnId]);
       const vuln = modules.flatMap(m => m.vulnerabilities).find(v => v.id === vulnId);
       if (vuln) {
         addToLog(`⚡ Эксплуатирована уязвимость: ${vuln.name}`);

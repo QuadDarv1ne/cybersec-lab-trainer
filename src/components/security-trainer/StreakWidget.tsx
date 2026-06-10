@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Flame, Trophy, Clock } from 'lucide-react';
 import { getStreakInfo } from '@/lib/study-sessions';
@@ -17,7 +18,7 @@ function formatDayCount(n: number, t: ReturnType<typeof useTranslations>): strin
 
 export function StreakWidget() {
   const studySessions = useAppStore((state) => state.studySessions);
-  const streak = getStreakInfo(studySessions);
+  const streak = useMemo(() => getStreakInfo(studySessions), [studySessions]);
   const t = useTranslations('streak');
 
   const streakFireColor = streak.currentStreak >= 7 ? 'text-orange-500' : streak.currentStreak >= 3 ? 'text-amber-500' : 'text-emerald-500';

@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { getHeatmapData, type HeatmapDay } from '@/lib/study-sessions';
 import { useAppStore } from '@/lib/store';
@@ -15,7 +16,7 @@ const LEVEL_COLORS = [
 
 export function HeatmapCalendar() {
   const studySessions = useAppStore((state) => state.studySessions);
-  const heatmap = getHeatmapData(studySessions, 26);
+  const heatmap = useMemo(() => getHeatmapData(studySessions, 26), [studySessions]);
   const t = useTranslations('heatmap');
 
   const weeks: HeatmapDay[][] = [];

@@ -78,7 +78,12 @@ export default function WeaknessReview() {
     }
 
     setReviewedIds((prev) => new Set([...prev, currentItem.id]));
-  }, [selectedOption, currentItem, awardXP]);
+
+    // If this was the last remaining item, mark review as completed
+    if (currentIndex >= remainingItems.length - 1) {
+      setCompleted(true);
+    }
+  }, [selectedOption, currentItem, awardXP, currentIndex, remainingItems.length]);
 
   const handleNext = useCallback(() => {
     if (currentIndex < remainingItems.length - 1) {
