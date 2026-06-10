@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { logger } from '@/lib/logger';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -71,7 +71,17 @@ export default function CTFLabs({ onBack }: { onBack?: () => void }) {
   const [flagInputs, setFlagInputs] = useState<Record<string, string>>({});
   const [revealedHints, setRevealedHints] = useState<Set<string>>(new Set());
   const [foundFlags, setFoundFlags] = useState<Set<string>>(new Set());
-  const [labProgress] = useState<Record<string, { flagsFound: number; totalFlags: number; score: number }>>({});
+
+  const labProgress = useMemo(() => {
+    const progress: Record<string, { flagsFound: number; totalFlags: number; score: number }> = {};
+    for (const lab of labs) {
+      const labFlags = lab.flags ?? [];
+      const foundCount = labFlags.filter((f: LabFlag) => foundFlags.has(`${lab.id}-${f.flagKey}`)).length;
+      const totalPoints = labFlags.reduce((sum: number, f: LabFlag) => sum + (foundFlags.has(`${lab.id}-${f.flagKey}`) ? f.points : 0), 0);
+      progress[lab.id] = { flagsFound: foundCount, totalFlags: labFlags.length, score: totalPoints };
+    }
+    return progress;
+  }, [labs, foundFlags]);
 
   const { submitFlag, isSubmitting, lastResult, reset: resetFlagResult } = useFlagSubmission();
 

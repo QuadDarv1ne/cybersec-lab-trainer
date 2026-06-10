@@ -59,7 +59,7 @@ export function LanguageSelector() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {(Object.entries(LOCALES) as [Locale, (typeof LOCALES)[Locale]][]).map(
-          ([key, { native, flag, label: _label }]) => (
+          ([key, { native, flag }]) => (
             <DropdownMenuItem
               key={key}
               onClick={() => setLocale(key)}
