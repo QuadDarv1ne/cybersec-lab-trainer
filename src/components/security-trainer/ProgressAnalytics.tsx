@@ -91,10 +91,10 @@ export default function ProgressAnalytics() {
   // Challenge performance
   const challengePerformance = useMemo(() => {
     const challenges = [
-      { name: 'OWASP', correct: owaspChallengeScores.correct, total: owaspChallengeScores.total },
-      { name: 'Auth', correct: authChallengeScores.correct, total: authChallengeScores.total },
-      { name: 'Headers', correct: headersChallengeScores.correct, total: headersChallengeScores.total },
-      { name: 'Secure Coding', correct: secureCodingChallengeScores.correct, total: secureCodingChallengeScores.total },
+      { name: 'OWASP', correct: owaspChallengeScores?.correct ?? 0, total: owaspChallengeScores?.total ?? 0 },
+      { name: 'Auth', correct: authChallengeScores?.correct ?? 0, total: authChallengeScores?.total ?? 0 },
+      { name: 'Headers', correct: headersChallengeScores?.correct ?? 0, total: headersChallengeScores?.total ?? 0 },
+      { name: 'Secure Coding', correct: secureCodingChallengeScores?.correct ?? 0, total: secureCodingChallengeScores?.total ?? 0 },
     ].filter((c) => c.total > 0);
 
     return challenges.map((c) => ({

@@ -22,6 +22,7 @@ import {
 
 // Per-type defense rendering
 const renderDefense = (xssId: string, attackDemo: string) => {
+  if (!attackDemo) return <p className="text-sm text-slate-400 italic">No attack demo available</p>;
   switch (xssId) {
     case 'reflected':
     case 'stored': {
