@@ -54,7 +54,7 @@ export default function SignInPage() {
     abortRef.current = false;
 
     fetch('/api/auth/providers', { signal: controller.signal })
-      .then((res) => res.json())
+      .then((res) => res.ok ? res.json() : Promise.reject(new Error(`Providers fetch returned ${res.status}`)))
       .then((data) => {
         if (!abortRef.current) {
           setAvailableProviders(data.providers ?? []);
@@ -106,8 +106,12 @@ export default function SignInPage() {
       const location = res.headers.get('location');
       if (location) {
         window.location.replace(location);
-      } else {
+      } else if (res.ok) {
         window.location.replace(callbackUrl);
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        toast.error(errorData.error || t('loginError'));
+        setLoadingProvider(null);
       }
     } catch {
       toast.error(t('errorOccurred'));
@@ -147,8 +151,12 @@ export default function SignInPage() {
       const location = res.headers.get('location');
       if (location) {
         window.location.replace(location);
-      } else {
+      } else if (res.ok) {
         window.location.replace(callbackUrl);
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        toast.error(errorData.error || t('loginError'));
+        setLoadingProvider(null);
       }
     } catch (err) {
       logger.error('[SIGNIN] handleDemo error:', err);

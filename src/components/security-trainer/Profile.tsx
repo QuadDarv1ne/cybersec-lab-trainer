@@ -11,6 +11,7 @@ import { ROLE_LABELS, ROLE_BADGE_COLORS } from '@/lib/rbac-types';
 import { modules } from '@/lib/data/modules-data';
 import { quizCategories } from '@/lib/data/quiz-data';
 import { calculateLevel, levelProgress, xpToNextLevel, calculateXPBreakdown } from '@/lib/xp-system';
+import { calculateSessionXP, getTotalStudyTimeMs } from '@/lib/study-sessions';
 
 export default function Profile() {
   const { session, isAuthenticated, isLoading } = useSession();
@@ -30,7 +31,8 @@ export default function Profile() {
     (store.headersChallengeScores?.correct ?? 0) +
     (store.secureCodingChallengeScores?.correct ?? 0);
 
-  const breakdown = calculateXPBreakdown(completedModules, quizScores, allChallengeCorrect, 0, modules.length);
+  const studySessionXP = calculateSessionXP(getTotalStudyTimeMs(studySessions));
+  const breakdown = calculateXPBreakdown(completedModules, quizScores, allChallengeCorrect, studySessionXP, modules.length);
 
   const totalStudyMs = studySessions.reduce((sum, s) => sum + (s.durationMs ?? 0), 0);
   const todayStr = new Date().toISOString().slice(0, 10);

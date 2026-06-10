@@ -15,7 +15,6 @@ import {
   Clock,
   Calendar,
   BookOpen,
-  ArrowRight,
   X,
   Tag,
   Shield,
@@ -91,7 +90,7 @@ function ArticleCard({ article, onClick }: { article: BlogArticle; onClick: () =
 // ============================================================
 // Article Reader
 // ============================================================
-function ArticleReader({ article, onBack }: { article: BlogArticle; onBack: () => void }) {
+function ArticleReader({ article, onBack, onSelectArticle }: { article: BlogArticle; onBack: () => void; onSelectArticle?: (article: BlogArticle) => void }) {
   const IconComponent = ICON_MAP[article.coverIcon] ?? FileText;
   const paragraphs = article.sections ?? [];
 
@@ -176,7 +175,7 @@ function ArticleReader({ article, onBack }: { article: BlogArticle; onBack: () =
             .filter((a) => a.slug !== article.slug)
             .slice(0, 2)
             .map((related) => (
-              <ArticleCard key={related.slug} article={related} onClick={() => {}} />
+              <ArticleCard key={related.slug} article={related} onClick={() => onSelectArticle?.(related)} />
             ))}
         </div>
       </div>
@@ -212,6 +211,7 @@ export default function BlogPage({ onBack }: { onBack?: () => void }) {
               key="reader"
               article={selectedArticle}
               onBack={() => setSelectedArticle(null)}
+              onSelectArticle={(a) => setSelectedArticle(a)}
             />
           ) : (
             <motion.div
@@ -298,14 +298,6 @@ export default function BlogPage({ onBack }: { onBack?: () => void }) {
                 </Card>
               )}
 
-              {/* Read more link */}
-              {filteredArticles.length > 0 && (
-                <div className="mt-8 text-center">
-                  <Button variant="outline" className="gap-2">
-                    {t('loadMore')} <ArrowRight size={14} />
-                  </Button>
-                </div>
-              )}
             </motion.div>
           )}
         </AnimatePresence>
