@@ -1,7 +1,7 @@
 # ROADMAP — CyberSec Lab Trainer
 
 **Создан:** 2026-05-22 | **Автор:** Дуплей Максим Игоревич
-**Обновлён:** 2026-05-22 | Исправлены неточные статусы
+**Обновлён:** 2026-06-10 | Синхронизация с фактическим состоянием кода
 
 ---
 
@@ -23,11 +23,11 @@
 ### 1. Миграция Prisma: применить новую модель ItemProgress
 Запустить `npx prisma db push` (или `prisma migrate dev`) для создания таблицы `item_progress` в PostgreSQL. Без этого синхронизация детализированного прогресса не заработает в production.
 
-### 4. Синхронизация заметок и учебных сессий с базой данных
-Заметки (`notes`) и учебные сессии (`studySessions`) хранятся только в localStorage. Добавить Prisma модели и API endpoint'ы для их сохранения, чтобы данные не терялись при смене устройства.
+### ~~4. Синхронизация заметок и учебных сессий с базой данных~~ ~~COMPLETED~~
+API endpoint'ы `notes-sync`, `note-delete`, `study-sessions-sync` реализованы в `route.ts`. Prisma модели Note и StudySession существуют. Клиентская синхронизация через `apiClient.saveNotes()`, `apiClient.deleteNote()`, `apiClient.saveStudySessions()` в `store.ts`.
 
-### 5. Синхронизация csrfViewedChallenges с базой данных
-Массив `csrfViewedChallenges` также не синхронизируется. Добавить его в механизм item-progress-sync или создать отдельный поток синхронизации.
+### ~~5. Синхронизация csrfViewedChallenges с базой данных~~ ~~COMPLETED~~
+`csrfViewedChallenges` синхронизируются через `item-progress-sync` в `store.ts` (строка 456: `{ moduleId: 'csrf', itemIds: state.csrfViewedChallenges.map(String) }`). При загрузке восстанавливаются в `loadFromDatabase` (строка 589-591).
 
 ### 7. Добавить role-based access control (RBAC)
 Опциональный пункт: добавить роли `admin`/`user` в модель User, middleware для защиты админ-маршрутов, UI для управления пользователями.
@@ -48,8 +48,8 @@
 - [ ] 1. Миграция Prisma
 - [x] 2. API route тесты ~~COMPLETED~~
 - [x] 3. Тесты notes-system и study-sessions ~~COMPLETED~~
-- [ ] 4. Синхронизация заметок и сессий
-- [ ] 5. Синхронизация csrfViewedChallenges
+- [x] 4. Синхронизация заметок и сессий ~~COMPLETED~~
+- [x] 5. Синхронизация csrfViewedChallenges ~~COMPLETED~~
 - [x] 6. Исправление lint ошибок ~~COMPLETED~~
 - [ ] 7. RBAC
 - [ ] 8. Мониторинг ошибок

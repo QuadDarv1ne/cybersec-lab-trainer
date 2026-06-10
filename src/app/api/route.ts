@@ -63,7 +63,7 @@ export async function GET(request: Request) {
 
       if (adapter.type === 'mongodb') {
         // MongoDB leaderboard
-        const { UserModel, StudySessionModel, ProgressModel, QuizResultModel } = await import('@/lib/mongoose-schema');
+        const { UserModel, StudySessionModel, ProgressModel, QuizResultModel, ChallengeProgressModel } = await import('@/lib/mongoose-schema');
         const match: Record<string, unknown> = {};
         if (timeframe === 'weekly') {
           const weekAgo = new Date();
@@ -77,31 +77,53 @@ export async function GET(request: Request) {
           { $limit: 50 },
         ]);
         const userIds = sessions.map((s: { _id: string }) => s._id);
-        const [progressCounts, quizCounts, users] = await Promise.all([
+        const [progressCounts, quizResults, challengeProgress, users] = await Promise.all([
           ProgressModel.aggregate([
             { $match: { userId: { $in: userIds }, completed: true } },
             { $group: { _id: '$userId', count: { $sum: 1 } } },
           ]),
-          QuizResultModel.aggregate([
-            { $match: { userId: { $in: userIds } } },
-            { $group: { _id: '$userId', count: { $sum: 1 } } },
-          ]),
+          QuizResultModel.find({ userId: { $in: userIds } }).lean(),
+          ChallengeProgressModel.find({ userId: { $in: userIds } }).lean(),
           UserModel.find({ _id: { $in: userIds } }).lean(),
         ]);
         const progressMap = Object.fromEntries(progressCounts.map((p: { _id: string; count: number }) => [p._id, p.count]));
-        const quizMap = Object.fromEntries(quizCounts.map((q: { _id: string; count: number }) => [q._id, q.count]));
+        const quizByUser = new Map<string, Array<{ quizId: string; score: number; total: number }>>();
+        for (const qr of quizResults as unknown as Array<{ userId: string; quizId: string; score: number; total: number }>) {
+          if (!quizByUser.has(qr.userId)) quizByUser.set(qr.userId, []);
+          quizByUser.get(qr.userId)!.push({ quizId: qr.quizId, score: qr.score, total: qr.total });
+        }
+        const challengeByUser = new Map<string, number>();
+        for (const cp of challengeProgress as unknown as Array<{ userId: string; correct: number }>) {
+          challengeByUser.set(cp.userId, (challengeByUser.get(cp.userId) ?? 0) + cp.correct);
+        }
         const userMap = Object.fromEntries((users as unknown as Array<{ _id: string; name: string | null; email: string | null; image: string | null }>).map((u) => [String(u._id), u]));
         const { calculateLevel } = await import('@/lib/xp-system');
+        const totalModules = modules.length;
         const leaderboard = [];
         for (const s of sessions) {
           const user = userMap[s._id];
           if (user) {
+            const uid = String(user._id);
             const sessionXP = s.totalXP;
-            const completedModules = progressMap[s._id] ?? 0;
-            const quizCount = quizMap[s._id] ?? 0;
+            const completedModules = progressMap[uid] ?? 0;
             const moduleXP = completedModules * XP_REWARDS.completeModule;
-            const quizXP = quizCount * XP_REWARDS.quizPass;
-            const totalXP = sessionXP + moduleXP + quizXP;
+            const moduleBonusesXP = (completedModules >= 1 ? XP_REWARDS.firstModuleComplete : 0)
+              + (completedModules >= totalModules ? XP_REWARDS.allModulesComplete : 0);
+
+            // Deduplicate quiz scores per quizId
+            const userQuizzes = quizByUser.get(uid) ?? [];
+            const bestScores = new Map<string, number>();
+            for (const qr of userQuizzes) {
+              const pct = qr.total > 0 ? (qr.score / qr.total) * 100 : 0;
+              bestScores.set(qr.quizId, Math.max(bestScores.get(qr.quizId) ?? 0, pct));
+            }
+            let quizXP = 0;
+            for (const pct of bestScores.values()) {
+              quizXP += XP_REWARDS.quizPass + Math.round(pct * XP_REWARDS.quizBonusPerPercent);
+            }
+
+            const challengeXP = (challengeByUser.get(uid) ?? 0) * XP_REWARDS.challengeCorrect;
+            const totalXP = sessionXP + moduleXP + moduleBonusesXP + quizXP + challengeXP;
             leaderboard.push({
               id: user._id,
               name: user.name,
@@ -121,6 +143,7 @@ export async function GET(request: Request) {
       const { calculateLevel } = await import('@/lib/xp-system');
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
+      const totalModules = modules.length;
 
       const users = await db.user.findMany({
         where: { role: 'STUDENT' },
@@ -130,17 +153,42 @@ export async function GET(request: Request) {
             where: { createdAt: { gte: weekAgo } },
             select: { xpEarned: true },
           } : { select: { xpEarned: true } },
-          _count: { select: { progress: { where: { completed: true } }, quizResults: true } },
+          progress: { where: { completed: true }, select: { moduleId: true } },
+          challengeProgress: { select: { correct: true } },
+          quizResults: { select: { quizId: true, score: true, total: true } },
         },
         take: 50,
       });
 
       const leaderboard = users
-        .map((u: { id: string; name: string | null; email: string | null; image: string | null; studySessions: { xpEarned: number }[]; _count: { progress: number; quizResults: number } }) => {
+        .map((u: {
+          id: string; name: string | null; email: string | null; image: string | null;
+          studySessions: { xpEarned: number }[];
+          progress: { moduleId: string }[];
+          challengeProgress: { correct: number }[];
+          quizResults: { quizId: string; score: number; total: number }[];
+        }) => {
           const sessionXP = u.studySessions.reduce((sum: number, s: { xpEarned: number }) => sum + s.xpEarned, 0);
-          const moduleXP = u._count.progress * XP_REWARDS.completeModule;
-          const quizXP = u._count.quizResults * XP_REWARDS.quizPass;
-          const totalXP = sessionXP + moduleXP + quizXP;
+          const moduleCount = u.progress.length;
+          const moduleXP = moduleCount * XP_REWARDS.completeModule;
+          const moduleBonusesXP = (moduleCount >= 1 ? XP_REWARDS.firstModuleComplete : 0)
+            + (moduleCount >= totalModules ? XP_REWARDS.allModulesComplete : 0);
+
+          // Deduplicate quiz scores: use best score per quizId (matches load-progress)
+          const bestScores = new Map<string, number>();
+          for (const qr of u.quizResults) {
+            const pct = qr.total > 0 ? (qr.score / qr.total) * 100 : 0;
+            bestScores.set(qr.quizId, Math.max(bestScores.get(qr.quizId) ?? 0, pct));
+          }
+          let quizXP = 0;
+          for (const pct of bestScores.values()) {
+            quizXP += XP_REWARDS.quizPass + Math.round(pct * XP_REWARDS.quizBonusPerPercent);
+          }
+
+          const correctAnswers = u.challengeProgress.reduce((sum: number, cp: { correct: number }) => sum + cp.correct, 0);
+          const challengeXP = correctAnswers * XP_REWARDS.challengeCorrect;
+
+          const totalXP = sessionXP + moduleXP + moduleBonusesXP + quizXP + challengeXP;
           return {
             id: u.id,
             name: u.name,
@@ -148,7 +196,7 @@ export async function GET(request: Request) {
             image: u.image,
             totalXP,
             level: calculateLevel(totalXP),
-            completedModules: u._count.progress,
+            completedModules: moduleCount,
           };
         })
         .sort((a: { totalXP: number }, b: { totalXP: number }) => b.totalXP - a.totalXP);
