@@ -125,6 +125,7 @@ export default function QuizSystem() {
     setQuizQuestionsOverride(null);
     const questions = quizQuestions.filter((q) => q.category === cat.name);
     if (questions.length === 0) return;
+    setTimerActive(false); // ensure clean timer reset
     setActiveCategory(cat.id);
     setCurrentQuestion(0);
     setCorrectCount(0);
@@ -152,10 +153,9 @@ export default function QuizSystem() {
       setTimerActive(true);
     } else {
       const catId = activeCategory;
-      // Compute score from answers directly — correctCountRef can be stale
-      // due to React's batched state updates when the timer fires immediately
-      // after the last answer.
-      const finalAnswers = [...answersRef.current];
+      // Compute score from answers state directly — use the closure value rather
+      // than answersRef which can be stale if state update hasn't flushed to useEffect yet.
+      const finalAnswers = [...answers];
       const correctCount = finalAnswers.filter(Boolean).length;
       const score = Math.round((correctCount / totalQuestions) * 100);
 

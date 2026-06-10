@@ -76,5 +76,5 @@ export function sanitizeNoteContent(raw: string): string {
 
   // Client-side (browser): Use DOMParser for robust HTML parsing
   const doc = new DOMParser().parseFromString(raw, 'text/html');
-  return doc.body.textContent || '';
+  return doc.body?.textContent || '';
 }

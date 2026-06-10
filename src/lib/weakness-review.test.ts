@@ -1,11 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { buildWeaknessReview, getWeaknessCount, resetWeaknessReviewCache } from './weakness-review';
+import { describe, it, expect } from 'vitest';
+import { buildWeaknessReview, getWeaknessCount } from './weakness-review';
 import type { QuizAttempt } from './store';
 
 describe('weakness-review', () => {
-  beforeEach(() => {
-    resetWeaknessReviewCache();
-  });
 
   const emptyScores = {
     correct: 0,

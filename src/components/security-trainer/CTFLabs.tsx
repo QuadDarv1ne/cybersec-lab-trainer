@@ -94,7 +94,7 @@ export default function CTFLabs({ onBack }: { onBack?: () => void }) {
         if (!res.ok) {
           throw new Error(`Server returned ${res.status}: ${res.statusText}`);
         }
-        const data = await res.json();
+        const data = await res.json().catch(() => { throw new Error('Invalid JSON response from server'); });
         if (!controller.signal.aborted && data.labs) {
           setLabs(data.labs);
         }

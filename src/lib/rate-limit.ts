@@ -162,6 +162,8 @@ export function getClientIP(request: Request): string {
 
   // Fallback: use connection remoteAddress if available, otherwise shared anonymous bucket.
   // In production, ensure the reverse proxy is configured with TRUST_PROXY=1.
+  // WARNING: all users without identifiable IPs share the 'anonymous' bucket —
+  // a single malicious user can trigger a rate-limit denial of service for everyone.
   return "anonymous";
 }
 

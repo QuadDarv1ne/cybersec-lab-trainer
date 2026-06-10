@@ -232,10 +232,10 @@ export async function GET(request: Request) {
         let selectedOptions: Record<string, number> = {};
         try {
           if (cp.answered) answered = JSON.parse(cp.answered as string);
-        } catch { logger.warn('Corrupted challenge answered data, defaulting to empty'); }
+        } catch (e) { logger.warn('Corrupted challenge answered data, defaulting to empty', e); }
         try {
           if (cp.selectedOptions) selectedOptions = JSON.parse(cp.selectedOptions as string);
-        } catch { logger.warn('Corrupted challenge selectedOptions data, defaulting to empty'); }
+        } catch (e) { logger.warn('Corrupted challenge selectedOptions data, defaulting to empty', e); }
         challenges[cp.challengeType as string] = {
           correct: cp.correct as number,
           total: cp.total as number,
@@ -250,7 +250,7 @@ export async function GET(request: Request) {
         let itemIds: string[] = [];
         try {
           if (ip.itemIds) itemIds = JSON.parse(ip.itemIds as string);
-        } catch { logger.warn('Corrupted itemProgress itemIds data, defaulting to empty'); }
+        } catch (e) { logger.warn('Corrupted itemProgress itemIds data, defaulting to empty', e); }
         itemProgress[ip.moduleId as string] = itemIds;
       }
 
@@ -325,13 +325,13 @@ export async function GET(request: Request) {
   } catch (error) {
     const actionLabel = action === 'leaderboard' ? 'leaderboard' : 'progress';
     logger.error(`Failed to load ${actionLabel}:`, error);
-    try { await setCsrfCookie(); } catch { /* non-critical */ }
+    try { await setCsrfCookie(); } catch (e) { logger.warn('Failed to set CSRF cookie in load-progress', e); }
     const response = NextResponse.json({ error: `Failed to load ${actionLabel}`, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() }, { status: 500 });
     addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
     return response;
   }
 
-  try { await setCsrfCookie(); } catch { /* non-critical */ }
+    try { await setCsrfCookie(); } catch (e) { logger.warn('Failed to set CSRF cookie in error handler', e); }
   const response = NextResponse.json(
     { error: `Unknown action. Expected: load-progress, leaderboard`, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() },
     { status: 400 }

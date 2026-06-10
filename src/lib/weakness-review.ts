@@ -179,11 +179,9 @@ export function buildWeaknessReview(
 
 /**
  * Returns the total count of weakness items across all sources.
- * Memoized to avoid expensive recalculation on every render.
+ * Client-side callers should use useMemo with the input values as dependencies
+ * to avoid expensive recalculation on every render.
  */
-let lastCacheKey: string | null = null;
-let lastCacheResult = 0;
-
 export function getWeaknessCount(
   quizHistory: QuizAttempt[] = [],
   owaspChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> },
@@ -191,22 +189,6 @@ export function getWeaknessCount(
   headersChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> },
   secureCodingChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> },
 ): number {
-  const cacheKey = JSON.stringify([
-    quizHistory.map((h) => ({ id: h.id, score: h.score })),
-    owaspChallengeScores.total,
-    authChallengeScores.total,
-    headersChallengeScores.total,
-    secureCodingChallengeScores.total,
-    owaspChallengeScores.answered?.length ?? 0,
-    authChallengeScores.answered?.length ?? 0,
-    headersChallengeScores.answered?.length ?? 0,
-    secureCodingChallengeScores.answered?.length ?? 0,
-  ]);
-
-  if (cacheKey === lastCacheKey) {
-    return lastCacheResult;
-  }
-
   const review = buildWeaknessReview(
     quizHistory,
     owaspChallengeScores,
@@ -215,14 +197,5 @@ export function getWeaknessCount(
     secureCodingChallengeScores,
   );
 
-  lastCacheKey = cacheKey;
-  lastCacheResult = review.totalCount;
-
   return review.totalCount;
-}
-
-/** Reset the internal cache (useful for testing) */
-export function resetWeaknessReviewCache(): void {
-  lastCacheKey = null;
-  lastCacheResult = 0;
 }
