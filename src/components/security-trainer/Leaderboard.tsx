@@ -31,19 +31,21 @@ export default function Leaderboard() {
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
-    fetch(`/api?action=leaderboard&timeframe=${timeframe}`, { signal: controller.signal })
-      .then((res) => res.json())
-      .then((data) => {
+
+    (async () => {
+      try {
+        const res = await fetch(`/api?action=leaderboard&timeframe=${timeframe}`, { signal: controller.signal });
+        const data = await res.json();
         if (!controller.signal.aborted && data.leaderboard) setEntries(data.leaderboard);
-      })
-      .catch((err) => {
+      } catch (err) {
         if (controller.signal.aborted) return;
         toast.error(t('loadError'));
         logger.error('Leaderboard fetch failed:', err);
-      })
-      .finally(() => {
+      } finally {
         if (!controller.signal.aborted) setLoading(false);
-      });
+      }
+    })();
+
     return () => controller.abort();
   }, [timeframe, t]);
 

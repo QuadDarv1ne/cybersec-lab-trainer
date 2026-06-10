@@ -50,6 +50,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { toPageType } from '@/lib/constants';
+import { logger } from '@/lib/logger';
 
 function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: string }) {
   const count = useMotionValue(value);
@@ -669,7 +670,8 @@ export default function Dashboard() {
                         icon: <AlertTriangle size={16} />,
                       });
                     }
-                  } catch {
+                    } catch (err) {
+                      logger.error('Import failed:', err);
                     toast.error(t('exportImport.importError'), {
                       icon: <AlertTriangle size={16} />,
                     });

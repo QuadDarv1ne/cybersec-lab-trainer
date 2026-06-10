@@ -183,10 +183,10 @@ export async function GET(request: Request) {
         let selectedOptions: Record<string, number> = {};
         try {
           if (cp.answered) answered = JSON.parse(cp.answered as string);
-        } catch { /* corrupted data, default to empty */ }
+        } catch { logger.warn('Corrupted challenge answered data, defaulting to empty'); }
         try {
           if (cp.selectedOptions) selectedOptions = JSON.parse(cp.selectedOptions as string);
-        } catch { /* corrupted data, default to empty */ }
+        } catch { logger.warn('Corrupted challenge selectedOptions data, defaulting to empty'); }
         challenges[cp.challengeType as string] = {
           correct: cp.correct as number,
           total: cp.total as number,
@@ -201,7 +201,7 @@ export async function GET(request: Request) {
         let itemIds: string[] = [];
         try {
           if (ip.itemIds) itemIds = JSON.parse(ip.itemIds as string);
-        } catch { /* corrupted data, default to empty */ }
+        } catch { logger.warn('Corrupted itemProgress itemIds data, defaulting to empty'); }
         itemProgress[ip.moduleId as string] = itemIds;
       }
 
