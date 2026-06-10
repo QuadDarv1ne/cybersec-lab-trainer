@@ -19,8 +19,35 @@ const nextConfig: NextConfig = {
     }
     const oauthSrc = oauthDomains.length > 0 ? ` ${oauthDomains.join(" ")}` : "";
 
-    const devCSP = `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'${oauthSrc}; frame-src 'self'${oauthSrc}; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`;
-    const prodCSP = `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'${oauthSrc}; frame-src 'self'${oauthSrc}; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`;
+    const devCSP = [
+      "default-src 'self' blob:",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https: http:",
+      "font-src 'self' data: https:",
+      "media-src 'self' https:",
+      "connect-src 'self' https: wss:" + oauthSrc,
+      "frame-src 'self'" + oauthSrc,
+      "worker-src 'self' blob:",
+      "frame-ancestors 'self'",
+      "form-action 'self'",
+      "base-uri 'self'",
+    ].join('; ');
+
+    const prodCSP = [
+      "default-src 'self' blob:",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data: https:",
+      "media-src 'self' https:",
+      "connect-src 'self' https:" + oauthSrc,
+      "frame-src 'self'" + oauthSrc,
+      "worker-src 'self' blob:",
+      "frame-ancestors 'self'",
+      "form-action 'self'",
+      "base-uri 'self'",
+    ].join('; ');
 
     return [
       {
