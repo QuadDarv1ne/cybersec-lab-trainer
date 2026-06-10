@@ -52,9 +52,10 @@ export async function GET(request: Request) {
 
   const userId = session.user.id;
 
+  const url = new URL(request.url);
+  const action = url.searchParams.get('action');
+
   try {
-    const url = new URL(request.url);
-    const action = url.searchParams.get('action');
 
     if (action === 'leaderboard') {
       const timeframe = url.searchParams.get('timeframe') || 'all';
@@ -232,17 +233,26 @@ export async function GET(request: Request) {
         createdAt: toTime(ss.createdAt),
       }));
 
-      // Calculate totalXP from all sources
+      // Calculate totalXP from all sources (must match client-side logic)
       // 1. Study sessions XP
       const sessionXP = studySessionRecords.reduce((sum, ss) => sum + (ss.xpEarned as number), 0);
 
-      // 2. Module completion XP
-      const moduleXP = completedModules.length * XP_REWARDS.completeModule;
+      // 2. Module completion XP (base + bonuses)
+      const moduleCount = completedModules.length;
+      const moduleXP = moduleCount * XP_REWARDS.completeModule;
+      const moduleBonusesXP = (moduleCount >= 1 ? XP_REWARDS.firstModuleComplete : 0)
+        + (moduleCount >= modules.length ? XP_REWARDS.allModulesComplete : 0);
 
-      // 3. Quiz pass XP (base reward per quiz, bonus calculated separately)
-      const quizXP = Object.keys(quizScores).length * XP_REWARDS.quizPass;
+      // 3. Quiz XP (base + percentage bonus)
+      let quizXP = 0;
+      for (const score of Object.values(quizScores)) {
+        quizXP += XP_REWARDS.quizPass + Math.round(score * XP_REWARDS.quizBonusPerPercent);
+      }
 
-      const totalXP = sessionXP + moduleXP + quizXP;
+      // 4. Challenge XP
+      const challengeXP = challengeProgressRecords.reduce((sum, cp) => sum + (cp.correct as number), 0) * XP_REWARDS.challengeCorrect;
+
+      const totalXP = sessionXP + moduleXP + moduleBonusesXP + quizXP + challengeXP;
 
       // Build quiz history from quiz results
       const quizHistory = quizResults.map((qr) => {
@@ -265,16 +275,17 @@ export async function GET(request: Request) {
       return response;
     }
   } catch (error) {
-    logger.error('Failed to load progress:', error);
-    await setCsrfCookie();
-    const response = NextResponse.json({ error: "Failed to load progress", csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() }, { status: 500 });
+    const actionLabel = action === 'leaderboard' ? 'leaderboard' : 'progress';
+    logger.error(`Failed to load ${actionLabel}:`, error);
+    try { await setCsrfCookie(); } catch { /* non-critical */ }
+    const response = NextResponse.json({ error: `Failed to load ${actionLabel}`, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() }, { status: 500 });
     addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
     return response;
   }
 
-  await setCsrfCookie();
+  try { await setCsrfCookie(); } catch { /* non-critical */ }
   const response = NextResponse.json(
-    { error: `Unknown action. Expected: load-progress`, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() },
+    { error: `Unknown action. Expected: load-progress, leaderboard`, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() },
     { status: 400 }
   );
   addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);

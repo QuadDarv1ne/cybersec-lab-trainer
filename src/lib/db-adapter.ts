@@ -558,10 +558,16 @@ export function getDbAdapter(): DbAdapter {
     logger.info('[DB] Using MongoDB (Mongoose) adapter');
   } else {
     // Lazy import to avoid Prisma client not generated errors
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { db } = require('./db');
-    adapter = createPrismaAdapter(db);
-    logger.info(`[DB] Using ${dbType} (Prisma) adapter`);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { db } = require('./db');
+      adapter = createPrismaAdapter(db);
+      logger.info(`[DB] Using ${dbType} (Prisma) adapter`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error(`[DB] Failed to initialize Prisma adapter: ${message}. Run 'prisma generate' to generate the Prisma client.`);
+      throw new Error(`Prisma client not found. Run 'prisma generate' first. Original error: ${message}`);
+    }
   }
 
   return adapter;
