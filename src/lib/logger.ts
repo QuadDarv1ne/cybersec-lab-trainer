@@ -21,10 +21,8 @@ export const logger = {
   },
 
   warn: (...args: unknown[]) => {
-    if (isDevelopment) {
-      // eslint-disable-next-line no-console
-      console.warn(...args);
-    }
+    // eslint-disable-next-line no-console
+    console.warn(...args);
   },
 
   error: (...args: unknown[]) => {

@@ -40,6 +40,7 @@ type UpdateInput = Record<string, unknown>;
 interface AdapterResult<T> {
   findMany: (where: WhereInput) => Promise<T[]>;
   upsert: (where: WhereInput, create: CreateInput, update: UpdateInput) => Promise<T>;
+  create: (data: CreateInput) => Promise<T>;
   deleteMany: (where: WhereInput) => Promise<void>;
 }
 
@@ -133,6 +134,7 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
         create: create as Prisma.ProgressCreateInput,
         update: update as Prisma.ProgressUpdateInput,
       }),
+      create: (data) => db.progress.create({ data: data as Prisma.ProgressCreateInput }),
       deleteMany: async (where) => { await db.progress.deleteMany({ where }); },
     },
 
@@ -143,6 +145,7 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
         create: create as Prisma.QuizResultCreateInput,
         update: update as Prisma.QuizResultUpdateInput,
       }),
+      create: (data) => db.quizResult.create({ data: data as Prisma.QuizResultCreateInput }),
       deleteMany: async (where) => { await db.quizResult.deleteMany({ where }); },
     },
 
@@ -153,6 +156,7 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
         create: create as Prisma.ChallengeProgressCreateInput,
         update: update as Prisma.ChallengeProgressUpdateInput,
       }),
+      create: (data) => db.challengeProgress.create({ data: data as Prisma.ChallengeProgressCreateInput }),
       deleteMany: async (where) => { await db.challengeProgress.deleteMany({ where }); },
     },
 
@@ -163,6 +167,7 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
         create: create as Prisma.ItemProgressCreateInput,
         update: update as Prisma.ItemProgressUpdateInput,
       }),
+      create: (data) => db.itemProgress.create({ data: data as Prisma.ItemProgressCreateInput }),
       deleteMany: async (where) => { await db.itemProgress.deleteMany({ where }); },
     },
 
@@ -173,6 +178,7 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
         create: create as Prisma.NoteCreateInput,
         update: update as Prisma.NoteUpdateInput,
       }),
+      create: (data) => db.note.create({ data: data as Prisma.NoteCreateInput }),
       deleteMany: async (where) => { await db.note.deleteMany({ where }); },
     },
 
@@ -183,6 +189,7 @@ function createPrismaAdapter(db: PrismaClient): DbAdapter {
         create: create as Prisma.StudySessionCreateInput,
         update: update as Prisma.StudySessionUpdateInput,
       }),
+      create: (data) => db.studySession.create({ data: data as Prisma.StudySessionCreateInput }),
       deleteMany: async (where) => { await db.studySession.deleteMany({ where }); },
     },
 
@@ -319,6 +326,7 @@ function createMongooseAdapter(): DbAdapter {
         const doc = await ProgressModel.findOneAndUpdate(where, { $set: { ...create, ...update, updatedAt: new Date() } }, { upsert: true, new: true });
         return normalizeOrThrow<Progress>(doc, 'progress upsert');
       },
+      create: async (data) => normalizeOrThrow<Progress>(await ProgressModel.create(data), 'progress create'),
       deleteMany: async (where) => { await ProgressModel.deleteMany(where); },
     },
 
@@ -328,6 +336,7 @@ function createMongooseAdapter(): DbAdapter {
         const doc = await QuizResultModel.findOneAndUpdate(where, { $set: { ...create, ...update } }, { upsert: true, new: true });
         return normalizeOrThrow<QuizResult>(doc, 'quizResult upsert');
       },
+      create: async (data) => normalizeOrThrow<QuizResult>(await QuizResultModel.create(data), 'quizResult create'),
       deleteMany: async (where) => { await QuizResultModel.deleteMany(where); },
     },
 
@@ -337,6 +346,7 @@ function createMongooseAdapter(): DbAdapter {
         const doc = await ChallengeProgressModel.findOneAndUpdate(where, { $set: { ...create, ...update, updatedAt: new Date() } }, { upsert: true, new: true });
         return normalizeOrThrow<ChallengeProgress>(doc, 'challengeProgress upsert');
       },
+      create: async (data) => normalizeOrThrow<ChallengeProgress>(await ChallengeProgressModel.create(data), 'challengeProgress create'),
       deleteMany: async (where) => { await ChallengeProgressModel.deleteMany(where); },
     },
 
@@ -346,6 +356,7 @@ function createMongooseAdapter(): DbAdapter {
         const doc = await ItemProgressModel.findOneAndUpdate(where, { $set: { ...create, ...update, updatedAt: new Date() } }, { upsert: true, new: true });
         return normalizeOrThrow<ItemProgress>(doc, 'itemProgress upsert');
       },
+      create: async (data) => normalizeOrThrow<ItemProgress>(await ItemProgressModel.create(data), 'itemProgress create'),
       deleteMany: async (where) => { await ItemProgressModel.deleteMany(where); },
     },
 
@@ -355,6 +366,7 @@ function createMongooseAdapter(): DbAdapter {
         const doc = await NoteModel.findOneAndUpdate(where, { $set: { ...create, ...update, updatedAt: new Date() } }, { upsert: true, new: true });
         return normalizeOrThrow<Note>(doc, 'note upsert');
       },
+      create: async (data) => normalizeOrThrow<Note>(await NoteModel.create(data), 'note create'),
       deleteMany: async (where) => { await NoteModel.deleteMany(where); },
     },
 
@@ -364,6 +376,7 @@ function createMongooseAdapter(): DbAdapter {
         const doc = await StudySessionModel.findOneAndUpdate(where, { $set: { ...create, ...update } }, { upsert: true, new: true });
         return normalizeOrThrow<StudySession>(doc, 'studySession upsert');
       },
+      create: async (data) => normalizeOrThrow<StudySession>(await StudySessionModel.create(data), 'studySession create'),
       deleteMany: async (where) => { await StudySessionModel.deleteMany(where); },
     },
 

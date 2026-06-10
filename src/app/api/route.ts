@@ -590,7 +590,7 @@ export async function POST(request: Request) {
             const id = qh.id || `quiz-${Date.now()}-${generateUUID().slice(0, 8)}`;
             const percentage = qh.total > 0 ? (qh.score / qh.total) * 100 : 0;
             await adapter.quizResult.create(
-              { userId, id, quizId: id, score: qh.score, total: qh.total, percentage, createdAt: new Date(qh.timestamp) }
+              { userId, id, quizId: qh.categoryId, score: qh.score, total: qh.total, percentage, createdAt: new Date(qh.timestamp) }
             );
             savedCount++;
           } catch (error) {

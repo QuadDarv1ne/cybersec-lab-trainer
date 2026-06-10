@@ -110,6 +110,13 @@ export const studySessionSchema = z.object({
     'weakness-review',
     'blog',
     'ctf-labs',
+    'advanced-ctf',
+    'real-app-simulation',
+    'devsecops-simulation',
+    'admin',
+    'teacher',
+    'leaderboard',
+    'profile',
   ], { message: 'pageType должен быть допустимым типом страницы' }),
   xpEarned: z.number().int().min(0).max(100).optional().default(0),
 });
