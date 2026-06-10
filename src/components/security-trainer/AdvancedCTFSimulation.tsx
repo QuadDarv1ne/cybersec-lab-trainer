@@ -35,7 +35,7 @@ export default function AdvancedCTFSimulation() {
   const [attackLog, setAttackLog] = useState<string[]>([]);
 
   const level = ctfLevels[currentLevel];
-  const isCompleted = completedLevels.includes(level.id);
+  const isCompleted = level ? completedLevels.includes(level.id) : false;
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -113,6 +113,8 @@ export default function AdvancedCTFSimulation() {
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
     }
   };
+
+  if (!level) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><p className="text-slate-500 dark:text-slate-400">Level not found</p></div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-4">

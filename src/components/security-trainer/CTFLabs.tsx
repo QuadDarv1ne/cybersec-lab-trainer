@@ -73,7 +73,7 @@ export default function CTFLabs({ onBack }: { onBack?: () => void }) {
   const [foundFlags, setFoundFlags] = useState<Set<string>>(new Set());
   const [labProgress] = useState<Record<string, { flagsFound: number; totalFlags: number; score: number }>>({});
 
-  const { submitFlag, isSubmitting, lastResult } = useFlagSubmission();
+  const { submitFlag, isSubmitting, lastResult, reset: resetFlagResult } = useFlagSubmission();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -113,12 +113,13 @@ export default function CTFLabs({ onBack }: { onBack?: () => void }) {
     const value = flagInputs[`${labId}-${flagKey}`]?.trim();
     if (!value) return;
 
+    resetFlagResult();
     const result = await submitFlag(labId, flagKey, value);
     if (result?.correct) {
       setFoundFlags(prev => new Set([...prev, `${labId}-${flagKey}`]));
       setFlagInputs(prev => ({ ...prev, [`${labId}-${flagKey}`]: '' }));
     }
-  }, [flagInputs, submitFlag]);
+  }, [flagInputs, submitFlag, resetFlagResult]);
 
   const toggleHint = useCallback((hintKey: string) => {
     setRevealedHints(prev => {
@@ -260,7 +261,7 @@ export default function CTFLabs({ onBack }: { onBack?: () => void }) {
                               <Input
                                 placeholder={t('flagPlaceholder')}
                                 value={flagInputs[flagKey] ?? ''}
-                                onChange={(e) => setFlagInputs(prev => ({ ...prev, [flagKey]: e.target.value }))}
+                                onChange={(e) => { setFlagInputs(prev => ({ ...prev, [flagKey]: e.target.value })); resetFlagResult(); }}
                                 onKeyDown={(e) => e.key === 'Enter' && handleFlagSubmit(currentLab.id, flag.flagKey)}
                                 disabled={isSubmitting}
                                 className="flex-1"

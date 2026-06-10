@@ -5,6 +5,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LocaleLang } from "@/components/LocaleLang";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 import { SITE_URL } from "@/lib/constants";
 import "./globals.css";
 
@@ -75,9 +76,8 @@ export default async function RootLayout({
   let session = null;
   try {
     session = await getServerSession(authOptions);
-  } catch {
-    // Session is invalid (e.g., JWT was encrypted with a different secret)
-    // This can happen when NEXTAUTH_SECRET changes or cookies are stale
+  } catch (e) {
+    logger.warn('Session retrieval failed (possibly stale JWT/secret):', e);
     session = null;
   }
 

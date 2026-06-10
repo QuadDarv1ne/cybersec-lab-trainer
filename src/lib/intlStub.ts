@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from './logger';
 import ru from '../i18n/locales/ru/main.json';
 import en from '../i18n/locales/en/main.json';
 import zh from '../i18n/locales/zh/main.json';
@@ -23,8 +24,8 @@ export function getCurrentLocale(): Locale {
   let stored: string | null = null;
   try {
     stored = localStorage.getItem('app-locale');
-  } catch {
-    // localStorage may be inaccessible in private browsing mode
+  } catch (e) {
+    logger.warn('localStorage access failed in getCurrentLocale:', e);
   }
   if (stored === 'en' || stored === 'ru' || stored === 'zh') return stored as Locale;
   const browserLang = navigator.language.toLowerCase();
@@ -57,8 +58,8 @@ export function setLocale(locale: Locale): void {
   if (locale !== 'ru' && locale !== 'en' && locale !== 'zh') return;
   try {
     localStorage.setItem('app-locale', locale);
-  } catch {
-    // localStorage may be inaccessible in private browsing mode
+  } catch (e) {
+    logger.warn('localStorage access failed in setLocale:', e);
   }
   window.dispatchEvent(new StorageEvent('storage', { key: 'app-locale', newValue: locale }));
   document.documentElement.lang = locale;
