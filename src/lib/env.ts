@@ -26,11 +26,14 @@ function warnMissingEnvFile(): void {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { join } = require('path') as typeof import('path');
     const cwd = process.cwd();
-    if (!existsSync(join(cwd, '.env.local')) && !existsSync(join(cwd, '.next', '.env.local'))) {
+    if (
+      !existsSync(join(cwd, '.env')) &&
+      !existsSync(join(cwd, '.env.local'))
+    ) {
       process.stderr.write(
-        '\x1b[33m[Env] Warning: .env.local file not found.\x1b[0m\n' +
-        '  Copy .env.example to .env.local and configure your environment variables.\n' +
-        '  Run: copy .env.example .env.local\n\n'
+        '\x1b[33m[Env] Warning: No .env or .env.local file found.\x1b[0m\n' +
+        '  Copy .env.example to .env or .env.local and configure your environment variables.\n' +
+        '  Run: copy .env.example .env\n\n'
       );
     }
   } catch {
@@ -59,7 +62,7 @@ export function validateEnv(): Env {
     const errors = result.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`);
     throw new Error(
       `Invalid environment variables:\n${errors.join('\n')}\n\n` +
-      'Check your .env.local file and ensure all required variables are set.'
+      'Check your .env or .env.local file and ensure all required variables are set.'
     );
   }
 

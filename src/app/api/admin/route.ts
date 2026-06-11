@@ -4,7 +4,7 @@ import { getDbAdapter } from "@/lib/db-adapter";
 import { logger } from "@/lib/logger";
 import { validateCsrfToken, setCsrfCookie } from "@/lib/csrf-server";
 import { getCsrfCookieName, getCsrfHeaderName } from "@/lib/csrf-constants";
-import { rateLimit, getClientIP, addRateLimitHeaders } from "@/lib/rate-limit";
+import { rateLimit, getClientIP } from "@/lib/rate-limit";
 
 export async function GET(request: Request) {
   const { error } = await requireRole(['ADMIN']);
