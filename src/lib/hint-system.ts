@@ -38,55 +38,25 @@ export function calculateHintedXP(baseXP: number, usedHints: HintLevel[]): numbe
   return Math.max(0, baseXP - reduction);
 }
 
-/**
- * Generate hints for a specific challenge/task.
- * @param taskKey - Unique identifier for the task
- * @returns Array of hints from general to specific
- */
-export function getHints(taskKey: string): Hint[] {
-  const hintMap = getHintMap();
-  return hintMap[taskKey] || getDefaultHints(taskKey);
-}
+const DEFAULT_HINTS: Hint[] = [
+  {
+    level: 1,
+    text: `Think about what vulnerability this task is testing. Review the relevant module materials.`,
+    xpReduction: HINT_XP_PENALTY[1],
+  },
+  {
+    level: 2,
+    text: `Look at the code carefully. Pay attention to input validation, output encoding, and authentication checks.`,
+    xpReduction: HINT_XP_PENALTY[2],
+  },
+  {
+    level: 3,
+    text: `The answer involves understanding how the data flows through the application. Trace the input from entry point to output.`,
+    xpReduction: HINT_XP_PENALTY[3],
+  },
+];
 
-/**
- * Get the hint level description for display.
- */
-export function getHintLevelLabel(level: HintLevel): string {
-  switch (level) {
-    case 1: return 'General hint';
-    case 2: return 'Specific hint';
-    case 3: return 'Solution hint';
-  }
-}
-
-/**
- * Default hints for any task.
- */
-function getDefaultHints(_taskKey: string): Hint[] {
-  return [
-    {
-      level: 1,
-      text: `Think about what vulnerability this task is testing. Review the relevant module materials.`,
-      xpReduction: HINT_XP_PENALTY[1],
-    },
-    {
-      level: 2,
-      text: `Look at the code carefully. Pay attention to input validation, output encoding, and authentication checks.`,
-      xpReduction: HINT_XP_PENALTY[2],
-    },
-    {
-      level: 3,
-      text: `The answer involves understanding how the data flows through the application. Trace the input from entry point to output.`,
-      xpReduction: HINT_XP_PENALTY[3],
-    },
-  ];
-}
-
-/**
- * Specific hints for known tasks.
- */
-function getHintMap(): Record<string, Hint[]> {
-  return {
+const HINT_MAP: Record<string, Hint[]> = {
     // OWASP challenges
     'owasp-1': [
       { level: 1, text: 'This is about injection attacks. What kind of data does the application accept from users?', xpReduction: 0.10 },
@@ -135,5 +105,24 @@ function getHintMap(): Record<string, Hint[]> {
       { level: 2, text: 'The application uses PHP unserialize() on data from cookies without validation.', xpReduction: 0.25 },
       { level: 3, text: 'Modify the serialized session cookie to include a malicious object that executes system commands.', xpReduction: 0.50 },
     ],
-  };
+};
+
+/**
+ * Generate hints for a specific challenge/task.
+ * @param taskKey - Unique identifier for the task
+ * @returns Array of hints from general to specific
+ */
+export function getHints(taskKey: string): Hint[] {
+  return HINT_MAP[taskKey] || DEFAULT_HINTS;
+}
+
+/**
+ * Get the hint level description for display.
+ */
+export function getHintLevelLabel(level: HintLevel): string {
+  switch (level) {
+    case 1: return 'General hint';
+    case 2: return 'Specific hint';
+    case 3: return 'Solution hint';
+  }
 }

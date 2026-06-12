@@ -34,7 +34,6 @@ export default function ThemeProvider({
       enableSystem
       disableTransitionOnChange={false}
       enableColorScheme
-      nonce={process.env.NODE_ENV === 'production' ? process.env.NEXT_NONCE : undefined}
       {...props}
     >
       <ThemeWatcher />

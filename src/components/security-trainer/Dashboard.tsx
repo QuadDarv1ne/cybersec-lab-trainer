@@ -675,6 +675,8 @@ export default function Dashboard() {
                     toast.error(t('exportImport.importError'), {
                       icon: <AlertTriangle size={16} />,
                     });
+                  } finally {
+                    if (fileInputRef.current) fileInputRef.current.value = '';
                   }
                 };
                 reader.onerror = () => {
@@ -684,7 +686,6 @@ export default function Dashboard() {
                   if (fileInputRef.current) fileInputRef.current.value = '';
                 };
                 reader.readAsText(file);
-                e.target.value = '';
               }}
             />
           </div>
