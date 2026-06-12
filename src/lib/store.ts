@@ -124,6 +124,7 @@ export type AppStore = AppState & AppActions;
 let syncTimeout: ReturnType<typeof setTimeout> | null = null;
 let pendingPromise: Promise<void> | null = null;
 let pendingResolve: (() => void) | null = null;
+let pendingReject: ((reason?: unknown) => void) | null = null;
 let isExecuting = false; // true while syncWithDatabase is actually running
 let followUpScheduled = false;
 const SYNC_DELAY_MS = 500;
@@ -154,6 +155,11 @@ if (typeof window !== 'undefined') {
       clearTimeout(syncTimeout);
       syncTimeout = null;
     }
+    if (pendingReject) {
+      pendingReject(new Error('Sync cancelled — page unloaded'));
+      pendingReject = null;
+      pendingPromise = null;
+    }
     if (loadAbortController && !loadAbortController.signal.aborted) {
       loadAbortController.abort();
     }
@@ -178,6 +184,11 @@ export function cleanupEventListeners(): void {
   if (syncTimeout) {
     clearTimeout(syncTimeout);
     syncTimeout = null;
+  }
+  if (pendingReject) {
+    pendingReject(new Error('Sync cancelled — HMR reload'));
+    pendingReject = null;
+    pendingPromise = null;
   }
   if (beforeUnloadHandler) {
     window.removeEventListener('beforeunload', beforeUnloadHandler);
@@ -212,12 +223,19 @@ const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>)
   if (pendingPromise) return pendingPromise;
 
   // Create a new deferred promise
-  pendingPromise = new Promise<void>((resolve) => {
+  pendingPromise = new Promise<void>((resolve, reject) => {
     pendingResolve = resolve;
+    pendingReject = reject;
   });
 
   // Clear any existing timer and start a new one
-  if (syncTimeout) clearTimeout(syncTimeout);
+  if (syncTimeout) {
+    clearTimeout(syncTimeout);
+    if (pendingReject) {
+      pendingReject(new Error('Sync cancelled — new request superseded'));
+      pendingReject = null;
+    }
+  }
   syncTimeout = setTimeout(async () => {
     syncTimeout = null;
     const resolve = pendingResolve;
@@ -241,6 +259,7 @@ const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>)
       isExecuting = false;
       followUpScheduled = false;
       if (resolve) resolve();
+      pendingReject = null;
       pendingPromise = null;
     }
   }, SYNC_DELAY_MS);
