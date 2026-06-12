@@ -48,21 +48,28 @@ export function useFlagSubmission() {
         body: JSON.stringify({ labId, flagKey, flagValue }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        let errorMessage = 'Ошибка отправки флага';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch {
+          // non-JSON error body — use default message
+        }
         setLastResult({
           correct: false,
           points: 0,
           alreadyFound: false,
-          message: data.error || data.message || 'Ошибка отправки флага',
+          message: errorMessage,
         });
         return null;
       }
 
+      const data = await response.json();
       setLastResult(data);
       return data;
-    } catch {
+    } catch (err) {
+      console.error('[useFlagSubmission] submitFlag error:', err);
       const result: FlagSubmissionResult = {
         correct: false,
         points: 0,

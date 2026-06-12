@@ -61,7 +61,8 @@ export default function SignInPage() {
           setDemoMode(data.demoMode ?? false);
         }
       })
-      .catch(() => {
+      .catch((err) => {
+        logger.error('[SIGNIN] Providers fetch error:', err);
         if (!abortRef.current) {
           setAvailableProviders([]);
           setDemoMode(true);
@@ -113,7 +114,8 @@ export default function SignInPage() {
         toast.error(errorData.error || t('loginError'));
         setLoadingProvider(null);
       }
-    } catch {
+    } catch (err) {
+      logger.error('[SIGNIN] handleEmailAuth error:', err);
       toast.error(t('errorOccurred'));
       setLoadingProvider(null);
     }
@@ -123,7 +125,8 @@ export default function SignInPage() {
     setLoadingProvider(provider);
     try {
       await signIn(provider, { callbackUrl });
-    } catch {
+    } catch (err) {
+      logger.error('[SIGNIN] handleOAuth error:', err);
       toast.error(t('authError', { provider }));
       setLoadingProvider(null);
     }
