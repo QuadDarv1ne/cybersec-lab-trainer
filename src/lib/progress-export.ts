@@ -92,6 +92,8 @@ export function exportProgress(state: {
   document.body.appendChild(a);
   try {
     a.click();
+  } catch (err) {
+    logger.error('Failed to trigger progress export download:', err);
   } finally {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);

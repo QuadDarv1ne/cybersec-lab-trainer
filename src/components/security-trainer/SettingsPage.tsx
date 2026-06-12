@@ -27,7 +27,7 @@ import {
   Info,
 } from 'lucide-react';
 
-export interface StudyGoals {
+interface StudyGoals {
   dailyMinutes: number;
   weeklyDays: number;
   notificationsEnabled: boolean;
