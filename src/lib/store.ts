@@ -240,7 +240,7 @@ const ensureSync = async (get: () => AppStore, set: (partial: Partial<AppStore>)
     } finally {
       isExecuting = false;
       followUpScheduled = false;
-      resolve?.();
+      if (resolve) resolve();
       pendingPromise = null;
     }
   }, SYNC_DELAY_MS);
@@ -284,7 +284,7 @@ const parseApiResponse = async <T = unknown>(response: Response, action: string)
     const error = await response.json().catch(() => ({ error: 'Unknown error' }));
     throw new Error(error.error || `Failed to ${action}`);
   }
-  return response.json().catch(() => { throw new Error(`Invalid server response while trying to ${action}`); });
+  return response.json().catch((err) => { throw new Error(`Invalid server response while trying to ${action}`, { cause: err }); });
 };
 
 // API client functions

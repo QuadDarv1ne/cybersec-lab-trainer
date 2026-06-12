@@ -90,7 +90,7 @@ export default function SignInPage() {
     try {
       const csrfRes = await fetch('/api/auth/csrf');
       if (!csrfRes.ok) throw new Error(`CSRF endpoint returned ${csrfRes.status}`);
-      const { csrfToken } = await csrfRes.json().catch(() => { throw new Error('Invalid JSON from CSRF endpoint'); });
+      const { csrfToken } = await csrfRes.json().catch((err) => { throw new Error('Invalid JSON from CSRF endpoint', { cause: err }); });
 
       const res = await fetch('/api/auth/callback/credentials', {
         method: 'POST',
@@ -138,7 +138,7 @@ export default function SignInPage() {
     try {
       const csrfRes = await fetch('/api/auth/csrf');
       if (!csrfRes.ok) throw new Error(`CSRF endpoint returned ${csrfRes.status}`);
-      const { csrfToken } = await csrfRes.json().catch(() => { throw new Error('Invalid JSON from CSRF endpoint'); });
+      const { csrfToken } = await csrfRes.json().catch((err) => { throw new Error('Invalid JSON from CSRF endpoint', { cause: err }); });
 
       const res = await fetch('/api/auth/callback/credentials', {
         method: 'POST',
