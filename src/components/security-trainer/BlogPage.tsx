@@ -7,8 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from '@/lib/intlStub';
-import { blogArticles, blogCategories, searchArticles } from '@/lib/data/blog-data';
-import type { BlogArticle } from '@/lib/data/blog-data';
+import { blogArticles, blogCategories, searchArticles, type BlogArticle } from '@/lib/data/blog-data';
 import {
   ChevronLeft,
   Search,

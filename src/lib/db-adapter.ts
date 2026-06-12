@@ -570,7 +570,7 @@ export function getDbAdapter(): DbAdapter {
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error(`[DB] Failed to initialize Prisma adapter: ${message}. Run 'prisma generate' to generate the Prisma client.`);
-      throw new Error(`Prisma client not found. Run 'prisma generate' first. Original error: ${message}`);
+      throw new Error(`Prisma client not found. Run 'prisma generate' first. Original error: ${message}`, { cause: err });
     }
   }
 

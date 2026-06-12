@@ -485,7 +485,7 @@ export async function POST(request: Request) {
           }
         } catch (error) {
           logger.error('Batch-sync transaction failed, all changes rolled back:', error);
-          throw new Error('Batch sync failed — transaction rolled back for data consistency');
+          throw new Error('Batch sync failed — transaction rolled back for data consistency', { cause: error });
         }
 
         result = { saved: { modules: savedModules, quizzes: savedQuizzes }, message: "Batch sync completed atomically" };

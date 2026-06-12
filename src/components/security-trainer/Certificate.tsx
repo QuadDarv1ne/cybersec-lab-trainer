@@ -2,10 +2,9 @@
 
 import { useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
-import { modules, quizCategories } from '@/lib/security-data';
+import { modules, quizCategories, achievements } from '@/lib/security-data';
 import { calculateLevel } from '@/lib/xp-system';
 import { getStreakInfo } from '@/lib/study-sessions';
-import { achievements } from '@/lib/security-data';
 import { getAchievementStatus } from '@/lib/achievement-utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

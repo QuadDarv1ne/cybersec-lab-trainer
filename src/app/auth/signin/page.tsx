@@ -89,6 +89,7 @@ export default function SignInPage() {
     setLoadingProvider('credentials');
     try {
       const csrfRes = await fetch('/api/auth/csrf');
+      if (!csrfRes.ok) throw new Error(`CSRF endpoint returned ${csrfRes.status}`);
       const { csrfToken } = await csrfRes.json().catch(() => { throw new Error('Invalid JSON from CSRF endpoint'); });
 
       const res = await fetch('/api/auth/callback/credentials', {
@@ -136,6 +137,7 @@ export default function SignInPage() {
     setLoadingProvider('demo');
     try {
       const csrfRes = await fetch('/api/auth/csrf');
+      if (!csrfRes.ok) throw new Error(`CSRF endpoint returned ${csrfRes.status}`);
       const { csrfToken } = await csrfRes.json().catch(() => { throw new Error('Invalid JSON from CSRF endpoint'); });
 
       const res = await fetch('/api/auth/callback/credentials', {

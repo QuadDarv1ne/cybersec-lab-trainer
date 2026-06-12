@@ -219,6 +219,7 @@ export default function TeacherDashboard() {
     setViewSubmissionsFor(assignmentId);
     try {
       const res = await fetch(`/api/teacher?action=assignment-submissions&assignmentId=${assignmentId}`);
+      if (!res.ok) { toast.error('Failed to load submissions'); setSubmissionsLoading(false); return; }
       const data = await res.json();
       if (data.submissions) setSubmissions(data.submissions);
       if (data.assignment) setSubmissionsAssignment(data.assignment);
