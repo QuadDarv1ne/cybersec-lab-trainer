@@ -105,6 +105,58 @@ const HINT_MAP: Record<string, Hint[]> = {
       { level: 2, text: 'The application uses PHP unserialize() on data from cookies without validation.', xpReduction: 0.25 },
       { level: 3, text: 'Modify the serialized session cookie to include a malicious object that executes system commands.', xpReduction: 0.50 },
     ],
+
+    // Secure Coding Lab code-review challenges (sc-1 through sc-10)
+    'sc-1': [
+      { level: 1, text: 'This endpoint accepts user input and inserts it directly into a database query. What could go wrong?', xpReduction: 0.10 },
+      { level: 2, text: 'Look at how req.params.id is used — it is concatenated directly into the SQL string without any escaping.', xpReduction: 0.25 },
+      { level: 3, text: 'Use parameterized queries (prepared statements) with placeholders instead of string concatenation to prevent SQL injection.', xpReduction: 0.50 },
+    ],
+    'sc-2': [
+      { level: 1, text: 'The code saves user data — look at how the password field is handled before storage.', xpReduction: 0.10 },
+      { level: 2, text: 'The password is saved as-is. Base64 is an encoding, not encryption — it is trivially reversible.', xpReduction: 0.25 },
+      { level: 3, text: 'Hash passwords using bcrypt with a unique salt before storing in the database. Never store plaintext passwords.', xpReduction: 0.50 },
+    ],
+    'sc-3': [
+      { level: 1, text: 'This function displays user-supplied text in the DOM. How is the text inserted?', xpReduction: 0.10 },
+      { level: 2, text: 'innerHTML interprets HTML tags. If the query string contains &lt;script&gt; tags, the code will execute.', xpReduction: 0.25 },
+      { level: 3, text: 'Use textContent instead of innerHTML — it inserts text as plain text, encoding special characters automatically.', xpReduction: 0.50 },
+    ],
+    'sc-4': [
+      { level: 1, text: 'This endpoint performs a destructive action. Who is allowed to call it?', xpReduction: 0.10 },
+      { level: 2, text: 'There are no authentication or authorization checks — anyone can send a request and delete any user record.', xpReduction: 0.25 },
+      { level: 3, text: 'Add authentication middleware that verifies the caller\'s identity and checks that they have permission to perform the action.', xpReduction: 0.50 },
+    ],
+    'sc-5': [
+      { level: 1, text: 'What information does the error response expose to the client?', xpReduction: 0.10 },
+      { level: 2, text: 'The full stack trace reveals file paths, library versions, and the application\'s internal directory structure.', xpReduction: 0.25 },
+      { level: 3, text: 'In production, return a generic error message to the client and log the detailed error server-side only.', xpReduction: 0.50 },
+    ],
+    'sc-6': [
+      { level: 1, text: 'The endpoint serves files based on a user-supplied filename. What could go wrong?', xpReduction: 0.10 },
+      { level: 2, text: 'A filename like ../../etc/passwd could navigate outside the uploads directory and read system files.', xpReduction: 0.25 },
+      { level: 3, text: 'Validate the filename (reject ../ and absolute paths), use path.resolve, and verify the resolved path stays within the allowed directory.', xpReduction: 0.50 },
+    ],
+    'sc-7': [
+      { level: 1, text: 'The code processes user-supplied data to dynamically create objects. How is it doing this?', xpReduction: 0.10 },
+      { level: 2, text: 'eval() executes arbitrary JavaScript code. If profile.type contains malicious code, it runs with full server privileges.', xpReduction: 0.25 },
+      { level: 3, text: 'Use schema validation libraries (Zod, Joi) to validate and parse user input. Never use eval() with user-supplied data.', xpReduction: 0.50 },
+    ],
+    'sc-8': [
+      { level: 1, text: 'This endpoint reads a balance, then writes it. What happens with two concurrent requests?', xpReduction: 0.10 },
+      { level: 2, text: 'Between the read and the write, another request could read the same old balance — leading to a double-spend.', xpReduction: 0.25 },
+      { level: 3, text: 'Use database transactions with row-level locking (e.g., SELECT FOR UPDATE) to make the read-check-write atomic.', xpReduction: 0.50 },
+    ],
+    'sc-9': [
+      { level: 1, text: 'The endpoint redirects the user to a URL from the query string. Where could that URL point?', xpReduction: 0.10 },
+      { level: 2, text: 'An attacker can craft a link that looks like your domain but redirects to a phishing site — an Open Redirect attack.', xpReduction: 0.25 },
+      { level: 3, text: 'Only redirect to relative/internal URLs, or maintain a whitelist of allowed external domains for redirects.', xpReduction: 0.50 },
+    ],
+    'sc-10': [
+      { level: 1, text: 'The endpoint accepts file uploads. How does it validate what files are uploaded?', xpReduction: 0.10 },
+      { level: 2, text: 'An attacker could upload a .php or .js file and execute it directly on the server — there is no validation at all.', xpReduction: 0.25 },
+      { level: 3, text: 'Validate MIME type, file extension, and size. Generate unique filenames. Store uploads outside the web-root directory.', xpReduction: 0.50 },
+    ],
 };
 
 /**

@@ -5,6 +5,7 @@
 
 import { useState, useCallback } from 'react';
 import { getCsrfCookieName, getCsrfHeaderName } from '@/lib/csrf-constants';
+import { logger } from '@/lib/logger';
 
 interface FlagSubmissionResult {
   correct: boolean;
@@ -69,7 +70,7 @@ export function useFlagSubmission() {
       setLastResult(data);
       return data;
     } catch (err) {
-      console.error('[useFlagSubmission] submitFlag error:', err);
+      logger.error('[useFlagSubmission] submitFlag error:', err);
       const result: FlagSubmissionResult = {
         correct: false,
         points: 0,

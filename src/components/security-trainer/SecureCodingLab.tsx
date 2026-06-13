@@ -4,12 +4,14 @@ import { useState, useEffect, useMemo } from 'react';
 import InlineNotes from './InlineNotes';
 import { useAppStore } from '@/lib/store';
 import { secureCodingChallenges } from '@/lib/security-data';
+import { getHints, getHintLevelLabel, type HintLevel } from '@/lib/hint-system';
 import CodeBlock from './CodeBlock';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from '@/lib/intlStub';
+import { logger } from '@/lib/logger';
 import {
   ChevronLeft,
   Code,
@@ -17,6 +19,9 @@ import {
   XCircle,
   ArrowRight,
   ArrowLeft,
+  Lightbulb,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 export default function SecureCodingLab() {
@@ -29,8 +34,12 @@ export default function SecureCodingLab() {
   const [activeChallenge, setActiveChallenge] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
+  const [revealedHints, setRevealedHints] = useState<Set<HintLevel>>(new Set());
+  const [showHints, setShowHints] = useState(false);
 
   const challenge = secureCodingChallenges[activeChallenge];
+
+  const hints = useMemo(() => getHints(challenge.id), [challenge.id]);
 
   const answeredSet = useMemo(() => new Set(secureCodingChallengeScores.answered), [secureCodingChallengeScores.answered]);
   const isAnswered = answeredSet.has(activeChallenge);
@@ -47,6 +56,12 @@ export default function SecureCodingLab() {
       setShowResult(false);
     }
   }, [secureCodingChallengeScores.answered, secureCodingChallengeScores.selectedOptions, activeChallenge, isAnswered]);
+
+  // Reset hints when switching challenges
+  useEffect(() => {
+    setRevealedHints(new Set());
+    setShowHints(false);
+  }, [activeChallenge]);
 
   // Complete module when all challenges are answered with >= 70% correct
   useEffect(() => {
@@ -68,6 +83,12 @@ export default function SecureCodingLab() {
   const handleSelectOption = (index: number) => {
     if (isAnswered) return;
     setSelectedOption(index);
+  };
+
+  const revealHint = (level: HintLevel) => {
+    setRevealedHints((prev) => new Set([...prev, level]));
+    setShowHints(true);
+    logger.info(`Hint level ${level} revealed for challenge:`, challenge.id);
   };
 
   const navigateToChallenge = (index: number) => {
@@ -176,6 +197,73 @@ export default function SecureCodingLab() {
 
             {/* Vulnerable code */}
             <CodeBlock code={challenge.code} language="javascript" title="vulnerable.js" />
+
+            {/* Hints section */}
+            {!isAnswered && (
+              <div className="mt-4">
+                <button
+                  onClick={() => setShowHints((v) => !v)}
+                  className="flex items-center gap-1.5 text-xs font-medium text-amber-600 hover:text-amber-700 transition-colors"
+                >
+                  <Lightbulb size={14} />
+                  {showHints ? 'Hide hints' : 'Show hints'}
+                  {revealedHints.size > 0 && (
+                    <span className="text-[10px] text-amber-500">
+                      ({revealedHints.size}/{hints.length} revealed)
+                    </span>
+                  )}
+                  {showHints ? <EyeOff size={12} /> : <Eye size={12} />}
+                </button>
+                {showHints && (
+                  <div className="mt-2 space-y-1.5">
+                    {hints.map((hint) => {
+                      const isRevealed = revealedHints.has(hint.level);
+                      return (
+                        <div
+                          key={hint.level}
+                          className={`rounded-lg border transition-colors ${
+                            isRevealed
+                              ? 'border-amber-200 bg-amber-50'
+                              : 'border-slate-200 bg-slate-50'
+                          }`}
+                        >
+                          {!isRevealed ? (
+                            <button
+                              onClick={() => revealHint(hint.level)}
+                              className="w-full text-left p-2.5 flex items-center justify-between gap-2 text-xs hover:bg-amber-50/50 rounded-lg transition-colors"
+                            >
+                              <span className="font-medium text-slate-700">
+                                {getHintLevelLabel(hint.level)}
+                              </span>
+                              <span className="text-[10px] text-amber-600 font-medium whitespace-nowrap">
+                                -{Math.round(hint.xpReduction * 100)}% XP
+                              </span>
+                            </button>
+                          ) : (
+                            <div className="p-2.5">
+                              <div className="flex items-center justify-between gap-2 mb-1">
+                                <span className="text-[10px] font-semibold text-amber-700">
+                                  {getHintLevelLabel(hint.level)}
+                                </span>
+                                <span className="text-[10px] text-amber-600 font-medium whitespace-nowrap">
+                                  -{Math.round(hint.xpReduction * 100)}% XP
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-600 leading-relaxed">{hint.text}</p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {revealedHints.size > 0 && (
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        Using hints reduces the challenge XP. Highest penalty applies.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="mt-4">
               <h3 className="text-sm font-semibold mb-3">What needs to be fixed?</h3>

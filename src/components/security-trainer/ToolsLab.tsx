@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
+import { logger } from '@/lib/logger';
 import {
   caesarEncrypt,
   caesarDecrypt,
@@ -56,7 +57,8 @@ function CopyButton({ text }: { text: string }) {
       setCopied(true);
       setFailed(false);
       timerRef.current = setTimeout(() => setCopied(false), 1500);
-    } catch {
+    } catch (err) {
+      logger.warn('Clipboard write failed:', err);
       setFailed(true);
       timerRef.current = setTimeout(() => setFailed(false), 2000);
     }

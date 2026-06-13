@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from '@/lib/intlStub';
+import { logger } from '@/lib/logger';
 import { authChallenges } from '@/lib/security-data';
 import {
   ChevronLeft,
@@ -92,7 +93,8 @@ export default function AuthSecurityLab() {
         if (!cancelled) {
           setSimulatedHash(hashHex);
         }
-      } catch {
+      } catch (err) {
+        logger.warn('Crypto digest failed — Web Crypto may be unavailable:', err);
         if (!cancelled) {
           setSimulatedHash('(crypto unavailable)');
         }
