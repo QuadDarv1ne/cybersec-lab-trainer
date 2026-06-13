@@ -198,8 +198,8 @@ export default function Sidebar() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{session.user.name}</p>
-                    <p className="text-xs text-slate-400 truncate">{session.user.email}</p>
+                    <p className="text-sm font-medium truncate">{session.user.name || 'User'}</p>
+                    <p className="text-xs text-slate-400 truncate">{session.user.email || ''}</p>
                     {userRole && (
                       <span className={`inline-block text-[10px] px-1.5 py-0.5 rounded mt-0.5 font-medium ${ROLE_BADGE_COLORS[userRole as Role] || 'bg-slate-700 text-slate-300'}`}>
                         {ROLE_LABELS[userRole as Role] || userRole}

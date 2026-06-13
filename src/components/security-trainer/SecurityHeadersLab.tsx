@@ -47,7 +47,7 @@ export default function SecurityHeadersLab() {
     const newAnswered = new Set(headersChallengeScores.answered);
     setAnsweredChallenges(newAnswered);
     answeredChallengesRef.current = newAnswered;
-    if (headersChallengeScores.selectedOptions[activeChallenge] !== undefined) {
+    if (headersChallengeScores.selectedOptions?.[activeChallenge] !== undefined) {
       setSelectedOption(headersChallengeScores.selectedOptions[activeChallenge]);
       setShowResult(answeredChallengesRef.current.has(activeChallenge));
     } else {

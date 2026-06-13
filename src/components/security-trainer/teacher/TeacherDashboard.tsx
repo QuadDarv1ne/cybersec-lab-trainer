@@ -128,7 +128,7 @@ export default function TeacherDashboard() {
         if (!res.ok) return;
         const data = await res.json();
         if (data.students) setAddStudentResults(data.students);
-      } catch { /* ignore — search typing is debounced, failures are expected */ }
+      } catch { logger.debug('Student search debounce aborted or failed (expected)'); }
     }, 300);
     return () => clearTimeout(timer);
   }, [addStudentSearch]);

@@ -8,9 +8,16 @@ import { getCurrentLocale } from '@/lib/intlStub';
  * Reacts to locale changes via the localechange custom event.
  */
 export function LocaleLang() {
-  const [locale, setLocale] = useState(() => getCurrentLocale());
+  const [mounted, setMounted] = useState(false);
+  const [locale, setLocale] = useState('ru');
 
   useEffect(() => {
+    setLocale(getCurrentLocale());
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     document.documentElement.lang = locale;
 
     const handleStorage = () => {
@@ -25,7 +32,7 @@ export function LocaleLang() {
       window.removeEventListener('storage', handleStorage);
       window.removeEventListener('localechange', handleStorage);
     };
-  }, [locale]);
+  }, [locale, mounted]);
 
   return null;
 }
