@@ -93,6 +93,9 @@ vi.mock('@/lib/intlStub', () => ({
     };
     return map[key] ?? key;
   },
+  formatDate: (date: Date | string | number, options?: Intl.DateTimeFormatOptions) => {
+    return new Date(date).toLocaleString('ru-RU', options);
+  },
 }));
 
 vi.mock('@/lib/achievement-utils', () => ({
@@ -135,6 +138,9 @@ vi.mock('framer-motion', () => {
     animate: (_value: { get: () => number }, _to: number, _options?: { duration?: number; ease?: unknown }) => ({
       stop: vi.fn(),
     }),
+    useScroll: () => ({ scrollX: { get: () => 0 }, scrollY: { get: () => 0 }, scrollYProgress: { get: () => 0 } }),
+    useMotionValueEvent: vi.fn(),
+    useInView: () => [null, false],
   };
 });
 
