@@ -269,7 +269,7 @@ export default function AuthSecurityLab() {
                 <button
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                  aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                   type="button"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -341,7 +341,7 @@ export default function AuthSecurityLab() {
                     value={crackLength}
                     onChange={(e) => setCrackLength(Number(e.target.value))}
                     className="w-full accent-emerald-600"
-                    aria-label="Длина пароля"
+                    aria-label={t('passwordLength')}
                   />
                   <div className="flex justify-between text-[10px] text-slate-400">
                     <span>4</span>
@@ -370,7 +370,7 @@ export default function AuthSecurityLab() {
                     value={crackComplexity}
                     onChange={(e) => setCrackComplexity(Number(e.target.value))}
                     className="w-full accent-emerald-600"
-                    aria-label="Сложность пароля"
+                    aria-label={t('passwordStrength')}
                   />
                   <div className="flex justify-between text-[10px] text-slate-400">
                     <span>Строчные</span>

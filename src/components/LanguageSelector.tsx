@@ -11,9 +11,10 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
-import { LOCALES, getCurrentLocale, setLocale, type Locale } from "@/lib/intlStub";
+import { useTranslations, LOCALES, getCurrentLocale, setLocale, type Locale } from "@/lib/intlStub";
 
 export function LanguageSelector() {
+  const t = useTranslations('common');
   const [locale, setLocaleState] = useState<Locale>(() => getCurrentLocale());
   const [mounted, setMounted] = useState(false);
 
@@ -33,7 +34,7 @@ export function LanguageSelector() {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Language">
+      <Button variant="ghost" size="icon" className="h-9 w-9" aria-label={t('languageLabel')}>
         <Globe className="h-4 w-4" />
       </Button>
     );
@@ -48,14 +49,14 @@ export function LanguageSelector() {
           variant="ghost"
           size="icon"
           className="h-9 w-9"
-          aria-label={`Language: ${current.native}`}
+          aria-label={`${t('languageLabel')}: ${current.native}`}
         >
           <Globe className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuLabel className="text-xs text-muted-foreground">
-          Язык интерфейса
+          {t('languageLabel')}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {(Object.entries(LOCALES) as [Locale, (typeof LOCALES)[Locale]][]).map(

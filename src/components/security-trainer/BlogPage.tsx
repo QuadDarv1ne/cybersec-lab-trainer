@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useTranslations } from '@/lib/intlStub';
+import { useTranslations, formatDate } from '@/lib/intlStub';
 import { blogArticles, blogCategories, searchArticles, type BlogArticle } from '@/lib/data/blog-data';
 import {
   ChevronLeft,
@@ -33,6 +33,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number; className?: 
 // ============================================================
 function ArticleCard({ article, onClick }: { article: BlogArticle; onClick: () => void }) {
   const IconComponent = ICON_MAP[article.coverIcon] ?? FileText;
+  const t = useTranslations('blog');
 
   return (
     <motion.div
@@ -65,11 +66,11 @@ function ArticleCard({ article, onClick }: { article: BlogArticle; onClick: () =
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-3">
             <div className="flex items-center gap-1">
               <Calendar size={12} />
-              {new Date(article.date).toLocaleDateString('ru-RU')}
+              {formatDate(article.date)}
             </div>
             <div className="flex items-center gap-1">
               <Clock size={12} />
-              {article.readTime} мин
+              {article.readTime} {t('minRead')}
             </div>
           </div>
 

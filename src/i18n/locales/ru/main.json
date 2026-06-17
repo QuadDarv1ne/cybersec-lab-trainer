@@ -61,6 +61,8 @@
     "incorrectAnswer": "Неверно",
     "checkAnswerBtn": "Проверить ответ",
     "taskLabel": "Задание {current} из {total}",
+    "hidePassword": "Скрыть пароль",
+    "showPassword": "Показать пароль",
     "noChallenges": "Нет доступных заданий",
     "timeLabels": {
       "instant": "Мгновенно",
@@ -143,6 +145,12 @@
     "nextAchievement": "Следующее достижение",
     "modulesTitle": "Модули обучения",
     "modulesLessons": "{count} уроков",
+    "completed": "Пройдено",
+    "quickStart": {
+      "title": "Быстрый старт",
+      "description": "Начните с изучения OWASP Top 10 или пройдите первый квиз, чтобы оценить свои знания",
+      "takeQuiz": "Пройти квиз"
+    },
     "quizCard": {
       "title": "Квиз по безопасности",
       "description": "Проверьте свои знания по всем темам информационной безопасности",
@@ -227,7 +235,13 @@
     "info": "Информация",
     "level": "Уровень {level}",
     "progress": "Прогресс",
-    "scrollToTop": "Прокрутить наверх"
+    "scrollToTop": "Прокрутить наверх",
+    "themeLabel": "Тема оформления",
+    "themeLight": "Светлая",
+    "themeDark": "Тёмная",
+    "themeSystem": "Системная",
+    "themeActive": "активна",
+    "languageLabel": "Язык интерфейса"
   },
   "sidebar": {
     "dashboard": "Панель управления",
@@ -258,7 +272,14 @@
     "leaderboard": "Лидерборд",
     "profile": "Профиль",
     "teacher": "Преподаватель",
-    "admin": "Администрирование"
+    "admin": "Администрирование",
+    "menu": "Меню",
+    "sectionMain": "Основное",
+    "sectionLabs": "Лаборатории",
+    "sectionSimulations": "Симуляции",
+    "sectionLearning": "Обучение",
+    "sectionOther": "Прочее",
+    "shortcuts": "1-9: навигация · Ctrl+K: поиск"
   },
   "owasp": {
     "title": "OWASP Top 10",
@@ -400,7 +421,10 @@
     "markComplete": "Отметить как завершённое",
     "moduleComplete": "Модуль завершён!",
     "noChallenges": "Нет доступных заданий",
-    "backToDashboard": "Вернуться на главную"
+    "backToDashboard": "Вернуться на главную",
+    "challengeLabel": "Челлендж {title}",
+    "goToChallenge": "Перейти к челленджу {number}",
+    "defense": "Защита"
   },
   "secureCoding": {
     "title": "Безопасное кодирование",
@@ -790,7 +814,8 @@
     "noResults": "Ничего не найдено. Попробуйте другой запрос.",
     "loadMore": "Загрузить ещё",
     "backToBlog": "Назад к блогу",
-    "relatedArticles": "Читайте также"
+    "relatedArticles": "Читайте также",
+    "minRead": "мин"
   },
   "leaderboard": {
     "title": "Лидерборд",
@@ -806,5 +831,48 @@
   "crypto": {
     "encodingError": "Ошибка кодирования",
     "decodingError": "Ошибка декодирования"
+  },
+  "profile": {
+    "signInRequired": "Войдите в систему, чтобы увидеть профиль",
+    "defaultName": "Пользователь",
+    "level": "Уровень",
+    "totalXP": "Всего XP",
+    "progressToNext": "Прогресс до {level} уровня",
+    "xpRemaining": "{xp} XP осталось",
+    "xpItems": {
+      "modules": "Модули",
+      "quizzes": "Квизы",
+      "challenges": "Челленджи",
+      "bonuses": "Бонусы",
+      "studySessions": "Занятия"
+    },
+    "xpDistribution": "Распределение XP",
+    "total": "Всего",
+    "studyStats": {
+      "title": "Статистика занятий",
+      "today": "Сегодня",
+      "total": "Всего",
+      "sessions": "Сессий",
+      "xpFromSessions": "XP от занятий"
+    },
+    "completedModules": {
+      "title": "Пройденные модули",
+      "empty": "Пока не пройдено ни одного модуля",
+      "bonusHint": "Чтобы получить бонус «100% завершение» (+500 XP), пройдите все модули"
+    },
+    "quizResults": {
+      "title": "Результаты квизов",
+      "empty": "Пока не пройдено ни одного квиза"
+    },
+    "formatDuration": {
+      "hr": "ч",
+      "min": "м"
+    },
+    "stats": {
+      "modulesCompleted": "Модулей пройдено",
+      "quizzesCompleted": "Квизов пройдено",
+      "totalStudyTime": "Всего занятий",
+      "studySessions": "Сессий изучения"
+    }
   }
 }

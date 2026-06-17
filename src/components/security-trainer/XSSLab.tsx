@@ -158,11 +158,11 @@ export default function XSSLab() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')} aria-label={t('backToDashboard')}>
+        <Button variant="ghost" size="icon" onClick={() => setCurrentPage('dashboard')} className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
           <ChevronLeft size={20} />
         </Button>
-        <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-          <FileText size={20} className="text-emerald-600" />
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
+          <FileText size={20} className="text-white" />
         </div>
         <div>
           <h1 className="text-xl font-bold">{t('title')}</h1>
@@ -171,26 +171,31 @@ export default function XSSLab() {
       </div>
 
       {/* Progress */}
-      <Card className="border-none shadow-sm">
-        <CardContent className="p-4">
+      <Card className="border-slate-200 dark:border-slate-700/50 overflow-hidden">
+        <CardContent className="p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-orange-500" />
               {t('progress', { completed: xssCompletedLevels.length, total: xssTypes.length })}
             </span>
-            {allCompleted && <Badge className="bg-emerald-600 text-white">{t('moduleComplete')}</Badge>}
+            {allCompleted && (
+              <Badge className="bg-emerald-600 text-white rounded-full">
+                <CheckCircle2 size={12} className="mr-1" /> {t('moduleComplete')}
+              </Badge>
+            )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             {xssTypes.map((x) => (
               <button
                 key={x.id}
                 onClick={() => setActiveTab(x.id)}
                 aria-label={t('goToType', { type: t(`types.${x.id}` as const) })}
-                className={`flex-1 h-2 rounded-full transition-all ${
+                className={`flex-1 h-2 rounded-full transition-all duration-300 ${
                   xssCompletedLevels.includes(x.id)
-                    ? 'bg-emerald-500'
+                    ? 'bg-emerald-500 shadow-sm shadow-emerald-500/30'
                     : x.id === activeTab
-                      ? 'bg-emerald-300'
-                      : 'bg-slate-200'
+                      ? 'bg-orange-400'
+                      : 'bg-slate-200 dark:bg-slate-700'
                 }`}
               />
             ))}

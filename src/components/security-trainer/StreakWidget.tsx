@@ -2,10 +2,10 @@
 
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Trophy, Clock } from 'lucide-react';
+import { Flame, Trophy, Clock, Sparkles, Zap, Target } from 'lucide-react';
 import { getStreakInfo } from '@/lib/study-sessions';
 import { useAppStore } from '@/lib/store';
-import { useTranslations } from '@/lib/intlStub';
+import { useTranslations, formatDate } from '@/lib/intlStub';
 
 function formatDayCount(n: number, t: ReturnType<typeof useTranslations>): string {
   const lastDigit = n % 10;
@@ -16,6 +16,46 @@ function formatDayCount(n: number, t: ReturnType<typeof useTranslations>): strin
   return t('dayCount_many', { count: n });
 }
 
+function getMotivationalMessage(streak: number): { text: string; icon: React.ReactNode } {
+  if (streak >= 30) return { text: 'Legendary streak! 🔥', icon: <Zap size={14} className="text-purple-500" /> };
+  if (streak >= 14) return { text: 'Unstoppable! Keep going!', icon: <Zap size={14} className="text-orange-500" /> };
+  if (streak >= 7) return { text: 'One week strong! Great habit!', icon: <Sparkles size={14} className="text-amber-500" /> };
+  if (streak >= 3) return { text: 'Keep the momentum going!', icon: <Target size={14} className="text-emerald-500" /> };
+  if (streak >= 1) return { text: 'Nice start! Come back tomorrow!', icon: <Sparkles size={14} className="text-emerald-400" /> };
+  return { text: 'Start your streak today!', icon: <Flame size={14} className="text-slate-400" /> };
+}
+
+function WeekMiniView({ studySessions }: { studySessions: { date: string }[] }) {
+  const today = new Date();
+  const dayStrs = studySessions.map((s) => s.date);
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - (6 - i));
+    return d.toISOString().split('T')[0];
+  });
+
+  return (
+    <div className="flex justify-center gap-1 mt-3">
+      {days.map((date) => {
+        const active = dayStrs.includes(date);
+        return (
+          <div
+            key={date}
+            className={`w-6 h-6 rounded-sm text-[9px] font-mono flex items-center justify-center transition-colors ${
+              active
+                ? 'bg-emerald-400 dark:bg-emerald-500 text-white font-bold'
+                : 'bg-slate-100 dark:bg-slate-700/50 text-slate-400'
+            }`}
+            title={date}
+          >
+            {formatDate(date, { weekday: 'narrow' })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function StreakWidget() {
   const studySessions = useAppStore((state) => state.studySessions);
   const streak = useMemo(() => getStreakInfo(studySessions), [studySessions]);
@@ -23,6 +63,7 @@ export function StreakWidget() {
 
   const streakFireColor = streak.currentStreak >= 7 ? 'text-orange-500' : streak.currentStreak >= 3 ? 'text-amber-500' : 'text-emerald-500';
   const streakBgColor = streak.currentStreak >= 7 ? 'from-orange-500/10 to-amber-500/10' : streak.currentStreak >= 3 ? 'from-amber-500/10 to-yellow-500/10' : 'from-emerald-500/10 to-teal-500/10';
+  const message = getMotivationalMessage(streak.currentStreak);
 
   return (
     <motion.div
@@ -85,15 +126,16 @@ export function StreakWidget() {
         </div>
       </div>
 
-      {!streak.isActive && streak.currentStreak === 0 && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-3 text-xs text-center text-slate-500 dark:text-slate-400"
-        >
-          {t('startPrompt')}
-        </motion.p>
-      )}
+      <WeekMiniView studySessions={studySessions} />
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="mt-2 flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400"
+      >
+        {message.icon}
+        <span>{message.text}</span>
+      </motion.div>
     </motion.div>
   );
 }

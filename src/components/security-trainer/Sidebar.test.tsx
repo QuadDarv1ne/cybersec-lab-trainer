@@ -87,6 +87,52 @@ vi.mock('@/hooks/use-session', () => ({
   }),
 }));
 
+vi.mock('@/components/ui/tooltip', () => ({
+  TooltipProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  TooltipContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+vi.mock('@radix-ui/react-dropdown-menu', () => ({
+  Root: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Trigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Portal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Content: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Item: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+vi.mock('@radix-ui/react-tooltip', () => ({
+  Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Root: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Trigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Portal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Content: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Arrow: () => null,
+}));
+
+vi.mock('@/components/ui/dropdown-menu', () => {
+  const Comp = ({ children }: React.HTMLAttributes<HTMLElement>) => <>{children}</>;
+  const Group = ({ children }: React.HTMLAttributes<HTMLElement>) => <>{children}</>;
+  return {
+    DropdownMenu: Comp,
+    DropdownMenuTrigger: Comp,
+    DropdownMenuContent: Comp,
+    DropdownMenuItem: Comp,
+    DropdownMenuLabel: Comp,
+    DropdownMenuSeparator: () => null,
+    DropdownMenuGroup: Group,
+    DropdownMenuPortal: Comp,
+    DropdownMenuCheckboxItem: Comp,
+    DropdownMenuRadioGroup: Group,
+    DropdownMenuRadioItem: Comp,
+    DropdownMenuSubTrigger: Comp,
+    DropdownMenuSubContent: Comp,
+    DropdownMenuSub: Comp,
+    DropdownMenuShortcut: Comp,
+  };
+});
+
 vi.mock('framer-motion', () => {
   const El = ({ children, ...props }: React.HTMLAttributes<HTMLElement> & { initial?: unknown; animate?: unknown; exit?: unknown; transition?: unknown }) => <div {...props}>{children}</div>;
   return {
@@ -116,14 +162,14 @@ describe('Sidebar', () => {
     render(<Sidebar />);
     expect(screen.getByText('Панель')).toBeDefined();
     expect(screen.getByText('OWASP Top 10')).toBeDefined();
-    expect(screen.getByText('SQL-инъекции')).toBeDefined();
-    expect(screen.getByText('XSS-атаки')).toBeDefined();
-    expect(screen.getByText('CSRF-атаки')).toBeDefined();
+    expect(screen.getByText('SQL Injection')).toBeDefined();
+    expect(screen.getByText('XSS')).toBeDefined();
+    expect(screen.getByText('CSRF')).toBeDefined();
     expect(screen.getByText('Аутентификация')).toBeDefined();
     expect(screen.getByText('Безопасное кодирование')).toBeDefined();
     expect(screen.getByText('Инструменты')).toBeDefined();
-    expect(screen.getByText('Заголовки безопасности')).toBeDefined();
-    expect(screen.getByText('Тестирование')).toBeDefined();
+    expect(screen.getByText('Security Headers')).toBeDefined();
+    expect(screen.getByText('Квизы')).toBeDefined();
     expect(screen.getByText('Достижения')).toBeDefined();
   });
 

@@ -105,7 +105,7 @@ export default function CSRFLab() {
           <button
             key={c.id}
             onClick={() => { setActiveChallenge(i); setShowDefense(false); markCsrfChallengeViewed(i); }}
-            aria-label={`Челлендж ${c.title}`}
+            aria-label={t('challengeLabel', { title: c.title })}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               i === activeChallenge && !showDefense
                 ? 'bg-emerald-600 text-white'
@@ -251,7 +251,7 @@ export default function CSRFLab() {
             <button
               key={challenge.id}
               onClick={() => { setActiveChallenge(i); setShowDefense(false); }}
-              aria-label={`Перейти к челленджу ${i + 1}`}
+              aria-label={t('goToChallenge', { number: i + 1 })}
               className={`w-2.5 h-2.5 rounded-full transition-all ${
                 i === activeChallenge && !showDefense ? 'bg-emerald-500'
                   : csrfViewedChallenges.includes(i) ? 'bg-emerald-300'
@@ -260,7 +260,7 @@ export default function CSRFLab() {
             />
           ))}
           {showDefense && (
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-600" aria-label="Защита" />
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-600" aria-label={t('defense')} />
           )}
         </div>
 

@@ -12,22 +12,24 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
+import { useTranslations } from "@/lib/intlStub";
 
 const THEMES = [
-  { value: "light", label: "Светлая", icon: Sun, shortcut: "⌘L" },
-  { value: "dark", label: "Тёмная", icon: Moon, shortcut: "⌘D" },
-  { value: "system", label: "Системная", icon: Monitor, shortcut: "⌘S" },
+  { value: "light", key: "themeLight" as const, icon: Sun, shortcut: "⌘L" },
+  { value: "dark", key: "themeDark" as const, icon: Moon, shortcut: "⌘D" },
+  { value: "system", key: "themeSystem" as const, icon: Monitor, shortcut: "⌘S" },
 ] as const;
 
 export function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const t = useTranslations('common');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Theme">
+      <Button variant="ghost" size="icon" className="h-9 w-9" aria-label={t('themeLabel')}>
         <Sun className="h-4 w-4" />
       </Button>
     );
@@ -43,27 +45,27 @@ export function ThemeToggle() {
           variant="ghost"
           size="icon"
           className="h-9 w-9"
-          aria-label={`Theme: ${currentTheme.label}`}
+          aria-label={`${t('themeLabel')}: ${t(currentTheme.key)}`}
         >
           <Icon className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuLabel className="text-xs text-muted-foreground">
-          Тема оформления
+          {t('themeLabel')}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {THEMES.map(({ value, label, icon: ThemeIcon, shortcut }) => (
+        {THEMES.map(({ value, key, icon: ThemeIcon, shortcut }) => (
           <DropdownMenuItem
             key={value}
             onClick={() => setTheme(value)}
             className="cursor-pointer"
           >
             <ThemeIcon className="mr-2 h-4 w-4" />
-            <span className="flex-1">{label}</span>
+            <span className="flex-1">{t(key)}</span>
             {theme === value && (
               <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                {resolvedTheme === value ? "активна" : `→ ${resolvedTheme}`}
+                {resolvedTheme === value ? t('themeActive') : `→ ${t(resolvedTheme === 'light' ? 'themeLight' : 'themeDark')}`}
               </span>
             )}
             <span className="ml-2 text-xs text-muted-foreground">{shortcut}</span>

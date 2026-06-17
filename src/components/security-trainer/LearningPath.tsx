@@ -61,7 +61,7 @@ export function LearningPath() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.05 }}
     >
-      <Card className="border-sky-200 bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 dark:from-slate-800 dark:via-slate-800 dark:to-slate-900 dark:border-slate-700">
+      <Card className="border-sky-200 dark:border-sky-800/30 bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 dark:from-sky-950/20 dark:via-blue-950/10 dark:to-indigo-950/20">
         <CardContent className="p-5">
           {/* Header */}
           <div className="flex items-center gap-2 mb-3">
@@ -93,30 +93,32 @@ export function LearningPath() {
               const isNext = nextModule === mod.id;
 
               return (
-                <button
-                  key={mod.id}
-                  onClick={() => handleNavigate(mod.id, mod.accessible)}
-                  disabled={!mod.accessible}
-                  className={`
-                    w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all
-                    ${mod.isCompleted
-                      ? 'bg-emerald-100/60 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                      : mod.accessible
-                        ? 'bg-white/70 hover:bg-white text-slate-700 dark:bg-slate-700/50 dark:hover:bg-slate-700 dark:text-slate-200 shadow-sm cursor-pointer'
-                        : 'bg-slate-100/50 text-slate-400 dark:bg-slate-800/50 dark:text-slate-600 cursor-not-allowed'
-                    }
-                    ${isNext ? 'ring-2 ring-sky-300 dark:ring-sky-700' : ''}
-                  `}
+                  <button
+                    key={mod.id}
+                    onClick={() => handleNavigate(mod.id, mod.accessible)}
+                    disabled={!mod.accessible}
+                    className={`
+                      w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200
+                      ${mod.isCompleted
+                        ? 'bg-emerald-100/60 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                        : mod.accessible
+                          ? 'bg-white/70 hover:bg-white text-slate-700 dark:bg-slate-700/50 dark:hover:bg-slate-700 dark:text-slate-200 shadow-sm cursor-pointer hover:shadow-md active:scale-[0.98]'
+                          : 'bg-slate-100/50 text-slate-400 dark:bg-slate-800/50 dark:text-slate-600 cursor-not-allowed'
+                      }
+                      ${isNext ? 'ring-2 ring-sky-400 dark:ring-sky-600' : ''}
+                    `}
                 >
                   {/* Step indicator */}
                   <div className={`
-                    w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0
+                    w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0
+                    transition-all duration-300
                     ${mod.isCompleted
-                      ? 'bg-emerald-500 text-white'
+                      ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/30'
                       : mod.accessible
-                        ? 'bg-sky-200 text-sky-700 dark:bg-sky-800 dark:text-sky-300'
+                        ? 'bg-sky-200 text-sky-700 dark:bg-sky-800 dark:text-sky-300 shadow-sm'
                         : 'bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-500'
                     }
+                    ${isNext ? 'scale-110 ring-2 ring-sky-300 dark:ring-sky-600' : ''}
                   `}>
                     {mod.isCompleted ? (
                       <CheckCircle2 size={14} />

@@ -61,6 +61,8 @@
     "incorrectAnswer": "不正确",
     "checkAnswerBtn": "检查答案",
     "taskLabel": "任务{current}/{total}",
+    "hidePassword": "隐藏密码",
+    "showPassword": "显示密码",
     "noChallenges": "没有可用的挑战",
     "timeLabels": {
       "instant": "瞬间",
@@ -143,6 +145,12 @@
     "nextAchievement": "下一个成就",
     "modulesTitle": "学习模块",
     "modulesLessons": "{count}节课",
+    "completed": "已完成",
+    "quickStart": {
+      "title": "快速入门",
+      "description": "从OWASP Top 10开始，或参加第一次测验来评估你的知识",
+      "takeQuiz": "参加测验"
+    },
     "quizCard": {
       "title": "安全测验",
       "description": "测试你对所有信息安全主题的知识",
@@ -227,7 +235,13 @@
     "info": "信息",
     "level": "等级 {level}",
     "progress": "进度",
-    "scrollToTop": "滚动到顶部"
+    "scrollToTop": "滚动到顶部",
+    "themeLabel": "主题",
+    "themeLight": "浅色",
+    "themeDark": "深色",
+    "themeSystem": "系统",
+    "themeActive": "活跃",
+    "languageLabel": "界面语言"
   },
   "sidebar": {
     "dashboard": "控制面板",
@@ -258,7 +272,14 @@
     "leaderboard": "排行榜",
     "profile": "个人资料",
     "teacher": "教师",
-    "admin": "管理"
+    "admin": "管理",
+    "menu": "菜单",
+    "sectionMain": "主要",
+    "sectionLabs": "实验室",
+    "sectionSimulations": "模拟",
+    "sectionLearning": "学习",
+    "sectionOther": "其他",
+    "shortcuts": "1-9: 导航 · Ctrl+K: 搜索"
   },
   "owasp": {
     "title": "OWASP Top 10",
@@ -400,7 +421,10 @@
     "markComplete": "标记为完成",
     "moduleComplete": "模块完成！",
     "noChallenges": "没有可用的挑战",
-    "backToDashboard": "返回控制面板"
+    "backToDashboard": "返回控制面板",
+    "challengeLabel": "挑战 {title}",
+    "goToChallenge": "转到挑战 {number}",
+    "defense": "防御"
   },
   "secureCoding": {
     "title": "安全编码",
@@ -790,7 +814,8 @@
     "noResults": "未找到任何内容。尝试其他查询。",
     "loadMore": "加载更多",
     "backToBlog": "返回博客",
-    "relatedArticles": "推荐阅读"
+    "relatedArticles": "推荐阅读",
+    "minRead": "分钟"
   },
   "leaderboard": {
     "title": "排行榜",
@@ -806,5 +831,48 @@
   "crypto": {
     "encodingError": "编码错误",
     "decodingError": "解码错误"
+  },
+  "profile": {
+    "signInRequired": "登录以查看个人资料",
+    "defaultName": "用户",
+    "level": "等级",
+    "totalXP": "总经验值",
+    "progressToNext": "升级进度 {level}",
+    "xpRemaining": "还需 {xp} 经验值",
+    "xpItems": {
+      "modules": "模块",
+      "quizzes": "测验",
+      "challenges": "挑战",
+      "bonuses": "奖励",
+      "studySessions": "学习"
+    },
+    "xpDistribution": "经验值分布",
+    "total": "总计",
+    "studyStats": {
+      "title": "学习统计",
+      "today": "今天",
+      "total": "总计",
+      "sessions": "会话",
+      "xpFromSessions": "学习经验值"
+    },
+    "completedModules": {
+      "title": "已完成的模块",
+      "empty": "尚未完成任何模块",
+      "bonusHint": "完成所有模块可获得「100% 完成」奖励（+500 经验值）"
+    },
+    "quizResults": {
+      "title": "测验结果",
+      "empty": "尚未完成任何测验"
+    },
+    "formatDuration": {
+      "hr": "小时",
+      "min": "分钟"
+    },
+    "stats": {
+      "modulesCompleted": "模块完成",
+      "quizzesCompleted": "测验完成",
+      "totalStudyTime": "学习总时长",
+      "studySessions": "学习会话"
+    }
   }
 }

@@ -8,7 +8,7 @@ import { generateUUID } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
@@ -21,7 +21,6 @@ import {
   Lock,
   Shield,
   ShieldAlert,
-  Clock,
   CheckCircle2,
   XCircle,
   RotateCcw,
@@ -256,11 +255,11 @@ export default function QuizSystem() {
       </div>
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => { resetQuiz(); setCurrentPage('dashboard'); }} aria-label={t('backToCategories')}>
+        <Button variant="ghost" size="icon" onClick={() => { resetQuiz(); setCurrentPage('dashboard'); }} className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200" aria-label={t('backToCategories')}>
           <ChevronLeft size={20} />
         </Button>
-        <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-          <HelpCircle size={20} className="text-amber-600" />
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
+          <HelpCircle size={20} className="text-white" />
         </div>
         <div>
           <h1 className="text-xl font-bold">{t('title')}</h1>
@@ -271,9 +270,12 @@ export default function QuizSystem() {
       {/* Select Category */}
       {quizState === 'select' && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-          <Card className="border-none shadow-sm">
+          <Card className="border-slate-200 dark:border-slate-700/50">
             <CardContent className="p-5">
-              <h2 className="font-semibold mb-1">{t('selectCategory')}</h2>
+              <h2 className="font-semibold mb-1 flex items-center gap-2">
+                <HelpCircle size={16} className="text-amber-500" />
+                {t('selectCategory')}
+              </h2>
               <p className="text-xs text-slate-500">{t('selectCategoryDesc')}</p>
             </CardContent>
           </Card>
@@ -285,7 +287,7 @@ export default function QuizSystem() {
               return (
                 <Card
                   key={cat.id}
-                  className="cursor-pointer border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all"
+                  className="cursor-pointer border-slate-200 dark:border-slate-700/50 card-hover"
                   onClick={() => startQuiz(cat.id)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -299,8 +301,8 @@ export default function QuizSystem() {
                 >
                   <CardContent className="p-5">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                        {iconMap[cat.icon]}
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-md">
+                        {iconMap[cat.icon] || <HelpCircle size={20} />}
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-sm">{cat.name}</h3>
@@ -308,11 +310,11 @@ export default function QuizSystem() {
                       </div>
                       <div className="text-right">
                         {score !== undefined ? (
-                          <Badge className={score >= 80 ? 'bg-emerald-600' : score >= 60 ? 'bg-amber-500' : 'bg-red-500'}>
+                          <Badge className={score >= 80 ? 'bg-emerald-600 rounded-full' : score >= 60 ? 'bg-amber-500 rounded-full' : 'bg-red-500 rounded-full'}>
                             {score}%
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-[10px]">
+                          <Badge variant="outline" className="text-[10px] rounded-full">
                             {t('new')}
                           </Badge>
                         )}
@@ -334,18 +336,46 @@ export default function QuizSystem() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <Badge variant="secondary" className="text-xs">{activeCategoryName}</Badge>
-                <div className="flex items-center gap-3 text-xs text-slate-500">
-                  <span>{t('questionProgress', { current: currentQuestion + 1, total: categoryQuestions.length })}</span>
-                  <div className={`flex items-center gap-1 ${timeLeft <= 10 ? 'text-red-500' : 'text-slate-500'}`}>
-                    <Clock size={14} />
-                    <span className="font-mono font-bold">{timeLeft}{t('seconds')}</span>
+                  <div className="flex items-center gap-3 text-xs text-slate-500">
+                    <span>{t('questionProgress', { current: currentQuestion + 1, total: categoryQuestions.length })}</span>
+                    <div className="relative w-8 h-8 flex items-center justify-center">
+                      <svg className="absolute inset-0 -rotate-90 w-full h-full" viewBox="0 0 32 32">
+                        <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-slate-200 dark:text-slate-600" />
+                        <motion.circle
+                          cx="16" cy="16" r="13"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          className={timeLeft <= 10 ? 'text-red-500' : 'text-emerald-500'}
+                          strokeDasharray={2 * Math.PI * 13}
+                          initial={false}
+                          animate={{ strokeDashoffset: (timeLeft / 30) * 2 * Math.PI * 13 }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      </svg>
+                      <span className={`font-mono text-xs font-bold z-10 ${timeLeft <= 10 ? 'text-red-500' : 'text-slate-600 dark:text-slate-300'}`}>
+                        {timeLeft}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <Progress
-                value={categoryQuestions.length > 0 ? ((currentQuestion + 1) / categoryQuestions.length) * 100 : 0}
-                className="h-2"
-              />
+                <div className="flex gap-1 mt-2">
+                  {categoryQuestions.map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-1.5 flex-1 rounded-full transition-colors ${
+                        i === currentQuestion
+                          ? 'bg-emerald-500'
+                          : answers[i] === true
+                            ? 'bg-emerald-300'
+                            : answers[i] === false
+                              ? 'bg-red-300'
+                              : 'bg-slate-200 dark:bg-slate-700'
+                      }`}
+                    />
+                  ))}
+                </div>
             </CardContent>
           </Card>
 
@@ -399,15 +429,35 @@ export default function QuizSystem() {
                 })}
               </RadioGroup>
 
-              {/* Action buttons */}
               {!showAnswer && (
-                <Button
-                  className="mt-4 w-full bg-emerald-600 hover:bg-emerald-700"
-                  onClick={handleAnswer}
-                  disabled={!selectedAnswer}
-                >
-                  {t('submitAnswer')}
-                </Button>
+                <div className="mt-4 flex gap-2">
+                  <Button
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                    onClick={handleAnswer}
+                    disabled={!selectedAnswer}
+                  >
+                    <CheckCircle2 size={16} className="mr-1.5" />
+                    {t('submitAnswer')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const question = categoryQuestions[currentQuestion];
+                      if (!question) { nextQuestion(); return; }
+                      const qIdx = currentQuestion;
+                      setShowAnswer(true);
+                      setTimerActive(false);
+                      setAnswers((prev) => {
+                        if (prev[qIdx] !== null) return prev;
+                        const newAnswers = [...prev];
+                        newAnswers[qIdx] = false;
+                        return newAnswers;
+                      });
+                    }}
+                  >
+                    {t('skip') || 'Skip'}
+                  </Button>
+                </div>
               )}
 
               {showAnswer && (
@@ -441,54 +491,113 @@ export default function QuizSystem() {
       {/* Results */}
       {quizState === 'result' && (
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4">
-          <Card className="border-none shadow-sm bg-gradient-to-br from-slate-900 to-emerald-900 text-white">
-            <CardContent className="p-8 text-center">
-              <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
+          <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 text-white">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full -translate-y-1/3 translate-x-1/3 blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-500/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
+            <CardContent className="p-8 md:p-10 text-center relative z-10">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 ${
+                  finalScore >= 80 ? 'bg-gradient-to-br from-amber-400 to-yellow-500 shadow-lg shadow-amber-500/30' :
+                  finalScore >= 60 ? 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/30' :
+                  'bg-gradient-to-br from-red-400 to-rose-500 shadow-lg shadow-red-500/30'
+                }`}
+              >
                 {finalScore >= 80 ? (
-                  <Trophy size={32} className="text-amber-400" />
+                  <Trophy size={36} className="text-white" />
                 ) : finalScore >= 60 ? (
-                  <Target size={32} className="text-emerald-400" />
+                  <Target size={36} className="text-white" />
                 ) : (
-                  <HelpCircle size={32} className="text-red-400" />
+                  <HelpCircle size={36} className="text-white" />
                 )}
-              </div>
-              <h2 className="text-2xl font-bold mb-1">
+              </motion.div>
+
+              <motion.h2
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-2xl font-bold mb-1"
+              >
                 {finalScore >= 80 ? t('excellent') : finalScore >= 60 ? t('goodResult') : t('needsImprovement')}
-              </h2>
-              <p className="text-slate-300 text-sm mb-4">{activeCategoryName}</p>
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-slate-300 text-sm mb-2"
+              >
+                {activeCategoryName}
+              </motion.p>
 
-              <div className="text-5xl font-bold font-mono mb-2">{finalScore}%</div>
-              <p className="text-slate-400 text-sm mb-6">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4, type: 'spring' }}
+                className="text-6xl font-bold font-mono mb-2 bg-gradient-to-b from-white to-emerald-200 bg-clip-text text-transparent"
+              >
+                {finalScore}%
+              </motion.div>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="text-slate-400 text-sm mb-6"
+              >
                 {t('correctAnswers', { correct: displayCorrectCount, total: categoryQuestions.length })}
-              </p>
+              </motion.p>
 
-              <div className="flex gap-2 justify-center flex-wrap">
-                <Button variant="outline" className="text-white border-white/20 hover:bg-white/10" onClick={resetQuiz}>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="flex gap-2 justify-center flex-wrap"
+              >
+                <Button variant="outline" className="text-white border-white/20 hover:bg-white/10 hover:text-white" onClick={resetQuiz}>
                   <RotateCcw size={14} className="mr-2" /> {t('backToCategories')}
                 </Button>
-                <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => startQuiz(activeCategory)}>
+                <Button className="bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/30" onClick={() => startQuiz(activeCategory)}>
                   <RotateCcw size={14} className="mr-2" /> {t('retry')}
                 </Button>
                 {categoryQuestions.some((_, i) => !answers[i]) && (
-                  <Button variant="secondary" className="bg-amber-500 hover:bg-amber-600 text-white" onClick={retryWrong}>
+                  <Button variant="secondary" className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/30" onClick={retryWrong}>
                     <AlertCircle size={14} className="mr-2" /> {t('retryWrong')}
                   </Button>
                 )}
-              </div>
+              </motion.div>
             </CardContent>
           </Card>
 
-          {/* Answer breakdown */}
-          <Card className="border-slate-200">
+          {/* Progress ring */}
+          <Card className="border-slate-200 dark:border-slate-700/50">
             <CardContent className="p-5">
-              <h3 className="text-sm font-semibold mb-3">{t('answerBreakdown')}</h3>
-              <div className="space-y-3">
+              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                <Target size={15} className="text-emerald-500" />
+                {t('answerBreakdown')}
+              </h3>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="w-3 h-3 rounded-full bg-emerald-500" />
+                  <span className="text-slate-600 dark:text-slate-400">Верно: {displayCorrectCount}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="w-3 h-3 rounded-full bg-red-500" />
+                  <span className="text-slate-600 dark:text-slate-400">Неверно: {categoryQuestions.length - displayCorrectCount}</span>
+                </div>
+              </div>
+              <div className="space-y-2">
                 {categoryQuestions.map((q, i) => (
-                  <div key={q.id} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                  <motion.div
+                    key={q.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/30">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
                       answers[i] ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
                     }`}>
-                      {answers[i] ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
+                      {answers[i] ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium leading-relaxed">{q.question}</p>
@@ -498,7 +607,7 @@ export default function QuizSystem() {
                         </p>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </CardContent>

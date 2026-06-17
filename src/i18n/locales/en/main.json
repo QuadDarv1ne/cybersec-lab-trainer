@@ -61,6 +61,8 @@
     "incorrectAnswer": "Incorrect",
     "checkAnswerBtn": "Check answer",
     "taskLabel": "Task {current} of {total}",
+    "hidePassword": "Hide password",
+    "showPassword": "Show password",
     "noChallenges": "No challenges available",
     "timeLabels": {
       "instant": "Instant",
@@ -143,6 +145,12 @@
     "nextAchievement": "Next achievement",
     "modulesTitle": "Learning Modules",
     "modulesLessons": "{count} lessons",
+    "completed": "Completed",
+    "quickStart": {
+      "title": "Quick Start",
+      "description": "Start with OWASP Top 10 or take your first quiz to assess your knowledge",
+      "takeQuiz": "Take Quiz"
+    },
     "quizCard": {
       "title": "Security Quiz",
       "description": "Test your knowledge on all information security topics",
@@ -227,7 +235,13 @@
     "info": "Info",
     "level": "Level {level}",
     "progress": "Progress",
-    "scrollToTop": "Scroll to top"
+    "scrollToTop": "Scroll to top",
+    "themeLabel": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "themeActive": "active",
+    "languageLabel": "Interface language"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -258,7 +272,14 @@
     "leaderboard": "Leaderboard",
     "profile": "Profile",
     "teacher": "Teacher",
-    "admin": "Administration"
+    "admin": "Administration",
+    "menu": "Menu",
+    "sectionMain": "Main",
+    "sectionLabs": "Labs",
+    "sectionSimulations": "Simulations",
+    "sectionLearning": "Learning",
+    "sectionOther": "Other",
+    "shortcuts": "1-9: navigate · Ctrl+K: search"
   },
   "owasp": {
     "title": "OWASP Top 10",
@@ -400,7 +421,10 @@
     "markComplete": "Mark as complete",
     "moduleComplete": "Module complete!",
     "noChallenges": "No challenges available",
-    "backToDashboard": "Back to dashboard"
+    "backToDashboard": "Back to dashboard",
+    "challengeLabel": "Challenge {title}",
+    "goToChallenge": "Go to challenge {number}",
+    "defense": "Defense"
   },
   "secureCoding": {
     "title": "Secure Coding",
@@ -790,7 +814,8 @@
     "noResults": "Nothing found. Try a different query.",
     "loadMore": "Load more",
     "backToBlog": "Back to blog",
-    "relatedArticles": "Read also"
+    "relatedArticles": "Read also",
+    "minRead": "min"
   },
   "leaderboard": {
     "title": "Leaderboard",
@@ -806,5 +831,48 @@
   "crypto": {
     "encodingError": "Encoding error",
     "decodingError": "Decoding error"
+  },
+  "profile": {
+    "signInRequired": "Sign in to view profile",
+    "defaultName": "User",
+    "level": "Level",
+    "totalXP": "Total XP",
+    "progressToNext": "Progress to level {level}",
+    "xpRemaining": "{xp} XP remaining",
+    "xpItems": {
+      "modules": "Modules",
+      "quizzes": "Quizzes",
+      "challenges": "Challenges",
+      "bonuses": "Bonuses",
+      "studySessions": "Study"
+    },
+    "xpDistribution": "XP Distribution",
+    "total": "Total",
+    "studyStats": {
+      "title": "Study Statistics",
+      "today": "Today",
+      "total": "Total",
+      "sessions": "Sessions",
+      "xpFromSessions": "XP from sessions"
+    },
+    "completedModules": {
+      "title": "Completed Modules",
+      "empty": "No modules completed yet",
+      "bonusHint": "Complete all modules to earn the '100% Completion' bonus (+500 XP)"
+    },
+    "quizResults": {
+      "title": "Quiz Results",
+      "empty": "No quizzes completed yet"
+    },
+    "formatDuration": {
+      "hr": "h",
+      "min": "m"
+    },
+    "stats": {
+      "modulesCompleted": "Modules completed",
+      "quizzesCompleted": "Quizzes completed",
+      "totalStudyTime": "Total study time",
+      "studySessions": "Study sessions"
+    }
   }
 }
