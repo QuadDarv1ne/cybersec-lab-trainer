@@ -566,53 +566,64 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
 
     if (signal?.aborted) return;
 
-    // Runtime validation: normalize top-level fields
-    const completedModules = Array.isArray(data.completedModules) ? data.completedModules : [];
-    const quizScores = data.quizScores && typeof data.quizScores === 'object' && !Array.isArray(data.quizScores) ? data.quizScores : {};
+    // Merge server data with local state to avoid overwriting unsaved changes.
+    // Pattern: use set((state) => ...) to access current state and merge
+    // (same approach already used for studySessions and quizHistory below).
+    set((state) => {
+      const serverModules: string[] = Array.isArray(data.completedModules) ? data.completedModules : [];
+      const serverScores: Record<string, number> = data.quizScores && typeof data.quizScores === 'object' && !Array.isArray(data.quizScores) ? data.quizScores : {};
+      const serverChallenges = data.challenges && typeof data.challenges === 'object' ? data.challenges : null;
+      const serverItemProgress = data.itemProgress && typeof data.itemProgress === 'object' ? data.itemProgress : null;
 
-    if (completedModules.length > 0 || Object.keys(quizScores).length > 0) {
-      set({
-        completedModules,
-        quizScores,
+      return {
         userId,
         syncStatus: 'synced',
         lastSyncedAt: Date.now(),
-      });
-    } else {
-      set({ userId, syncStatus: 'synced', lastSyncedAt: Date.now() });
-    }
 
-    // Restore challenge progress if available
-    if (data.challenges && typeof data.challenges === 'object') {
-      const challenges = data.challenges;
-      const defaultChallenge = { correct: 0, total: 0, answered: [], selectedOptions: {} };
-      set({
-        owaspChallengeScores: (challenges.owasp && typeof challenges.owasp === 'object') ? challenges.owasp : defaultChallenge,
-        authChallengeScores: (challenges.auth && typeof challenges.auth === 'object') ? challenges.auth : defaultChallenge,
-        headersChallengeScores: (challenges.headers && typeof challenges.headers === 'object') ? challenges.headers : defaultChallenge,
-        secureCodingChallengeScores: (challenges['secure-coding'] && typeof challenges['secure-coding'] === 'object') ? challenges['secure-coding'] : defaultChallenge,
-      });
-    }
+        // Merge completed modules — union of server and local
+        completedModules: [...new Set([...serverModules, ...state.completedModules])],
 
-    // Restore item-level progress if available
-    if (data.itemProgress && typeof data.itemProgress === 'object') {
-      const itemProgress = data.itemProgress;
-      set({
-        studiedOwaspItems: Array.isArray(itemProgress.owasp) ? itemProgress.owasp : [],
-        sqlCompletedLevels: Array.isArray(itemProgress['sql-injection']) ? itemProgress['sql-injection'] : [],
-        xssCompletedLevels: Array.isArray(itemProgress.xss) ? itemProgress.xss : [],
-      });
-    }
+        // Merge quiz scores — server wins for same keys, local-only preserved
+        quizScores: { ...state.quizScores, ...serverScores },
 
-    // Restore CSRF viewed challenges if available
-    if (Array.isArray(data.csrfViewedChallenges)) {
-      set({ csrfViewedChallenges: data.csrfViewedChallenges.map(Number) });
-    }
+        // Merge challenge progress — server data wins for keys it knows about
+        ...(serverChallenges ? {
+          owaspChallengeScores: serverChallenges.owasp && typeof serverChallenges.owasp === 'object'
+            ? { ...state.owaspChallengeScores, ...serverChallenges.owasp }
+            : state.owaspChallengeScores,
+          authChallengeScores: serverChallenges.auth && typeof serverChallenges.auth === 'object'
+            ? { ...state.authChallengeScores, ...serverChallenges.auth }
+            : state.authChallengeScores,
+          headersChallengeScores: serverChallenges.headers && typeof serverChallenges.headers === 'object'
+            ? { ...state.headersChallengeScores, ...serverChallenges.headers }
+            : state.headersChallengeScores,
+          secureCodingChallengeScores: serverChallenges['secure-coding'] && typeof serverChallenges['secure-coding'] === 'object'
+            ? { ...state.secureCodingChallengeScores, ...serverChallenges['secure-coding'] }
+            : state.secureCodingChallengeScores,
+        } : {}),
 
-    // Restore notes if available
-    if (data.notes && typeof data.notes === 'object' && !Array.isArray(data.notes)) {
-      set({ notes: data.notes });
-    }
+        // Merge item-level progress — union of arrays
+        studiedOwaspItems: serverItemProgress && Array.isArray(serverItemProgress.owasp)
+          ? [...new Set([...serverItemProgress.owasp, ...state.studiedOwaspItems])]
+          : state.studiedOwaspItems,
+        sqlCompletedLevels: serverItemProgress && Array.isArray(serverItemProgress['sql-injection'])
+          ? [...new Set([...serverItemProgress['sql-injection'], ...state.sqlCompletedLevels])]
+          : state.sqlCompletedLevels,
+        xssCompletedLevels: serverItemProgress && Array.isArray(serverItemProgress.xss)
+          ? [...new Set([...serverItemProgress.xss, ...state.xssCompletedLevels])]
+          : state.xssCompletedLevels,
+
+        // Merge CSRF viewed challenges — union of arrays
+        csrfViewedChallenges: Array.isArray(data.csrfViewedChallenges)
+          ? [...new Set([...data.csrfViewedChallenges.map(Number), ...state.csrfViewedChallenges])]
+          : state.csrfViewedChallenges,
+
+        // Merge notes — keep existing, then overlay server keys
+        notes: data.notes && typeof data.notes === 'object' && !Array.isArray(data.notes)
+          ? { ...state.notes, ...data.notes }
+          : state.notes,
+      };
+    });
 
     // Restore study sessions if available — merge with local unsaved sessions
     if (Array.isArray(data.studySessions)) {

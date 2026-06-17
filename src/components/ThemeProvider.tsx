@@ -7,9 +7,12 @@ function ThemeWatcher() {
   const { theme, resolvedTheme } = useTheme();
 
   useEffect(() => {
-    // Trigger View Transition API when theme changes
+    // Trigger View Transition API when theme changes.
+    // The View Transition API requires a callback function — without it,
+    // Chrome throws TypeError: parameter 1 is not a function.
+    // We pass a no-op since next-themes handles the actual DOM update.
     if (document.startViewTransition) {
-      document.startViewTransition();
+      document.startViewTransition(() => {});
     }
   }, [theme, resolvedTheme]);
 
