@@ -23,6 +23,13 @@
 - **Batch-sync транзакции** — заменён `Promise.allSettled` на атомарные транзакции через `prisma.$transaction` / MongoDB session transactions. Теперь либо все обновления сохраняются, либо ни одно (rollback при ошибе).
 - **FIFO eviction в rate-limit** — корректное удаление oldest entry по resetTime вместо `entries().next()`
 - **Тесты** — sanitize.ts (13 тестов), store actions (19 тестов), API route edge cases (8 новых), i18n completeness (12 новых)
+- **i18n hardcoded strings** — 30+ строк переведены в search-bar, StreakWidget, CodeBlock, not-found, loading, LandingPage, use-achievement-toasts
+- **zh locale detection** — layout.tsx теперь определяет китайский язык из Accept-Language
+- **ARIA accessibility** — aria-label на кнопки поиска, aria-expanded на мобильное меню, aria-hidden на декоративные элементы
+- **Memory leak fix** — setTimeout в search-bar onBlur теперь очищается при unmount
+- **Hint system XP penalties** — calculateHintPenalty() вычисляет множитель штрафа, recordHintsUsed сохраняет использование подсказок, getXPBreakdown() применяет штраф к XP
+- **Hint key mismatches** — HINT_MAP ключи исправлены для совпадения с реальными ID挑战ов
+- **Sort mutation fix** — teams.sort() в AdvancedCTFSimulation теперь не мутирует state
 
 ---
 
