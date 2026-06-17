@@ -89,5 +89,5 @@ export function useAchievementToasts() {
     }
 
     previousUnlockedRef.current = currentlyUnlocked;
-  }, [completedModules, quizScores, challengeStats, achievements]);
+  }, [completedModules, quizScores, challengeStats]);
 }

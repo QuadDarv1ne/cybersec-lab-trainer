@@ -6,7 +6,9 @@
 
 /** Strip all HTML tags (regex fallback for server-side). */
 function stripTags(input: string): string {
-  return input.replace(/<[^>]*>/g, '');
+  return input
+    .replace(/<[^>]*>/g, '')              // remove properly closed tags
+    .replace(/<[a-zA-Z/!?][^>]*/g, '');  // remove unclosed tags (e.g. <img src=x)
 }
 
 /** Decode HTML entities (hex, decimal, named). */
