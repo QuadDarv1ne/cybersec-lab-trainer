@@ -23,21 +23,6 @@ export const HINT_XP_PENALTY: Record<HintLevel, number> = {
   3: 0.50,
 };
 
-/**
- * Calculate the effective XP for a challenge after hint usage.
- * @param baseXP - Base XP for the challenge
- * @param usedHints - Array of hint levels used
- * @returns Effective XP (rounded down)
- */
-export function calculateHintedXP(baseXP: number, usedHints: HintLevel[]): number {
-  if (usedHints.length === 0) return baseXP;
-
-  // Take the highest penalty (most severe)
-  const maxPenalty = Math.max(...usedHints.map((level) => HINT_XP_PENALTY[level]));
-  const reduction = Math.round(baseXP * maxPenalty);
-  return Math.max(0, baseXP - reduction);
-}
-
 const DEFAULT_HINTS: Hint[] = [
   {
     level: 1,

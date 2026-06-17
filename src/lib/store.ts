@@ -296,14 +296,14 @@ const createApiHeaders = (): Record<string, string> => {
   return headers;
 };
 
-// Parse API response with consistent error handling.
-// Throws on non-2xx status or invalid JSON, with descriptive messages.
 const parseApiResponse = async <T = unknown>(response: Response, action: string): Promise<T> => {
+  const data = await response.json().catch((err) => {
+    throw new Error(`Invalid server response while trying to ${action}`, { cause: err });
+  });
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error(error.error || `Failed to ${action}`);
+    throw new Error(data.error || `Failed to ${action}`);
   }
-  return response.json().catch((err) => { throw new Error(`Invalid server response while trying to ${action}`, { cause: err }); });
+  return data;
 };
 
 // API client functions

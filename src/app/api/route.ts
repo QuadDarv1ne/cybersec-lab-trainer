@@ -34,18 +34,13 @@ function toTime(val: unknown): number {
   return toDate(val).getTime();
 }
 
-async function applyRateLimit(request: Request): Promise<{ response: NextResponse | null; remaining: number; reset: number }> {
-  const ip = getClientIP(request);
-  return rateLimit(ip);
-}
-
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   }
 
-  const rateLimitResult = await applyRateLimit(request);
+  const rateLimitResult = await rateLimit(getClientIP(request));
   if (rateLimitResult.response) {
     return rateLimitResult.response;
   }
@@ -341,7 +336,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  let rateLimitResult: Awaited<ReturnType<typeof applyRateLimit>> | null = null;
+  let rateLimitResult: { response: NextResponse | null; remaining: number; reset: number } | null = null;
 
   try {
     // Reject oversized payloads before parsing to prevent memory exhaustion DoS
@@ -359,7 +354,7 @@ export async function POST(request: Request) {
 
     // glossary-search is public (no auth needed) — apply rate limit
     if (type === 'glossary-search') {
-      rateLimitResult = await applyRateLimit(request);
+      rateLimitResult = await rateLimit(getClientIP(request));
       if (rateLimitResult.response) {
         return rateLimitResult.response;
       }
@@ -397,7 +392,7 @@ export async function POST(request: Request) {
     const userId = session.user.id;
 
     // Apply rate limit BEFORE CSRF validation to protect server resources
-    rateLimitResult = await applyRateLimit(request);
+    rateLimitResult = await rateLimit(getClientIP(request));
     if (rateLimitResult.response) {
       return rateLimitResult.response;
     }

@@ -16,6 +16,32 @@ interface ShortcutOptions {
   onOpenSearch?: () => void;
 }
 
+const navigationShortcuts: Omit<ShortcutConfig, 'action'>[] = [
+  { key: '1', description: 'Dashboard' },
+  { key: '2', description: 'OWASP Top 10' },
+  { key: '3', description: 'SQL Injection' },
+  { key: '4', description: 'XSS' },
+  { key: '5', description: 'CSRF' },
+  { key: '6', description: 'Auth Security' },
+  { key: '7', description: 'Secure Coding' },
+  { key: '8', description: 'Tools Lab' },
+  { key: '9', description: 'Security Headers' },
+  { key: '0', description: 'Quiz' },
+];
+
+const pageOrder: PageType[] = [
+  'dashboard',
+  'owasp',
+  'sql-injection',
+  'xss',
+  'csrf',
+  'auth',
+  'secure-coding',
+  'tools',
+  'security-headers',
+  'quiz',
+];
+
 /**
  * Hook that registers global keyboard shortcuts.
  * Prevents default for matched shortcuts to avoid browser conflicts.
@@ -29,33 +55,6 @@ export function useKeyboardShortcuts(options: ShortcutOptions = {}) {
   const optionsRef = useRef(options);
 
   const shortcuts = useCallback(() => {
-    // Navigation shortcuts - map keys to page IDs
-    const navigationShortcuts: Omit<ShortcutConfig, 'action'>[] = [
-      { key: '1', description: 'Dashboard' },
-      { key: '2', description: 'OWASP Top 10' },
-      { key: '3', description: 'SQL Injection' },
-      { key: '4', description: 'XSS' },
-      { key: '5', description: 'CSRF' },
-      { key: '6', description: 'Auth Security' },
-      { key: '7', description: 'Secure Coding' },
-      { key: '8', description: 'Tools Lab' },
-      { key: '9', description: 'Security Headers' },
-      { key: '0', description: 'Quiz' },
-    ];
-
-    const pageOrder: PageType[] = [
-      'dashboard',
-      'owasp',
-      'sql-injection',
-      'xss',
-      'csrf',
-      'auth',
-      'secure-coding',
-      'tools',
-      'security-headers',
-      'quiz',
-    ];
-
     return [
       // Number keys for navigation
       ...navigationShortcuts.map((shortcut, index) => ({
