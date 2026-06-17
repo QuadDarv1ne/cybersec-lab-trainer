@@ -162,14 +162,14 @@ describe('Sidebar', () => {
     render(<Sidebar />);
     expect(screen.getByText('Панель')).toBeDefined();
     expect(screen.getByText('OWASP Top 10')).toBeDefined();
-    expect(screen.getByText('SQL Injection')).toBeDefined();
-    expect(screen.getByText('XSS')).toBeDefined();
-    expect(screen.getByText('CSRF')).toBeDefined();
+    expect(screen.getByText('SQL-инъекции')).toBeDefined();
+    expect(screen.getByText('XSS-атаки')).toBeDefined();
+    expect(screen.getByText('CSRF-атаки')).toBeDefined();
     expect(screen.getByText('Аутентификация')).toBeDefined();
     expect(screen.getByText('Безопасное кодирование')).toBeDefined();
     expect(screen.getByText('Инструменты')).toBeDefined();
-    expect(screen.getByText('Security Headers')).toBeDefined();
-    expect(screen.getByText('Квизы')).toBeDefined();
+    expect(screen.getByText('Заголовки безопасности')).toBeDefined();
+    expect(screen.getByText('Тестирование')).toBeDefined();
     expect(screen.getByText('Достижения')).toBeDefined();
   });
 
