@@ -96,7 +96,7 @@ export function exportProgress(state: {
     logger.error('Failed to trigger progress export download:', err);
   } finally {
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   return exportData.exportedAt;
@@ -119,6 +119,7 @@ export function importProgress(jsonString: string): {
   csrfViewedChallenges: number[];
   quizHistory: QuizHistoryEntry[];
   totalXP: number;
+  notes: ExportData['data']['notes'];
 } | null {
   try {
     const parsed: ExportData = JSON.parse(jsonString);

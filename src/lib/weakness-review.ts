@@ -92,7 +92,7 @@ function extractWrongChallenges<T extends { id: string }>(
       question: getQuestion(challenge),
       options: optionTexts,
       correctIndex: correctIdx,
-      explanation: (challenge as Record<string, unknown>).explanation as string ?? '',
+      explanation: typeof (challenge as Record<string, unknown>).explanation === 'string' ? (challenge as Record<string, unknown>).explanation as string : '',
       sourceModule,
     });
   }

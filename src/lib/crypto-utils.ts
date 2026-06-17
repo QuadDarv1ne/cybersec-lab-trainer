@@ -108,7 +108,7 @@ export function xorDecrypt(hex: string, key: string): string {
       .filter((h) => h.length > 0)
       .map((h, i) => String.fromCharCode(parseInt(h, 16) ^ key.charCodeAt(i % key.length)))
       .join('');
-} catch {
+  } catch {
     logger.warn('xorDecrypt failed: invalid hex input or key');
     return CRYPTO_ERRORS.decodingError;
   }
