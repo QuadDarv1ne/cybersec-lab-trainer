@@ -460,7 +460,8 @@
     "checkAnswer": "检查答案",
     "back": "返回",
     "next": "下一个",
-    "noChallenges": "没有可用的挑战"
+    "noChallenges": "没有可用的挑战",
+    "hintsPenaltyInfo": "使用提示将减少{percent}%的XP"
   },
   "tools": {
     "title": "安全工具",

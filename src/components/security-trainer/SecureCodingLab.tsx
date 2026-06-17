@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import InlineNotes from './InlineNotes';
 import { useAppStore } from '@/lib/store';
 import { secureCodingChallenges } from '@/lib/security-data';
-import { getHints, getHintLevelLabel, type HintLevel } from '@/lib/hint-system';
+import { getHints, getHintLevelLabel, calculateHintPenalty, type HintLevel } from '@/lib/hint-system';
 import CodeBlock from './CodeBlock';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +31,7 @@ export default function SecureCodingLab() {
   const completedModules = useAppStore((s) => s.completedModules);
   const secureCodingChallengeScores = useAppStore((s) => s.secureCodingChallengeScores);
   const setSecureCodingChallengeScore = useAppStore((s) => s.setSecureCodingChallengeScore);
+  const recordHintsUsed = useAppStore((s) => s.recordHintsUsed);
   const [activeChallenge, setActiveChallenge] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -86,8 +87,10 @@ export default function SecureCodingLab() {
   };
 
   const revealHint = (level: HintLevel) => {
-    setRevealedHints((prev) => new Set([...prev, level]));
+    const newRevealed = new Set([...revealedHints, level]);
+    setRevealedHints(newRevealed);
     setShowHints(true);
+    recordHintsUsed('secure-coding', activeChallenge, [...newRevealed]);
     logger.info(`Hint level ${level} revealed for challenge:`, challenge.id);
   };
 
@@ -257,7 +260,7 @@ export default function SecureCodingLab() {
                     })}
                     {revealedHints.size > 0 && (
                       <p className="text-[10px] text-slate-400 mt-1">
-                        Using hints reduces the challenge XP. Highest penalty applies.
+                        {t('hintsPenaltyInfo', { percent: Math.round((1 - calculateHintPenalty(revealedHints)) * 100) })}
                       </p>
                     )}
                   </div>

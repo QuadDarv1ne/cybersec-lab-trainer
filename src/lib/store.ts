@@ -11,6 +11,7 @@ import { type StudySession, calculateSessionXP, generateSessionId, getTodayTotal
 import { getCsrfCookieName, getCsrfHeaderName } from './csrf-constants';
 import { sanitizeNoteContent } from './sanitize';
 import { PAGE_TYPES } from './constants';
+import { type HintLevel, calculateHintPenalty } from './hint-system';
 
 export type PageType = typeof PAGE_TYPES[number];
 
@@ -30,6 +31,7 @@ interface ChallengeProgress {
   total: number;
   answered: number[];
   selectedOptions: Record<string, number>;
+  hintsUsed?: Record<number, HintLevel[]>;
 }
 
 interface LoadProgressResponse {
@@ -53,10 +55,10 @@ interface AppState {
   studiedOwaspItems: string[];
   sqlCompletedLevels: string[];
   xssCompletedLevels: string[];
-  owaspChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> };
-  authChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> };
-  headersChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> };
-  secureCodingChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number> };
+  owaspChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number>; hintsUsed?: Record<number, HintLevel[]> };
+  authChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number>; hintsUsed?: Record<number, HintLevel[]> };
+  headersChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number>; hintsUsed?: Record<number, HintLevel[]> };
+  secureCodingChallengeScores: { correct: number; total: number; answered: number[]; selectedOptions: Record<string, number>; hintsUsed?: Record<number, HintLevel[]> };
   csrfViewedChallenges: number[];
   totalXP: number;
   notes: NotesMap;
@@ -81,8 +83,9 @@ interface AppActions {
   setOwaspChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => void;
   setAuthChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => void;
   setHeadersChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => void;
-  setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => void;
+  setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>, hintsUsed?: Record<number, HintLevel[]>) => void;
   markCsrfChallengeViewed: (index: number) => void;
+  recordHintsUsed: (challengeType: 'owasp' | 'auth' | 'headers' | 'secure-coding', challengeIndex: number, levels: HintLevel[]) => void;
   setUserId: (userId: string | null) => void;
   importProgressData: (data: {
     completedModules: string[];
@@ -838,8 +841,8 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
     triggerSync(get, set, 'setHeadersChallengeScore');
   },
 
-  setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>) => {
-    set({ secureCodingChallengeScores: { correct, total: answered.length, answered, selectedOptions } });
+  setSecureCodingChallengeScore: (correct: number, answered: number[], selectedOptions: Record<string, number>, hintsUsed?: Record<number, HintLevel[]>) => {
+    set({ secureCodingChallengeScores: { correct, total: answered.length, answered, selectedOptions, hintsUsed } });
     triggerSync(get, set, 'setSecureCodingChallengeScore');
   },
 
@@ -848,6 +851,17 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       csrfViewedChallenges: addUnique(state.csrfViewedChallenges, index),
     }));
     triggerSync(get, set, 'markCsrfChallengeViewed');
+  },
+
+  recordHintsUsed: (challengeType, challengeIndex, levels) => {
+    set((state) => {
+      const key = `${challengeType}ChallengeScores` as 'owaspChallengeScores' | 'authChallengeScores' | 'headersChallengeScores' | 'secureCodingChallengeScores';
+      const current = state[key];
+      const existingHints = current.hintsUsed ?? {};
+      const merged = { ...existingHints, [challengeIndex]: levels };
+      return { [key]: { ...current, hintsUsed: merged } };
+    });
+    triggerSync(get, set, `recordHintsUsed:${challengeType}`);
   },
 
   setUserId: (userId: string | null) => set({ userId }),
@@ -874,9 +888,27 @@ const createStore = (set: (state: Partial<AppStore> | ((state: AppStore) => Part
       state.authChallengeScores.correct +
       state.headersChallengeScores.correct +
       state.secureCodingChallengeScores.correct;
+
+    // Calculate hint penalty multiplier — find the worst penalty across all challenge types
+    let worstPenalty = 1;
+    const challengeScores = [
+      state.owaspChallengeScores,
+      state.authChallengeScores,
+      state.headersChallengeScores,
+      state.secureCodingChallengeScores,
+    ];
+    for (const cs of challengeScores) {
+      if (cs.hintsUsed) {
+        for (const levels of Object.values(cs.hintsUsed)) {
+          const penalty = calculateHintPenalty(new Set(levels));
+          if (penalty < worstPenalty) worstPenalty = penalty;
+        }
+      }
+    }
+
     const allTimeTotalMs = getTotalStudyTimeMs(state.studySessions);
     const studySessionXP = calculateSessionXP(allTimeTotalMs);
-    return calculateXPBreakdown(state.completedModules, state.quizScores, totalChallengeCorrect, studySessionXP, modules.length);
+    return calculateXPBreakdown(state.completedModules, state.quizScores, totalChallengeCorrect, studySessionXP, modules.length, worstPenalty);
   },
 
   addNote: (itemId: string, moduleId: string, moduleName: string, content: string) => {

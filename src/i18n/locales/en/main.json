@@ -460,7 +460,8 @@
     "checkAnswer": "Check answer",
     "back": "Back",
     "next": "Next",
-    "noChallenges": "No challenges available"
+    "noChallenges": "No challenges available",
+    "hintsPenaltyInfo": "Using hints reduces XP by {percent}%"
   },
   "tools": {
     "title": "Security Tools",

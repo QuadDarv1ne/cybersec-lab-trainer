@@ -303,7 +303,7 @@ export default function AdvancedCTFSimulation() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {teams
+                  {[...teams]
                     .sort((a, b) => b.score - a.score)
                     .map((team, idx) => (
                       <div

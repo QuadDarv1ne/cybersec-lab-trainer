@@ -71,7 +71,8 @@ export function calculateXPBreakdown(
   quizScores: Record<string, number>,
   challengeCorrect: number,
   studySessionXP = 0,
-  totalModules = 9
+  totalModules = 9,
+  hintPenaltyMultiplier = 1
 ): XPBreakdown {
   const moduleXP = completedModules.length * XP_REWARDS.completeModule;
   // First module bonus: awarded once the first module is completed (persists in breakdown)
@@ -83,7 +84,7 @@ export function calculateXPBreakdown(
     quizXP += XP_REWARDS.quizPass + Math.round(score * XP_REWARDS.quizBonusPerPercent);
   }
 
-  const challengeXP = challengeCorrect * XP_REWARDS.challengeCorrect;
+  const challengeXP = Math.round(challengeCorrect * XP_REWARDS.challengeCorrect * hintPenaltyMultiplier);
 
   const total = moduleXP + quizXP + challengeXP + bonusesXP + allModulesBonusXP + studySessionXP;
 
