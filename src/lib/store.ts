@@ -433,13 +433,13 @@ const syncWithDatabase = async (state: AppState, set: (partial: Partial<AppStore
   try {
     // Calculate actual scores for challenge-based modules
     const completedModulesList = state.completedModules.map((moduleId: string) => {
-      const score = moduleId === 'owasp' && state.owaspChallengeScores.total > 0
+      const score = moduleId === 'owasp' && state.owaspChallengeScores?.total > 0
         ? Math.round((state.owaspChallengeScores.correct / state.owaspChallengeScores.total) * 100)
-        : moduleId === 'auth' && state.authChallengeScores.total > 0
+        : moduleId === 'auth' && state.authChallengeScores?.total > 0
           ? Math.round((state.authChallengeScores.correct / state.authChallengeScores.total) * 100)
-          : moduleId === 'security-headers' && state.headersChallengeScores.total > 0
+          : moduleId === 'security-headers' && state.headersChallengeScores?.total > 0
             ? Math.round((state.headersChallengeScores.correct / state.headersChallengeScores.total) * 100)
-            : moduleId === 'secure-coding' && state.secureCodingChallengeScores.total > 0
+            : moduleId === 'secure-coding' && state.secureCodingChallengeScores?.total > 0
               ? Math.round((state.secureCodingChallengeScores.correct / state.secureCodingChallengeScores.total) * 100)
               : undefined;
       return { moduleId, completed: true, ...(score !== undefined && { score }) };
@@ -615,7 +615,7 @@ const loadFromDatabase = async (set: (state: Partial<AppStore> | ((state: AppSto
 
         // Merge CSRF viewed challenges — union of arrays
         csrfViewedChallenges: Array.isArray(data.csrfViewedChallenges)
-          ? [...new Set([...data.csrfViewedChallenges.map(Number), ...state.csrfViewedChallenges])]
+          ? [...new Set([...data.csrfViewedChallenges.map((v: unknown) => { const n = Number(v); return Number.isNaN(n) ? 0 : n; }), ...state.csrfViewedChallenges])]
           : state.csrfViewedChallenges,
 
         // Merge notes — keep existing, then overlay server keys

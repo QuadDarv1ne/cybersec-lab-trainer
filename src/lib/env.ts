@@ -61,8 +61,7 @@ export function validateEnv(): Env {
   if (!result.success) {
     const errors = result.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`);
     throw new Error(
-      `Invalid environment variables:\n${errors.join('\n')}\n\n` +
-      'Check your .env or .env.local file and ensure all required variables are set.'
+      `Invalid environment variables:\n${errors.join('\n')}\n\nCheck your .env or .env.local file and ensure all required variables are set.`
     );
   }
 

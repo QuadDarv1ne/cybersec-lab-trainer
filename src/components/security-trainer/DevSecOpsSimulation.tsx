@@ -267,14 +267,8 @@ export default function DevSecOpsSimulation() {
       if (vuln) {
         addToLog(`🔍 Обнаружена уязвимость: ${vuln.name} (${vuln.severity})`);
         
-        // Уменьшаем security score в зависимости от severity
-        let scoreReduction = 0;
-        switch (vuln.severity) {
-          case 'critical': scoreReduction = 15; break;
-          case 'high': scoreReduction = 10; break;
-          case 'medium': scoreReduction = 5; break;
-          case 'low': scoreReduction = 2; break;
-        }
+        const SEVERITY_PENALTY: Record<string, number> = { critical: 15, high: 10, medium: 5, low: 2 };
+        const scoreReduction = SEVERITY_PENALTY[vuln.severity] ?? 0;
         setSecurityScore(prev => Math.max(0, prev - scoreReduction));
       }
     }
@@ -288,14 +282,8 @@ export default function DevSecOpsSimulation() {
       if (vuln) {
         addToLog(`✅ Исправлена уязвимость: ${vuln.name}`);
         
-        // Восстанавливаем security score
-        let scoreRecovery = 0;
-        switch (vuln.severity) {
-          case 'critical': scoreRecovery = 15; break;
-          case 'high': scoreRecovery = 10; break;
-          case 'medium': scoreRecovery = 5; break;
-          case 'low': scoreRecovery = 2; break;
-        }
+        const SEVERITY_PENALTY: Record<string, number> = { critical: 15, high: 10, medium: 5, low: 2 };
+        const scoreRecovery = SEVERITY_PENALTY[vuln.severity] ?? 0;
         setSecurityScore(prev => Math.min(100, prev + scoreRecovery));
       }
     }

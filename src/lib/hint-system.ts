@@ -161,5 +161,6 @@ export function getHintLevelLabel(level: HintLevel): string {
     case 1: return 'General hint';
     case 2: return 'Specific hint';
     case 3: return 'Solution hint';
+    default: return 'Hint';
   }
 }
