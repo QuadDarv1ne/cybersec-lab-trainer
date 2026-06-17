@@ -21,6 +21,7 @@ const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 let cleanupInterval: ReturnType<typeof setInterval> | null = null;
 let fallbackUsed = false;
 let signalListenersRegistered = false;
+let signalHandler: (() => void) | null = null;
 
 function ensureCleanupInterval(): void {
   if (cleanupInterval !== null) return;
@@ -34,12 +35,25 @@ function ensureCleanupInterval(): void {
   }, CLEANUP_INTERVAL_MS);
 
   if (typeof process !== 'undefined' && typeof process.on === 'function' && !signalListenersRegistered) {
-    // Remove any stale listeners from previous HMR module instances first
-    process.removeListener('SIGTERM', stopCleanupInterval);
-    process.removeListener('SIGINT', stopCleanupInterval);
-    process.on('SIGTERM', stopCleanupInterval);
-    process.on('SIGINT', stopCleanupInterval);
+    signalHandler = () => stopCleanupInterval();
+    process.on('SIGTERM', signalHandler);
+    process.on('SIGINT', signalHandler);
     signalListenersRegistered = true;
+
+    // Clean up on HMR to prevent listener accumulation across module reloads.
+    // Without this, each HMR cycle adds a new SIGTERM/SIGINT listener.
+    const importMeta = import.meta as { hot?: { dispose: (cb: () => void) => void } };
+    if (importMeta.hot) {
+      importMeta.hot.dispose(() => {
+        if (signalHandler) {
+          process.removeListener('SIGTERM', signalHandler);
+          process.removeListener('SIGINT', signalHandler);
+          signalHandler = null;
+        }
+        stopCleanupInterval();
+        signalListenersRegistered = false;
+      });
+    }
   }
 }
 
@@ -171,8 +185,13 @@ export function getClientIP(request: Request): string {
 }
 
 function isValidIP(str: string): boolean {
-  // Basic IPv4 and IPv6 validation
-  return /^(\d{1,3}\.){3}\d{1,3}$/.test(str) || /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/.test(str);
+  // IPv4
+  if (/^(\d{1,3}\.){3}\d{1,3}$/.test(str)) return true;
+  // IPv6 (full, no shorthand) — reject malformed addresses with empty segments
+  if (/^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/.test(str)) return true;
+  if (/^::1$/.test(str)) return true;  // localhost
+  if (/^::$/.test(str)) return true;   // unspecified
+  return false;
 }
 
 export function addRateLimitHeaders(response: NextResponse, remaining: number, reset: number): void {
