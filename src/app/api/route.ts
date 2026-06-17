@@ -323,7 +323,7 @@ export async function GET(request: Request) {
       return response;
     }
   } catch (error) {
-    const actionLabel = action === 'leaderboard' ? 'leaderboard' : 'progress';
+    const actionLabel = action ?? 'progress';
     logger.error(`Failed to load ${actionLabel}:`, error);
     try { await setCsrfCookie(); } catch (e) { logger.warn('Failed to set CSRF cookie in load-progress', e); }
     const response = NextResponse.json({ error: `Failed to load ${actionLabel}`, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() }, { status: 500 });

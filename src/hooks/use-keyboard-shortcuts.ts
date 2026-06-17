@@ -170,8 +170,7 @@ export function useKeyboardShortcuts(options: ShortcutOptions = {}) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- refs are synced in effect body; callbacks read latest values via refs
-  }, [shortcuts]);
+  }, [shortcuts, currentPage, options]);
 }
 
 /**
