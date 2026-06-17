@@ -33,7 +33,11 @@
     "ctaDesc": "登录以访问所有模块、测验和工具",
     "ctaButton": "登录",
     "footerName": "CyberSec Lab — 安全培训",
-    "footerMajor": "09.03.04 软件工程"
+    "footerMajor": "09.03.04 软件工程",
+    "footerAbout": "关于项目",
+    "footerDocs": "文档",
+    "openMenu": "打开菜单",
+    "closeMenu": "关闭菜单"
   },
   "auth": {
     "title": "认证",
@@ -241,7 +245,26 @@
     "themeDark": "深色",
     "themeSystem": "系统",
     "themeActive": "活跃",
-    "languageLabel": "界面语言"
+    "languageLabel": "界面语言",
+    "notFoundTitle": "页面未找到",
+    "notFoundDesc": "请求的页面不存在。它可能已被删除或您输入了错误的地址。",
+    "goHome": "回到首页",
+    "goToTrainer": "前往训练器",
+    "loading": "加载中…",
+    "copyCode": "复制代码",
+    "copied": "已复制",
+    "searchPlaceholder": "搜索模块…",
+    "searchPlaceholderExpanded": "搜索训练器…",
+    "noResults": "未找到结果",
+    "tryOtherKeywords": "尝试其他关键词",
+    "searchHint": "输入查询以搜索模块和材料",
+    "searchNav": "导航",
+    "searchSelect": "选择",
+    "searchClose": "关闭",
+    "searchButton": "搜索",
+    "moduleLabel": "模块",
+    "pageLabel": "页面",
+    "achievementUnlocked": "成就已解锁！"
   },
   "sidebar": {
     "dashboard": "控制面板",
@@ -563,7 +586,14 @@
     "dayCount_many": "{count}天",
     "record": "记录",
     "today": "今天",
-    "startPrompt": "今天开始学习以启动连续学习！"
+    "startPrompt": "今天开始学习以启动连续学习！",
+    "motivation_30": "传奇连续！🔥",
+    "motivation_14": "势不可挡！继续加油！",
+    "motivation_7": "坚持一周！好习惯！",
+    "motivation_3": "保持势头！",
+    "motivation_1": "不错的开始！明天再来！",
+    "motivation_0": "今天开始你的连续学习！",
+    "minutesShort": "分钟"
   },
   "quiz": {
     "title": "安全测验",

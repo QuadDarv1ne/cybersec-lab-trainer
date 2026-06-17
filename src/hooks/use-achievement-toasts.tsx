@@ -5,6 +5,7 @@ import { useAppStore } from '@/lib/store';
 import { achievements } from '@/lib/security-data';
 import { getAchievementStatus } from '@/lib/achievement-utils';
 import { toast } from 'sonner';
+import { useTranslations } from '@/lib/intlStub';
 
 /**
  * Hook that detects newly unlocked achievements and shows toast notifications.
@@ -19,6 +20,7 @@ export function useAchievementToasts() {
   const headersChallengeScores = useAppStore((s) => s.headersChallengeScores);
   const secureCodingChallengeScores = useAppStore((s) => s.secureCodingChallengeScores);
   const previousUnlockedRef = useRef<Set<string> | null>(null);
+  const t = useTranslations('common');
 
   // Stable challenge stats — only changes when underlying values change
   const challengeStats = useMemo(() => ({
@@ -76,7 +78,7 @@ export function useAchievementToasts() {
         <div className="flex items-start gap-3">
           <div className="text-2xl">🏆</div>
           <div>
-            <p className="font-semibold text-sm">Ачивка разблокирована!</p>
+            <p className="font-semibold text-sm">{t('achievementUnlocked')}</p>
             <p className="font-medium text-sm">{achievement.title}</p>
             <p className="text-xs text-slate-500">{achievement.description}</p>
           </div>
@@ -89,5 +91,5 @@ export function useAchievementToasts() {
     }
 
     previousUnlockedRef.current = currentlyUnlocked;
-  }, [completedModules, quizScores, challengeStats]);
+  }, [completedModules, quizScores, challengeStats, t]);
 }

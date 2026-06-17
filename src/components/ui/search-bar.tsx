@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAppStore, type PageType } from '@/lib/store';
 import { modules } from '@/lib/security-data';
+import { useTranslations } from '@/lib/intlStub';
 
 interface SearchResult {
   type: 'module' | 'page';
@@ -30,7 +31,9 @@ export function SearchBar({ className, variant = 'simple' }: SearchBarProps) {
   const [isFocused, setIsFocused] = React.useState(false);
   const [selectedIndex, setSelectedIndex] = React.useState(-1);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const blurTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const setCurrentPage = useAppStore((s) => s.setCurrentPage);
+  const t = useTranslations('common');
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -46,6 +49,12 @@ export function SearchBar({ className, variant = 'simple' }: SearchBarProps) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+    };
   }, []);
 
   React.useEffect(() => {
@@ -101,6 +110,10 @@ export function SearchBar({ className, variant = 'simple' }: SearchBarProps) {
     inputRef.current?.focus();
   };
 
+  const handleBlur = () => {
+    blurTimeoutRef.current = setTimeout(() => setIsFocused(false), 200);
+  };
+
   if (variant === 'simple') {
     return (
       <div className={cn('relative', className)}>
@@ -109,10 +122,10 @@ export function SearchBar({ className, variant = 'simple' }: SearchBarProps) {
           <Input
             ref={inputRef}
             type="search"
-            placeholder="Поиск модулей..."
+            placeholder={t('searchPlaceholder')}
             className="pl-9 pr-10 h-9 w-48 md:w-64"
             onFocus={() => setIsFocused(true)}
-            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+            onBlur={handleBlur}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -120,6 +133,7 @@ export function SearchBar({ className, variant = 'simple' }: SearchBarProps) {
             <button
               onClick={clearSearch}
               className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-muted transition-colors"
+              aria-label={t('searchClose')}
             >
               <X className="h-3 w-3 text-muted-foreground" />
             </button>
@@ -174,7 +188,7 @@ export function SearchBar({ className, variant = 'simple' }: SearchBarProps) {
             className="absolute top-full left-0 right-0 mt-2 z-50"
           >
             <div className="rounded-xl border border-border bg-popover shadow-xl p-4 text-center">
-              <p className="text-sm text-muted-foreground">Результатов не найдено</p>
+              <p className="text-sm text-muted-foreground">{t('noResults')}</p>
             </div>
           </motion.div>
         )}
@@ -189,10 +203,10 @@ export function SearchBar({ className, variant = 'simple' }: SearchBarProps) {
         <Input
           ref={inputRef}
           type="search"
-          placeholder="Поиск по тренажёру..."
+          placeholder={t('searchPlaceholderExpanded')}
           className="pl-12 pr-12 h-12 text-base"
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+          onBlur={handleBlur}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -201,6 +215,7 @@ export function SearchBar({ className, variant = 'simple' }: SearchBarProps) {
           <button
             onClick={clearSearch}
             className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-muted transition-colors"
+            aria-label={t('searchClose')}
           >
             <X className="h-4 w-4 text-muted-foreground" />
           </button>
@@ -233,7 +248,7 @@ export function SearchBar({ className, variant = 'simple' }: SearchBarProps) {
                 <Input
                   ref={inputRef}
                   type="search"
-                  placeholder="Поиск модулей..."
+                  placeholder={t('searchPlaceholder')}
                   className="pl-10 pr-4 h-12 text-base border-0 focus-visible:ring-0"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -265,7 +280,7 @@ export function SearchBar({ className, variant = 'simple' }: SearchBarProps) {
                           <p className="text-sm text-muted-foreground">{result.description}</p>
                         </div>
                         <span className="text-xs text-muted-foreground px-2 py-1 rounded bg-muted">
-                          {result.type === 'module' ? 'Модуль' : 'Страница'}
+                          {result.type === 'module' ? t('moduleLabel') : t('pageLabel')}
                         </span>
                       </button>
                     ))}
@@ -273,17 +288,17 @@ export function SearchBar({ className, variant = 'simple' }: SearchBarProps) {
                 ) : query ? (
                   <div className="py-12 text-center">
                     <Search className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                    <p className="text-sm text-muted-foreground">Результатов не найдено</p>
+                    <p className="text-sm text-muted-foreground">{t('noResults')}</p>
                     <p className="text-xs text-muted-foreground mt-2">
-                      Попробуйте другие ключевые слова
+                      {t('tryOtherKeywords')}
                     </p>
                   </div>
                 ) : (
                   <div className="py-12 text-center">
                     <Command className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                    <p className="text-sm font-medium">Поиск по тренажёру</p>
+                    <p className="text-sm font-medium">{t('searchPlaceholderExpanded')}</p>
                     <p className="text-xs text-muted-foreground mt-2">
-                      Введите запрос для поиска модулей и материалов
+                      {t('searchHint')}
                     </p>
                   </div>
                 )}
@@ -294,16 +309,16 @@ export function SearchBar({ className, variant = 'simple' }: SearchBarProps) {
                   <div className="flex items-center gap-4">
                     <span className="flex items-center gap-1">
                       <kbd className="px-1.5 py-0.5 rounded bg-muted font-medium">↑↓</kbd>
-                      навигация
+                      {t('searchNav')}
                     </span>
                     <span className="flex items-center gap-1">
                       <kbd className="px-1.5 py-0.5 rounded bg-muted font-medium">↵</kbd>
-                      выбор
+                      {t('searchSelect')}
                     </span>
                   </div>
                   <span className="flex items-center gap-1">
                     <kbd className="px-1.5 py-0.5 rounded bg-muted font-medium">⎋</kbd>
-                    закрытие
+                    {t('searchClose')}
                   </span>
                 </div>
               </div>
@@ -321,6 +336,7 @@ interface SearchButtonProps {
 }
 
 export function SearchButton({ onClick, className }: SearchButtonProps) {
+  const t = useTranslations('common');
   return (
     <Button
       variant="outline"
@@ -329,7 +345,7 @@ export function SearchButton({ onClick, className }: SearchButtonProps) {
       onClick={onClick}
     >
       <Search className="h-4 w-4" />
-      <span className="hidden md:inline">Поиск</span>
+      <span className="hidden md:inline">{t('searchButton')}</span>
       <kbd className="hidden md:inline-flex ml-1 px-1.5 py-0.5 text-xs font-medium text-muted-foreground bg-muted rounded">
         ⌘K
       </kbd>

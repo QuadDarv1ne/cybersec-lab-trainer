@@ -67,6 +67,17 @@ const stats = [
   { labelKey: 'statsAchievements', value: 15, suffix: '+' },
 ];
 
+const floatingIcons = [
+  { Icon: Shield, color: 'text-emerald-400/20', size: 48, x: '10%', y: '20%', delay: 0 },
+  { Icon: Lock, color: 'text-blue-400/20', size: 36, x: '85%', y: '30%', delay: 1 },
+  { Icon: Database, color: 'text-teal-400/20', size: 42, x: '20%', y: '70%', delay: 2 },
+  { Icon: Code, color: 'text-violet-400/20', size: 32, x: '75%', y: '60%', delay: 0.5 },
+  { Icon: KeyRound, color: 'text-amber-400/20', size: 28, x: '50%', y: '15%', delay: 1.5 },
+  { Icon: FileCode, color: 'text-rose-400/20', size: 34, x: '90%', y: '75%', delay: 2.5 },
+  { Icon: Globe, color: 'text-cyan-400/20', size: 30, x: '35%', y: '80%', delay: 1.8 },
+  { Icon: ShieldAlert, color: 'text-orange-400/20', size: 26, x: '65%', y: '85%', delay: 0.8 },
+];
+
 export default function LandingPage() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -76,17 +87,6 @@ export default function LandingPage() {
     setMobileMenuOpen(false);
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
-
-  const floatingIcons = [
-    { Icon: Shield, color: 'text-emerald-400/20', size: 48, x: '10%', y: '20%', delay: 0 },
-    { Icon: Lock, color: 'text-blue-400/20', size: 36, x: '85%', y: '30%', delay: 1 },
-    { Icon: Database, color: 'text-teal-400/20', size: 42, x: '20%', y: '70%', delay: 2 },
-    { Icon: Code, color: 'text-violet-400/20', size: 32, x: '75%', y: '60%', delay: 0.5 },
-    { Icon: KeyRound, color: 'text-amber-400/20', size: 28, x: '50%', y: '15%', delay: 1.5 },
-    { Icon: FileCode, color: 'text-rose-400/20', size: 34, x: '90%', y: '75%', delay: 2.5 },
-    { Icon: Globe, color: 'text-cyan-400/20', size: 30, x: '35%', y: '80%', delay: 1.8 },
-    { Icon: ShieldAlert, color: 'text-orange-400/20', size: 26, x: '65%', y: '85%', delay: 0.8 },
-  ];
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white overflow-hidden">
@@ -179,7 +179,12 @@ export default function LandingPage() {
             </Button>
           </nav>
 
-          <button className="md:hidden text-slate-600 dark:text-slate-300 p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          <button
+            className="md:hidden text-slate-600 dark:text-slate-300 p-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-expanded={mobileMenuOpen}
+            aria-label={mobileMenuOpen ? t('closeMenu') : t('openMenu')}
+          >
             {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
@@ -303,7 +308,7 @@ export default function LandingPage() {
           >
             <Badge variant="outline" className="mb-4 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 rounded-full px-4 py-1.5">
               <Layers size={14} className="mr-1.5" />
-              Возможности
+              {t('features')}
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance">{t('featuresTitle')}</h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">{t('featuresDesc')}</p>
@@ -477,8 +482,8 @@ export default function LandingPage() {
             <span className="font-medium">{t('footerName')}</span>
           </div>
           <div className="flex items-center gap-6">
-            <a href="#" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-200">О проекте</a>
-            <a href="#" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-200">Документация</a>
+            <a href="#" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-200">{t('footerAbout')}</a>
+            <a href="#" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-200">{t('footerDocs')}</a>
             <span>{t('footerMajor')}</span>
           </div>
         </div>

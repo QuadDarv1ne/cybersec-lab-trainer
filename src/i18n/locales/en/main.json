@@ -33,7 +33,11 @@
     "ctaDesc": "Sign in to access all modules, quizzes and tools",
     "ctaButton": "Sign In",
     "footerName": "CyberSec Lab — Security Training",
-    "footerMajor": "09.03.04 Software Engineering"
+    "footerMajor": "09.03.04 Software Engineering",
+    "footerAbout": "About",
+    "footerDocs": "Documentation",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "auth": {
     "title": "Authentication",
@@ -241,7 +245,26 @@
     "themeDark": "Dark",
     "themeSystem": "System",
     "themeActive": "active",
-    "languageLabel": "Interface language"
+    "languageLabel": "Interface language",
+    "notFoundTitle": "Page not found",
+    "notFoundDesc": "The requested page does not exist. It may have been removed or you entered the wrong address.",
+    "goHome": "Go Home",
+    "goToTrainer": "Go to Trainer",
+    "loading": "Loading…",
+    "copyCode": "Copy code",
+    "copied": "Copied",
+    "searchPlaceholder": "Search modules…",
+    "searchPlaceholderExpanded": "Search the trainer…",
+    "noResults": "No results found",
+    "tryOtherKeywords": "Try different keywords",
+    "searchHint": "Enter a query to search modules and materials",
+    "searchNav": "navigate",
+    "searchSelect": "select",
+    "searchClose": "close",
+    "searchButton": "Search",
+    "moduleLabel": "Module",
+    "pageLabel": "Page",
+    "achievementUnlocked": "Achievement unlocked!"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -563,7 +586,14 @@
     "dayCount_many": "{count} days",
     "record": "Record",
     "today": "Today",
-    "startPrompt": "Start studying today to begin a streak!"
+    "startPrompt": "Start studying today to begin a streak!",
+    "motivation_30": "Legendary streak! 🔥",
+    "motivation_14": "Unstoppable! Keep going!",
+    "motivation_7": "One week strong! Great habit!",
+    "motivation_3": "Keep the momentum going!",
+    "motivation_1": "Nice start! Come back tomorrow!",
+    "motivation_0": "Start your streak today!",
+    "minutesShort": "min"
   },
   "quiz": {
     "title": "Security Quiz",

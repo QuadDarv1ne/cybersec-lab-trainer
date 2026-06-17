@@ -12,6 +12,7 @@ import { useRef, useState, useEffect } from 'react';
 import { MotionConfig } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import BottomNav from '@/components/security-trainer/BottomNav';
+import { useTranslations } from '@/lib/intlStub';
 
 const Dashboard = dynamic(() => import('@/components/security-trainer/Dashboard'), { ssr: false, loading: () => <PageSkeleton /> });
 const OWASPTop10 = dynamic(() => import('@/components/security-trainer/OWASPTop10'), { ssr: false, loading: () => <PageSkeleton /> });
@@ -129,6 +130,7 @@ export default function AppPage() {
   useKeyboardShortcuts({ onOpenSearch: () => setSearchOpen(true) });
   useAchievementToasts();
   const mainRef = useRef<HTMLElement>(null);
+  const t = useTranslations('common');
 
   const Page = pages[currentPage] ?? Dashboard;
 
@@ -165,7 +167,7 @@ export default function AppPage() {
           ) : (
             <div className="flex items-center justify-center h-64 text-slate-400 dark:text-slate-500">
               <Sparkles size={20} className="animate-pulse mr-2" />
-              <span>Загрузка…</span>
+              <span>{t('loading')}</span>
             </div>
           )}
         </div>

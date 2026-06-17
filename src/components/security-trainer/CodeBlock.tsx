@@ -1,6 +1,7 @@
 import dynamic from 'next/dynamic';
 import { Suspense, useState } from 'react';
 import { Check, Copy, Code2 } from 'lucide-react';
+import { useTranslations } from '@/lib/intlStub';
 
 const HighlightedCode = dynamic(() => import('./HighlightedCode'), {
   ssr: false,
@@ -20,6 +21,7 @@ interface CodeBlockProps {
 
 export default function CodeBlock({ code, language = 'javascript', title }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
+  const t = useTranslations('common');
 
   const handleCopy = async () => {
     try {
@@ -34,15 +36,15 @@ export default function CodeBlock({ code, language = 'javascript', title }: Code
   return (
     <div className="group relative rounded-lg overflow-hidden border border-slate-700 my-3">
       <div className="bg-slate-800/90 px-4 py-2 text-xs font-mono text-slate-400 flex items-center gap-2">
-        <span className="w-3 h-3 rounded-full bg-red-500 inline-block" />
-        <span className="w-3 h-3 rounded-full bg-yellow-500 inline-block" />
-        <span className="w-3 h-3 rounded-full bg-green-500 inline-block" />
+        <span className="w-3 h-3 rounded-full bg-red-500 inline-block" aria-hidden="true" />
+        <span className="w-3 h-3 rounded-full bg-yellow-500 inline-block" aria-hidden="true" />
+        <span className="w-3 h-3 rounded-full bg-green-500 inline-block" aria-hidden="true" />
         <Code2 size={12} className="ml-2 text-slate-500" />
         <span className="text-slate-300">{title || language}</span>
         <button
           onClick={handleCopy}
           className="ml-auto p-1.5 rounded-md text-slate-500 hover:text-slate-200 hover:bg-slate-700/50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-          aria-label={copied ? 'Copied' : 'Copy code'}
+          aria-label={copied ? t('copied') : t('copyCode')}
         >
           {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
         </button>

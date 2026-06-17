@@ -16,13 +16,13 @@ function formatDayCount(n: number, t: ReturnType<typeof useTranslations>): strin
   return t('dayCount_many', { count: n });
 }
 
-function getMotivationalMessage(streak: number): { text: string; icon: React.ReactNode } {
-  if (streak >= 30) return { text: 'Legendary streak! 🔥', icon: <Zap size={14} className="text-purple-500" /> };
-  if (streak >= 14) return { text: 'Unstoppable! Keep going!', icon: <Zap size={14} className="text-orange-500" /> };
-  if (streak >= 7) return { text: 'One week strong! Great habit!', icon: <Sparkles size={14} className="text-amber-500" /> };
-  if (streak >= 3) return { text: 'Keep the momentum going!', icon: <Target size={14} className="text-emerald-500" /> };
-  if (streak >= 1) return { text: 'Nice start! Come back tomorrow!', icon: <Sparkles size={14} className="text-emerald-400" /> };
-  return { text: 'Start your streak today!', icon: <Flame size={14} className="text-slate-400" /> };
+function getMotivationalMessage(streak: number, t: ReturnType<typeof useTranslations>): { text: string; icon: React.ReactNode } {
+  if (streak >= 30) return { text: t('motivation_30'), icon: <Zap size={14} className="text-purple-500" /> };
+  if (streak >= 14) return { text: t('motivation_14'), icon: <Zap size={14} className="text-orange-500" /> };
+  if (streak >= 7) return { text: t('motivation_7'), icon: <Sparkles size={14} className="text-amber-500" /> };
+  if (streak >= 3) return { text: t('motivation_3'), icon: <Target size={14} className="text-emerald-500" /> };
+  if (streak >= 1) return { text: t('motivation_1'), icon: <Sparkles size={14} className="text-emerald-400" /> };
+  return { text: t('motivation_0'), icon: <Flame size={14} className="text-slate-400" /> };
 }
 
 function WeekMiniView({ studySessions }: { studySessions: { date: string }[] }) {
@@ -63,7 +63,7 @@ export function StreakWidget() {
 
   const streakFireColor = streak.currentStreak >= 7 ? 'text-orange-500' : streak.currentStreak >= 3 ? 'text-amber-500' : 'text-emerald-500';
   const streakBgColor = streak.currentStreak >= 7 ? 'from-orange-500/10 to-amber-500/10' : streak.currentStreak >= 3 ? 'from-amber-500/10 to-yellow-500/10' : 'from-emerald-500/10 to-teal-500/10';
-  const message = getMotivationalMessage(streak.currentStreak);
+  const message = getMotivationalMessage(streak.currentStreak, t);
 
   return (
     <motion.div
@@ -118,7 +118,7 @@ export function StreakWidget() {
             <Clock className="w-4 h-4" />
           </div>
           <div className="text-lg font-bold text-slate-900 dark:text-slate-100">
-            {streak.todayMinutes}м
+            {streak.todayMinutes}{t('minutesShort')}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400">
             {t('today')}
