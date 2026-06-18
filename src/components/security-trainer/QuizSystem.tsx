@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import { quizQuestions, quizCategories } from '@/lib/security-data';
 import { useTranslations, formatDate } from '@/lib/intlStub';
-import { generateUUID } from '@/lib/utils';
+import { generateUUID, getOptionStyle } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -392,18 +392,12 @@ export default function QuizSystem() {
                 className="space-y-2"
               >
                 {question.options.map((option, i) => {
-                  let optionClass = 'border-slate-200 hover:border-emerald-400 cursor-pointer';
-                  if (showAnswer) {
-                    if (i === question.correctIndex) {
-                      optionClass = 'border-emerald-400 bg-emerald-50';
-                    } else if (selectedAnswer === String(i) && i !== question.correctIndex) {
-                      optionClass = 'border-red-400 bg-red-50';
-                    } else {
-                      optionClass = 'border-slate-100 opacity-50';
-                    }
-                  } else if (selectedAnswer === String(i)) {
-                    optionClass = 'border-emerald-400 bg-emerald-50/50';
-                  }
+                  const optionClass = getOptionStyle(
+                    showAnswer,
+                    i === question.correctIndex,
+                    selectedAnswer === String(i),
+                    { default: 'border-slate-200', defaultHover: 'hover:border-emerald-400 cursor-pointer', other: 'border-slate-100 opacity-50' }
+                  );
 
                   return (
                     <div

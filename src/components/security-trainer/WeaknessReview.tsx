@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { useAppStore } from '@/lib/store';
+import { getOptionStyle } from '@/lib/utils';
 import { buildWeaknessReview } from '@/lib/weakness-review';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -255,19 +256,7 @@ export default function WeaknessReview() {
                 {currentItem.options.map((option, idx) => {
                   const isSelected = selectedOption === idx;
                   const isCorrect = idx === currentItem.correctIndex;
-                  let optionClass = 'border-slate-200 hover:border-slate-300';
-
-                  if (showResult) {
-                    if (isCorrect) {
-                      optionClass = 'border-emerald-400 bg-emerald-50';
-                    } else if (isSelected && !isCorrect) {
-                      optionClass = 'border-red-400 bg-red-50';
-                    } else {
-                      optionClass = 'border-slate-100 opacity-50';
-                    }
-                  } else if (isSelected) {
-                    optionClass = 'border-emerald-400 bg-emerald-50';
-                  }
+                  const optionClass = getOptionStyle(showResult, isCorrect, isSelected, { defaultHover: 'hover:border-slate-300', other: 'border-slate-100 opacity-50' });
 
                   return (
                     <button

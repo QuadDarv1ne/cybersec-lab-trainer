@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import InlineNotes from './InlineNotes';
 import { useAppStore } from '@/lib/store';
+import { getOptionStyle } from '@/lib/utils';
 import { secureCodingChallenges } from '@/lib/security-data';
 import { getHints, getHintLevelLabel, calculateHintPenalty, type HintLevel } from '@/lib/hint-system';
 import CodeBlock from './CodeBlock';
@@ -272,18 +273,7 @@ export default function SecureCodingLab() {
               <h3 className="text-sm font-semibold mb-3">What needs to be fixed?</h3>
               <div className="space-y-2">
                 {challenge.options.map((option, i) => {
-                  let optionStyle = 'border-slate-200 hover:border-slate-400 hover:bg-slate-50';
-                  if (isAnswered) {
-                    if (option.correct) {
-                      optionStyle = 'border-emerald-400 bg-emerald-50';
-                    } else if (selectedOption === i && !option.correct) {
-                      optionStyle = 'border-red-400 bg-red-50';
-                    } else {
-                      optionStyle = 'border-slate-100 opacity-60';
-                    }
-                  } else if (selectedOption === i) {
-                    optionStyle = 'border-emerald-400 bg-emerald-50/50';
-                  }
+                  const optionStyle = getOptionStyle(isAnswered, option.correct, selectedOption === i);
 
                   return (
                     <button

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import InlineNotes from './InlineNotes';
 import { useAppStore } from '@/lib/store';
+import { getOptionStyle } from '@/lib/utils';
 import CodeBlock from './CodeBlock';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -629,13 +630,7 @@ function authenticate(req, res, next) {
 
                 <div className="space-y-2">
                   {currentChallenge.options.map((option, i) => {
-                    let optionStyle = 'border-slate-200 hover:border-slate-400 hover:bg-slate-50';
-                    if (isChallengeAnswered) {
-                      optionStyle = option.correct ? 'border-emerald-400 bg-emerald-50' :
-                        selectedOption === i && !option.correct ? 'border-red-400 bg-red-50' : 'border-slate-100 opacity-60';
-                    } else if (selectedOption === i) {
-                      optionStyle = 'border-emerald-400 bg-emerald-50/50';
-                    }
+                    const optionStyle = getOptionStyle(isChallengeAnswered, option.correct, selectedOption === i);
 
                     return (
                       <button

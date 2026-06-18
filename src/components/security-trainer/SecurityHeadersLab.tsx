@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import InlineNotes from './InlineNotes';
 import { useAppStore } from '@/lib/store';
+import { getOptionStyle } from '@/lib/utils';
 import { securityHeaders, headerChallenges } from '@/lib/data/security-headers-data';
 import CodeBlock from './CodeBlock';
 import { Card, CardContent } from '@/components/ui/card';
@@ -276,18 +277,7 @@ export default function SecurityHeadersLab() {
 
             <div className="space-y-2">
               {challenge.options.map((option, i) => {
-                let optionStyle = 'border-slate-200 hover:border-slate-400 hover:bg-slate-50';
-                if (isAnswered) {
-                  if (option.correct) {
-                    optionStyle = 'border-emerald-400 bg-emerald-50';
-                  } else if (selectedOption === i && !option.correct) {
-                    optionStyle = 'border-red-400 bg-red-50';
-                  } else {
-                    optionStyle = 'border-slate-100 opacity-60';
-                  }
-                } else if (selectedOption === i) {
-                  optionStyle = 'border-blue-400 bg-blue-50/50';
-                }
+                const optionStyle = getOptionStyle(isAnswered, option.correct, selectedOption === i, { selected: 'border-blue-400 bg-blue-50/50' });
 
                 return (
                   <button

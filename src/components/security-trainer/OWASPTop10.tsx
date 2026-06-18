@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppStore } from '@/lib/store';
+import { getOptionStyle } from '@/lib/utils';
 import { owaspTopics, owaspChallenges } from '@/lib/security-data';
 import { useTranslations } from '@/lib/intlStub';
 import CodeBlock from './CodeBlock';
@@ -371,13 +372,7 @@ export default function OWASPTop10() {
 
                 <div className="space-y-2">
                   {currentChallenge.options.map((option, i) => {
-                    let optionStyle = 'border-slate-200 hover:border-slate-400 hover:bg-slate-50';
-                    if (isChallengeAnswered) {
-                      optionStyle = option.correct ? 'border-emerald-400 bg-emerald-50' :
-                        selectedOption === i && !option.correct ? 'border-red-400 bg-red-50' : 'border-slate-100 opacity-60';
-                    } else if (selectedOption === i) {
-                      optionStyle = 'border-emerald-400 bg-emerald-50/50';
-                    }
+                    const optionStyle = getOptionStyle(isChallengeAnswered, option.correct, selectedOption === i);
 
                     return (
                       <button
