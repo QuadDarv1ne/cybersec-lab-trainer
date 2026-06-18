@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import InlineNotes from './InlineNotes';
 import { useAppStore } from '@/lib/store';
 import { getOptionStyle } from '@/lib/utils';
@@ -82,33 +82,26 @@ export default function SecureCodingLab() {
     );
   }
 
-  const handleSelectOption = (index: number) => {
+  const handleSelectOption = useCallback((index: number) => {
     if (isAnswered) return;
     setSelectedOption(index);
-  };
+  }, [isAnswered]);
 
-  const revealHint = (level: HintLevel) => {
-    const newRevealed = new Set([...revealedHints, level]);
-    setRevealedHints(newRevealed);
+  const revealHint = useCallback((level: HintLevel) => {
+    setRevealedHints((prev) => {
+      const next = new Set([...prev, level]);
+      recordHintsUsed('secure-coding', activeChallenge, [...next]);
+      return next;
+    });
     setShowHints(true);
-    recordHintsUsed('secure-coding', activeChallenge, [...newRevealed]);
     logger.info(`Hint level ${level} revealed for challenge:`, challenge.id);
-  };
+  }, [activeChallenge, challenge.id, recordHintsUsed]);
 
-  const navigateToChallenge = (index: number) => {
+  const navigateToChallenge = useCallback((index: number) => {
     setActiveChallenge(index);
-    const answeredSet = new Set(secureCodingChallengeScores.answered);
-    const isAnswered = answeredSet.has(index);
-    if (isAnswered) {
-      const selectedIndex = secureCodingChallengeScores.selectedOptions?.[index] ?? -1;
-      setSelectedOption(selectedIndex >= 0 ? selectedIndex : null);
-    } else {
-      setSelectedOption(null);
-    }
-    setShowResult(isAnswered);
-  };
+  }, []);
 
-  const handleCheckAnswer = () => {
+  const handleCheckAnswer = useCallback(() => {
     if (selectedOption === null || isAnswered) return;
     const currentChallenge = secureCodingChallenges[activeChallenge];
     const isCorrect = currentChallenge.options[selectedOption].correct;
@@ -119,19 +112,15 @@ export default function SecureCodingLab() {
     };
     setSecureCodingChallengeScore(newScores.correct, newScores.answered, newScores.selectedOptions);
     setShowResult(true);
-  };
+  }, [selectedOption, isAnswered, activeChallenge, secureCodingChallengeScores, setSecureCodingChallengeScore]);
 
-  const nextChallenge = () => {
-    if (activeChallenge < secureCodingChallenges.length - 1) {
-      navigateToChallenge(activeChallenge + 1);
-    }
-  };
+  const nextChallenge = useCallback(() => {
+    setActiveChallenge((prev) => Math.min(prev + 1, secureCodingChallenges.length - 1));
+  }, []);
 
-  const prevChallenge = () => {
-    if (activeChallenge > 0) {
-      navigateToChallenge(activeChallenge - 1);
-    }
-  };
+  const prevChallenge = useCallback(() => {
+    setActiveChallenge((prev) => Math.max(prev - 1, 0));
+  }, []);
 
   return (
     <div className="space-y-6">
