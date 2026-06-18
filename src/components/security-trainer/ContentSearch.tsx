@@ -251,14 +251,6 @@ interface ContentSearchProps {
   onClose: () => void;
 }
 
-let cachedSearchIndex: ReturnType<typeof buildSearchIndex> | null = null;
-function getCachedSearchIndex(): ReturnType<typeof buildSearchIndex> {
-  if (!cachedSearchIndex) {
-    cachedSearchIndex = buildSearchIndex();
-  }
-  return cachedSearchIndex;
-}
-
 export default function ContentSearch({ open, onClose }: ContentSearchProps) {
   const setCurrentPage = useAppStore((s) => s.setCurrentPage);
   const t = useTranslations('search');
@@ -266,7 +258,7 @@ export default function ContentSearch({ open, onClose }: ContentSearchProps) {
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLButtonElement[]>([]);
-  const searchIndex = useMemo(() => getCachedSearchIndex(), []);
+  const searchIndex = useMemo(() => buildSearchIndex(), []);
 
   const typeLabels = useMemo(
     () => ({
