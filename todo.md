@@ -30,6 +30,63 @@
 - **Hint system XP penalties** — calculateHintPenalty() вычисляет множитель штрафа, recordHintsUsed сохраняет использование подсказок, getXPBreakdown() применяет штраф к XP
 - **Hint key mismatches** — HINT_MAP ключи исправлены для совпадения с реальными ID挑战ов
 - **Sort mutation fix** — teams.sort() в AdvancedCTFSimulation теперь не мутирует state
+- **Quiz history score bug** — load-progress возвращал qr.score (количество правильных) вместо qr.percentage (процент 0-100). Пользователи видели "7%" вместо "70%" после синхронизации
+
+---
+
+## План на следующие 10 улучшений
+
+> Приоритизировано по impact/effort. Следующий аудит начинать с пункта 1.
+
+### 1. DRY: Извлечь shared `getOptionStyle()` из 6 компонентов
+**Файл:** `src/lib/ui-helpers.ts` (новый)
+**Проблема:** QuizSystem, SecureCodingLab, WeaknessReview, SecurityHeadersLab, OWASPTop10, AuthSecurityLab — все содержат идентичный 10-строчный блок вычисления стиля опций (default → correct → incorrect-selected → other-selected).
+**Решение:** Одна функция `getOptionStyle(isAnswered, isCorrect, isSelected, accentColor)`, импортируемая во все 6 файлов.
+
+### 2. Performance: `useCallback` в SecureCodingLab
+**Файл:** `src/components/security-trainer/SecureCodingLab.tsx:84-108`
+**Проблема:** `handleSelectOption`, `revealHint`, `navigateToChallenge` пересоздаются каждый рендер без `useCallback`.
+**Решение:** Обернуть хендлеры в `useCallback` с зависимостями.
+
+### 3. Performance: заменить module-level search cache на `useMemo`
+**Файл:** `src/components/security-trainer/ContentSearch.tsx:254-259`
+**Проблема:** `buildSearchIndex()` вызывается один раз и кэшируется в module-level переменной. Невалидируется при HMR и работает даже если поиск не открыт.
+**Решение:** `useMemo` внутри компонента с lazy initialization.
+
+### 4. Code quality: убрать дублирование в `navigateToChallenge`
+**Файл:** `src/components/security-trainer/SecureCodingLab.tsx:97-108`
+**Проблема:** `navigateToChallenge` дублирует логику `useEffect` на строках 50-59, плюс создаёт дублирующий `Set` вместо использования `useMemo` на строке 45.
+**Решение:** Оставить только `setActiveChallenge(index)`, `useEffect` сам обработает остальное.
+
+### 5. API: исправить unreachable code в GET handler
+**Файл:** `src/app/api/route.ts:329-335`
+**Проблема:** Блок "unknown action" за пределами try/catch unreachable для валидных запросов, но вызывает `setCsrfCookie()` зря.
+**Решение:** Добавить `else` внутри try-блока для неизвестных action.
+
+### 6. Accessibility: добавить `aria-label` на все интерактивные элементы
+**Файлы:** QuizSystem, SecureCodingLab, CSRFLab
+**Проблема:** Некоторые кнопки навигации и переключатели не имеют `aria-label`.
+**Решение:** Пройтись по компонентам и добавить недостающие `aria-label`.
+
+### 7. Testing: добавить тест для quiz history percentage fix
+**Файл:** `src/app/api/route.test.ts`
+**Проблема:** Нет теста, проверяющего что `score` в load-progress возвращает percentage, а не raw count.
+**Решение:** Добавить тест-кейс с mock quizResult содержащим `score=7, total=10, percentage=70`.
+
+### 8. Code quality: типизировать `hint-system.ts` строже
+**Файл:** `src/lib/hint-system.ts`
+**Проблема:** Некоторые типы используют `number` вместо строгих enum/literal types.
+**Решение:** Проверить и усилить типизацию.
+
+### 9. UX: добавить skeleton loading для тяжёлых компонентов
+**Файлы:** Dashboard, ContentSearch, ProgressAnalytics
+**Проблема:** При первой загрузке данные появляются без плавного transition.
+**Решение:** Добавить skeleton placeholders.
+
+### 10. Docs: обновить README с актуальными инструкциями по запуску
+**Файл:** `README.md`
+**Проблема:** Инструкции могут устареть после изменений в конфигурации БД и Docker.
+**Решение:** Переписать секцию Quick Start с актуальными командами.
 
 ---
 
