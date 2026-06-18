@@ -304,7 +304,7 @@ export async function GET(request: Request) {
           id: qr.id as string,
           categoryId: qr.quizId as string,
           categoryName: category?.name ?? (qr.quizId as string),
-          score: qr.score as number,
+          score: Math.round(qr.percentage as number),
           correct: qr.score as number,
           total: qr.total as number,
           answers: [] as (boolean | null)[],
