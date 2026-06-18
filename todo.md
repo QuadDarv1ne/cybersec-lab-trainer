@@ -38,15 +38,17 @@
 
 > Приоритизировано по impact/effort. Следующий аудит начинать с пункта 1.
 
-### 1. DRY: Извлечь shared `getOptionStyle()` из 6 компонентов
+### 1. DRY: Извлечь shared `getOptionStyle()` из 6 компонентов ✅
 **Файл:** `src/lib/ui-helpers.ts` (новый)
 **Проблема:** QuizSystem, SecureCodingLab, WeaknessReview, SecurityHeadersLab, OWASPTop10, AuthSecurityLab — все содержат идентичный 10-строчный блок вычисления стиля опций (default → correct → incorrect-selected → other-selected).
 **Решение:** Одна функция `getOptionStyle(isAnswered, isCorrect, isSelected, accentColor)`, импортируемая во все 6 файлов.
+**Статус:** ✅ Готово — `src/lib/utils.ts`, -64/+51 строк, 6 компонентов обновлены.
 
-### 2. Performance: `useCallback` в SecureCodingLab
+### 2. Performance: `useCallback` в SecureCodingLab ✅
 **Файл:** `src/components/security-trainer/SecureCodingLab.tsx:84-108`
 **Проблема:** `handleSelectOption`, `revealHint`, `navigateToChallenge` пересоздаются каждый рендер без `useCallback`.
 **Решение:** Обернуть хендлеры в `useCallback` с зависимостями.
+**Статус:** ✅ Готово — 6 хендлеров обёрнуты, navigateToChallenge упрощён (убрано дублирование useEffect), -31/+20 строк.
 
 ### 3. Performance: заменить module-level search cache на `useMemo`
 **Файл:** `src/components/security-trainer/ContentSearch.tsx:254-259`
