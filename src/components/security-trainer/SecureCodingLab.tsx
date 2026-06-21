@@ -65,23 +65,6 @@ export default function SecureCodingLab() {
     setShowHints(false);
   }, [activeChallenge]);
 
-  // Complete module when all challenges are answered with >= 70% correct
-  useEffect(() => {
-    if (secureCodingChallengeScores.answered.length === secureCodingChallenges.length &&
-        secureCodingChallengeScores.correct >= Math.ceil(secureCodingChallenges.length * 0.7) &&
-        !isCompleted) {
-      completeModule('secure-coding');
-    }
-  }, [secureCodingChallengeScores, isCompleted, completeModule]);
-
-  if (!challenge) {
-    return (
-      <div className="flex items-center justify-center h-64 text-slate-400">
-        {t('noChallenges')}
-      </div>
-    );
-  }
-
   const handleSelectOption = useCallback((index: number) => {
     if (isAnswered) return;
     setSelectedOption(index);
@@ -121,6 +104,23 @@ export default function SecureCodingLab() {
   const prevChallenge = useCallback(() => {
     setActiveChallenge((prev) => Math.max(prev - 1, 0));
   }, []);
+
+  // Complete module when all challenges are answered with >= 70% correct
+  useEffect(() => {
+    if (secureCodingChallengeScores.answered.length === secureCodingChallenges.length &&
+        secureCodingChallengeScores.correct >= Math.ceil(secureCodingChallenges.length * 0.7) &&
+        !isCompleted) {
+      completeModule('secure-coding');
+    }
+  }, [secureCodingChallengeScores, isCompleted, completeModule]);
+
+  if (!challenge) {
+    return (
+      <div className="flex items-center justify-center h-64 text-slate-400">
+        {t('noChallenges')}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

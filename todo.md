@@ -68,9 +68,13 @@
 **Решение:** Добавить `else` внутри try-блока для неизвестных action.
 **Статус:** ✅ Готово — блок "unknown action" перенесён внутрь try/catch.
 
-### 6. Accessibility: добавить `aria-label` на все интерактивные элементы
-**Файлы:** QuizSystem, SecureCodingLab, CSRFLab
-**Проблема:** Некоторые кнопки навигации и переключатели не имеют `aria-label`.
+### 6. ~~Accessibility: добавить `aria-label` на все интерактивные элементы~~ ✅ Частично
+**Файлы:** SecureCodingLab — хуки перемещены выше early return (fix hooks/rules-of-hooks), aria-label уже был добавлен ранее.
+
+### 6b. Fix React hooks rule violation в SecureCodingLab ✅
+**Файл:** `src/components/security-trainer/SecureCodingLab.tsx:77-123`
+**Проблема:** 6 `useCallback` хуков вызывались после условного `if (!challenge) return` — нарушение rules-of-hooks (6 ESLint ошибок).
+**Решение:** Переместить все `useCallback` выше early return.
 
 ### 7. Testing: добавить тест для quiz history percentage fix ✅
 **Файл:** `src/app/api/route.test.ts`
