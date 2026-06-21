@@ -50,45 +50,47 @@
 **Решение:** Обернуть хендлеры в `useCallback` с зависимостями.
 **Статус:** ✅ Готово — 6 хендлеров обёрнуты, navigateToChallenge упрощён (убрано дублирование useEffect), -31/+20 строк.
 
-### 3. Performance: заменить module-level search cache на `useMemo`
+### 3. Performance: заменить module-level search cache на `useMemo` ✅
 **Файл:** `src/components/security-trainer/ContentSearch.tsx:254-259`
 **Проблема:** `buildSearchIndex()` вызывается один раз и кэшируется в module-level переменной. Невалидируется при HMR и работает даже если поиск не открыт.
 **Решение:** `useMemo` внутри компонента с lazy initialization.
+**Статус:** ✅ Готово — module-level кэш удалён, -9/+1 строк.
 
-### 4. Code quality: убрать дублирование в `navigateToChallenge`
+### 4. Code quality: убрать дублирование в `navigateToChallenge` ✅
 **Файл:** `src/components/security-trainer/SecureCodingLab.tsx:97-108`
 **Проблема:** `navigateToChallenge` дублирует логику `useEffect` на строках 50-59, плюс создаёт дублирующий `Set` вместо использования `useMemo` на строке 45.
 **Решение:** Оставить только `setActiveChallenge(index)`, `useEffect` сам обработает остальное.
+**Статус:** ✅ Готово — выполнено вместе с пунктом 2 (useCallback refactor).
 
-### 5. API: исправить unreachable code в GET handler
+### 5. API: исправить unreachable code в GET handler ✅
 **Файл:** `src/app/api/route.ts:329-335`
 **Проблема:** Блок "unknown action" за пределами try/catch unreachable для валидных запросов, но вызывает `setCsrfCookie()` зря.
 **Решение:** Добавить `else` внутри try-блока для неизвестных action.
+**Статус:** ✅ Готово — блок "unknown action" перенесён внутрь try/catch.
 
 ### 6. Accessibility: добавить `aria-label` на все интерактивные элементы
 **Файлы:** QuizSystem, SecureCodingLab, CSRFLab
 **Проблема:** Некоторые кнопки навигации и переключатели не имеют `aria-label`.
-**Решение:** Пройтись по компонентам и добавить недостающие `aria-label`.
 
-### 7. Testing: добавить тест для quiz history percentage fix
+### 7. Testing: добавить тест для quiz history percentage fix ✅
 **Файл:** `src/app/api/route.test.ts`
 **Проблема:** Нет теста, проверяющего что `score` в load-progress возвращает percentage, а не raw count.
-**Решение:** Добавить тест-кейс с mock quizResult содержащим `score=7, total=10, percentage=70`.
+**Решение:** Добавлен тест-кейс с mock quizResult содержащим `score=3, total=10, percentage=30`.
+**Статус:** ✅ Готово — проверяет что `score` = percentage (30), `correct` = raw count (3).
 
-### 8. Code quality: типизировать `hint-system.ts` строже
+### 8. Code quality: типизировать `hint-system.ts` строже ✅
 **Файл:** `src/lib/hint-system.ts`
-**Проблема:** Некоторые типы используют `number` вместо строгих enum/literal types.
-**Решение:** Проверить и усилить типизацию.
+**Проблема:** Магические числа `xpReduction` (0.10, 0.25, 0.50) дублировались 30 раз; `getHintLevelLabel` использовал switch c default-строкой.
+**Решение:** Заменить все xpReduction на `HINT_XP_PENALTY[level]`, добавить `satisfies Record<string, Hint[]>`, переписать `getHintLevelLabel` через `Record<HintLevel, string>`.
+**Статус:** ✅ Готово — единый источник истины для штрафов, строгая типизация, никаких магических чисел.
 
 ### 9. UX: добавить skeleton loading для тяжёлых компонентов
 **Файлы:** Dashboard, ContentSearch, ProgressAnalytics
 **Проблема:** При первой загрузке данные появляются без плавного transition.
-**Решение:** Добавить skeleton placeholders.
 
 ### 10. Docs: обновить README с актуальными инструкциями по запуску
 **Файл:** `README.md`
 **Проблема:** Инструкции могут устареть после изменений в конфигурации БД и Docker.
-**Решение:** Переписать секцию Quick Start с актуальными командами.
 
 ---
 

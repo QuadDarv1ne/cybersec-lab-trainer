@@ -317,6 +317,14 @@ export async function GET(request: Request) {
       addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
       return response;
     }
+
+    try { await setCsrfCookie(); } catch (e) { logger.warn('Failed to set CSRF cookie for unknown action', e); }
+    const unknownResponse = NextResponse.json(
+      { error: `Unknown action. Expected: load-progress, leaderboard`, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() },
+      { status: 400 }
+    );
+    addRateLimitHeaders(unknownResponse, rateLimitResult.remaining, rateLimitResult.reset);
+    return unknownResponse;
   } catch (error) {
     const actionLabel = action ?? 'progress';
     logger.error(`Failed to load ${actionLabel}:`, error);
@@ -325,14 +333,6 @@ export async function GET(request: Request) {
     addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
     return response;
   }
-
-    try { await setCsrfCookie(); } catch (e) { logger.warn('Failed to set CSRF cookie in error handler', e); }
-  const response = NextResponse.json(
-    { error: `Unknown action. Expected: load-progress, leaderboard`, csrfCookieName: getCsrfCookieName(), csrfHeaderName: getCsrfHeaderName() },
-    { status: 400 }
-  );
-  addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.reset);
-  return response;
 }
 
 export async function POST(request: Request) {

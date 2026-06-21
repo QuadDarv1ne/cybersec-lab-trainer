@@ -199,6 +199,31 @@ describe('API Route GET /api', () => {
     const body = await response.json();
     expect(body.quizScores['owasp']).toBe(90);
   });
+
+  it('returns quiz history with score as percentage not raw count', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(mockSession);
+
+    (mockProgress.findMany ).mockResolvedValue([]);
+    (mockQuizResult.findMany ).mockResolvedValue([
+      { quizId: 'owasp', score: 3, total: 10, percentage: 30, userId: 'test-user-1', createdAt: new Date() },
+      { quizId: 'xss', score: 8, total: 10, percentage: 80, userId: 'test-user-1', createdAt: new Date() },
+    ]);
+    (mockChallengeProgress.findMany ).mockResolvedValue([]);
+    (mockItemProgress.findMany ).mockResolvedValue([]);
+    (mockNote.findMany ).mockResolvedValue([]);
+    (mockStudySession.findMany ).mockResolvedValue([]);
+
+    const request = new NextRequest('http://localhost:3000/api?action=load-progress');
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.quizHistory).toHaveLength(2);
+    expect(body.quizHistory[0].score).toBe(30);
+    expect(body.quizHistory[0].correct).toBe(3);
+    expect(body.quizHistory[1].score).toBe(80);
+    expect(body.quizHistory[1].correct).toBe(8);
+  });
 });
 
 describe('API Route POST /api', () => {
